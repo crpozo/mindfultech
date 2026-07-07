@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+<style>
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:#f3f1f5;color:#16151a;font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+  ::selection{background:#c32865;color:#fff;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+  @keyframes floaty2{0%,100%{transform:translateY(0)}50%{transform:translateY(22px)}}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes spinslow{to{transform:rotate(360deg)}}
+  @keyframes blobmorph{0%,100%{border-radius:62% 38% 55% 45% / 50% 58% 42% 50%}50%{border-radius:42% 58% 40% 60% / 58% 42% 60% 42%}}
+  @keyframes scrolldot{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(20px);opacity:0}}
+  @keyframes shimmer{to{background-position:200% center}}
+  @keyframes riseIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</helmet>
+<div style="position:relative;width:100%;overflow:hidden;">
+
+  <!-- ambient background glows -->
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:0;background:
+      radial-gradient(60% 50% at 78% 12%, rgba(195,40,101,.16), transparent 60%),
+      radial-gradient(50% 45% at 12% 30%, rgba(139,92,246,.14), transparent 60%),
+      radial-gradient(55% 50% at 50% 100%, rgba(255,106,160,.10), transparent 60%);"></div>
+
+  <!-- NAV -->
+  <nav id="mt-nav" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);width:min(1180px,calc(100% - 32px));z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 14px 12px 20px;border-radius:100px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.7);box-shadow:0 12px 40px -16px rgba(60,20,50,.22);transition:box-shadow .4s,background .4s;">
+    <a href="#home" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:#16151a;">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="30" y2="30"><stop stop-color="#c32865"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><rect width="30" height="30" rx="9" fill="url(#lg)"/><circle cx="15" cy="12" r="3.4" fill="#fff"/><path d="M8 22c0-3.6 3.1-6 7-6s7 2.4 7 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;letter-spacing:-.02em;">mindful<span style="color:#c32865;">tech</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:30px;">
+      <a href="#specialization" style="text-decoration:none;color:#3a3942;font-size:15px;font-weight:500;transition:color .25s;" style-hover="color:#c32865;">Specialization</a>
+      <a href="#about" style="text-decoration:none;color:#3a3942;font-size:15px;font-weight:500;transition:color .25s;" style-hover="color:#c32865;">About</a>
+      <a href="#work" style="text-decoration:none;color:#3a3942;font-size:15px;font-weight:500;transition:color .25s;" style-hover="color:#c32865;">Projects</a>
+      <a href="#contact" style="text-decoration:none;color:#3a3942;font-size:15px;font-weight:500;transition:color .25s;" style-hover="color:#c32865;">Contact</a>
+    </div>
+    <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:100px;background:linear-gradient(120deg,#c32865,#8b5cf6);color:#fff;font-weight:600;font-size:14.5px;box-shadow:0 12px 30px -10px rgba(195,40,101,.6);transition:transform .3s,box-shadow .3s;" style-hover="box-shadow:0 18px 40px -10px rgba(195,40,101,.7);">Let's talk</a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="home" style="position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;padding:140px 0 80px;">
+    <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;"></canvas>
+    <!-- css fallback orb (also adds depth behind glass) -->
+    <div style="position:absolute;z-index:0;right:8%;top:46%;width:min(40vw,480px);height:min(40vw,480px);transform:translateY(-50%);background:radial-gradient(circle at 38% 32%,rgba(255,160,200,.9),rgba(195,40,101,.55) 42%,rgba(139,92,246,.45) 78%);filter:blur(8px);animation:blobmorph 14s ease-in-out infinite,floaty 9s ease-in-out infinite;opacity:.35;"></div>
+
+    <div style="position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 32px;width:100%;">
+      <div style="max-width:680px;">
+        <div data-reveal style="display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border-radius:100px;background:rgba(255,255,255,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.8);font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#c32865;box-shadow:0 8px 24px -12px rgba(60,20,50,.2);">
+          <span style="width:7px;height:7px;border-radius:50%;background:#c32865;box-shadow:0 0 0 4px rgba(195,40,101,.18);"></span>UX-driven software lab · Quito, EC
+        </div>
+        <h1 data-reveal style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(48px,7vw,90px);line-height:.98;letter-spacing:-.035em;margin:26px 0 0;color:#16151a;">
+          Software lab<br>focused on<br><span style="background:linear-gradient(110deg,#c32865 10%,#8b5cf6 90%);-webkit-background-clip:text;background-clip:text;color:transparent;">people.</span>
+        </h1>
+        <p data-reveal style="margin:30px 0 0;font-size:20px;line-height:1.55;color:#4a4954;max-width:540px;">
+          We craft digital products through a humanity-oriented process — seamless experiences, scalable engineering, and innovation built to serve real people.
+        </p>
+        <div data-reveal style="display:flex;flex-wrap:wrap;gap:14px;margin-top:38px;">
+          <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;padding:17px 30px;border-radius:100px;background:linear-gradient(120deg,#c32865,#8b5cf6);color:#fff;font-weight:600;font-size:16.5px;box-shadow:0 16px 40px -12px rgba(195,40,101,.6);transition:transform .3s,box-shadow .3s;" style-hover="box-shadow:0 24px 52px -12px rgba(195,40,101,.72);">Let's talk →</a>
+          <a href="#work" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;padding:17px 30px;border-radius:100px;background:rgba(255,255,255,.6);backdrop-filter:blur(12px);color:#16151a;font-weight:600;font-size:16.5px;border:1px solid rgba(20,18,30,.12);transition:transform .3s,background .3s;" style-hover="background:rgba(255,255,255,.92);transform:translateY(-2px);">View portfolio</a>
+        </div>
+        <div data-reveal style="display:flex;gap:40px;margin-top:56px;flex-wrap:wrap;">
+          <div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:34px;letter-spacing:-.02em;color:#16151a;"><span data-count="10">0</span>+</div><div style="font-size:14px;color:#6a6976;margin-top:2px;">Years building products</div></div>
+          <div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:34px;letter-spacing:-.02em;color:#16151a;"><span data-count="40">0</span>+</div><div style="font-size:14px;color:#6a6976;margin-top:2px;">Products shipped</div></div>
+          <div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:34px;letter-spacing:-.02em;color:#16151a;">AWS</div><div style="font-size:14px;color:#6a6976;margin-top:2px;">Cloud architecture</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- scroll cue -->
+    <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:#9b97a6;">
+      <div style="width:22px;height:36px;border:2px solid rgba(120,110,130,.4);border-radius:14px;display:flex;justify-content:center;padding-top:7px;"><span style="width:4px;height:8px;border-radius:3px;background:#c32865;animation:scrolldot 1.8s ease-in-out infinite;"></span></div>
+    </div>
+  </section>
+
+  <!-- SPECIALIZATION -->
+  <section id="specialization" style="position:relative;z-index:1;padding:120px 0;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 32px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:64px;">
+        <div>
+          <div data-reveal style="font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c32865;margin-bottom:18px;">What we do</div>
+          <h2 data-reveal data-reveal-delay="60" style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(34px,4.6vw,58px);line-height:1.02;letter-spacing:-.03em;margin:0;max-width:620px;">Our specialization</h2>
+        </div>
+        <p data-reveal data-reveal-delay="120" style="max-width:380px;font-size:17px;line-height:1.6;color:#56545f;margin:0;">From tailor-made platforms to cloud automation — engineering that adapts to how your team actually works.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+
+        <div data-reveal data-tilt style="position:relative;padding:34px 32px 36px;border-radius:26px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.75);box-shadow:0 24px 60px -28px rgba(80,30,70,.32);overflow:hidden;transition:transform .35s,box-shadow .35s;">
+          <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(195,40,101,.22),transparent 70%);"></div>
+          <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#c32865,#8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -10px rgba(195,40,101,.55);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3 style="font-family:'Bricolage Grotesque';font-weight:600;font-size:23px;letter-spacing:-.01em;margin:24px 0 12px;">Web & Mobile App Development</h3>
+          <p style="font-size:15.5px;line-height:1.62;color:#56545f;margin:0;">Scalable, tailor-made software that aligns with your processes, goals, and technical requirements — built for long-term efficiency and control.</p>
+        </div>
+
+        <div data-reveal data-reveal-delay="100" data-tilt style="position:relative;padding:34px 32px 36px;border-radius:26px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.75);box-shadow:0 24px 60px -28px rgba(80,30,70,.32);overflow:hidden;transition:transform .35s,box-shadow .35s;">
+          <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.22),transparent 70%);"></div>
+          <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#c32865);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -10px rgba(139,92,246,.5);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l-4 16M18 8l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <h3 style="font-family:'Bricolage Grotesque';font-weight:600;font-size:23px;letter-spacing:-.01em;margin:24px 0 12px;">Custom Software</h3>
+          <p style="font-size:15.5px;line-height:1.62;color:#56545f;margin:0;">Solutions designed around your unique workflows. Unmatched flexibility, seamless scalability, and long-term operational efficiency.</p>
+        </div>
+
+        <div data-reveal data-reveal-delay="200" data-tilt style="position:relative;padding:34px 32px 36px;border-radius:26px;background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.75);box-shadow:0 24px 60px -28px rgba(80,30,70,.32);overflow:hidden;transition:transform .35s,box-shadow .35s;">
+          <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,160,.24),transparent 70%);"></div>
+          <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#ff6aa0,#8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -10px rgba(255,106,160,.5);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h1a4 4 0 010 8H6a5 5 0 01-1-9.9A6 6 0 0118 10z"/></svg>
+          </div>
+          <h3 style="font-family:'Bricolage Grotesque';font-weight:600;font-size:23px;letter-spacing:-.01em;margin:24px 0 12px;">Cloud Solutions & Automation</h3>
+          <p style="font-size:15.5px;line-height:1.62;color:#56545f;margin:0;">Secure, cost-effective AWS architectures. We automate workflows and integrations to boost productivity and reduce manual effort.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT / TECH -->
+  <section id="about" style="position:relative;z-index:1;padding:60px 0 120px;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 32px;">
+      <div style="display:grid;grid-template-columns:1fr 1.25fr;gap:60px;align-items:center;margin-bottom:72px;">
+        <div data-reveal style="position:relative;padding:48px 40px;border-radius:30px;background:linear-gradient(150deg,rgba(195,40,101,.95),rgba(139,92,246,.92));color:#fff;overflow:hidden;box-shadow:0 30px 70px -28px rgba(139,40,120,.6);">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 80% 10%,rgba(255,255,255,.28),transparent 50%);"></div>
+          <div style="position:relative;">
+            <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(72px,10vw,120px);line-height:.9;letter-spacing:-.04em;"><span data-count="10">0</span></div>
+            <div style="font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.92;margin-top:8px;">Years of experience<br>shipping digital products</div>
+          </div>
+        </div>
+        <div data-reveal data-reveal-delay="120">
+          <div style="font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c32865;margin-bottom:16px;">About</div>
+          <h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(30px,4vw,46px);line-height:1.05;letter-spacing:-.03em;margin:0 0 18px;">Top technologies & frameworks</h2>
+          <p style="font-size:17.5px;line-height:1.6;color:#56545f;margin:0;max-width:520px;">Building great digital products takes the right tools and an eye on what's next. Here's the stack behind the work — battle-tested, modern, and chosen to fit each problem.</p>
+        </div>
+      </div>
+    </div>
+    <!-- marquee -->
+    <div style="position:relative;overflow:hidden;padding:8px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);">
+      <div data-marquee style="display:flex;width:max-content;gap:18px;">
+        <div style="display:flex;gap:18px;padding-right:18px;">
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">React</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">JavaScript</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:linear-gradient(120deg,#c32865,#8b5cf6);color:#fff;font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;">AWS</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Tailwind</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Bootstrap</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">WordPress</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Shopify</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Typo3</span>
+        </div>
+        <div style="display:flex;gap:18px;padding-right:18px;" aria-hidden="true">
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">React</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">JavaScript</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:linear-gradient(120deg,#c32865,#8b5cf6);color:#fff;font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;">AWS</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Tailwind</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Bootstrap</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">WordPress</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Shopify</span>
+          <span style="white-space:nowrap;padding:14px 26px;border-radius:100px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;color:#2a2832;backdrop-filter:blur(10px);">Typo3</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="work" style="position:relative;z-index:1;padding:100px 0 120px;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 32px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:30px;">
+        <div>
+          <div data-reveal style="font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c32865;margin-bottom:16px;">Selected work</div>
+          <h2 data-reveal data-reveal-delay="60" style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(34px,4.6vw,58px);line-height:1.02;letter-spacing:-.03em;margin:0;">Projects we're proud of</h2>
+        </div>
+        <a href="#contact" data-reveal data-reveal-delay="120" style="text-decoration:none;font-size:16px;font-weight:600;color:#c32865;display:inline-flex;align-items:center;gap:8px;">Start a project →</a>
+      </div>
+
+      <div data-proj data-grad="linear-gradient(120deg,#c32865,#8b5cf6)" data-tag="Custom Software" style="position:relative;display:flex;align-items:center;gap:24px;padding:34px 8px;border-top:1px solid rgba(20,18,30,.12);cursor:pointer;overflow:hidden;transition:padding .4s,background .4s;">
+        <span style="font-family:'Bricolage Grotesque';font-weight:600;font-size:16px;color:#a09dab;width:44px;flex:none;">01</span>
+        <h3 data-proj-title style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(30px,5vw,64px);letter-spacing:-.03em;margin:0;color:#16151a;transition:color .4s,transform .4s;flex:1;">USFQ</h3>
+        <span style="font-size:15px;color:#56545f;flex:none;display:none;" data-proj-tag>Custom Software</span>
+        <span data-proj-arrow style="font-size:30px;color:#c32865;flex:none;transition:transform .4s,opacity .4s;opacity:0;transform:translateX(-12px);">→</span>
+      </div>
+      <div data-proj data-grad="linear-gradient(120deg,#8b5cf6,#6366f1)" data-tag="Web Development" style="position:relative;display:flex;align-items:center;gap:24px;padding:34px 8px;border-top:1px solid rgba(20,18,30,.12);cursor:pointer;overflow:hidden;transition:padding .4s,background .4s;">
+        <span style="font-family:'Bricolage Grotesque';font-weight:600;font-size:16px;color:#a09dab;width:44px;flex:none;">02</span>
+        <h3 data-proj-title style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(30px,5vw,64px);letter-spacing:-.03em;margin:0;color:#16151a;transition:color .4s,transform .4s;flex:1;">KrugerLabs</h3>
+        <span data-proj-arrow style="font-size:30px;color:#c32865;flex:none;transition:transform .4s,opacity .4s;opacity:0;transform:translateX(-12px);">→</span>
+      </div>
+      <div data-proj data-grad="linear-gradient(120deg,#ff6aa0,#c32865)" data-tag="Ecommerce" style="position:relative;display:flex;align-items:center;gap:24px;padding:34px 8px;border-top:1px solid rgba(20,18,30,.12);cursor:pointer;overflow:hidden;transition:padding .4s,background .4s;">
+        <span style="font-family:'Bricolage Grotesque';font-weight:600;font-size:16px;color:#a09dab;width:44px;flex:none;">03</span>
+        <h3 data-proj-title style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(30px,5vw,64px);letter-spacing:-.03em;margin:0;color:#16151a;transition:color .4s,transform .4s;flex:1;">Waku Inc.</h3>
+        <span data-proj-arrow style="font-size:30px;color:#c32865;flex:none;transition:transform .4s,opacity .4s;opacity:0;transform:translateX(-12px);">→</span>
+      </div>
+      <div data-proj data-grad="linear-gradient(120deg,#8b5cf6,#c32865)" data-tag="Web Development" style="position:relative;display:flex;align-items:center;gap:24px;padding:34px 8px;border-top:1px solid rgba(20,18,30,.12);border-bottom:1px solid rgba(20,18,30,.12);cursor:pointer;overflow:hidden;transition:padding .4s,background .4s;">
+        <span style="font-family:'Bricolage Grotesque';font-weight:600;font-size:16px;color:#a09dab;width:44px;flex:none;">04</span>
+        <h3 data-proj-title style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(30px,5vw,64px);letter-spacing:-.03em;margin:0;color:#16151a;transition:color .4s,transform .4s;flex:1;">Ecohelix</h3>
+        <span data-proj-arrow style="font-size:30px;color:#c32865;flex:none;transition:transform .4s,opacity .4s;opacity:0;transform:translateX(-12px);">→</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" style="position:relative;z-index:1;padding:40px 0 0;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 32px;">
+      <div data-reveal style="position:relative;border-radius:34px;overflow:hidden;background:linear-gradient(140deg,#1a1320,#2a1530 45%,#3a1840);padding:clamp(48px,7vw,96px) clamp(32px,6vw,80px);box-shadow:0 40px 90px -34px rgba(60,20,60,.6);">
+        <div style="position:absolute;inset:0;background:radial-gradient(50% 60% at 85% 10%,rgba(195,40,101,.5),transparent 60%),radial-gradient(45% 55% at 10% 100%,rgba(139,92,246,.45),transparent 60%);"></div>
+        <div style="position:relative;display:grid;grid-template-columns:1.3fr 1fr;gap:50px;align-items:center;">
+          <div>
+            <div style="font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#ff9ac4;margin-bottom:18px;">Quito, Ecuador</div>
+            <h2 style="font-family:'Bricolage Grotesque';font-weight:700;font-size:clamp(36px,5.5vw,68px);line-height:1.0;letter-spacing:-.03em;margin:0;color:#fff;">Let's build<br>something <span style="background:linear-gradient(110deg,#ff6aa0,#b794f6);-webkit-background-clip:text;background-clip:text;color:transparent;">human.</span></h2>
+            <p style="font-size:18px;line-height:1.6;color:rgba(255,255,255,.72);margin:24px 0 0;max-width:440px;">I'm here to help and answer any question you might have. I'd love to hear from you.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:36px;">
+              <a href="mailto:info@mindfultech.ec" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;padding:17px 30px;border-radius:100px;background:linear-gradient(120deg,#c32865,#8b5cf6);color:#fff;font-weight:600;font-size:16.5px;box-shadow:0 16px 40px -12px rgba(195,40,101,.7);transition:transform .3s;">Email us →</a>
+              <a href="https://api.whatsapp.com/send?phone=593958731994" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;padding:17px 30px;border-radius:100px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);color:#fff;font-weight:600;font-size:16.5px;border:1px solid rgba(255,255,255,.2);transition:background .3s;" style-hover="background:rgba(255,255,255,.18);">WhatsApp</a>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <a href="mailto:info@mindfultech.ec" style="text-decoration:none;display:block;padding:24px 26px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);transition:background .3s;" style-hover="background:rgba(255,255,255,.13);">
+              <div style="font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);">Email</div>
+              <div style="font-size:19px;font-weight:600;color:#fff;margin-top:6px;">info@mindfultech.ec</div>
+            </a>
+            <a href="tel:+593958731994" style="text-decoration:none;display:block;padding:24px 26px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);transition:background .3s;" style-hover="background:rgba(255,255,255,.13);">
+              <div style="font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);">Phone</div>
+              <div style="font-size:19px;font-weight:600;color:#fff;margin-top:6px;">+593 958 73 1994</div>
+            </a>
+            <div style="padding:24px 26px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">
+              <div style="font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);">Studio</div>
+              <div style="font-size:19px;font-weight:600;color:#fff;margin-top:6px;">Quito · Ecuador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- footer -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:40px 4px 50px;">
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 30 30" fill="none"><rect width="30" height="30" rx="9" fill="url(#lg)"/><circle cx="15" cy="12" r="3.4" fill="#fff"/><path d="M8 22c0-3.6 3.1-6 7-6s7 2.4 7 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;">mindful<span style="color:#c32865;">tech</span></span>
+        </div>
+        <div style="font-size:14px;color:#7a7884;">© Mindfultech 2025. All rights reserved.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c32865&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;enableMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;blobEnergy&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const rootEl = document.documentElement;
+    if (rootEl.getAttribute('data-mt-inited')) return;
+    // Wait until the streamed template DOM actually exists before claiming the
+    // one-time guard, otherwise an early empty mount consumes it and blocks setup.
+    const ready = document.querySelectorAll('[data-reveal]').length > 5 && !!document.getElementById('hero-canvas');
+    if (!ready) { setTimeout(() => { try { this.componentDidMount(); } catch(e){} }, 60); return; }
+    rootEl.setAttribute('data-mt-inited', '1');
+    this._raf = null;
+    this._cleanups = [];
+    try { this.initReveal(); } catch(e){ console.warn(e); }
+    try { this.initCounters(); } catch(e){ console.warn(e); }
+    try { this.initMagnetic(); } catch(e){ console.warn(e); }
+    try { this.initTilt(); } catch(e){ console.warn(e); }
+    try { this.initPortfolio(); } catch(e){ console.warn(e); }
+    try { this.initNav(); } catch(e){ console.warn(e); }
+    try { this.initMarquee(); } catch(e){ console.warn(e); }
+    this.initThree();
+  }
+
+  componentWillUnmount() {
+    // Intentionally a no-op: this DC re-instantiates its logic frequently in the
+    // preview host. All imperative setup is guarded to run once on a shared DOM
+    // node, so tearing it down here would kill the 3D scene/listeners for the
+    // surviving DOM. Leak is acceptable for a single-page mockup.
+  }
+
+  motionOn() { return this.props.enableMotion !== false; }
+
+  initReveal() {
+    // Entrance animations are declared in the template inline styles (React-owned,
+    // stable value -> plays once, never restarted by host re-renders). Nothing to do
+    // here; this stays a no-op so no element is ever hidden by imperative JS.
+  }
+
+  initCounters() {
+    const els = Array.from(document.querySelectorAll('[data-count]'));
+    const run = (el) => {
+      const target = parseInt(el.dataset.count, 10) || 0;
+      const dur = 1400; const t0 = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased).toString();
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      // guarantee the final value lands even if rAF is throttled/paused
+      setTimeout(() => { if (el.textContent !== String(target)) el.textContent = String(target); }, dur + 700);
+    };
+    const trigger = (el) => { if (!el.dataset.counted) { el.dataset.counted = '1'; run(el); } };
+    const check = () => {
+      const vh = window.innerHeight;
+      els.forEach(el => {
+        if (el.dataset.counted) return;
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.85 && r.bottom > 0) trigger(el);
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(check));
+    const onScroll = () => window.requestAnimationFrame(check);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // fallback: never leave a counter sitting at 0 if it's never scrolled past
+    setTimeout(() => els.forEach(trigger), 4000);
+  }
+
+  initMagnetic() {
+    document.querySelectorAll('[data-magnetic]').forEach(el => {
+      const move = (e) => {
+        const r = el.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width / 2;
+        const y = e.clientY - r.top - r.height / 2;
+        el.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
+      };
+      const leave = () => { el.style.transform = 'translate(0,0)'; };
+      el.addEventListener('mousemove', move);
+      el.addEventListener('mouseleave', leave);
+      this._cleanups.push(() => { el.removeEventListener('mousemove', move); el.removeEventListener('mouseleave', leave); });
+    });
+  }
+
+  initTilt() {
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+      const move = (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = `perspective(900px) rotateX(${-py * 6}deg) rotateY(${px * 6}deg) translateY(-6px)`;
+        el.style.boxShadow = '0 36px 80px -28px rgba(80,30,70,.4)';
+      };
+      const leave = () => { el.style.transform = 'none'; el.style.boxShadow = '0 24px 60px -28px rgba(80,30,70,.32)'; };
+      el.addEventListener('mousemove', move);
+      el.addEventListener('mouseleave', leave);
+      this._cleanups.push(() => { el.removeEventListener('mousemove', move); el.removeEventListener('mouseleave', leave); });
+    });
+  }
+
+  initPortfolio() {
+    document.querySelectorAll('[data-proj]').forEach(el => {
+      const title = el.querySelector('[data-proj-title]');
+      const arrow = el.querySelector('[data-proj-arrow]');
+      const grad = el.dataset.grad;
+      const tag = el.dataset.tag;
+      let badge = null;
+      const enter = () => {
+        el.style.paddingLeft = '28px';
+        el.style.background = 'rgba(255,255,255,.5)';
+        el.style.borderRadius = '20px';
+        if (title) { title.style.backgroundImage = grad; title.style.webkitBackgroundClip = 'text'; title.style.backgroundClip = 'text'; title.style.color = 'transparent'; title.style.transform = 'translateX(6px)'; }
+        if (arrow) { arrow.style.opacity = '1'; arrow.style.transform = 'translateX(0)'; }
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.textContent = tag;
+          badge.style.cssText = 'font-size:14px;font-weight:600;color:#fff;padding:7px 16px;border-radius:100px;background-image:' + grad + ';white-space:nowrap;flex:none;';
+          el.insertBefore(badge, arrow);
+        }
+        badge.style.opacity = '1';
+      };
+      const leave = () => {
+        el.style.paddingLeft = '8px';
+        el.style.background = 'transparent';
+        if (title) { title.style.color = '#16151a'; title.style.backgroundImage = 'none'; title.style.transform = 'none'; }
+        if (arrow) { arrow.style.opacity = '0'; arrow.style.transform = 'translateX(-12px)'; }
+        if (badge) badge.style.opacity = '0';
+      };
+      el.addEventListener('mouseenter', enter);
+      el.addEventListener('mouseleave', leave);
+      this._cleanups.push(() => { el.removeEventListener('mouseenter', enter); el.removeEventListener('mouseleave', leave); });
+    });
+  }
+
+  initNav() {
+    const nav = document.getElementById('mt-nav');
+    if (!nav) return;
+    const onScroll = () => {
+      if (window.scrollY > 30) {
+        nav.style.background = 'rgba(255,255,255,.8)';
+        nav.style.boxShadow = '0 16px 50px -18px rgba(60,20,50,.3)';
+      } else {
+        nav.style.background = 'rgba(255,255,255,.55)';
+        nav.style.boxShadow = '0 12px 40px -16px rgba(60,20,50,.22)';
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    this._cleanups.push(() => window.removeEventListener('scroll', onScroll));
+  }
+
+  initMarquee() {
+    // State only; the actual stepping happens inside the three.js rAF loop
+    // (the one rAF we've confirmed runs reliably in this host).
+    const track = document.querySelector('[data-marquee]');
+    if (!track) return;
+    this._mq = { track, x: 0, speed: 55 };
+    // Fallback standalone driver in case the 3D loop never starts (THREE failed).
+    let last = performance.now();
+    const step = (now) => {
+      if (this._mqDrivenBy3D) return; // 3D loop took over
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      this._stepMarquee(dt);
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  _stepMarquee(dt) {
+    const m = this._mq;
+    if (!m) return;
+    m.x -= m.speed * dt;
+    const half = m.track.scrollWidth / 2;
+    if (half && m.x <= -half) m.x += half;
+    m.track.style.transform = 'translate3d(' + m.x.toFixed(2) + 'px,0,0)';
+  }
+
+  initThree() {
+    const start = Date.now();
+    const tick = () => {
+      if (window.THREE) { try { this.buildScene(); } catch(e){ console.warn('3D init failed', e); } return; }
+      if (Date.now() - start < 9000) this._twait = setTimeout(tick, 120);
+    };
+    tick();
+  }
+
+  buildScene() {
+    const THREE = window.THREE;
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+    const accent = this.props.accent || '#c32865';
+    const energy = (this.props.blobEnergy != null ? this.props.blobEnergy : 1);
+    const motion = this.motionOn();
+    const accentColor = new THREE.Color(accent);
+    const violet = new THREE.Color('#8b5cf6');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    this._renderer = renderer;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    camera.position.set(0, 0, 6.2);
+
+    const sizeTo = () => {
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      return w / h;
+    };
+    let aspect = sizeTo();
+
+    // environment map from a gradient canvas
+    const envCanvas = document.createElement('canvas');
+    envCanvas.width = 512; envCanvas.height = 256;
+    const ex = envCanvas.getContext('2d');
+    const g = ex.createLinearGradient(0, 0, 0, 256);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.42, '#ffe1f0');
+    g.addColorStop(0.58, '#f1e2ff');
+    g.addColorStop(0.78, '#e2e9ff');
+    g.addColorStop(1, '#ffffff');
+    ex.fillStyle = g; ex.fillRect(0, 0, 512, 256);
+    const hi = ex.createRadialGradient(370, 64, 4, 370, 64, 170);
+    hi.addColorStop(0, 'rgba(255,255,255,1)'); hi.addColorStop(1, 'rgba(255,255,255,0)');
+    ex.fillStyle = hi; ex.fillRect(0, 0, 512, 256);
+    const envTex = new THREE.CanvasTexture(envCanvas);
+    envTex.mapping = THREE.EquirectangularReflectionMapping;
+    envTex.colorSpace = THREE.SRGBColorSpace;
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envRT = pmrem.fromEquirectangular(envTex);
+    scene.environment = envRT.texture;
+
+    // lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const d1 = new THREE.DirectionalLight(0xffffff, 1.3); d1.position.set(3, 4, 5); scene.add(d1);
+    const pL = new THREE.PointLight(accentColor.getHex(), 2.4, 40); pL.position.set(-3.5, -1.5, 3); scene.add(pL);
+    const pV = new THREE.PointLight(violet.getHex(), 1.8, 40); pV.position.set(4, 2.5, -1.5); scene.add(pV);
+
+    const group = new THREE.Group();
+    group.position.set(aspect > 1 ? 1.55 : 0, 0.05, 0);
+    scene.add(group);
+
+    // morphing glass blob
+    const uniforms = { uTime: { value: 0 }, uAmp: { value: 0.26 * energy } };
+    const noiseGLSL = `
+      vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}
+      vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+      float snoise(vec3 v){
+        const vec2 C = vec2(1.0/6.0, 1.0/3.0); const vec4 D = vec4(0.0,0.5,1.0,2.0);
+        vec3 i  = floor(v + dot(v, C.yyy)); vec3 x0 = v - i + dot(i, C.xxx);
+        vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g;
+        vec3 i1 = min(g.xyz, l.zxy); vec3 i2 = max(g.xyz, l.zxy);
+        vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + 2.0*C.xxx; vec3 x3 = x0 - 1.0 + 3.0*C.xxx;
+        i = mod(i, 289.0);
+        vec4 p = permute( permute( permute(i.z + vec4(0.0,i1.z,i2.z,1.0)) + i.y + vec4(0.0,i1.y,i2.y,1.0)) + i.x + vec4(0.0,i1.x,i2.x,1.0));
+        float n_ = 1.0/7.0; vec3 ns = n_ * D.wyz - D.xzx;
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+        vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_);
+        vec4 x = x_*ns.x + ns.yyyy; vec4 y = y_*ns.x + ns.yyyy; vec4 h = 1.0 - abs(x) - abs(y);
+        vec4 b0 = vec4(x.xy, y.xy); vec4 b1 = vec4(x.zw, y.zw);
+        vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0; vec4 sh = -step(h, vec4(0.0));
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+        vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
+        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+        p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
+        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0); m = m*m;
+        return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+      }`;
+    const blobMat = new THREE.MeshPhysicalMaterial({
+      transmission: 0.35, thickness: 1.6, roughness: 0.14, metalness: 0.0, ior: 1.45,
+      iridescence: 0.85, iridescenceIOR: 1.4, clearcoat: 1.0, clearcoatRoughness: 0.22,
+      color: accentColor.clone(), attenuationColor: accentColor.clone(),
+      attenuationDistance: 0.7, sheen: 1.0, sheenRoughness: 0.5,
+      sheenColor: new THREE.Color('#ff9ac4'), envMapIntensity: 1.15
+    });
+    blobMat.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = uniforms.uTime;
+      shader.uniforms.uAmp = uniforms.uAmp;
+      shader.vertexShader = 'uniform float uTime;\nuniform float uAmp;\n' + noiseGLSL + '\n' + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `
+        float nA = snoise(normalize(position) * 1.3 + uTime * 0.28);
+        float nB = snoise(normalize(position) * 2.7 - uTime * 0.2);
+        vec3 transformed = position + normal * (nA * uAmp + nB * uAmp * 0.45);`);
+    };
+    const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25, 40), blobMat);
+    group.add(blob);
+
+    // orbiting iridescent crystals
+    const crystals = [];
+    const crystalGeos = [new THREE.IcosahedronGeometry(0.22, 0), new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.OctahedronGeometry(0.26, 0)];
+    for (let i = 0; i < 6; i++) {
+      const cm = new THREE.MeshPhysicalMaterial({ roughness: 0.04, metalness: 0.0, clearcoat: 1.0, iridescence: 1.0, iridescenceIOR: 1.6, color: 0xffffff, envMapIntensity: 1.5 });
+      const mesh = new THREE.Mesh(crystalGeos[i % crystalGeos.length], cm);
+      const radius = 1.9 + Math.random() * 0.9;
+      const ang = (i / 6) * Math.PI * 2;
+      mesh.userData = { radius, ang, speed: 0.12 + Math.random() * 0.16, yOff: (Math.random() - 0.5) * 1.4, spin: Math.random() * 0.02 + 0.005 };
+      mesh.position.set(Math.cos(ang) * radius, mesh.userData.yOff, Math.sin(ang) * radius);
+      group.add(mesh); crystals.push(mesh);
+    }
+
+    // particle dust
+    const pCount = 380;
+    const pPos = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      const r = 2.0 + Math.random() * 1.8;
+      const th = Math.random() * Math.PI * 2; const ph = Math.acos(2 * Math.random() - 1);
+      pPos[i*3] = r * Math.sin(ph) * Math.cos(th);
+      pPos[i*3+1] = r * Math.cos(ph) * 0.7;
+      pPos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    const pMat = new THREE.PointsMaterial({ size: 0.045, color: accentColor.clone(), transparent: true, opacity: 0.55, sizeAttenuation: true, depthWrite: false });
+    const points = new THREE.Points(pGeo, pMat);
+    group.add(points);
+
+    // interaction
+    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    const onMove = (e) => { mouse.tx = (e.clientX / window.innerWidth) * 2 - 1; mouse.ty = (e.clientY / window.innerHeight) * 2 - 1; };
+    window.addEventListener('mousemove', onMove);
+    const onResize = () => { aspect = sizeTo(); group.position.x = aspect > 1 ? 1.55 : 0; };
+    window.addEventListener('resize', onResize);
+    this._cleanups.push(() => { window.removeEventListener('mousemove', onMove); window.removeEventListener('resize', onResize); });
+
+    const clock = new THREE.Clock();
+    const loop = () => {
+      this._raf = requestAnimationFrame(loop);
+      const dt = clock.getDelta();
+      const t = clock.elapsedTime;
+      if (motion) uniforms.uTime.value += dt;
+      mouse.x += (mouse.tx - mouse.x) * 0.05;
+      mouse.y += (mouse.ty - mouse.y) * 0.05;
+      group.rotation.y += motion ? dt * 0.12 : 0;
+      group.rotation.x = mouse.y * 0.25;
+      group.rotation.z = mouse.x * 0.08;
+      camera.position.x = mouse.x * 0.4;
+      camera.position.y = -mouse.y * 0.3;
+      camera.lookAt(group.position.x * 0.5, 0, 0);
+      crystals.forEach((c) => {
+        if (motion) c.userData.ang += dt * c.userData.speed;
+        c.position.set(Math.cos(c.userData.ang) * c.userData.radius, c.userData.yOff + Math.sin(t * 0.5 + c.userData.ang) * 0.2, Math.sin(c.userData.ang) * c.userData.radius);
+        if (motion) { c.rotation.x += c.userData.spin; c.rotation.y += c.userData.spin * 0.8; }
+      });
+      points.rotation.y -= motion ? dt * 0.04 : 0;
+      this._mqDrivenBy3D = true;
+      this._stepMarquee(dt);
+      renderer.render(scene, camera);
+    };
+    loop();
+  }
+
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

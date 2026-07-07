@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
+<script src="nav-fix.js"></script>
+<style>
+  :root{--accent:#69c7b9;--accent-light:#96d8ce;--accent-tint:#eef8f6;--ink:#0e0d12;--mono:'IBM Plex Mono',monospace;}
+  *{box-sizing:border-box;} html{scroll-behavior:smooth;}
+  body{margin:0;background:#fff;color:#0e0d12;font-family:'Outfit',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  ::selection{background:#0e0d12;color:#fff;} a{color:#0e0d12;} a:hover{color:var(--accent);}
+  @media (max-width:1120px){
+    #mtai-navrow{gap:10px !important;}
+    #mtai-navrow nav{gap:14px !important;padding:12px 14px !important;}
+    #mtai-navrow nav > div{gap:16px !important;}
+    #mtai-navrow nav a{font-size:14.5px !important;}
+    #mtai-navrow > div:not([data-mtai-dd]) > a:first-of-type{display:none;}
+  }
+</style>
+</helmet>
+<div style="position:relative;width:100%;overflow:hidden;background:#ffffff;">
+
+  <div style="background:#0a0a0c;color:#fff;display:flex;align-items:center;justify-content:center;padding:13px 20px;">
+    <a href="MindfulTech AI.dc.html#news" style="text-decoration:none;color:#fff;font-family:var(--mono);font-size:13px;letter-spacing:.02em;" style-hover="color:#fff;opacity:.85;">Announcing our AI practice. Intelligent products, built for humans &#8594;</a>
+  </div>
+
+  <div id="mtai-navrow" style="display:flex;gap:14px;padding:16px 18px;max-width:1560px;margin:0 auto;">
+    <nav style="flex:1;display:flex;align-items:center;gap:28px;background:#ffffff;border:1px solid rgba(14,13,18,.07);border-radius:14px;padding:14px 22px;box-shadow:0 6px 24px -18px rgba(14,13,18,.25);">
+      <a href="MindfulTech AI.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><defs><linearGradient id="mtc-mark" x1="4" y1="4" x2="28" y2="28"><stop style="stop-color:var(--accent-light)"/><stop offset="1" style="stop-color:var(--accent)"/></linearGradient></defs><circle cx="16" cy="16" r="11" stroke="url(#mtc-mark)" stroke-width="4.4" fill="none" stroke-linecap="round" stroke-dasharray="53.5 15.6" transform="rotate(-52 16 16)"/><circle cx="16" cy="16" r="3.9" fill="#0e0d12"/></svg>
+        <span style="font-weight:500;font-size:20px;letter-spacing:-.02em;">mindfultech</span>
+      </a>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:32px;">
+        <a href="MindfulTech Services.dc.html" style="text-decoration:none;font-size:14px;font-weight:400;color:#1a1820;">Services</a>
+        <a href="MindfulTech AI.dc.html#research" style="text-decoration:none;font-size:14px;font-weight:400;color:#1a1820;">Process</a>
+        <a href="MindfulTech Work.dc.html" style="text-decoration:none;font-size:14px;font-weight:400;color:#1a1820;">Work</a>
+        <a href="MindfulTech Blog.dc.html" style="text-decoration:none;font-size:14px;font-weight:400;color:#1a1820;">Blog</a>
+        <a href="MindfulTech Company.dc.html" style="text-decoration:none;font-size:14px;font-weight:500;color:var(--accent);">Company</a>
+      </div>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid rgba(14,13,18,.07);border-radius:14px;padding:10px 12px;box-shadow:0 6px 24px -18px rgba(14,13,18,.25);">
+      <span style="width:34px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--accent) 30%,#e6e4ee);"></span>
+      <a href="mailto:info@mindfultech.ec" style="text-decoration:none;font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.1em;color:var(--ink);padding:12px 16px;white-space:nowrap;">CONTACT SALES</a>
+      <a href="mailto:info@mindfultech.ec" style="text-decoration:none;font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.1em;background:#0e0d12;color:#fff;padding:13px 20px;border-radius:6px;white-space:nowrap;" style-hover="background:#000;color:#fff;">START A PROJECT</a>
+    </div>
+  </div>
+
+  <section id="about" style="background:linear-gradient(180deg,#ffffff,#f4f7fc);padding:90px 0 60px;text-align:center;">
+    <div style="max-width:880px;margin:0 auto;padding:0 40px;">
+      <span style="display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--accent);background:var(--accent-tint);padding:8px 14px;border-radius:5px;">COMPANY</span>
+      <h1 style="font-weight:500;font-size:clamp(40px,4.6vw,72px);line-height:1.04;letter-spacing:-.025em;margin:26px 0 0;color:var(--ink);">A software lab focused on people</h1>
+      <p style="font-size:19px;line-height:1.55;color:#6b6875;max-width:640px;margin:22px auto 0;">Since 2016 we&#8217;ve designed and engineered digital products from Quito for teams across Ecuador and beyond — with research, craft, and now applied AI at the core.</p>
+    </div>
+  </section>
+
+  <section style="background:#ffffff;padding:60px 0 20px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 40px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px;">
+        <div style="background:#bdd9f0;border-radius:8px;padding:24px;min-height:210px;display:flex;flex-direction:column;justify-content:space-between;"><div style="font-weight:500;font-size:21px;">People first</div><div style="font-size:13.5px;line-height:1.6;color:#2c3a4a;">Every engagement starts with the humans who will use the product — not the tech stack.</div></div>
+        <div style="background:#f2cfe3;border-radius:8px;padding:24px;min-height:210px;display:flex;flex-direction:column;justify-content:space-between;"><div style="font-weight:500;font-size:21px;">Craft over volume</div><div style="font-size:13.5px;line-height:1.6;color:#4a3040;">A small senior team that ships fewer, better things — and stays accountable after launch.</div></div>
+        <div style="background:#f8d9c3;border-radius:8px;padding:24px;min-height:210px;display:flex;flex-direction:column;justify-content:space-between;"><div style="font-weight:500;font-size:21px;">AI with judgment</div><div style="font-size:13.5px;line-height:1.6;color:#4c3628;">We automate the repetitive and keep humans on everything that requires care.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="careers" style="background:#ffffff;padding:90px 0 20px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;">
+      <div>
+        <span style="display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--accent);background:var(--accent-tint);padding:8px 14px;border-radius:5px;">CAREERS</span>
+        <h2 style="font-weight:500;font-size:clamp(28px,3.2vw,46px);letter-spacing:-.02em;line-height:1.08;margin:18px 0 14px;">Join our mission</h2>
+        <p style="font-size:16.5px;line-height:1.6;color:#55525e;margin:0 0 22px;max-width:460px;">We hire designers and engineers who care about people. No open reqs right now — but we always read portfolios from folks who build with intention.</p>
+        <a href="mailto:info@mindfultech.ec?subject=Portfolio" style="text-decoration:none;display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.12em;background:#0e0d12;color:#fff;padding:14px 22px;border-radius:5px;" style-hover="color:#fff;background:#000;">SEND YOUR PORTFOLIO</a>
+      </div>
+      <div style="border-radius:16px;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 26%,#9cc4ea),#dff0f2 55%,color-mix(in srgb,var(--accent) 20%,#fff));aspect-ratio:4/3;">
+        <image-slot id="mtc-team" style="width:100%;height:100%;" shape="rect" placeholder="Drop a team photo" fit="cover"></image-slot>
+      </div>
+    </div>
+  </section>
+
+  <section id="press" style="background:#ffffff;padding:90px 0 90px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 40px;">
+      <div style="background:#0d0a1f;border-radius:16px;padding:clamp(40px,5vw,72px);display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center;">
+        <div>
+          <span style="display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:#ffc2dd;">PRESS</span>
+          <h2 style="font-weight:500;font-size:clamp(26px,2.8vw,42px);letter-spacing:-.02em;margin:14px 0 12px;color:#fff;">MindfulTech in the news</h2>
+          <p style="font-size:16px;color:#8f8ba4;margin:0;max-width:460px;">For interviews, speaking, or brand assets, write to our studio — we answer within one business day.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <a href="mailto:info@mindfultech.ec?subject=Press" style="text-decoration:none;display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;" style-hover="color:#fff;background:rgba(255,255,255,.14);"><span style="font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#8f8ba4;">PRESS</span><span style="font-size:15.5px;font-weight:500;">info@mindfultech.ec</span></a>
+          <a href="tel:+593958731994" style="text-decoration:none;display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;" style-hover="color:#fff;background:rgba(255,255,255,.14);"><span style="font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#8f8ba4;">PHONE</span><span style="font-size:15.5px;font-weight:500;">+593 958 73 1994</span></a>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;"><span style="font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#8f8ba4;">STUDIO</span><span style="font-size:15.5px;font-weight:500;">Quito &#183; Ecuador</span></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:36px 6px 0;">
+        <div style="display:flex;align-items:center;gap:22px;">
+          <a href="MindfulTech AI.dc.html" style="text-decoration:none;font-size:13.5px;color:#44424d;">Home</a>
+          <a href="MindfulTech Services.dc.html" style="text-decoration:none;font-size:13.5px;color:#44424d;">Services</a>
+          <a href="MindfulTech Work.dc.html" style="text-decoration:none;font-size:13.5px;color:#44424d;">Work</a>
+          <a href="MindfulTech Blog.dc.html" style="text-decoration:none;font-size:13.5px;color:#44424d;">Blog</a>
+        </div>
+        <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:#8b8896;">&#169; 2026 MINDFULTECH &#183; QUITO, ECUADOR</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+</body>
+</html>

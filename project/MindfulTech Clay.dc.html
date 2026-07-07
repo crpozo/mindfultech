@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+<script src="image-slot.js"></script>
+<style>
+  :root{--accent:#c32865;--accent-light:#ff5fa2;--accent-tint:#f6e7ee;--accent-deep:#9c2d5e;--accent-deeper:#5e2350;}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:#ffffff;color:#1a1320;font-family:'Figtree',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+  ::selection{background:var(--accent);color:#fff;}
+  @keyframes mtcfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+</style>
+</helmet>
+<div style="position:relative;width:100%;overflow:hidden;background:#ffffff;">
+
+  <!-- NAV -->
+  <nav id="mtc-nav" style="position:fixed;top:0;left:0;right:0;z-index:120;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;margin:14px auto;max-width:1320px;background:rgba(255,255,255,.86);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border:1px solid rgba(26,19,32,.06);border-radius:22px;box-shadow:0 10px 34px -18px rgba(60,20,50,.28);">
+    <a href="#home" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:#1a1320;">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><defs><linearGradient id="mtcg" x1="0" y1="0" x2="30" y2="30"><stop style="stop-color:var(--accent-light)"/><stop offset="1" style="stop-color:var(--accent)"/></linearGradient></defs><rect width="30" height="30" rx="10" fill="url(#mtcg)"/><circle cx="15" cy="12" r="3.3" fill="#fff"/><path d="M8.5 21.5c0-3.4 2.9-5.7 6.5-5.7s6.5 2.3 6.5 5.7" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/></svg>
+      <span style="font-weight:800;font-size:20px;letter-spacing:-.03em;">mindfultech</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:28px;">
+      <a href="#build" style="text-decoration:none;color:#3b3543;font-size:15.5px;font-weight:600;transition:color .2s;" style-hover="color:var(--accent);">What we build</a>
+      <a href="#work" style="text-decoration:none;color:#3b3543;font-size:15.5px;font-weight:600;transition:color .2s;" style-hover="color:var(--accent);">Work</a>
+      <a href="#services" style="text-decoration:none;color:#3b3543;font-size:15.5px;font-weight:600;transition:color .2s;" style-hover="color:var(--accent);">Services</a>
+      <a href="#contact" style="text-decoration:none;color:#3b3543;font-size:15.5px;font-weight:600;transition:color .2s;" style-hover="color:var(--accent);">Contact</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="#contact" style="text-decoration:none;color:#1a1320;font-size:15px;font-weight:600;padding:10px 14px;">Book a call</a>
+      <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;padding:12px 20px;border-radius:13px;background:#1a1320;color:#fff;font-weight:700;font-size:15px;transition:transform .25s,background .25s;" style-hover="background:#000;">Start a project</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="home" style="position:relative;min-height:100vh;background:linear-gradient(180deg,#ffffff 0%,#f7f5f8 58%,#eeeaf0 100%);overflow:hidden;">
+    <canvas id="clay-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;"></canvas>
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 0 56px;">
+      <div style="max-width:1320px;margin:0 auto;padding:0 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:48px;flex-wrap:wrap;">
+        <div style="max-width:760px;">
+          <a href="#services" style="text-decoration:none;display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;">New · UX-driven product studio <span>→</span></a>
+          <h1 style="font-weight:900;font-size:clamp(54px,8.2vw,118px);line-height:.92;letter-spacing:-.04em;margin:0;color:#16141a;">Build products<br><span style="color:var(--accent);">people love</span></h1>
+        </div>
+        <div style="max-width:380px;padding-bottom:14px;">
+          <p style="font-size:19px;line-height:1.5;color:#56525d;font-weight:500;margin:0 0 22px;">Your UX-driven software partner — we design and engineer web, mobile, and cloud products through a humanity-oriented process.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:16px 26px;border-radius:15px;background:var(--accent);color:#fff;font-weight:800;font-size:16px;box-shadow:0 14px 30px -12px rgba(195,40,101,.42);transition:transform .25s;">Start a project →</a>
+            <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:16px 26px;border-radius:15px;background:#fff;color:#16141a;border:1px solid rgba(22,20,26,.12);font-weight:800;font-size:16px;box-shadow:0 8px 24px -16px rgba(40,10,30,.3);transition:transform .25s;">Book a call →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUSTED / BENTO -->
+  <section id="work" style="position:relative;z-index:2;background:#f3f2f4;padding:40px 0 90px;margin-top:-2px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
+      <div style="background:#ffffff;border-radius:36px;padding:clamp(40px,5vw,72px) clamp(24px,4vw,56px);box-shadow:0 30px 80px -50px rgba(40,10,30,.4);">
+        <p style="text-align:center;font-size:clamp(20px,2.4vw,30px);line-height:1.4;font-weight:600;color:#1a1320;max-width:740px;margin:0 auto 44px;">Trusted by teams who build with intention — from universities to fast-moving startups. <span style="color:#9a94a3;">Crafted with care, shipped with confidence.</span></p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div data-tilt style="grid-column:span 2;background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px 28px;display:flex;flex-direction:column;justify-content:space-between;min-height:150px;transition:transform .3s,box-shadow .3s;">
+            <p style="font-size:16.5px;line-height:1.5;color:#2c2733;font-weight:500;margin:0;">"MindfulTech became our product team — they turned a tangle of manual processes into software our staff actually enjoy using."</p>
+            <div style="font-size:14px;color:#9a94a3;font-weight:600;margin-top:18px;">— Operations lead, USFQ</div>
+          </div>
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:150px;"><span style="font-size:26px;font-weight:800;letter-spacing:-.02em;color:#2c2733;">USFQ</span></div>
+          <div style="background:linear-gradient(135deg,var(--accent-light),var(--accent));border-radius:22px;padding:26px;display:flex;flex-direction:column;justify-content:center;min-height:150px;color:#fff;"><div style="font-size:40px;font-weight:900;letter-spacing:-.03em;line-height:1;"><span data-count="10">0</span>+</div><div style="font-size:13.5px;font-weight:600;opacity:.92;margin-top:6px;">years shipping<br>digital products</div></div>
+
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:140px;"><span style="font-size:24px;font-weight:800;color:#2c2733;letter-spacing:-.02em;">KrugerLabs</span></div>
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;flex-direction:column;justify-content:center;min-height:140px;"><div style="font-size:30px;font-weight:900;color:var(--accent);letter-spacing:-.02em;"><span data-count="40">0</span>+</div><div style="font-size:13.5px;color:#6b6675;font-weight:600;margin-top:4px;">products shipped end-to-end</div></div>
+          <div data-tilt style="grid-column:span 2;background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px 28px;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;transition:transform .3s,box-shadow .3s;">
+            <p style="font-size:16.5px;line-height:1.5;color:#2c2733;font-weight:500;margin:0;">"From Shopify storefronts to custom dashboards, they handle the whole stack — and the details no one else catches."</p>
+            <div style="font-size:14px;color:#9a94a3;font-weight:600;margin-top:14px;">— Founder, Waku Inc.</div>
+          </div>
+
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:130px;"><span style="font-size:24px;font-weight:800;color:#2c2733;letter-spacing:-.02em;">Waku</span></div>
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:130px;"><span style="font-size:24px;font-weight:800;color:#2c2733;letter-spacing:-.02em;">Ecohelix</span></div>
+          <div style="background:#f6f5f7;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;flex-direction:column;justify-content:center;min-height:130px;"><div style="font-size:30px;font-weight:900;color:#16141a;letter-spacing:-.02em;">AWS</div><div style="font-size:13.5px;color:#6b6675;font-weight:600;margin-top:4px;">cloud architecture & automation</div></div>
+          <div style="background:#faf9fb;border:1px solid rgba(26,19,32,.06);border-radius:22px;padding:26px;display:flex;align-items:center;justify-content:center;gap:14px;min-height:130px;color:#2c2733;font-weight:700;font-size:15px;"><span>React</span><span style="color:#cdc9d3;">·</span><span>Next</span><span style="color:#cdc9d3;">·</span><span>Node</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE BUILD (tabbed showcase) -->
+  <section id="build" style="position:relative;z-index:2;background:#ffffff;padding:100px 0 90px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 28px;text-align:center;">
+      <h2 style="font-weight:900;font-size:clamp(36px,5.2vw,68px);line-height:1.0;letter-spacing:-.035em;margin:0;color:#1a1320;">Teams build with MindfulTech</h2>
+      <p style="font-size:clamp(17px,2vw,21px);line-height:1.5;color:#6b6675;font-weight:500;max-width:560px;margin:18px auto 40px;">One partner for the whole product lifecycle — from first wireframe to scaled, automated infrastructure.</p>
+      <div id="mtc-tabs" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:46px;">
+        <button data-tab="0" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;transition:background .2s,color .2s;">Web Apps</button>
+        <button data-tab="1" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:#f1eff3;color:#3b3543;font-weight:700;font-size:15px;transition:background .2s,color .2s;">Mobile</button>
+        <button data-tab="2" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:#f1eff3;color:#3b3543;font-weight:700;font-size:15px;transition:background .2s,color .2s;">Custom Software</button>
+        <button data-tab="3" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:#f1eff3;color:#3b3543;font-weight:700;font-size:15px;transition:background .2s,color .2s;">Cloud</button>
+        <button data-tab="4" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:#f1eff3;color:#3b3543;font-weight:700;font-size:15px;transition:background .2s,color .2s;">Automation</button>
+        <button data-tab="5" style="border:none;cursor:pointer;font-family:inherit;padding:11px 20px;border-radius:13px;background:#f1eff3;color:#3b3543;font-weight:700;font-size:15px;transition:background .2s,color .2s;">UX Design</button>
+      </div>
+
+      <div style="position:relative;background:linear-gradient(180deg,#f6f4fb,#efeaf9);border-radius:30px;padding:clamp(26px,3.5vw,48px);box-shadow:0 30px 80px -50px rgba(40,10,30,.4);overflow:hidden;">
+        <!-- product UI mockup -->
+        <div style="background:#fff;border-radius:18px;box-shadow:0 24px 60px -34px rgba(40,10,30,.5);overflow:hidden;text-align:left;max-width:980px;margin:0 auto;border:1px solid rgba(26,19,32,.06);">
+          <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid rgba(26,19,32,.06);background:#fbfafc;">
+            <span style="width:11px;height:11px;border-radius:50%;background:#ff5f57;"></span><span style="width:11px;height:11px;border-radius:50%;background:#febc2e;"></span><span style="width:11px;height:11px;border-radius:50%;background:#28c840;"></span>
+            <span style="margin-left:14px;font-size:13px;color:#9a94a3;font-weight:600;">app.mindfultech.ec / <span id="mtc-mock-crumb" style="color:#1a1320;">workspace</span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:200px 1fr;min-height:320px;">
+            <div style="border-right:1px solid rgba(26,19,32,.06);padding:18px 14px;background:#fbfafc;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a94a3;margin:0 8px 10px;">Projects</div>
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;background:#fff;border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);font-size:13.5px;font-weight:700;color:#1a1320;"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></span>USFQ Portal</div>
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.5px;font-weight:600;color:#6b6675;"><span style="width:8px;height:8px;border-radius:50%;background:#ef93bd;"></span>Waku Store</div>
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.5px;font-weight:600;color:#6b6675;"><span style="width:8px;height:8px;border-radius:50%;background:#9a96a3;"></span>Ecohelix App</div>
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.5px;font-weight:600;color:#6b6675;"><span style="width:8px;height:8px;border-radius:50%;background:#2c2833;"></span>Kruger Dash</div>
+              </div>
+            </div>
+            <div style="padding:22px;position:relative;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                <div><div id="mtc-mock-title" style="font-size:19px;font-weight:800;letter-spacing:-.02em;color:#1a1320;">Web app delivery</div><div id="mtc-mock-sub" style="font-size:13.5px;color:#9a94a3;font-weight:600;margin-top:2px;">Design → build → ship, on one timeline</div></div>
+                <div style="display:flex;gap:8px;"><span style="font-size:12.5px;font-weight:700;color:#1f9d6b;background:#e9f7ef;padding:7px 12px;border-radius:9px;">● On track</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid rgba(26,19,32,.07);border-radius:12px;"><span style="width:30px;height:30px;border-radius:8px;background:#f1f0f3;display:flex;align-items:center;justify-content:center;color:#6b6675;font-weight:800;font-size:13px;">01</span><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#1a1320;">Discovery & UX research</div></div><span style="font-size:12px;font-weight:700;color:#9a94a3;">Done</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid rgba(26,19,32,.07);border-radius:12px;"><span style="width:30px;height:30px;border-radius:8px;background:var(--accent-tint);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:800;font-size:13px;">02</span><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#1a1320;">Design system & prototype</div></div><span style="font-size:12px;font-weight:700;color:#9a94a3;">Done</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid color-mix(in srgb, var(--accent) 28%, transparent);border-radius:12px;background:color-mix(in srgb, var(--accent) 5%, #fff);"><span style="width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">03</span><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#1a1320;">Engineering & QA</div><div style="height:5px;border-radius:3px;background:var(--accent-tint);margin-top:7px;overflow:hidden;"><div style="width:68%;height:100%;background:linear-gradient(90deg,var(--accent-light),var(--accent));"></div></div></div><span style="font-size:12px;font-weight:700;color:var(--accent);">68%</span></div>
+              </div>
+              <div style="position:absolute;right:-6px;bottom:-12px;background:#fff;border:1px solid rgba(26,19,32,.08);border-radius:14px;box-shadow:0 18px 40px -20px rgba(40,10,30,.45);padding:12px 15px;display:flex;align-items:center;gap:10px;animation:mtcfloat 4s ease-in-out infinite;"><span style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent-light),var(--accent));display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:800;">✓</span><div><div style="font-size:13px;font-weight:800;color:#1a1320;">Shipped to production</div><div style="font-size:11.5px;color:#9a94a3;font-weight:600;">2 days ahead of schedule</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES: feature sections -->
+  <section id="services" style="position:relative;z-index:2;background:#ffffff;padding:30px 0 40px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:24px;">
+
+      <!-- lavender: development -->
+      <div style="background:#f7f6f8;border:1px solid rgba(26,19,32,.05);border-radius:34px;padding:clamp(34px,4vw,64px);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;overflow:hidden;">
+        <div>
+          <span style="display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-tint);padding:8px 16px;border-radius:100px;margin-bottom:22px;">Development</span>
+          <h2 style="font-weight:900;font-size:clamp(30px,3.8vw,52px);line-height:1.02;letter-spacing:-.03em;margin:0;color:#1a1320;">Web & mobile apps,<br><span style="color:var(--accent);">built to scale</span></h2>
+          <p style="font-size:17.5px;line-height:1.55;color:#4a4453;font-weight:500;margin:20px 0 0;max-width:430px;">Scalable, tailor-made software aligned to your processes, goals, and technical requirements — engineered for long-term efficiency and control.</p>
+          <div style="display:flex;gap:24px;margin-top:26px;flex-wrap:wrap;">
+            <div><div style="font-size:15px;font-weight:700;color:#1a1320;">React · Next · React Native</div><div style="font-size:13.5px;color:#7c7585;">Modern, maintainable stacks</div></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;">
+            <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:14px;background:var(--accent);color:#fff;font-weight:800;font-size:15.5px;transition:transform .25s;">Start a project →</a>
+            <a href="#work" style="text-decoration:none;display:inline-flex;align-items:center;padding:14px 24px;border-radius:14px;background:#fff;color:#1a1320;font-weight:700;font-size:15.5px;border:1px solid rgba(26,19,32,.1);">See our work</a>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#f1f0f3,#e7e5ea);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;">
+          <image-slot id="mtc-dev" style="width:100%;height:100%;" shape="rect" placeholder="Drop a product / 3D render" fit="cover"></image-slot>
+        </div>
+      </div>
+
+      <!-- peach: cloud & automation -->
+      <div style="background:#f7f6f8;border:1px solid rgba(26,19,32,.05);border-radius:34px;padding:clamp(34px,4vw,64px);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;overflow:hidden;">
+        <div style="position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#f1f0f3,#e7e5ea);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;order:2;">
+          <image-slot id="mtc-cloud" style="width:100%;height:100%;" shape="rect" placeholder="Drop a product / 3D render" fit="cover"></image-slot>
+        </div>
+        <div style="order:1;">
+          <span style="display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-tint);padding:8px 16px;border-radius:100px;margin-bottom:22px;">Cloud & Automation</span>
+          <h2 style="font-weight:900;font-size:clamp(30px,3.8vw,52px);line-height:1.02;letter-spacing:-.03em;margin:0;color:#1a1320;">Cloud architecture<br><span style="color:var(--accent);">that just works</span></h2>
+          <p style="font-size:17.5px;line-height:1.55;color:#4a4453;font-weight:500;margin:20px 0 0;max-width:430px;">Secure, cost-effective AWS architectures. We automate workflows and integrations to boost productivity and cut manual effort — so your team ships faster.</p>
+          <div style="display:flex;gap:24px;margin-top:26px;flex-wrap:wrap;">
+            <div><div style="font-size:15px;font-weight:700;color:#1a1320;">AWS · CI/CD · Serverless</div><div style="font-size:13.5px;color:#7c7585;">Reliable, observable infrastructure</div></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;">
+            <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:14px;background:var(--accent);color:#fff;font-weight:800;font-size:15.5px;transition:transform .25s;">Start a project →</a>
+            <a href="#build" style="text-decoration:none;display:inline-flex;align-items:center;padding:14px 24px;border-radius:14px;background:#fff;color:#1a1320;font-weight:700;font-size:15.5px;border:1px solid rgba(26,19,32,.1);">How we work</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- mint: custom software -->
+      <div style="background:#f7f6f8;border:1px solid rgba(26,19,32,.05);border-radius:34px;padding:clamp(34px,4vw,64px);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;overflow:hidden;">
+        <div>
+          <span style="display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-tint);padding:8px 16px;border-radius:100px;margin-bottom:22px;">Custom Software</span>
+          <h2 style="font-weight:900;font-size:clamp(30px,3.8vw,52px);line-height:1.02;letter-spacing:-.03em;margin:0;color:#1a1320;">Software shaped<br><span style="color:var(--accent);">around your team</span></h2>
+          <p style="font-size:17.5px;line-height:1.55;color:#4a4453;font-weight:500;margin:20px 0 0;max-width:430px;">Solutions designed around your unique workflows. Unmatched flexibility, seamless scalability, and long-term operational efficiency — no off-the-shelf compromises.</p>
+          <div style="display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;">
+            <a href="#contact" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:14px;background:var(--accent);color:#fff;font-weight:800;font-size:15.5px;transition:transform .25s;">Start a project →</a>
+            <a href="#contact" style="text-decoration:none;display:inline-flex;align-items:center;padding:14px 24px;border-radius:14px;background:#fff;color:#1a1320;font-weight:700;font-size:15.5px;border:1px solid rgba(26,19,32,.1);">Book a call</a>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#f1f0f3,#e7e5ea);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;">
+          <image-slot id="mtc-custom" style="width:100%;height:100%;" shape="rect" placeholder="Drop a product / 3D render" fit="cover"></image-slot>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT CTA -->
+  <section id="contact" style="position:relative;z-index:2;background:#ffffff;padding:60px 0 24px;">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
+      <div style="position:relative;border-radius:38px;overflow:hidden;background:linear-gradient(150deg,var(--accent) 0%,var(--accent-deep) 50%,var(--accent-deeper) 100%);padding:clamp(48px,6vw,96px) clamp(28px,5vw,72px);">
+        <div style="position:absolute;inset:0;background:radial-gradient(50% 60% at 85% 12%,rgba(255,95,162,.5),transparent 60%),radial-gradient(45% 55% at 8% 100%,rgba(124,92,255,.4),transparent 60%);"></div>
+        <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr;gap:50px;align-items:center;">
+          <div>
+            <span style="display:inline-block;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#ffc2dd;margin-bottom:18px;">Quito, Ecuador</span>
+            <h2 style="font-weight:900;font-size:clamp(36px,5.4vw,72px);line-height:.98;letter-spacing:-.035em;margin:0;color:#fff;">Let's build something<br>people love</h2>
+            <p style="font-size:18.5px;line-height:1.5;color:rgba(255,255,255,.82);font-weight:500;margin:22px 0 34px;max-width:460px;">Tell us what you're building. We'll help you design, engineer, and ship it — with a humanity-oriented process from day one.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <a href="mailto:info@mindfultech.ec" data-magnetic style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:17px 30px;border-radius:15px;background:#fff;color:var(--accent);font-weight:800;font-size:16.5px;transition:transform .25s;">Start a project →</a>
+              <a href="https://api.whatsapp.com/send?phone=593958731994" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:17px 30px;border-radius:15px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:800;font-size:16.5px;transition:background .25s;">WhatsApp us →</a>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <a href="mailto:info@mindfultech.ec" style="text-decoration:none;display:block;padding:22px 24px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);transition:background .25s;" style-hover="background:rgba(255,255,255,.16);">
+              <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:700;">Email</div>
+              <div style="font-size:18px;font-weight:700;color:#fff;margin-top:6px;">info@mindfultech.ec</div>
+            </a>
+            <a href="tel:+593958731994" style="text-decoration:none;display:block;padding:22px 24px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);transition:background .25s;" style-hover="background:rgba(255,255,255,.16);">
+              <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:700;">Phone</div>
+              <div style="font-size:18px;font-weight:700;color:#fff;margin-top:6px;">+593 958 73 1994</div>
+            </a>
+            <div style="padding:22px 24px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);">
+              <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:700;">Studio</div>
+              <div style="font-size:18px;font-weight:700;color:#fff;margin-top:6px;">Quito · Ecuador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:34px 6px 30px;">
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 30 30" fill="none"><rect width="30" height="30" rx="10" fill="url(#mtcg)"/><circle cx="15" cy="12" r="3.3" fill="#fff"/><path d="M8.5 21.5c0-3.4 2.9-5.7 6.5-5.7s6.5 2.3 6.5 5.7" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/></svg>
+          <span style="font-weight:800;font-size:16px;letter-spacing:-.02em;">mindfultech</span>
+        </div>
+        <div style="font-size:14px;color:#9a94a3;font-weight:500;">© Mindfultech 2025 · Software lab focused on people.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c32865&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;enableMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    this.applyAccent();
+    const root = document.documentElement;
+    if (root.getAttribute('data-mtc-inited')) return;
+    const ready = document.getElementById('clay-canvas') && document.querySelectorAll('[data-count]').length > 0;
+    if (!ready) { setTimeout(() => { try { this.componentDidMount(); } catch(e){} }, 60); return; }
+    root.setAttribute('data-mtc-inited', '1');
+    try { this.initTabs(); } catch(e){ console.warn(e); }
+    try { this.initCounters(); } catch(e){ console.warn(e); }
+    try { this.initMagnetic(); } catch(e){ console.warn(e); }
+    try { this.initTilt(); } catch(e){ console.warn(e); }
+    try { this.initNav(); } catch(e){ console.warn(e); }
+    this.initThree();
+  }
+
+  componentWillUnmount() { /* no-op: one-time guarded setup must survive host re-instantiation */ }
+
+  componentDidUpdate() { this.applyAccent(); }
+
+  _hexToRgb(h){ h=String(h).replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); return { r:parseInt(h.slice(0,2),16)||0, g:parseInt(h.slice(2,4),16)||0, b:parseInt(h.slice(4,6),16)||0 }; }
+  _toHex(x){ return Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0'); }
+  _shade(hex, t){ const c=this._hexToRgb(hex); const tg = t>=0 ? 255 : 0; const a=Math.abs(t); return '#'+this._toHex(c.r+(tg-c.r)*a)+this._toHex(c.g+(tg-c.g)*a)+this._toHex(c.b+(tg-c.b)*a); }
+  applyAccent(){
+    const accent = (this.props && this.props.accent) || '#c32865';
+    const root = document.documentElement;
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--accent-light', this._shade(accent, 0.34));
+    root.style.setProperty('--accent-tint', this._shade(accent, 0.88));
+    root.style.setProperty('--accent-deep', this._shade(accent, -0.24));
+    root.style.setProperty('--accent-deeper', this._shade(accent, -0.52));
+    const meshes = window.__mtcAccentMeshes;
+    if (meshes && window.THREE) meshes.forEach(o => { try { o.mat.color.set(this._shade(accent, o.shade)); } catch(e){} });
+  }
+
+  initTabs() {
+    const data = [
+      { crumb: 'web-apps',   title: 'Web app delivery',        sub: 'Design → build → ship, on one timeline' },
+      { crumb: 'mobile',     title: 'Mobile apps',             sub: 'iOS & Android from a single codebase' },
+      { crumb: 'custom',     title: 'Custom software',         sub: 'Built around your exact workflows' },
+      { crumb: 'cloud',      title: 'Cloud infrastructure',    sub: 'Secure, scalable AWS architecture' },
+      { crumb: 'automation', title: 'Workflow automation',     sub: 'Integrations that remove manual work' },
+      { crumb: 'ux',         title: 'UX & product design',     sub: 'Research-led, humanity-oriented design' }
+    ];
+    const btns = Array.from(document.querySelectorAll('#mtc-tabs [data-tab]'));
+    const crumb = document.getElementById('mtc-mock-crumb');
+    const title = document.getElementById('mtc-mock-title');
+    const sub = document.getElementById('mtc-mock-sub');
+    const select = (i) => {
+      btns.forEach((b, j) => {
+        const on = j === i;
+        b.style.background = on ? 'var(--accent)' : '#f1eff3';
+        b.style.color = on ? '#fff' : '#3b3543';
+      });
+      const d = data[i];
+      if (crumb) crumb.textContent = d.crumb;
+      if (title) title.textContent = d.title;
+      if (sub) sub.textContent = d.sub;
+    };
+    btns.forEach((b, i) => b.addEventListener('click', () => select(i)));
+  }
+
+  initCounters() {
+    const els = Array.from(document.querySelectorAll('[data-count]'));
+    const run = (el) => {
+      const target = parseInt(el.dataset.count, 10) || 0;
+      const dur = 1400; const t0 = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toString();
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      setTimeout(() => { if (el.textContent !== String(target)) el.textContent = String(target); }, dur + 700);
+    };
+    const trigger = (el) => { if (!el.dataset.counted) { el.dataset.counted = '1'; run(el); } };
+    const check = () => {
+      const vh = window.innerHeight;
+      els.forEach(el => { if (el.dataset.counted) return; const r = el.getBoundingClientRect(); if (r.top < vh * 0.9 && r.bottom > 0) trigger(el); });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(check));
+    window.addEventListener('scroll', () => requestAnimationFrame(check), { passive: true });
+    setTimeout(() => els.forEach(trigger), 4000);
+  }
+
+  initMagnetic() {
+    document.querySelectorAll('[data-magnetic]').forEach(el => {
+      const move = (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.transform = 'translate(' + (e.clientX - r.left - r.width/2) * 0.2 + 'px,' + (e.clientY - r.top - r.height/2) * 0.3 + 'px)';
+      };
+      el.addEventListener('mousemove', move);
+      el.addEventListener('mouseleave', () => { el.style.transform = 'translate(0,0)'; });
+    });
+  }
+
+  initTilt() {
+    document.querySelectorAll('[data-tilt]').forEach(el => {
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = 'perspective(800px) rotateX(' + (-py*4) + 'deg) rotateY(' + (px*4) + 'deg) translateY(-4px)';
+        el.style.boxShadow = '0 28px 60px -34px rgba(40,10,30,.4)';
+      });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'none'; el.style.boxShadow = 'none'; });
+    });
+  }
+
+  initNav() {
+    const nav = document.getElementById('mtc-nav');
+    if (!nav) return;
+    window.addEventListener('scroll', () => {
+      nav.style.boxShadow = window.scrollY > 20 ? '0 14px 44px -18px rgba(60,20,50,.34)' : '0 10px 34px -18px rgba(60,20,50,.28)';
+    }, { passive: true });
+  }
+
+  initThree() {
+    const start = Date.now();
+    const tick = () => {
+      if (window.THREE) { try { this.buildScene(); } catch(e){ console.warn('clay 3D failed', e); } return; }
+      if (Date.now() - start < 9000) setTimeout(tick, 120);
+    };
+    tick();
+  }
+
+  buildScene() {
+    const THREE = window.THREE;
+    const canvas = document.getElementById('clay-canvas');
+    if (!canvas) return;
+    const motion = this.props.enableMotion !== false;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+    camera.position.set(0, 1.3, 9);
+    camera.lookAt(0, 0.7, 0);
+
+    const sizeTo = () => {
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      return w / h;
+    };
+    let aspect = sizeTo();
+
+    // lights
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xeceaf0, 0.9));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+    const key = new THREE.DirectionalLight(0xffffff, 1.7);
+    key.position.set(4.5, 9, 6);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 1; key.shadow.camera.far = 40;
+    key.shadow.camera.left = -12; key.shadow.camera.right = 12; key.shadow.camera.top = 12; key.shadow.camera.bottom = -12;
+    key.shadow.bias = -0.0004; key.shadow.radius = 6;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xf2eef4, 0.4); fill.position.set(-6, 2.5, 4); scene.add(fill);
+
+    // magenta clay hill
+    const hill = new THREE.Mesh(new THREE.SphereGeometry(24, 80, 80), new THREE.MeshStandardMaterial({ color: 0xe9e7ec, roughness: 0.95, metalness: 0 }));
+    hill.position.set(0, -24.0, 0);
+    hill.receiveShadow = true;
+    scene.add(hill);
+
+    const clay = (c) => new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.74, metalness: 0.0 });
+    const objs = new THREE.Group(); scene.add(objs);
+    const items = [];
+    const add = (geo, color, pos, rot) => {
+      const m = new THREE.Mesh(geo, clay(color));
+      m.castShadow = true; m.receiveShadow = true;
+      m.position.set(pos[0], pos[1], pos[2]);
+      if (rot) m.rotation.set(rot[0], rot[1], rot[2]);
+      m.userData = { baseY: pos[1], phase: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.5, amp: 0.08 + Math.random() * 0.14, spd: 0.5 + Math.random() * 0.7 };
+      objs.add(m); items.push(m); return m;
+    };
+
+    const accent = this.props.accent || '#c32865';
+    window.__mtcAccentMeshes = [];
+    const addA = (geo, shade, pos, rot) => { const m = add(geo, this._shade(accent, shade), pos, rot); window.__mtcAccentMeshes.push({ mat: m.material, shade: shade }); return m; };
+
+    addA(new THREE.SphereGeometry(0.62, 40, 40), 0, [-2.7, 0.65, 0.4]);
+    add(new THREE.ConeGeometry(0.72, 1.15, 40), '#f1eef2', [2.5, 1.15, -0.6], [Math.PI, 0, 0.15]);
+    add(new THREE.TorusGeometry(0.55, 0.22, 28, 56), '#2c2833', [3.5, 0.5, 0.2], [0.5, 0.6, 0]);
+    add(new THREE.CylinderGeometry(0.27, 0.27, 1.9, 32), '#d4d2da', [-3.8, 0.45, -0.2], [0, 0, Math.PI / 2.3]);
+    addA(new THREE.TorusKnotGeometry(0.33, 0.13, 120, 18), 0, [1.1, 1.7, 0.1]);
+    addA(new THREE.OctahedronGeometry(0.5, 0), 0.55, [0.1, 0.6, 0.9]);
+    addA(new THREE.BoxGeometry(0.36, 0.7, 0.36), 0.5, [4.3, 0.35, -0.3]);
+    addA(new THREE.BoxGeometry(0.36, 1.15, 0.36), 0.3, [4.74, 0.57, -0.3]);
+    addA(new THREE.BoxGeometry(0.36, 1.6, 0.36), 0, [5.18, 0.8, -0.3]);
+    addA(new THREE.SphereGeometry(0.27, 28, 28), 0.55, [1.9, 0.28, 1.3]);
+    add(new THREE.IcosahedronGeometry(0.42, 0), '#2c2833', [-1.4, 1.5, 0.5]);
+
+    // magnifying glass group
+    const mg = new THREE.Group();
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.12, 24, 48), clay('#f1eef2')); ring.castShadow = true;
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(0.46, 40), new THREE.MeshStandardMaterial({ color: 0xeef0f4, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.55 }));
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.72, 18), clay('#2c2833')); handle.position.set(0.42, -0.62, 0); handle.rotation.z = -0.7; handle.castShadow = true;
+    mg.add(ring, lens, handle);
+    mg.position.set(-1.0, 1.05, 0.7);
+    mg.userData = { baseY: 1.05, phase: 1.2, spin: 0.12, amp: 0.13, spd: 0.5 };
+    objs.add(mg); items.push(mg);
+
+    if (aspect < 1) objs.scale.setScalar(0.7);
+
+    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    const onMove = (e) => { mouse.tx = (e.clientX / window.innerWidth) * 2 - 1; mouse.ty = (e.clientY / window.innerHeight) * 2 - 1; };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('resize', () => { aspect = sizeTo(); objs.scale.setScalar(aspect < 1 ? 0.7 : 1); });
+
+    const clock = new THREE.Clock();
+    const loop = () => {
+      requestAnimationFrame(loop);
+      const dt = clock.getDelta(); const t = clock.elapsedTime;
+      mouse.x += (mouse.tx - mouse.x) * 0.05; mouse.y += (mouse.ty - mouse.y) * 0.05;
+      items.forEach(m => {
+        if (motion) { m.position.y = m.userData.baseY + Math.sin(t * m.userData.spd + m.userData.phase) * m.userData.amp; m.rotation.y += m.userData.spin * dt; }
+      });
+      objs.rotation.y = mouse.x * 0.18;
+      objs.rotation.x = mouse.y * 0.06;
+      camera.position.x = mouse.x * 0.5;
+      camera.position.y = 1.3 - mouse.y * 0.25;
+      camera.lookAt(0, 0.7, 0);
+      renderer.render(scene, camera);
+    };
+    loop();
+  }
+
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
