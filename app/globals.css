@@ -1,0 +1,179 @@
+:root {
+  --accent: #69c7b9;
+  --accent-light: #96d8ce;
+  --accent-tint: #eef8f6;
+  --accent-deep: #50978d;
+  --ink: #0e0d12;
+  --mono: var(--font-mono), "IBM Plex Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0e0d12;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: #0e0d12;
+  color: #fff;
+}
+
+a {
+  color: #0e0d12;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* Buttons keep their own colors on hover (beat the generic a:hover rule). */
+.btn-dark {
+  transition: background 0.2s;
+}
+.btn-dark:hover {
+  background: #000 !important;
+  color: #fff !important;
+}
+.btn-light:hover {
+  background: #dfe1e8 !important;
+  color: var(--ink) !important;
+}
+.btn-soft:hover {
+  background: #e2e3e6 !important;
+  color: var(--ink) !important;
+}
+.btn-white:hover {
+  background: #e8e8ec !important;
+  color: #0d0a1f !important;
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+.announce-link:hover {
+  color: #fff !important;
+  opacity: 0.85;
+}
+
+/* Mega-menu item hover */
+.menu-item:hover {
+  background: #f6f7f9;
+  color: var(--ink);
+}
+.menu-card:hover {
+  background: #eff0f4 !important;
+}
+
+/* Stat cards: bg shift + reveal "LEARN HOW" on hover */
+.stat-card {
+  transition: background 0.4s ease;
+}
+.stat-card:hover {
+  background: var(--hover) !important;
+}
+.stat-card:hover .stat-more {
+  opacity: 1 !important;
+  transform: translateY(0px) !important;
+}
+
+/* Dark carousel first card hover reveals the gradient wash */
+.hover-card:hover .hover-bg {
+  opacity: 1 !important;
+}
+
+.read-more:hover {
+  color: #fff !important;
+  background: rgba(20, 18, 30, 0.6) !important;
+}
+
+.press-row:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+}
+
+.blog-link:hover {
+  opacity: 0.85;
+}
+
+@keyframes mt-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes mtspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Page-transition loader */
+.mt-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #edf2fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.mt-loader.show {
+  opacity: 1;
+}
+.mt-loader svg {
+  animation: mtspin 0.9s linear infinite;
+}
+
+/* Responsive nav — mirrors the prototype's <1120px rules */
+@media (max-width: 1120px) {
+  .navrow {
+    gap: 10px !important;
+  }
+  .navrow nav {
+    gap: 14px !important;
+    padding: 12px 14px !important;
+  }
+  .navrow nav > div {
+    gap: 16px !important;
+  }
+  .navrow nav a {
+    font-size: 14.5px !important;
+  }
+  .nav-cta .hide-narrow {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .stack-2,
+  .stack-3,
+  .stack-4 {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-stage {
+    display: none !important;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
