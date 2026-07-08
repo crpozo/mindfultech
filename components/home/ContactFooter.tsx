@@ -92,11 +92,8 @@ export function ContactFooter() {
         overflow: "hidden",
       }}
     >
-      {/* blurred sculpture backdrop */}
-      <Blob left="12%" bottom={-140} w={480} h={480} radius="50%" bg="radial-gradient(circle at 35% 35%,#a7c8ec,#6f9ad8)" blur={52} opacity={0.75} />
-      <Blob left="40%" bottom={-60} w={560} h={400} radius="40%" bg="#cbc2ea" blur={64} opacity={0.8} />
-      <Blob right="8%" bottom={120} w={420} h={320} radius="36%" bg="linear-gradient(140deg,#8fb4e8,#b9a9e6)" blur={58} opacity={0.7} />
-      <Blob left="6%" bottom={180} w={240} h={280} radius="24%" bg="color-mix(in srgb,var(--accent) 72%,#fff)" blur={48} opacity={0.55} />
+      {/* 3D sculpture backdrop (peeks above the floating footer card) */}
+      <FooterSculpture />
 
       <div style={{ position: "relative", maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <h2
@@ -476,43 +473,82 @@ function Social({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
-function Blob({
-  left,
-  right,
-  bottom,
-  w,
-  h,
-  radius,
-  bg,
-  blur,
-  opacity,
-}: {
-  left?: string;
-  right?: string;
-  bottom: number;
-  w: number;
-  h: number;
-  radius: string;
-  bg: string;
-  blur: number;
-  opacity: number;
-}) {
+function FooterSculpture() {
   return (
     <div
+      aria-hidden
       style={{
         position: "absolute",
-        left,
-        right,
-        bottom,
-        width: w,
-        height: h,
-        borderRadius: radius,
-        background: bg,
-        filter: `blur(${blur}px)`,
-        opacity,
+        left: 0,
+        right: 0,
+        top: 0,
+        height: 640,
+        overflow: "hidden",
         pointerEvents: "none",
       }}
-    />
+    >
+      <svg
+        viewBox="0 0 1440 640"
+        preserveAspectRatio="xMidYMax slice"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+      >
+        <defs>
+          <linearGradient id="mt-glass" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stopColor="#dce8f7" />
+            <stop offset="1" stopColor="#a9c7ea" />
+          </linearGradient>
+          <linearGradient id="mt-blade" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#7ea6df" />
+            <stop offset="1" stopColor="#3f6fd0" />
+          </linearGradient>
+          <linearGradient id="mt-purple" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#cabff2" />
+            <stop offset="1" stopColor="#9a86e0" />
+          </linearGradient>
+          <linearGradient id="mt-coral" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f4ab95" />
+            <stop offset="1" stopColor="#e97a63" />
+          </linearGradient>
+          <linearGradient id="mt-teal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#8fdccd" />
+            <stop offset="1" stopColor="#57b7a7" />
+          </linearGradient>
+          <filter id="mt-soft" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="7" />
+          </filter>
+        </defs>
+
+        {/* coral wedge, left edge */}
+        <rect
+          x="-70" y="300" width="180" height="320" rx="60"
+          fill="url(#mt-coral)" opacity="0.9"
+          transform="rotate(-14 20 460)" filter="url(#mt-soft)"
+        />
+        {/* teal accent, lower-left */}
+        <ellipse cx="250" cy="600" rx="200" ry="170" fill="url(#mt-teal)" opacity="0.55" filter="url(#mt-soft)" />
+        {/* big translucent glass disc, center */}
+        <ellipse cx="720" cy="560" rx="380" ry="320" fill="url(#mt-glass)" opacity="0.6" filter="url(#mt-soft)" />
+        <ellipse cx="640" cy="470" rx="120" ry="60" fill="#ffffff" opacity="0.35" filter="url(#mt-soft)" />
+        {/* blue blade, right */}
+        <rect
+          x="1210" y="150" width="130" height="430" rx="65"
+          fill="url(#mt-blade)" opacity="0.92"
+          transform="rotate(19 1275 360)" filter="url(#mt-soft)"
+        />
+        {/* purple slab, lower-right */}
+        <rect x="1050" y="470" width="420" height="220" rx="110" fill="url(#mt-purple)" opacity="0.85" filter="url(#mt-soft)" />
+      </svg>
+
+      {/* white glow so the heading stays legible over the forms */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(60% 42% at 50% 26%,rgba(255,255,255,.92),rgba(255,255,255,.5) 55%,transparent 78%)",
+        }}
+      />
+    </div>
   );
 }
 

@@ -360,14 +360,139 @@ export function FullStackLab() {
             ))}
           </div>
 
-          <LabVisual />
+          <LabVisual active={cur} />
         </div>
       </div>
     </section>
   );
 }
 
-function LabVisual() {
+const KW = "#ef6a4e";
+const STR = "#6fd3b8";
+const FN = "#9db4ff";
+const NUM = "#ffb38a";
+const LN = "#55536a";
+
+type Visual = {
+  breadcrumb: string;
+  title: string;
+  chips: { t: string; accent?: boolean }[];
+  desc: string;
+  runLabel: string;
+  langs: string[];
+  code: React.ReactNode;
+};
+
+// Generic, product-agnostic content — one per tab, no named client project.
+const VISUALS: Visual[] = [
+  {
+    breadcrumb: "DESIGN › DISCOVERY",
+    title: "Design System",
+    chips: [{ t: "FIGMA" }, { t: "TOKENS" }, { t: "WCAG AA", accent: true }],
+    desc: "Research-led components and accessible design tokens, tested with real users before a line of production code.",
+    runLabel: "◆ tokens.json",
+    langs: ["JSON", "CSS", "Figma"],
+    code: (
+      <>
+        <L n="01" />
+        <span style={{ color: "#eceaf4" }}>{"{"}</span>{"\n"}
+        <L n="02" />
+        {"  "}<span style={{ color: FN }}>&quot;color&quot;</span>: {"{"}{"\n"}
+        <L n="03" />
+        {"    "}<span style={{ color: FN }}>&quot;accent&quot;</span>:{" "}
+        <span style={{ color: STR }}>&quot;#69c7b9&quot;</span>,{"\n"}
+        <L n="04" />
+        {"    "}<span style={{ color: FN }}>&quot;ink&quot;</span>:{"    "}
+        <span style={{ color: STR }}>&quot;#0e0d12&quot;</span>{"\n"}
+        <L n="05" />
+        {"  "}{"},"}{"\n"}
+        <L n="06" />
+        {"  "}<span style={{ color: FN }}>&quot;radius&quot;</span>: {"{ "}
+        <span style={{ color: FN }}>&quot;md&quot;</span>:{" "}
+        <span style={{ color: NUM }}>10</span>,{" "}
+        <span style={{ color: FN }}>&quot;lg&quot;</span>:{" "}
+        <span style={{ color: NUM }}>16</span>{" }"},{"\n"}
+        <L n="07" />
+        {"  "}<span style={{ color: FN }}>&quot;type&quot;</span>:{"   "}
+        <span style={{ color: STR }}>&quot;Outfit, sans-serif&quot;</span>{"\n"}
+        <L n="08" />
+        <span style={{ color: "#eceaf4" }}>{"}"}</span>
+      </>
+    ),
+  },
+  {
+    breadcrumb: "BUILD › PLATFORM",
+    title: "Web Platform",
+    chips: [{ t: "REACT" }, { t: "NEXT.JS" }, { t: "AWS", accent: true }],
+    desc: "Scalable, tailor-made platforms on a modern stack — with observability and CI/CD wired in from day one.",
+    runLabel: "↑ Deploy app",
+    langs: ["TypeScript", "Node", "cURL"],
+    code: (
+      <>
+        <L n="01" />
+        <span style={{ color: KW }}>import</span> {"{ createApp } "}
+        <span style={{ color: KW }}>from</span>{" "}
+        <span style={{ color: STR }}>&quot;@mindfultech/core&quot;</span>;{"\n"}
+        <L n="02" />{"\n"}
+        <L n="03" />
+        <span style={{ color: KW }}>const</span> app ={" "}
+        <span style={{ color: FN }}>createApp</span>({"{"}{"\n"}
+        <L n="04" />
+        {"  "}router: <span style={{ color: FN }}>fileRouter</span>(),{"\n"}
+        <L n="05" />
+        {"  "}auth:{"   "}<span style={{ color: STR }}>&quot;session&quot;</span>,{"\n"}
+        <L n="06" />
+        {"});"}{"\n"}
+        <L n="07" />{"\n"}
+        <L n="08" />
+        app.<span style={{ color: FN }}>listen</span>(
+        <span style={{ color: NUM }}>3000</span>);{" "}
+        <span style={{ color: "#6a6880" }}>// ci: build ✓ · deploy aws</span>
+      </>
+    ),
+  },
+  {
+    breadcrumb: "AI › ASSISTANT",
+    title: "AI Assistant",
+    chips: [{ t: "CLAUDE" }, { t: "RAG" }, { t: "GROUNDED", accent: true }],
+    desc: "Grounded assistants with human review — copilots and intelligent search your users can trust.",
+    runLabel: "↑ Run assistant",
+    langs: ["TypeScript", "Python", "cURL"],
+    code: (
+      <>
+        <L n="01" />
+        <span style={{ color: KW }}>import</span> {"{ Assistant } "}
+        <span style={{ color: KW }}>from</span>{" "}
+        <span style={{ color: STR }}>&quot;@mindfultech/ai&quot;</span>;{"\n"}
+        <L n="02" />{"\n"}
+        <L n="03" />
+        <span style={{ color: KW }}>const</span> guide ={" "}
+        <span style={{ color: KW }}>new</span>{" "}
+        <span style={{ color: FN }}>Assistant</span>({"{"}{"\n"}
+        <L n="04" />
+        {"  "}grounding:{" "}
+        <span style={{ color: STR }}>&quot;knowledge-base&quot;</span>,{"\n"}
+        <L n="05" />
+        {"  "}review:{"    "}
+        <span style={{ color: STR }}>&quot;human-in-the-loop&quot;</span>,{"\n"}
+        <L n="06" />
+        {"});"}{"\n"}
+        <L n="07" />{"\n"}
+        <L n="08" />
+        <span style={{ color: KW }}>await</span> guide.
+        <span style={{ color: FN }}>answer</span>(
+        <span style={{ color: STR }}>&quot;How do I get started?&quot;</span>);
+      </>
+    ),
+  },
+];
+
+function L({ n }: { n: string }) {
+  return <span style={{ color: LN }}>{n + "  "}</span>;
+}
+
+function LabVisual({ active }: { active: number }) {
+  const v = VISUALS[active] || VISUALS[0];
   return (
     <div style={{ position: "relative", minHeight: 520 }}>
       <div
@@ -381,6 +506,7 @@ function LabVisual() {
         }}
       >
         <div
+          key={"card-" + active}
           style={{
             position: "absolute",
             left: "7%",
@@ -391,6 +517,7 @@ function LabVisual() {
             borderRadius: 12,
             boxShadow: "0 30px 80px -30px rgba(14,13,18,.45)",
             overflow: "hidden",
+            animation: "mtfade .4s ease",
           }}
         >
           <div
@@ -427,52 +554,35 @@ function LabVisual() {
             </div>
           </div>
           <div style={{ padding: "18px 20px" }}>
-            <div style={{ fontSize: 12, color: "#8b8896", fontFamily: MONO }}>
-              PROJECTS › USFQ PORTAL
-            </div>
-            <div style={{ fontWeight: 500, fontSize: 19, marginTop: 6 }}>
-              USFQ Student Portal v2
-            </div>
+            <div style={{ fontSize: 12, color: "#8b8896", fontFamily: MONO }}>{v.breadcrumb}</div>
+            <div style={{ fontWeight: 500, fontSize: 19, marginTop: 6 }}>{v.title}</div>
             <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-              {[
-                { t: "REACT", bg: "#f1f2f6", c: "#44424d" },
-                { t: "AWS", bg: "#f1f2f6", c: "#44424d" },
-                { t: "AI ASSIST", bg: "var(--accent-tint)", c: "var(--accent)" },
-              ].map((chip) => (
+              {v.chips.map((chip) => (
                 <span
                   key={chip.t}
                   style={{
                     fontFamily: MONO,
                     fontSize: 10.5,
                     letterSpacing: ".06em",
-                    background: chip.bg,
+                    background: chip.accent ? "var(--accent-tint)" : "#f1f2f6",
                     padding: "5px 9px",
                     borderRadius: 4,
-                    color: chip.c,
+                    color: chip.accent ? "var(--accent)" : "#44424d",
                   }}
                 >
                   {chip.t}
                 </span>
               ))}
             </div>
-            <div
-              style={{
-                marginTop: 14,
-                fontSize: 13,
-                lineHeight: 1.55,
-                color: "#55525e",
-                maxWidth: 420,
-              }}
-            >
-              Course planning assistant answers 2,400 student questions a week —
-              grounded in the university&apos;s own catalog, with human review
-              built in.
+            <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.55, color: "#55525e", maxWidth: 420 }}>
+              {v.desc}
             </div>
           </div>
         </div>
 
         {/* code window */}
         <div
+          key={"code-" + active}
           style={{
             position: "absolute",
             left: "3%",
@@ -482,6 +592,7 @@ function LabVisual() {
             borderRadius: 10,
             boxShadow: "0 30px 70px -24px rgba(10,8,16,.7)",
             overflow: "hidden",
+            animation: "mtfade .4s ease",
           }}
         >
           <div
@@ -493,27 +604,22 @@ function LabVisual() {
               borderBottom: "1px solid rgba(255,255,255,.08)",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#b9b6c6" }}>
-              ↑ Run assistant
-            </span>
+            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#b9b6c6" }}>{v.runLabel}</span>
             <div style={{ display: "flex", gap: 4 }}>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 10.5,
-                  color: "#ffb38a",
-                  borderBottom: "1px solid #ffb38a",
-                  padding: "3px 7px",
-                }}
-              >
-                TypeScript
-              </span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#8f8c9e", padding: "3px 7px" }}>
-                Python
-              </span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#8f8c9e", padding: "3px 7px" }}>
-                cURL
-              </span>
+              {v.langs.map((lang, i) => (
+                <span
+                  key={lang}
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    color: i === 0 ? "#ffb38a" : "#8f8c9e",
+                    borderBottom: i === 0 ? "1px solid #ffb38a" : "none",
+                    padding: "3px 7px",
+                  }}
+                >
+                  {lang}
+                </span>
+              ))}
             </div>
           </div>
           <pre
@@ -528,25 +634,7 @@ function LabVisual() {
               overflowX: "auto",
             }}
           >
-            <span style={{ color: "#55536a" }}>01</span>{"  "}
-            <span style={{ color: "#ef6a4e" }}>import</span> {"{ Assistant } "}
-            <span style={{ color: "#ef6a4e" }}>from</span>{" "}
-            <span style={{ color: "#6fd3b8" }}>&quot;@mindfultech/ai&quot;</span>;{"\n"}
-            <span style={{ color: "#55536a" }}>02</span>{"\n"}
-            <span style={{ color: "#55536a" }}>03</span>{"  "}
-            <span style={{ color: "#ef6a4e" }}>const</span> guide ={" "}
-            <span style={{ color: "#ef6a4e" }}>new</span>{" "}
-            <span style={{ color: "#9db4ff" }}>Assistant</span>({"{"}{"\n"}
-            <span style={{ color: "#55536a" }}>04</span>{"    "}grounding:{" "}
-            <span style={{ color: "#6fd3b8" }}>&quot;usfq-catalog&quot;</span>,{"\n"}
-            <span style={{ color: "#55536a" }}>05</span>{"    "}review:{" "}
-            <span style={{ color: "#6fd3b8" }}>&quot;human-in-the-loop&quot;</span>,{"\n"}
-            <span style={{ color: "#55536a" }}>06</span>{"  "}{"});"}{"\n"}
-            <span style={{ color: "#55536a" }}>07</span>{"\n"}
-            <span style={{ color: "#55536a" }}>08</span>{"  "}
-            <span style={{ color: "#ef6a4e" }}>await</span> guide.
-            <span style={{ color: "#9db4ff" }}>answer</span>(
-            <span style={{ color: "#6fd3b8" }}>&quot;Which courses fit my minor?&quot;</span>);
+            {v.code}
           </pre>
         </div>
       </div>

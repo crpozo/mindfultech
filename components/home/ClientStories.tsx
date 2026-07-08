@@ -43,55 +43,34 @@ export function ClientStories() {
           style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
         >
           {/* USFQ — wide */}
-          <div style={card("linear-gradient(150deg,#2a2736,#141126)")}>
-            <div style={{ position: "absolute", inset: 0 }}>
-              <ImagePlaceholder label="TEAM / CLIENT PHOTO" onDark />
+          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" label="TEAM / CLIENT PHOTO">
+            <div
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                fontSize: "clamp(20px,1.8vw,26px)",
+                lineHeight: 1.3,
+                letterSpacing: "-.01em",
+                maxWidth: 420,
+              }}
+            >
+              How USFQ partnered with MindfulTech to serve 12,000 students in
+              real time
             </div>
-            <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none" }} />
-            <span style={brand}>USFQ</span>
-            <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none" }}>
-              <div
-                style={{
-                  color: "#fff",
-                  fontWeight: 500,
-                  fontSize: "clamp(20px,1.8vw,26px)",
-                  lineHeight: 1.3,
-                  letterSpacing: "-.01em",
-                  maxWidth: 420,
-                }}
-              >
-                How USFQ partnered with MindfulTech to serve 12,000 students in
-                real time
-              </div>
-              <div style={metaLine}>PORTAL · AI ASSIST · ENTERPRISE</div>
-            </div>
-          </div>
+            <div style={metaLine}>PORTAL · AI ASSIST · ENTERPRISE</div>
+          </StoryCard>
 
           {/* Waku */}
-          <div style={card("linear-gradient(150deg,#39323f,#191521)")}>
-            <div style={{ position: "absolute", inset: 0 }}>
-              <ImagePlaceholder label="CLIENT PHOTO" onDark />
-            </div>
-            <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none" }} />
-            <span style={brand}>Waku Inc.</span>
-            <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none" }}>
-              <div style={bigStat}>80%</div>
-              <div style={metaLine}>LESS MANUAL ORDER PROCESSING</div>
-            </div>
-          </div>
+          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Waku Inc." label="CLIENT PHOTO">
+            <div style={bigStat}>80%</div>
+            <div style={metaLine}>LESS MANUAL ORDER PROCESSING</div>
+          </StoryCard>
 
           {/* KrugerLabs */}
-          <div style={card("linear-gradient(150deg,#2c3340,#151a24)")}>
-            <div style={{ position: "absolute", inset: 0 }}>
-              <ImagePlaceholder label="CLIENT PHOTO" onDark />
-            </div>
-            <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none" }} />
-            <span style={brand}>KrugerLabs</span>
-            <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none" }}>
-              <div style={bigStat}>3×</div>
-              <div style={metaLine}>PLATFORMS, ONE DESIGN SYSTEM</div>
-            </div>
-          </div>
+          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="KrugerLabs" label="CLIENT PHOTO">
+            <div style={bigStat}>3×</div>
+            <div style={metaLine}>PLATFORMS, ONE DESIGN SYSTEM</div>
+          </StoryCard>
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: 44 }}>
@@ -132,14 +111,38 @@ export function ClientStories() {
   );
 }
 
-function card(bg: string): React.CSSProperties {
-  return {
-    position: "relative",
-    borderRadius: 10,
-    overflow: "hidden",
-    minHeight: 420,
-    background: bg,
-  };
+function StoryCard({
+  bg,
+  brandName,
+  label,
+  children,
+}: {
+  bg: string;
+  brandName: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="story-card"
+      style={{
+        position: "relative",
+        borderRadius: 10,
+        overflow: "hidden",
+        minHeight: 420,
+      }}
+    >
+      {/* zooming media layer (image + gradient) */}
+      <div className="story-media" style={{ position: "absolute", inset: 0, background: bg }}>
+        <ImagePlaceholder label={label} onDark />
+      </div>
+      <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none", zIndex: 1 }} />
+      <span style={brand}>{brandName}</span>
+      <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none", zIndex: 2 }}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 const brand: React.CSSProperties = {
@@ -150,7 +153,7 @@ const brand: React.CSSProperties = {
   fontSize: 19,
   color: "#fff",
   letterSpacing: ".01em",
-  zIndex: 1,
+  zIndex: 2,
 };
 
 const metaLine: React.CSSProperties = {

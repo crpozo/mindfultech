@@ -402,6 +402,7 @@ export function SiteHeader({
 }) {
   const [open, setOpen] = React.useState<null | "services" | "company">(null);
   const [panelLeft, setPanelLeft] = React.useState(0);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const rowRef = React.useRef<HTMLDivElement>(null);
   const svcRef = React.useRef<HTMLButtonElement>(null);
   const coRef = React.useRef<HTMLButtonElement>(null);
@@ -572,6 +573,7 @@ export function SiteHeader({
               </span>
             </Link>
             <div
+              className="nav-center"
               style={{
                 flex: 1,
                 display: "flex",
@@ -603,6 +605,67 @@ export function SiteHeader({
                   Company
                 </Link>
               )}
+            </div>
+
+            {/* compact mobile cluster: primary CTA + hamburger */}
+            <div className="nav-mobile">
+              <a
+                {...ctaProps(ctaStart)}
+                className="btn-dark"
+                style={{
+                  textDecoration: "none",
+                  fontFamily: MONO,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: ".08em",
+                  background: "#0e0d12",
+                  color: "#fff",
+                  padding: "11px 14px",
+                  borderRadius: 6,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                START A PROJECT
+              </a>
+              <button
+                aria-label="Menu"
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen((o) => !o)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  width: 38,
+                  height: 38,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 5,
+                  padding: 0,
+                }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    style={{
+                      width: 20,
+                      height: 2,
+                      borderRadius: 2,
+                      background: "#0e0d12",
+                      transition: "transform .25s ease, opacity .2s ease",
+                      transform: mobileOpen
+                        ? i === 0
+                          ? "translateY(7px) rotate(45deg)"
+                          : i === 2
+                            ? "translateY(-7px) rotate(-45deg)"
+                            : "none"
+                        : "none",
+                      opacity: mobileOpen && i === 1 ? 0 : 1,
+                    }}
+                  />
+                ))}
+              </button>
             </div>
           </nav>
 
@@ -682,6 +745,70 @@ export function SiteHeader({
             </div>
           )}
         </div>
+
+        {/* mobile dropdown menu */}
+        {mobileOpen && (
+          <div className="mobile-menu" style={{ padding: "0 18px 14px" }}>
+            <div
+              style={{
+                background: "#fff",
+                border: "1px solid rgba(14,13,18,.07)",
+                borderRadius: 14,
+                boxShadow: "0 20px 50px -24px rgba(14,13,18,.35)",
+                padding: 12,
+                animation: "mtfade .3s ease",
+              }}
+            >
+              {[
+                { label: "Services", href: "/services", key: "services" },
+                { label: "Process", href: "/#research", key: "process" },
+                { label: "Work", href: "/work", key: "work" },
+                { label: "Blog", href: "/blog", key: "blog" },
+                { label: "Company", href: "/company", key: "company" },
+              ].map((l) => (
+                <Link
+                  key={l.key}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: "block",
+                    textDecoration: "none",
+                    fontSize: 17,
+                    fontWeight: 500,
+                    color: active === l.key ? "var(--accent)" : "#1a1820",
+                    padding: "13px 12px",
+                    borderRadius: 9,
+                  }}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              <a
+                {...ctaProps(ctaSales)}
+                onClick={(e) => {
+                  setMobileOpen(false);
+                  if (ctaMode === "form") openForm(e);
+                }}
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  fontFamily: MONO,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: ".1em",
+                  color: "var(--ink)",
+                  background: "#f1f2f6",
+                  padding: "14px",
+                  borderRadius: 9,
+                  marginTop: 8,
+                }}
+              >
+                CONTACT SALES
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
