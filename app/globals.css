@@ -107,15 +107,6 @@ a:hover {
   opacity: 0.85;
 }
 
-@keyframes mt-marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
 @keyframes mtspin {
   to {
     transform: rotate(360deg);

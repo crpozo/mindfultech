@@ -14,6 +14,7 @@ const MARQUEE = ["USFQ", "KrugerLabs", "Waku Inc.", "Ecohelix", "AWS Partner"];
 
 export function Hero() {
   const stageRef = React.useRef<HTMLDivElement>(null);
+  const marqRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const stage = stageRef.current;
@@ -40,8 +41,29 @@ export function Hero() {
     const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3));
     const t0 = performance.now();
 
+    // TRUSTED BY marquee — driven here (not CSS) so we can wrap on the exact
+    // one-set period and it never runs out of logos on wide screens.
+    const marq = marqRef.current;
+    const SET = MARQUEE.length; // logos per repeat
+    let marqX = 0;
+    let lastMarq = t0;
+
     const frame = () => {
       const now = performance.now();
+      if (marq) {
+        const dtMs = Math.min(120, now - lastMarq);
+        lastMarq = now;
+        marqX -= 42 * (dtMs / 1000);
+        const kids = marq.children;
+        // exact width of one repeat (incl. gaps) so the seam is invisible
+        const period =
+          kids.length > SET
+            ? (kids[SET] as HTMLElement).offsetLeft -
+              (kids[0] as HTMLElement).offsetLeft
+            : marq.scrollWidth / 2;
+        if (period > 0 && marqX <= -period) marqX += period;
+        marq.style.transform = "translate3d(" + marqX.toFixed(1) + "px,0,0)";
+      }
       const t = (now - t0) % T;
       const seg = (s: number, d: number) => ease((t - s) / d);
       const fac = 1 - seg(9300, 600); // soft outro before the loop restarts
@@ -584,35 +606,34 @@ export function Hero() {
           }}
         >
           <div
+            ref={marqRef}
             style={{
               display: "flex",
               alignItems: "center",
+              gap: 72,
               width: "max-content",
-              animation: "mt-marquee 28s linear infinite",
+              willChange: "transform",
             }}
           >
-            {[0, 1].map((set) => (
-              <div
-                key={set}
-                style={{ display: "flex", alignItems: "center", gap: 72, paddingRight: 72 }}
-              >
-                {MARQUEE.map((name) => (
-                  <span
-                    key={set + name}
-                    style={{
-                      fontWeight: 600,
-                      fontSize: 19,
-                      color: "#0e0d12",
-                      opacity: 0.4,
-                      letterSpacing: ".02em",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-            ))}
+            {/* Enough copies that the trailing sets always fill the widest
+                viewport; the rAF loop wraps on one set's exact width. */}
+            {Array.from({ length: 6 }).flatMap((_, s) =>
+              MARQUEE.map((name) => (
+                <span
+                  key={s + "-" + name}
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 19,
+                    color: "#0e0d12",
+                    opacity: 0.4,
+                    letterSpacing: ".02em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {name}
+                </span>
+              ))
+            )}
           </div>
         </div>
       </div>
