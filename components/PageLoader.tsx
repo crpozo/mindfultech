@@ -26,8 +26,11 @@ export function PageLoader() {
       if (!a) return;
       const href = a.getAttribute("href") || "";
       if (!href.startsWith("/")) return; // ignore hashes, mailto, tel, external
-      const dest = href.split("#")[0] || "/";
-      if (dest === pathname) return; // same page (anchor only)
+      // Compare against window.location.pathname — both include the basePath
+      // (usePathname strips it), so this stays correct on GitHub Pages.
+      const norm = (p: string) => p.replace(/\/+$/, "") || "/";
+      const dest = norm(href.split("#")[0] || "/");
+      if (dest === norm(window.location.pathname)) return; // same page (anchor only)
       setShow(true);
     };
     document.addEventListener("click", onClick, true);
