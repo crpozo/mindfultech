@@ -113,7 +113,8 @@ export function Hero() {
       id="home"
       style={{
         position: "relative",
-        minHeight: "max(calc(100vh - 190px),560px)",
+        flex: "1 0 auto",
+        minHeight: 560,
         display: "flex",
         alignItems: "center",
         background:

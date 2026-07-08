@@ -11,8 +11,11 @@ import { LiveChat } from "@/components/home/LiveChat";
 export default function Home() {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
-      <SiteHeader active="home" megaMenus ctaMode="form" />
-      <Hero />
+      {/* Header + hero share one full-viewport blue fold — no white peeks in. */}
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <SiteHeader active="home" megaMenus ctaMode="form" />
+        <Hero />
+      </div>
       <PlatformStats />
       <FullStackLab />
       <ResearchCarousel />
