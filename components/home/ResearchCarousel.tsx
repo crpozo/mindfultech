@@ -22,6 +22,8 @@ export function ResearchCarousel() {
   };
 
   const cardBase: React.CSSProperties = {
+    position: "relative",
+    overflow: "hidden",
     flex: "0 0 clamp(280px,23vw,360px)",
     borderRadius: 10,
     background: "#16132b",
@@ -33,6 +35,17 @@ export function ResearchCarousel() {
     justifyContent: "space-between",
     textAlign: "center",
     padding: "26px 26px 30px",
+  };
+
+  // Same wash the first (featured) card reveals on hover.
+  const hoverBg: React.CSSProperties = {
+    position: "absolute",
+    inset: -30,
+    opacity: 0,
+    transition: "opacity .45s ease",
+    background:
+      "radial-gradient(60% 50% at 70% 30%,rgba(120,150,220,.55),transparent 60%),radial-gradient(50% 45% at 25% 75%,color-mix(in srgb,var(--accent) 50%,transparent),transparent 65%),linear-gradient(140deg,#8d95a8,#b0a3b8 45%,#7d7f9a)",
+    filter: "blur(22px)",
   };
 
   return (
@@ -143,9 +156,11 @@ export function ResearchCarousel() {
           </div>
 
           {CARDS.map((c) => (
-            <div key={c.title} style={cardBase}>
+            <div key={c.title} className="hover-card" style={cardBase}>
+              <div className="hover-bg" style={hoverBg} />
               <span
                 style={{
+                  position: "relative",
                   fontFamily: MONO,
                   fontSize: 11,
                   letterSpacing: ".12em",
@@ -159,6 +174,7 @@ export function ResearchCarousel() {
               </span>
               <div
                 style={{
+                  position: "relative",
                   color: "#fff",
                   fontWeight: 500,
                   fontSize: 21.5,
@@ -168,7 +184,15 @@ export function ResearchCarousel() {
               >
                 {c.title}
               </div>
-              <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".1em", color: "#8f8ba4" }}>
+              <span
+                style={{
+                  position: "relative",
+                  fontFamily: MONO,
+                  fontSize: 11.5,
+                  letterSpacing: ".1em",
+                  color: "#8f8ba4",
+                }}
+              >
                 {c.meta}
               </span>
             </div>
