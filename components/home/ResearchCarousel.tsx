@@ -5,6 +5,9 @@ import Link from "next/link";
 
 const MONO = "var(--mono)";
 
+// Modern, AI-first stack shown in the "WORKING WITH" row.
+const WORKING_WITH = ["Claude", "OpenAI", "AWS", "Next.js", "LangChain", "Vercel"];
+
 const CARDS = [
   { tag: "UX RESEARCH", title: "Field studies with 200+ students shaped the new USFQ portal", meta: "USFQ · CASE STUDY" },
   { tag: "AUTOMATION", title: "Cutting manual order processing 80% with AI workflows", meta: "WAKU INC. · 2025" },
@@ -212,10 +215,10 @@ export function ResearchCarousel() {
           <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".16em", color: "#6f6b86" }}>
             WORKING WITH
           </span>
-          {["AWS", "React", "Shopify", "WordPress"].map((n, i) => (
+          {WORKING_WITH.map((n, i) => (
             <React.Fragment key={n}>
               <span style={{ fontWeight: 600, fontSize: 17, color: "#8f8ba4" }}>{n}</span>
-              {i < 3 && <span style={{ color: "#332e4e" }}>|</span>}
+              {i < WORKING_WITH.length - 1 && <span style={{ color: "#332e4e" }}>|</span>}
             </React.Fragment>
           ))}
         </div>
