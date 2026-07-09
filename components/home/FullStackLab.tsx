@@ -575,97 +575,120 @@ function EngVisual() {
   );
 }
 
-/* ---- AI & Cloud: assistant chat + agent flow ---- */
+/* ---- AI & Cloud: a live AI workflow graph ---- */
+type FNode = { x: number; y: number; label: string; sub: string; icon: React.ReactNode; accent?: boolean };
+
+const AI_NODES: FNode[] = [
+  { x: 50, y: 12, label: "Query", sub: "user input", icon: <path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.5-.8L3 20l1-4.5a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.4 8.3z" /> },
+  { x: 50, y: 31, label: "Router", sub: "classify intent", icon: <><circle cx="6" cy="12" r="2" /><circle cx="18" cy="6" r="2" /><circle cx="18" cy="18" r="2" /><path d="M8 12h3l5-5M11 12l5 5" /></> },
+  { x: 24, y: 52, label: "Retrieve", sub: "RAG · vectors", icon: <><path d="M6 3h8l5 5v13H6z" /><path d="M14 3v5h5" /><path d="M9 13h6M9 17h4" /></> },
+  { x: 76, y: 52, label: "Tools", sub: "search · API", icon: <><circle cx="11" cy="11" r="6" /><path d="M20 20l-3.5-3.5" /></> },
+  { x: 50, y: 71, label: "Claude", sub: "LLM · reasoning", accent: true, icon: <><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /><circle cx="12" cy="12" r="3.4" /></> },
+  { x: 50, y: 90, label: "Answer", sub: "grounded reply", icon: <path d="M20 6L9 17l-5-5" /> },
+];
+const AI_EDGES: [number, number][] = [[0, 1], [1, 2], [1, 3], [2, 4], [3, 4], [4, 5]];
+
 function AIVisual() {
   return (
     <Frame grad="linear-gradient(135deg,color-mix(in srgb,var(--accent) 26%,#bfe3ea),#f3efe6 55%,color-mix(in srgb,var(--accent) 20%,#fff))">
-      {/* chat card */}
       <div
         style={{
           position: "absolute",
-          left: "6%",
-          right: "-3%",
-          top: "7%",
+          left: "5%",
+          right: "5%",
+          top: "6%",
+          bottom: "5%",
           background: "#fff",
           borderRadius: 12,
           boxShadow: "0 30px 80px -30px rgba(14,13,18,.45)",
           overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid rgba(14,13,18,.07)" }}>
-          <span style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--accent-tint)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--accent)" }} />
-          </span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 13.5 }}>MT Assistant</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, color: "#8b8896" }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />Grounded · online
-            </div>
+        {/* header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid rgba(14,13,18,.07)", flex: "none" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Dots />
+            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#8b8896" }}>
+              ai-workflow <span style={{ color: "#0e0d12" }}>/ assistant</span>
+            </span>
           </div>
-          <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "#44424d", background: "#f1f2f6", padding: "5px 8px", borderRadius: 4 }}>HUMAN REVIEW</span>
-        </div>
-        <div style={{ padding: "16px 16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ alignSelf: "flex-end", maxWidth: "78%", background: "#0e0d12", color: "#fff", borderRadius: "12px 12px 3px 12px", padding: "10px 13px", fontSize: 13 }}>
-            How do I get started?
-          </div>
-          <div style={{ alignSelf: "flex-start", maxWidth: "86%", background: "#f7f7f9", color: "#1a1820", border: "1px solid rgba(14,13,18,.06)", borderRadius: "12px 12px 12px 3px", padding: "11px 13px", fontSize: 13, lineHeight: 1.5 }}>
-            Book a 15-min discovery call — I&apos;ll map your goals and propose a 3-week plan, grounded in your docs.
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 9 }}>
-              <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".06em", color: "var(--accent)", background: "var(--accent-tint)", padding: "4px 7px", borderRadius: 4 }}>◆ SOURCES</span>
-              <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#8b8896" }}>knowledge-base · 3 docs</span>
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "var(--accent)", background: "var(--accent-tint)", padding: "5px 8px", borderRadius: 4 }}>CLAUDE</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: "#8b8896" }}>
+              <span className="mt-agent-node" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />RUNNING
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* agent flow (live) */}
-      <div style={{ position: "absolute", left: "3%", right: "10%", bottom: "6%", background: "#0e0d12", borderRadius: 10, boxShadow: "0 24px 50px -20px rgba(10,8,16,.6)", padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: "#8f8ba4" }}>AGENT FLOW</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: "var(--accent)" }}>
-            <span className="mt-agent-node" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
-            RUNNING
-          </span>
-        </div>
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-          {[
-            { label: "Intake", accent: false },
-            { label: "MT Agent", accent: true },
-            { label: "Human review", accent: false },
-          ].map((node, i) => (
-            <React.Fragment key={node.label}>
-              <div
-                className={node.accent ? "mt-agent-node" : undefined}
-                style={{ display: "flex", alignItems: "center", gap: 8, background: node.accent ? "var(--accent)" : "rgba(255,255,255,.08)", color: node.accent ? "#0e0d12" : "#eceaf4", padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: node.accent ? 600 : 500, whiteSpace: "nowrap" }}
-              >
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: node.accent ? "#0e0d12" : "var(--accent)" }} />
-                {node.label}
-                {node.accent && (
-                  <span className="mt-typing" style={{ display: "inline-flex", gap: 2, marginLeft: 1 }}>
-                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
-                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
-                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
-                  </span>
-                )}
-              </div>
-              {i < 2 && <div className="mt-conn" style={{ flex: 1, height: 2, borderRadius: 2 }} />}
-            </React.Fragment>
+        {/* graph canvas */}
+        <div
+          style={{
+            position: "relative",
+            flex: 1,
+            minHeight: 300,
+            backgroundImage: "radial-gradient(circle, rgba(14,13,18,.07) 1px, transparent 1px)",
+            backgroundSize: "17px 17px",
+          }}
+        >
+          {/* edges */}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+            {AI_EDGES.map(([a, c], i) => {
+              const s = AI_NODES[a];
+              const t = AI_NODES[c];
+              return (
+                <g key={i}>
+                  <line x1={s.x} y1={s.y} x2={t.x} y2={t.y} stroke="rgba(14,13,18,.1)" strokeWidth={1.4} vectorEffect="non-scaling-stroke" />
+                  <line className="mt-edge" x1={s.x} y1={s.y} x2={t.x} y2={t.y} stroke="var(--accent)" strokeWidth={1.8} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ animationDelay: `${i * -0.12}s` }} />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* nodes */}
+          {AI_NODES.map((n) => (
+            <div
+              key={n.label}
+              className={n.accent ? "mt-agent-node" : undefined}
+              style={{
+                position: "absolute",
+                left: `${n.x}%`,
+                top: `${n.y}%`,
+                transform: "translate(-50%,-50%)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: n.accent ? "var(--accent)" : "#fff",
+                color: "#0e0d12",
+                border: n.accent ? "none" : "1px solid rgba(14,13,18,.1)",
+                boxShadow: "0 10px 24px -12px rgba(14,13,18,.35)",
+                borderRadius: 10,
+                padding: "7px 11px 7px 8px",
+                whiteSpace: "nowrap",
+                zIndex: 2,
+              }}
+            >
+              <span style={{ width: 26, height: 26, borderRadius: 8, background: n.accent ? "rgba(14,13,18,.14)" : "var(--accent-tint)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0e0d12" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  {n.icon}
+                </svg>
+              </span>
+              <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 600, fontSize: 12.5 }}>
+                  {n.label}
+                  {n.accent && (
+                    <span className="mt-typing" style={{ display: "inline-flex", gap: 2 }}>
+                      <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                      <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                      <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                    </span>
+                  )}
+                </span>
+                <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: ".04em", color: n.accent ? "rgba(14,13,18,.6)" : "#8b8896" }}>{n.sub}</span>
+              </span>
+            </div>
           ))}
-          {/* traveling data packet */}
-          <span
-            className="mt-packet"
-            style={{
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "var(--accent)",
-              boxShadow: "0 0 10px 2px color-mix(in srgb,var(--accent) 70%,transparent)",
-              pointerEvents: "none",
-            }}
-          />
         </div>
       </div>
     </Frame>
