@@ -618,27 +618,54 @@ function AIVisual() {
         </div>
       </div>
 
-      {/* agent flow */}
+      {/* agent flow (live) */}
       <div style={{ position: "absolute", left: "3%", right: "10%", bottom: "6%", background: "#0e0d12", borderRadius: 10, boxShadow: "0 24px 50px -20px rgba(10,8,16,.6)", padding: "14px 16px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: "#8f8ba4" }}>AGENT FLOW</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: "#8f8ba4" }}>AGENT FLOW</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: "var(--accent)" }}>
+            <span className="mt-agent-node" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
+            RUNNING
+          </span>
+        </div>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
           {[
             { label: "Intake", accent: false },
             { label: "MT Agent", accent: true },
             { label: "Human review", accent: false },
           ].map((node, i) => (
             <React.Fragment key={node.label}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: node.accent ? "var(--accent)" : "rgba(255,255,255,.08)", color: node.accent ? "#0e0d12" : "#eceaf4", padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: node.accent ? 600 : 500 }}>
+              <div
+                className={node.accent ? "mt-agent-node" : undefined}
+                style={{ display: "flex", alignItems: "center", gap: 8, background: node.accent ? "var(--accent)" : "rgba(255,255,255,.08)", color: node.accent ? "#0e0d12" : "#eceaf4", padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: node.accent ? 600 : 500, whiteSpace: "nowrap" }}
+              >
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: node.accent ? "#0e0d12" : "var(--accent)" }} />
                 {node.label}
+                {node.accent && (
+                  <span className="mt-typing" style={{ display: "inline-flex", gap: 2, marginLeft: 1 }}>
+                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#0e0d12" }} />
+                  </span>
+                )}
               </div>
-              {i < 2 && (
-                <div style={{ flex: 1, height: 2, background: "linear-gradient(90deg,rgba(255,255,255,.28),rgba(255,255,255,.1))", position: "relative" }}>
-                  <span style={{ position: "absolute", right: -3, top: -2, width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
-                </div>
-              )}
+              {i < 2 && <div className="mt-conn" style={{ flex: 1, height: 2, borderRadius: 2 }} />}
             </React.Fragment>
           ))}
+          {/* traveling data packet */}
+          <span
+            className="mt-packet"
+            style={{
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--accent)",
+              boxShadow: "0 0 10px 2px color-mix(in srgb,var(--accent) 70%,transparent)",
+              pointerEvents: "none",
+            }}
+          />
         </div>
       </div>
     </Frame>
