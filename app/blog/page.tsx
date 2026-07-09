@@ -42,7 +42,7 @@ const POSTS = [
 export default function BlogPage() {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
-      <SiteHeader active="blog" />
+      <SiteHeader active="blog" megaMenus />
 
       <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "80px 0 50px", textAlign: "center" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 40px" }}>

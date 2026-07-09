@@ -13,7 +13,7 @@ export default function Home() {
     <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
       {/* Header + hero share one full-viewport blue fold — no white peeks in. */}
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        <SiteHeader active="home" megaMenus ctaMode="form" />
+        <SiteHeader active="home" megaMenus blueBg ctaMode="form" />
         <Hero />
       </div>
       <PlatformStats />

@@ -73,7 +73,7 @@ const SERVICE_CARDS = [
 export default function ServicesPage() {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
-      <SiteHeader active="services" />
+      <SiteHeader active="services" megaMenus />
 
       {/* HERO */}
       <section

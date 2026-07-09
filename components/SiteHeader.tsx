@@ -395,10 +395,12 @@ export function SiteHeader({
   active = "home",
   megaMenus = false,
   ctaMode = "mailto",
+  blueBg = false,
 }: {
   active?: Active;
   megaMenus?: boolean;
   ctaMode?: "form" | "mailto";
+  blueBg?: boolean;
 }) {
   const [open, setOpen] = React.useState<null | "services" | "company">(null);
   const [panelLeft, setPanelLeft] = React.useState(0);
@@ -464,29 +466,32 @@ export function SiteHeader({
     which: "services" | "company",
     label: string,
     ref: React.RefObject<HTMLButtonElement | null>
-  ) => (
-    <button
-      ref={ref}
-      onMouseEnter={() => doOpen(which)}
-      onMouseLeave={scheduleClose}
-      onClick={() => (open === which ? setOpen(null) : doOpen(which))}
-      style={{
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        fontFamily: "inherit",
-        fontSize: 14,
-        fontWeight: 400,
-        color: "#1a1820",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "10px 0",
-      }}
-    >
-      {label} {caret(which)}
-    </button>
-  );
+  ) => {
+    const isActive = active === which;
+    return (
+      <button
+        ref={ref}
+        onMouseEnter={() => doOpen(which)}
+        onMouseLeave={scheduleClose}
+        onClick={() => (open === which ? setOpen(null) : doOpen(which))}
+        style={{
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          fontFamily: "inherit",
+          fontSize: 14,
+          fontWeight: isActive ? 500 : 400,
+          color: isActive ? "var(--accent)" : "#1a1820",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "10px 0",
+        }}
+      >
+        {label} {caret(which)}
+      </button>
+    );
+  };
 
   const ctaSales = ctaMode === "form" ? "#contact" : "mailto:info@mindfultech.ec";
   const ctaStart = ctaMode === "form" ? "#contact" : "mailto:info@mindfultech.ec";
@@ -524,7 +529,7 @@ export function SiteHeader({
         </Link>
       </div>
 
-      <div style={{ background: megaMenus ? "#edf2fa" : "transparent" }}>
+      <div style={{ background: blueBg ? "#edf2fa" : "transparent" }}>
         <div
           ref={rowRef}
           className="navrow"

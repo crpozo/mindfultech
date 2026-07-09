@@ -14,7 +14,7 @@ const MONO = "var(--mono)";
 export default function CompanyPage() {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
-      <SiteHeader active="company" />
+      <SiteHeader active="company" megaMenus />
 
       <section id="about" style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "90px 0 60px", textAlign: "center", scrollMarginTop: 120 }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 40px" }}>
