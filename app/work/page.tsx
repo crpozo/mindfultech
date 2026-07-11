@@ -16,6 +16,9 @@ type Case = {
   brand: string;
   imageFirst: boolean;
   imageBg: string;
+  image?: string;
+  link?: { label: string; href: string };
+  gallery?: { src: string; alt: string }[];
   tag: string;
   title: string;
   body: string;
@@ -24,9 +27,30 @@ type Case = {
 
 const CASES: Case[] = [
   {
+    id: "themedmotion",
+    brand: "ThemedMotion",
+    imageFirst: true,
+    imageBg: "#0b0a09",
+    image: "/portfolio/tm-joey.webp",
+    link: { label: "VISIT LIVE SITE →", href: "https://crpozo.github.io/themed-motion/" },
+    gallery: [
+      { src: "/portfolio/tm-build.webp", alt: "Finished character next to its mechanical skeleton" },
+      { src: "/portfolio/tm-skeleton.webp", alt: "Mechanical engineering figure" },
+      { src: "/portfolio/tm-creature.webp", alt: "Creature character design" },
+    ],
+    tag: "WEB · 3D · ANIMATRONICS",
+    title: "An immersive site for a Dutch animatronics studio",
+    body: "ThemedMotion (by P&P Projects, Netherlands) designs and builds animatronics for theme parks worldwide. We crafted their web experience: scroll-driven storytelling across their 7-step process, an interactive drag-to-rotate 3D figure, and a 60-second brief flow.",
+    stats: [
+      ["3D", "interactive figure viewer"],
+      ["07", "scroll-driven chapters"],
+      ["60s", "project brief flow"],
+    ],
+  },
+  {
     id: "usfq",
     brand: "USFQ",
-    imageFirst: true,
+    imageFirst: false,
     imageBg: "linear-gradient(150deg,#2a2736,#141126)",
     tag: "EDUCATION · PORTAL · AI ASSIST",
     title: "A campus portal 12,000 students actually use",
@@ -40,7 +64,7 @@ const CASES: Case[] = [
   {
     id: "waku",
     brand: "Waku Inc.",
-    imageFirst: false,
+    imageFirst: true,
     imageBg: "linear-gradient(150deg,#39323f,#191521)",
     tag: "E-COMMERCE · AUTOMATION",
     title: "Order processing, from hours to minutes",
@@ -53,7 +77,7 @@ const CASES: Case[] = [
   {
     id: "kruger",
     brand: "KrugerLabs",
-    imageFirst: true,
+    imageFirst: false,
     imageBg: "linear-gradient(150deg,#2c3340,#151a24)",
     tag: "DESIGN SYSTEMS · ENGINEERING",
     title: "One design system, three platforms",
@@ -96,11 +120,31 @@ export default function WorkPage() {
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px", display: "flex", flexDirection: "column", gap: 26 }}>
           {CASES.map((c) => {
             const image = (
-              <div style={{ position: "relative", minHeight: 380, background: c.imageBg }}>
-                <div style={{ position: "absolute", inset: 0 }}>
-                  <ImagePlaceholder label={`${c.brand.toUpperCase()} PROJECT PHOTO`} onDark />
-                </div>
-                <span style={{ position: "absolute", left: 20, top: 18, fontWeight: 600, fontSize: 19, color: "#fff", zIndex: 1 }}>
+              <div style={{ position: "relative", minHeight: 380, background: c.imageBg, overflow: "hidden" }}>
+                {c.image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={c.image}
+                    alt={`${c.brand} project`}
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <div style={{ position: "absolute", inset: 0 }}>
+                    <ImagePlaceholder label={`${c.brand.toUpperCase()} PROJECT PHOTO`} onDark />
+                  </div>
+                )}
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 20,
+                    top: 18,
+                    fontWeight: 600,
+                    fontSize: 19,
+                    color: "#fff",
+                    zIndex: 1,
+                    textShadow: "0 2px 12px rgba(0,0,0,.55)",
+                  }}
+                >
                   {c.brand}
                 </span>
               </div>
@@ -141,32 +185,84 @@ export default function WorkPage() {
                     </div>
                   ))}
                 </div>
+                {c.link && (
+                  <a
+                    href={c.link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-dark"
+                    style={{
+                      textDecoration: "none",
+                      alignSelf: "flex-start",
+                      fontFamily: MONO,
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      letterSpacing: ".12em",
+                      background: "#0e0d12",
+                      color: "#fff",
+                      padding: "13px 20px",
+                      borderRadius: 6,
+                      marginTop: 22,
+                    }}
+                  >
+                    {c.link.label}
+                  </a>
+                )}
               </div>
             );
             return (
               <div
                 key={c.id}
                 id={c.id}
-                className="stack-2"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: c.imageFirst ? "1.1fr 1fr" : "1fr 1.1fr",
                   border: "1px solid rgba(14,13,18,.09)",
                   borderRadius: 16,
                   overflow: "hidden",
                   scrollMarginTop: 120,
                 }}
               >
-                {c.imageFirst ? (
-                  <>
-                    {image}
-                    {text}
-                  </>
-                ) : (
-                  <>
-                    {text}
-                    {image}
-                  </>
+                <div
+                  className="stack-2"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: c.imageFirst ? "1.1fr 1fr" : "1fr 1.1fr",
+                  }}
+                >
+                  {c.imageFirst ? (
+                    <>
+                      {image}
+                      {text}
+                    </>
+                  ) : (
+                    <>
+                      {text}
+                      {image}
+                    </>
+                  )}
+                </div>
+                {c.gallery && (
+                  <div
+                    className="stack-3"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${c.gallery.length},1fr)`,
+                      gap: 3,
+                      borderTop: "1px solid rgba(14,13,18,.09)",
+                      background: "#f4f4f6",
+                    }}
+                  >
+                    {c.gallery.map((g) => (
+                      <div key={g.src} className="story-card" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", background: "#fff" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={g.src}
+                          alt={g.alt}
+                          className="story-media"
+                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             );

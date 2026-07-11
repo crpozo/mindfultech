@@ -10,7 +10,14 @@ function openForm(e: React.MouseEvent) {
   window.dispatchEvent(new CustomEvent("mt:open-form"));
 }
 
-const MARQUEE = ["USFQ", "KrugerLabs", "Waku Inc.", "Ecohelix", "AWS Partner"];
+const MARQUEE: { name: string; img?: string; h?: number }[] = [
+  { name: "USFQ" },
+  { name: "KrugerLabs" },
+  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.png", h: 36 },
+  { name: "Waku Inc." },
+  { name: "Ecohelix" },
+  { name: "AWS Partner" },
+];
 
 export function Hero() {
   const stageRef = React.useRef<HTMLDivElement>(null);
@@ -619,21 +626,37 @@ export function Hero() {
             {/* Enough copies that the trailing sets always fill the widest
                 viewport; the rAF loop wraps on one set's exact width. */}
             {Array.from({ length: 6 }).flatMap((_, s) =>
-              MARQUEE.map((name) => (
-                <span
-                  key={s + "-" + name}
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 19,
-                    color: "#0e0d12",
-                    opacity: 0.4,
-                    letterSpacing: ".02em",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {name}
-                </span>
-              ))
+              MARQUEE.map((m) =>
+                m.img ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    key={s + "-" + m.name}
+                    src={m.img}
+                    alt={m.name}
+                    style={{
+                      height: m.h || 26,
+                      width: "auto",
+                      display: "block",
+                      opacity: 0.55,
+                      filter: "grayscale(1)",
+                    }}
+                  />
+                ) : (
+                  <span
+                    key={s + "-" + m.name}
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 19,
+                      color: "#0e0d12",
+                      opacity: 0.4,
+                      letterSpacing: ".02em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {m.name}
+                  </span>
+                )
+              )
             )}
           </div>
         </div>
