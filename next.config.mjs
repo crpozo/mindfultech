@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Static export for GitHub Pages (served at https://crpozo.github.io/mindfultech/)
+  // Static export served at the domain root (https://mindfultech.ec via GitHub Pages)
   output: "export",
-  basePath: "/mindfultech",
   trailingSlash: true,
   images: { unoptimized: true },
 };
