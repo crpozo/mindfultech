@@ -674,22 +674,20 @@ export function SiteHeader({
             </div>
           </nav>
 
-          {/* connector line — bridges the two white pills, together.ai-style.
-              The ends tuck 10px under each pill (negative z paints below their
-              opaque backgrounds), so contact is guaranteed at any width. */}
+          {/* hinge — together.ai structure: nav-box | hinge | nav-box.
+              A short thick line floating between the pills with equal
+              clearance on both sides. */}
           <span
             className="nav-conn"
             aria-hidden
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 56,
+              width: 34,
               height: 8,
               borderRadius: 4,
-              margin: "0 -10px",
-              position: "relative",
-              zIndex: -1,
-              background: "color-mix(in srgb, #4FAE87 55%, #dfe7f2)",
+              margin: "0 12px",
+              background: "#90C8B7",
             }}
           />
           <div
