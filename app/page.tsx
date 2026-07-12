@@ -6,7 +6,7 @@ import { ResearchCarousel } from "@/components/home/ResearchCarousel";
 import { ClientStories } from "@/components/home/ClientStories";
 import { NewsGrid } from "@/components/home/NewsGrid";
 import { ContactFooter } from "@/components/home/ContactFooter";
-import { LiveChat } from "@/components/home/LiveChat";
+import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 
 export default function Home() {
   return (
@@ -22,7 +22,7 @@ export default function Home() {
       <ClientStories />
       <NewsGrid />
       <ContactFooter />
-      <LiveChat />
+      <WhatsAppBubble />
     </div>
   );
 }

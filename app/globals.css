@@ -309,3 +309,9 @@ a:hover {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* WhatsApp floating button */
+.wa-bubble:hover {
+  transform: scale(1.08);
+  box-shadow: 0 22px 48px -14px rgba(37, 211, 102, 0.8);
+}

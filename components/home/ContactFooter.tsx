@@ -485,6 +485,10 @@ function FooterSculpture() {
         height: 640,
         overflow: "hidden",
         pointerEvents: "none",
+        // fade out at the bottom so the band never shows a hard edge when
+        // the section grows (e.g. when the contact accordion opens)
+        WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 97%)",
+        maskImage: "linear-gradient(180deg,#000 55%,transparent 97%)",
       }}
     >
       <svg
