@@ -484,7 +484,6 @@ export function SiteHeader({
     );
   };
 
-  const ctaSales = ctaMode === "form" ? "#contact" : "mailto:info@mindfultech.ec";
   const ctaStart = ctaMode === "form" ? "#contact" : "mailto:info@mindfultech.ec";
   const ctaProps = (href: string) =>
     ctaMode === "form"
@@ -688,7 +687,6 @@ export function SiteHeader({
               boxShadow: "0 6px 24px -18px rgba(14,13,18,.25)",
             }}
           >
-            <LangToggle />
             <span
               style={{
                 width: 34,
@@ -697,22 +695,7 @@ export function SiteHeader({
                 background: "color-mix(in srgb,var(--accent) 30%,#e6e4ee)",
               }}
             />
-            <a
-              {...ctaProps(ctaSales)}
-              className="hide-narrow"
-              style={{
-                textDecoration: "none",
-                fontFamily: MONO,
-                fontSize: 11.5,
-                fontWeight: 500,
-                letterSpacing: ".1em",
-                color: "var(--ink)",
-                padding: "12px 16px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {es ? "HABLEMOS" : "CONTACT SALES"}
-            </a>
+            <LangToggle />
             <a
               {...ctaProps(ctaStart)}
               className="btn-dark"
@@ -790,29 +773,6 @@ export function SiteHeader({
                   {l.label}
                 </Link>
               ))}
-              <a
-                {...ctaProps(ctaSales)}
-                onClick={(e) => {
-                  setMobileOpen(false);
-                  if (ctaMode === "form") openForm(e);
-                }}
-                style={{
-                  display: "block",
-                  textAlign: "center",
-                  textDecoration: "none",
-                  fontFamily: MONO,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  letterSpacing: ".1em",
-                  color: "var(--ink)",
-                  background: "#f1f2f6",
-                  padding: "14px",
-                  borderRadius: 9,
-                  marginTop: 8,
-                }}
-              >
-                {es ? "HABLEMOS" : "CONTACT SALES"}
-              </a>
               <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
                 <LangToggle />
               </div>
