@@ -301,9 +301,9 @@ export default function ServicesPage() {
                     </div>
                   ))}
                 </div>
-                <a href="mailto:info@mindfultech.ec" className="btn-dark" style={cardBtn}>
-                  LEARN HOW
-                </a>
+                <Link href={`/services/${c.id}`} className="btn-dark" style={cardBtn}>
+                  LEARN MORE
+                </Link>
               </div>
             ))}
           </div>

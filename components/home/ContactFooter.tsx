@@ -10,10 +10,10 @@ const FOOTER_COLS: { heading: string; links: { label: string; href: string }[] }
   {
     heading: "SERVICES",
     links: [
-      { label: "UX Design", href: "/services#ux" },
-      { label: "Web & Mobile Apps", href: "/services#apps" },
-      { label: "Custom Software", href: "/services#custom" },
-      { label: "AI & Automation", href: "/services#ai" },
+      { label: "UX Design", href: "/services/ux" },
+      { label: "Web & Mobile Apps", href: "/services/apps" },
+      { label: "Custom Software", href: "/services/custom" },
+      { label: "AI & Automation", href: "/services/ai" },
       { label: "Cloud Architecture", href: "/services" },
     ],
   },

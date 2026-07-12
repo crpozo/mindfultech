@@ -19,7 +19,7 @@ function openForm(e: React.MouseEvent) {
 function ServicesPanel() {
   const items = [
     {
-      href: "/services#ux",
+      href: "/services/ux",
       title: "UX Design",
       sub: "Research-driven product design",
       icon: (
@@ -30,7 +30,7 @@ function ServicesPanel() {
       ),
     },
     {
-      href: "/services#apps",
+      href: "/services/apps",
       title: "Web & Mobile Apps",
       sub: "Tailor-made, scalable platforms",
       icon: (
@@ -41,13 +41,13 @@ function ServicesPanel() {
       ),
     },
     {
-      href: "/services#custom",
+      href: "/services/custom",
       title: "Custom Software",
       sub: "Built around your workflows",
       icon: <path d="M14 4l-4 16M18 8l4 4-4 4M6 16l-4-4 4-4" />,
     },
     {
-      href: "/services#ai",
+      href: "/services/ai",
       title: "AI & Automation",
       sub: "Assistants, copilots & pipelines",
       icon: (
@@ -313,43 +313,16 @@ function CompanyPanel() {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "8px 36px",
+        gridTemplateColumns: "1fr",
+        gap: 4,
         background: "#fff",
         border: "1px solid rgba(14,13,18,.06)",
         borderRadius: 16,
         boxShadow: "0 30px 80px -30px rgba(14,13,18,.35)",
-        padding: 24,
-        width: "min(660px,calc(100vw - 60px))",
+        padding: 16,
+        width: "min(340px,calc(100vw - 60px))",
       }}
     >
-      {col("RESOURCES", [
-        {
-          href: "/work",
-          title: "Case studies",
-          sub: "Results from real projects",
-          icon: <path d="M4 6h7M4 10h5M4 14h7M4 18h9M15 6h5M17 4v4" />,
-        },
-        {
-          href: "/blog",
-          title: "Blog",
-          sub: "Our latest news & posts",
-          icon: (
-            <>
-              <rect x="4" y="4" width="13" height="16" rx="2" />
-              <path d="M8 8h5M8 12h5M8 16h3M17 8h3v10a2 2 0 01-2 2" />
-            </>
-          ),
-        },
-        {
-          href: "mailto:info@mindfultech.ec",
-          title: "Support",
-          sub: "Talk to the team",
-          icon: (
-            <path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.5-.8L3 20l1-4.5a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.4 8.3z" />
-          ),
-        },
-      ])}
       {col("COMPANY", [
         {
           href: "/company#about",
@@ -382,6 +355,14 @@ function CompanyPanel() {
               <rect x="9" y="3" width="6" height="11" rx="3" />
               <path d="M5 11a7 7 0 0014 0M12 18v3" />
             </>
+          ),
+        },
+        {
+          href: "mailto:info@mindfultech.ec",
+          title: "Support",
+          sub: "Talk to the team",
+          icon: (
+            <path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.5-.8L3 20l1-4.5a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.4 8.3z" />
           ),
         },
       ])}
