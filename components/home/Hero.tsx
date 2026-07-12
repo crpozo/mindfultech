@@ -12,7 +12,6 @@ function openForm(e: React.MouseEvent) {
 
 const MARQUEE: { name: string; img?: string; h?: number }[] = [
   { name: "USFQ" },
-  { name: "KrugerLabs" },
   { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.png", h: 36 },
   { name: "Waku Inc." },
   { name: "Ecohelix" },
