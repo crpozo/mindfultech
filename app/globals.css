@@ -308,10 +308,40 @@ a:hover {
   .footer-grid {
     grid-template-columns: 1fr !important;
   }
+  /* icon-only logo so the CTA + burger always fit */
+  .logo-word {
+    display: none;
+  }
+  .nav-mobile a {
+    font-size: 10px !important;
+    padding: 10px 12px !important;
+  }
 }
 
 /* WhatsApp floating button */
 .wa-bubble:hover {
   transform: scale(1.08);
   box-shadow: 0 22px 48px -14px rgba(37, 211, 102, 0.8);
+}
+
+/* Project pipeline (dark process section) */
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 26px;
+}
+@media (max-width: 1120px) {
+  .flow-grid {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 44px;
+  }
+  .flow-line {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .flow-grid {
+    grid-template-columns: 1fr;
+    row-gap: 34px;
+  }
 }

@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { useLang } from "../i18n";
 import { ImagePlaceholder } from "../ImagePlaceholder";
 
 const MONO = "var(--mono)";
@@ -8,30 +11,32 @@ const SIDE = [
   {
     href: "/work#usfq",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
-    tag: "CASE STUDY",
-    title: "USFQ: a campus portal 12,000 students actually use",
-    body: "Adoption tripled after we rebuilt onboarding around real course-planning behavior…",
+    tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
+    title: { en: "USFQ: a campus portal 12,000 students actually use", es: "USFQ: un portal que 12.000 estudiantes sí usan" },
+    body: { en: "Adoption tripled after we rebuilt onboarding around real course-planning behavior…", es: "La adopción se triplicó tras rediseñar el onboarding según el comportamiento real…" },
     onDark: true,
   },
   {
-    href: "/work#waku",
+    href: "/work#helixona",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
-    tag: "ENGINEERING",
-    title: "How we cut Waku’s fulfillment time with automation",
-    body: "Order processing dropped from hours to minutes with AI-checked workflows…",
+    tag: { en: "ENGINEERING", es: "INGENIERÍA" },
+    title: { en: "How we cut Helixona’s fulfillment time with automation", es: "Cómo redujimos los tiempos de Helixona con automatización" },
+    body: { en: "Order processing dropped from hours to minutes with AI-checked workflows…", es: "El procesamiento de pedidos pasó de horas a minutos con flujos verificados por IA…" },
     onDark: false,
   },
   {
     href: "/blog",
     bg: "linear-gradient(140deg,#dfe6f2,#c9d4e8)",
-    tag: "RESEARCH",
-    title: "Designing AI features people trust",
-    body: "Our playbook for grounding, transparency, and human review in production AI…",
+    tag: { en: "RESEARCH", es: "INVESTIGACIÓN" },
+    title: { en: "Designing AI features people trust", es: "Diseñando funciones de IA en las que la gente confía" },
+    body: { en: "Our playbook for grounding, transparency, and human review in production AI…", es: "Nuestro playbook de grounding, transparencia y revisión humana en IA de producción…" },
     onDark: false,
   },
 ];
 
 export function NewsGrid() {
+  const { lang } = useLang();
+  const es = lang === "es";
   return (
     <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
@@ -54,7 +59,7 @@ export function NewsGrid() {
               color: "var(--ink)",
             }}
           >
-            What&apos;s new at MindfulTech
+            {es ? "Novedades en MindfulTech" : "What's new at MindfulTech"}
           </h2>
           <Link
             href="/blog"
@@ -71,7 +76,7 @@ export function NewsGrid() {
               borderRadius: 6,
             }}
           >
-            ALL BLOG POSTS
+            {es ? "TODO EL BLOG" : "ALL BLOG POSTS"}
           </Link>
         </div>
 
@@ -122,11 +127,10 @@ export function NewsGrid() {
                 margin: "14px 0 10px",
               }}
             >
-              MindfulTech is now an AI-first software lab
+              {es ? "MindfulTech ahora es un laboratorio de software AI-first" : "MindfulTech is now an AI-first software lab"}
             </h3>
             <p style={{ fontSize: 16, lineHeight: 1.55, color: "#6b6875", margin: 0, maxWidth: 560 }}>
-              Ten years of human-centered software, now with applied AI in every
-              engagement. Here&apos;s what changes — and what never will.
+              {es ? "Diez años de software centrado en personas, ahora con IA aplicada en cada proyecto. Esto es lo que cambia — y lo que nunca cambiará." : "Ten years of human-centered software, now with applied AI in every engagement. Here's what changes — and what never will."}
             </p>
           </div>
 
@@ -134,7 +138,7 @@ export function NewsGrid() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {SIDE.map((s, i) => (
               <Link
-                key={s.title}
+                key={s.title.en}
                 href={s.href}
                 className="blog-link"
                 style={{
@@ -171,7 +175,7 @@ export function NewsGrid() {
                       borderRadius: 4,
                     }}
                   >
-                    {s.tag}
+                    {s.tag[lang]}
                   </span>
                   <h4
                     style={{
@@ -182,10 +186,10 @@ export function NewsGrid() {
                       margin: "10px 0 6px",
                     }}
                   >
-                    {s.title}
+                    {s.title[lang]}
                   </h4>
                   <p style={{ fontSize: 14, lineHeight: 1.5, color: "#6b6875", margin: 0 }}>
-                    {s.body}
+                    {s.body[lang]}
                   </p>
                 </div>
               </Link>

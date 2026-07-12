@@ -1,14 +1,17 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
 
 type Card = {
   bg: string;
   hover: string;
-  tag: string;
+  tag: { en: string; es: string };
   value: string;
-  caption: string;
+  caption: { en: string; es: string };
   captionColor: string;
   href: string;
   connector?: boolean;
@@ -18,9 +21,9 @@ const CARDS: Card[] = [
   {
     bg: "#bdd9f0",
     hover: "#8fc4ec",
-    tag: "↑ YEARS SHIPPING",
-    value: "10+",
-    caption: "human-centered products in production.",
+    tag: { en: "↑ DAYS SHIPPING", es: "↑ DÍAS ENTREGANDO" },
+    value: "3,650+",
+    caption: { en: "human-centered products in production.", es: "productos centrados en personas, en producción." },
     captionColor: "#2c3a4a",
     href: "/services",
     connector: true,
@@ -28,9 +31,9 @@ const CARDS: Card[] = [
   {
     bg: "#f2cfe3",
     hover: "#efa7d2",
-    tag: "↓ MANUAL WORK",
+    tag: { en: "↓ MANUAL WORK", es: "↓ TRABAJO MANUAL" },
     value: "80%",
-    caption: "less order processing after AI workflows at Waku.",
+    caption: { en: "less order processing after AI workflows at Helixona.", es: "menos procesamiento manual con flujos de IA en Helixona." },
     captionColor: "#4a3040",
     href: "/work#waku",
     connector: true,
@@ -38,15 +41,17 @@ const CARDS: Card[] = [
   {
     bg: "#f8d9c3",
     hover: "#f5bd90",
-    tag: "↑ ADOPTION",
+    tag: { en: "↑ ADOPTION", es: "↑ ADOPCIÓN" },
     value: "3x",
-    caption: "on the USFQ portal after a research-led rebuild.",
+    caption: { en: "on the USFQ portal after a research-led rebuild.", es: "de adopción en el portal USFQ tras el rediseño con investigación." },
     captionColor: "#4c3628",
     href: "/work#usfq",
   },
 ];
 
 export function PlatformStats() {
+  const { lang } = useLang();
+  const es = lang === "es";
   return (
     <section
       id="platform"
@@ -64,7 +69,7 @@ export function PlatformStats() {
             color: "var(--ink)",
           }}
         >
-          The MindfulTech difference
+          {es ? "La diferencia MindfulTech" : "The MindfulTech difference"}
         </h2>
         <p
           style={{
@@ -77,7 +82,7 @@ export function PlatformStats() {
             margin: "18px auto 54px",
           }}
         >
-          Measured results across design, engineering, and AI automation.
+          {es ? "Resultados medidos en diseño, ingeniería y automatización con IA." : "Measured results across design, engineering, and AI automation."}
         </p>
 
         <div
@@ -117,7 +122,7 @@ export function PlatformStats() {
                   borderRadius: 4,
                 }}
               >
-                {c.tag}
+                {c.tag[lang]}
               </span>
               <span
                 style={{
@@ -132,7 +137,7 @@ export function PlatformStats() {
                 {c.value}
               </span>
               <span style={{ marginTop: "auto", fontSize: 13.5, color: c.captionColor }}>
-                {c.caption}
+                {c.caption[lang]}
               </span>
               <Link
                 href={c.href}
@@ -150,7 +155,7 @@ export function PlatformStats() {
                   transition: "opacity .35s ease,transform .35s ease",
                 }}
               >
-                LEARN HOW
+                {es ? "VER CÓMO" : "LEARN HOW"}
               </Link>
               {c.connector && (
                 <span

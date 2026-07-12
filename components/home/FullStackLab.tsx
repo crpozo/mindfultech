@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
 
@@ -14,13 +15,13 @@ const TAB_COLORS = [
   { fill: "#f5bd90", base: "#fcf1e7" },
 ];
 
-const TABS = ["UX Design", "Engineering", "AI & Cloud"];
+const TABS = { en: ["UX Design", "Engineering", "AI & Cloud"], es: ["Diseño UX", "Ingeniería", "IA y Cloud"] };
 
 type Panel = {
   icon: React.ReactNode;
-  title: string;
-  body: string;
-  rows: { icon: React.ReactNode; label: string }[];
+  title: { en: string; es: string };
+  body: { en: string; es: string };
+  rows: { icon: React.ReactNode; label: { en: string; es: string } }[];
 };
 
 const PANELS: Panel[] = [
@@ -31,8 +32,8 @@ const PANELS: Panel[] = [
         <path d="M4 20c0-3.6 3.6-6 8-6s8 2.4 8 6" />
       </>
     ),
-    title: "Product Discovery",
-    body: "Field research, journey mapping, and prototypes tested with real users — before a single line of production code.",
+    title: { en: "Product Discovery", es: "Descubrimiento de Producto" },
+    body: { en: "Field research, journey mapping, and prototypes tested with real users — before a single line of production code.", es: "Investigación de campo, journey mapping y prototipos probados con usuarios reales — antes de una sola línea de código." },
     rows: [
       {
         icon: (
@@ -41,7 +42,7 @@ const PANELS: Panel[] = [
             <path d="M3 9h18M9 21V9" />
           </>
         ),
-        label: "Design Systems",
+        label: { en: "Design Systems", es: "Design Systems" },
       },
       {
         icon: (
@@ -50,7 +51,7 @@ const PANELS: Panel[] = [
             <path d="M8 20h8" />
           </>
         ),
-        label: "Interface Design",
+        label: { en: "Interface Design", es: "Diseño de Interfaz" },
       },
       {
         icon: (
@@ -59,14 +60,14 @@ const PANELS: Panel[] = [
             <path d="M20 20l-4-4" />
           </>
         ),
-        label: "Usability Testing",
+        label: { en: "Usability Testing", es: "Pruebas de Usabilidad" },
       },
     ],
   },
   {
     icon: <path d="M14 4l-4 16M18 8l4 4-4 4M6 16l-4-4 4-4" />,
-    title: "Web Applications",
-    body: "Scalable, tailor-made platforms aligned to your processes and goals. Modern stacks, maintained for the long run.",
+    title: { en: "Web Applications", es: "Aplicaciones Web" },
+    body: { en: "Scalable, tailor-made platforms aligned to your processes and goals. Modern stacks, maintained for the long run.", es: "Plataformas escalables a tu medida, alineadas a tus procesos y objetivos. Stacks modernos, mantenidos a largo plazo." },
     rows: [
       {
         icon: (
@@ -75,11 +76,11 @@ const PANELS: Panel[] = [
             <path d="M11 18h2" />
           </>
         ),
-        label: "Mobile Apps",
+        label: { en: "Mobile Apps", es: "Apps Móviles" },
       },
       {
         icon: <path d="M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2zM12 11v9M4 6.5l8 4.5 8-4.5" />,
-        label: "Custom Software",
+        label: { en: "Custom Software", es: "Software a Medida" },
       },
       {
         icon: (
@@ -89,7 +90,7 @@ const PANELS: Panel[] = [
             <path d="M2 3h3l2.8 12.5h11L21 7H6" />
           </>
         ),
-        label: "E-commerce",
+        label: { en: "E-commerce", es: "E-commerce" },
       },
     ],
   },
@@ -100,26 +101,28 @@ const PANELS: Panel[] = [
         <circle cx="12" cy="12" r="3.4" />
       </>
     ),
-    title: "AI Integration",
-    body: "LLM-powered features designed responsibly — assistants, copilots, and intelligent search your users can trust.",
+    title: { en: "AI Integration", es: "Integración de IA" },
+    body: { en: "LLM-powered features designed responsibly — assistants, copilots, and intelligent search your users can trust.", es: "Funciones con LLMs diseñadas con responsabilidad — asistentes, copilotos y búsqueda inteligente en la que tus usuarios confían." },
     rows: [
       {
         icon: <path d="M4 17V7l8 10V7M16 12h6M19 9v6" />,
-        label: "Workflow Automation",
+        label: { en: "Workflow Automation", es: "Automatización de Flujos" },
       },
       {
         icon: <path d="M18 10h1a4 4 0 010 8H6a5 5 0 01-1-9.9A6 6 0 0118 10z" />,
-        label: "AWS Architecture",
+        label: { en: "AWS Architecture", es: "Arquitectura AWS" },
       },
       {
         icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
-        label: "Data & Analytics",
+        label: { en: "Data & Analytics", es: "Datos y Analítica" },
       },
     ],
   },
 ];
 
 export function FullStackLab() {
+  const { lang } = useLang();
+  const es = lang === "es";
   const [cur, setCur] = React.useState(0);
   const [prog, setProg] = React.useState(0);
   const curRef = React.useRef(0);
@@ -136,7 +139,7 @@ export function FullStackLab() {
       p += dt / DUR;
       if (p >= 1) {
         p = 0;
-        setCur((c) => (c + 1) % TABS.length);
+        setCur((c) => (c + 1) % 3);
       }
       setProg(p);
       raf = requestAnimationFrame(step);
@@ -171,7 +174,7 @@ export function FullStackLab() {
             color: "var(--ink)",
           }}
         >
-          Full-stack lab
+          {es ? "Laboratorio full-stack" : "Full-stack lab"}
         </h2>
         <p
           style={{
@@ -184,8 +187,7 @@ export function FullStackLab() {
             margin: "20px auto 56px",
           }}
         >
-          Powering every step of the product journey — from first research
-          session to production AI.
+          {es ? "Impulsamos cada paso del viaje del producto — de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey — from first research session to production AI."}
         </p>
 
         {/* tabs */}
@@ -198,7 +200,7 @@ export function FullStackLab() {
             marginBottom: 20,
           }}
         >
-          {TABS.map((label, j) => (
+          {TABS[lang].map((label, j) => (
             <button
               key={label}
               onClick={() => select(j)}
@@ -257,7 +259,7 @@ export function FullStackLab() {
         >
           <div>
             {PANELS.map((p, i) => (
-              <div key={p.title} style={{ display: i === cur ? "block" : "none" }}>
+              <div key={p.title.en} style={{ display: i === cur ? "block" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span
                     style={{
@@ -290,11 +292,11 @@ export function FullStackLab() {
                       margin: 0,
                     }}
                   >
-                    {p.title}
+                    {p.title[lang]}
                   </h3>
                 </div>
                 <p style={{ fontSize: 16.5, lineHeight: 1.6, color: "#55525e", margin: "18px 0 22px" }}>
-                  {p.body}
+                  {p.body[lang]}
                 </p>
                 <Link
                   href="/services"
@@ -312,12 +314,12 @@ export function FullStackLab() {
                     borderRadius: 6,
                   }}
                 >
-                  LEARN MORE
+                  {es ? "VER MÁS" : "LEARN MORE"}
                 </Link>
                 <div style={{ borderTop: "1px solid rgba(14,13,18,.08)", marginTop: 28 }}>
                   {p.rows.map((r, ri) => (
                     <div
-                      key={r.label}
+                      key={r.label.en}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -352,7 +354,7 @@ export function FullStackLab() {
                           {r.icon}
                         </svg>
                       </span>
-                      <span style={{ fontWeight: 500, fontSize: 19 }}>{r.label}</span>
+                      <span style={{ fontWeight: 500, fontSize: 19 }}>{r.label[lang]}</span>
                     </div>
                   ))}
                 </div>

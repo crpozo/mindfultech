@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Logo, MarkDefs } from "./Logo";
+import { useLang, LangToggle, type Lang } from "./i18n";
 
 type Active = "home" | "services" | "process" | "work" | "blog" | "company";
 
@@ -16,12 +17,13 @@ function openForm(e: React.MouseEvent) {
 
 /* ---------- mega-menu panels ---------- */
 
-function ServicesPanel() {
+function ServicesPanel({ lang }: { lang: Lang }) {
+  const es = lang === "es";
   const items = [
     {
       href: "/services/ux",
-      title: "UX Design",
-      sub: "Research-driven product design",
+      title: es ? "Diseño UX" : "UX Design",
+      sub: es ? "Diseño de producto basado en investigación" : "Research-driven product design",
       icon: (
         <>
           <circle cx="12" cy="8" r="4" />
@@ -31,8 +33,8 @@ function ServicesPanel() {
     },
     {
       href: "/services/apps",
-      title: "Web & Mobile Apps",
-      sub: "Tailor-made, scalable platforms",
+      title: es ? "Apps Web y Móviles" : "Web & Mobile Apps",
+      sub: es ? "Plataformas escalables, a tu medida" : "Tailor-made, scalable platforms",
       icon: (
         <>
           <rect x="2" y="3" width="20" height="14" rx="2" />
@@ -42,14 +44,14 @@ function ServicesPanel() {
     },
     {
       href: "/services/custom",
-      title: "Custom Software",
-      sub: "Built around your workflows",
+      title: es ? "Software a Medida" : "Custom Software",
+      sub: es ? "Construido alrededor de tus procesos" : "Built around your workflows",
       icon: <path d="M14 4l-4 16M18 8l4 4-4 4M6 16l-4-4 4-4" />,
     },
     {
       href: "/services/ai",
-      title: "AI & Automation",
-      sub: "Assistants, copilots & pipelines",
+      title: es ? "IA y Automatización" : "AI & Automation",
+      sub: es ? "Asistentes, copilotos y pipelines" : "Assistants, copilots & pipelines",
       icon: (
         <>
           <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
@@ -208,7 +210,7 @@ function ServicesPanel() {
             marginTop: 14,
           }}
         >
-          Tech stack
+          {es ? "Stack tecnológico" : "Tech stack"}
         </span>
         <span
           style={{
@@ -218,14 +220,15 @@ function ServicesPanel() {
             marginTop: 2,
           }}
         >
-          Explore the tools we ship with
+          {es ? "Explora las herramientas con las que construimos" : "Explore the tools we ship with"}
         </span>
       </Link>
     </div>
   );
 }
 
-function CompanyPanel() {
+function CompanyPanel({ lang }: { lang: Lang }) {
+  const es = lang === "es";
   const col = (
     heading: string,
     rows: { href: string; title: string; sub: string; icon: React.ReactNode }[]
@@ -323,11 +326,11 @@ function CompanyPanel() {
         width: "min(340px,calc(100vw - 60px))",
       }}
     >
-      {col("COMPANY", [
+      {col(es ? "COMPAÑÍA" : "COMPANY", [
         {
           href: "/company#about",
-          title: "About",
-          sub: "Get to know us",
+          title: es ? "Nosotros" : "About",
+          sub: es ? "Conócenos" : "Get to know us",
           icon: (
             <>
               <path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.5-.8L3 20l1-4.5a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.4 8.3z" />
@@ -337,8 +340,8 @@ function CompanyPanel() {
         },
         {
           href: "/company#careers",
-          title: "Careers",
-          sub: "Join our mission",
+          title: es ? "Carreras" : "Careers",
+          sub: es ? "Únete a la misión" : "Join our mission",
           icon: (
             <>
               <rect x="3" y="7" width="18" height="13" rx="2" />
@@ -348,8 +351,8 @@ function CompanyPanel() {
         },
         {
           href: "/company#press",
-          title: "Press",
-          sub: "MindfulTech in the news",
+          title: es ? "Prensa" : "Press",
+          sub: es ? "MindfulTech en los medios" : "MindfulTech in the news",
           icon: (
             <>
               <rect x="9" y="3" width="6" height="11" rx="3" />
@@ -359,8 +362,8 @@ function CompanyPanel() {
         },
         {
           href: "mailto:info@mindfultech.ec",
-          title: "Support",
-          sub: "Talk to the team",
+          title: es ? "Soporte" : "Support",
+          sub: es ? "Habla con el equipo" : "Talk to the team",
           icon: (
             <path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.5-.8L3 20l1-4.5a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.4 8.3z" />
           ),
@@ -383,6 +386,8 @@ export function SiteHeader({
   ctaMode?: "form" | "mailto";
   blueBg?: boolean;
 }) {
+  const { lang } = useLang();
+  const es = lang === "es";
   const [open, setOpen] = React.useState<null | "services" | "company">(null);
   const [panelLeft, setPanelLeft] = React.useState(0);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -408,9 +413,14 @@ export function SiteHeader({
   const doOpen = (which: "services" | "company") => {
     if (hideTimer.current) clearTimeout(hideTimer.current);
     setOpen(which);
-    // measure after paint so panel width is known
-    requestAnimationFrame(() => position(which));
   };
+
+  // Position after the panel has committed so offsetWidth is the real,
+  // current panel (not a stale/default width) — fixes misaligned dropdowns.
+  React.useLayoutEffect(() => {
+    if (open) position(open);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, lang]);
   const scheduleClose = () => {
     if (hideTimer.current) clearTimeout(hideTimer.current);
     hideTimer.current = setTimeout(() => setOpen(null), 160);
@@ -506,7 +516,7 @@ export function SiteHeader({
             letterSpacing: ".02em",
           }}
         >
-          Announcing our AI practice. Intelligent products, built for humans →
+          {es ? "Anunciamos nuestra práctica de IA. Productos inteligentes, hechos para humanos →" : "Announcing our AI practice. Intelligent products, built for humans →"}
         </Link>
       </div>
 
@@ -549,6 +559,7 @@ export function SiteHeader({
             >
               <Logo size={28} />
               <span
+                className="logo-word"
                 style={{
                   fontWeight: 500,
                   fontSize: 20,
@@ -569,26 +580,26 @@ export function SiteHeader({
               }}
             >
               {megaMenus ? (
-                triggerBtn("services", "Services", svcRef)
+                triggerBtn("services", es ? "Servicios" : "Services", svcRef)
               ) : (
                 <Link href="/services" style={linkStyle(active === "services")}>
-                  Services
+                  {es ? "Servicios" : "Services"}
                 </Link>
               )}
               <Link href="/#research" style={linkStyle(active === "process")}>
-                Process
+                {es ? "Proceso" : "Process"}
               </Link>
               <Link href="/work" style={linkStyle(active === "work")}>
-                Work
+                {es ? "Proyectos" : "Work"}
               </Link>
               <Link href="/blog" style={linkStyle(active === "blog")}>
                 Blog
               </Link>
               {megaMenus ? (
-                triggerBtn("company", "Company", coRef)
+                triggerBtn("company", es ? "Compañía" : "Company", coRef)
               ) : (
                 <Link href="/company" style={linkStyle(active === "company")}>
-                  Company
+                  {es ? "Compañía" : "Company"}
                 </Link>
               )}
             </div>
@@ -611,7 +622,7 @@ export function SiteHeader({
                   whiteSpace: "nowrap",
                 }}
               >
-                START A PROJECT
+                {es ? "INICIAR PROYECTO" : "START A PROJECT"}
               </a>
               <button
                 aria-label="Menu"
@@ -668,6 +679,7 @@ export function SiteHeader({
               boxShadow: "0 6px 24px -18px rgba(14,13,18,.25)",
             }}
           >
+            <LangToggle />
             <span
               style={{
                 width: 34,
@@ -690,7 +702,7 @@ export function SiteHeader({
                 whiteSpace: "nowrap",
               }}
             >
-              CONTACT SALES
+              {es ? "HABLEMOS" : "CONTACT SALES"}
             </a>
             <a
               {...ctaProps(ctaStart)}
@@ -708,7 +720,7 @@ export function SiteHeader({
                 whiteSpace: "nowrap",
               }}
             >
-              START A PROJECT
+              {es ? "INICIAR PROYECTO" : "START A PROJECT"}
             </a>
           </div>
 
@@ -727,7 +739,7 @@ export function SiteHeader({
                 zIndex: 400,
               }}
             >
-              {open === "services" ? <ServicesPanel /> : <CompanyPanel />}
+              {open === "services" ? <ServicesPanel lang={lang} /> : <CompanyPanel lang={lang} />}
             </div>
           )}
         </div>
@@ -746,11 +758,11 @@ export function SiteHeader({
               }}
             >
               {[
-                { label: "Services", href: "/services", key: "services" },
-                { label: "Process", href: "/#research", key: "process" },
-                { label: "Work", href: "/work", key: "work" },
+                { label: es ? "Servicios" : "Services", href: "/services", key: "services" },
+                { label: es ? "Proceso" : "Process", href: "/#research", key: "process" },
+                { label: es ? "Proyectos" : "Work", href: "/work", key: "work" },
                 { label: "Blog", href: "/blog", key: "blog" },
-                { label: "Company", href: "/company", key: "company" },
+                { label: es ? "Compañía" : "Company", href: "/company", key: "company" },
               ].map((l) => (
                 <Link
                   key={l.key}
@@ -790,8 +802,11 @@ export function SiteHeader({
                   marginTop: 8,
                 }}
               >
-                CONTACT SALES
+                {es ? "HABLEMOS" : "CONTACT SALES"}
               </a>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                <LangToggle />
+              </div>
             </div>
           </div>
         )}

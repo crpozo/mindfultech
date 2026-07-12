@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Logo } from "../Logo";
+import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
 
@@ -13,12 +14,14 @@ function openForm(e: React.MouseEvent) {
 const MARQUEE: { name: string; img?: string; h?: number }[] = [
   { name: "USFQ" },
   { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.png", h: 36 },
-  { name: "Waku Inc." },
+  { name: "Helixona" },
   { name: "Ecohelix" },
   { name: "AWS Partner" },
 ];
 
 export function Hero() {
+  const { lang } = useLang();
+  const es = lang === "es";
   const stageRef = React.useRef<HTMLDivElement>(null);
   const marqRef = React.useRef<HTMLDivElement>(null);
 
@@ -528,9 +531,9 @@ export function Hero() {
               color: "var(--ink)",
             }}
           >
-            Building the future
+            {es ? "Construyendo el futuro" : "Building the future"}
             <br />
-            <span style={{ color: "#9aa0ad" }}>with AI software</span>
+            <span style={{ color: "#9aa0ad" }}>{es ? "con software de IA" : "with AI software"}</span>
           </h1>
           <p
             style={{
@@ -542,7 +545,7 @@ export function Hero() {
               maxWidth: "min(520px,calc(52vw - 80px))",
             }}
           >
-            Full-stack software lab, powered by UX research and applied AI.
+            {es ? "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada." : "Full-stack software lab, powered by UX research and applied AI."}
           </p>
           <div style={{ display: "flex", gap: 14, marginTop: 28, flexWrap: "wrap" }}>
             <a
@@ -551,7 +554,7 @@ export function Hero() {
               className="btn-dark"
               style={ctaDark}
             >
-              START BUILDING
+              {es ? "EMPIEZA A CONSTRUIR" : "START BUILDING"}
             </a>
             <a
               href="#contact"
@@ -570,7 +573,7 @@ export function Hero() {
                 transition: "background .2s",
               }}
             >
-              CONTACT SALES
+              {es ? "HABLEMOS" : "CONTACT SALES"}
             </a>
           </div>
         </div>
@@ -600,7 +603,7 @@ export function Hero() {
             flex: "none",
           }}
         >
-          TRUSTED BY
+          {es ? "CONFÍAN EN NOSOTROS" : "TRUSTED BY"}
         </span>
         <div
           style={{

@@ -3,52 +3,57 @@
 import * as React from "react";
 import Link from "next/link";
 import { Logo } from "../Logo";
+import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
 
-const FOOTER_COLS: { heading: string; links: { label: string; href: string }[] }[] = [
+type BiStr = { en: string; es: string };
+const FOOTER_COLS: { heading: BiStr; links: { label: BiStr; href: string }[] }[] = [
   {
-    heading: "SERVICES",
+    heading: { en: "SERVICES", es: "SERVICIOS" },
     links: [
-      { label: "UX Design", href: "/services/ux" },
-      { label: "Web & Mobile Apps", href: "/services/apps" },
-      { label: "Custom Software", href: "/services/custom" },
-      { label: "AI & Automation", href: "/services/ai" },
-      { label: "Cloud Architecture", href: "/services" },
+      { label: { en: "UX Design", es: "Diseño UX" }, href: "/services/ux" },
+      { label: { en: "Web & Mobile Apps", es: "Apps Web y Móviles" }, href: "/services/apps" },
+      { label: { en: "Custom Software", es: "Software a Medida" }, href: "/services/custom" },
+      { label: { en: "AI & Automation", es: "IA y Automatización" }, href: "/services/ai" },
+      { label: { en: "Cloud Architecture", es: "Arquitectura Cloud" }, href: "/services" },
     ],
   },
   {
-    heading: "WORK",
+    heading: { en: "WORK", es: "PROYECTOS" },
     links: [
-      { label: "Case studies", href: "/work" },
-      { label: "USFQ Portal", href: "/work#usfq" },
-      { label: "Waku Automation", href: "/work#waku" },
-      { label: "KrugerLabs Systems", href: "/work#kruger" },
+      { label: { en: "Case studies", es: "Casos de estudio" }, href: "/work" },
+      { label: { en: "USFQ Portal", es: "Portal USFQ" }, href: "/work#usfq" },
+      { label: { en: "Helixona Automation", es: "Automatización Helixona" }, href: "/work#helixona" },
+      { label: { en: "KrugerLabs Systems", es: "Sistemas KrugerLabs" }, href: "/work#kruger" },
     ],
   },
   {
-    heading: "COMPANY",
+    heading: { en: "COMPANY", es: "COMPAÑÍA" },
     links: [
-      { label: "About us", href: "/company#about" },
-      { label: "Blog", href: "/blog" },
-      { label: "Careers", href: "/company#careers" },
-      { label: "Press", href: "/company#press" },
+      { label: { en: "About us", es: "Nosotros" }, href: "/company#about" },
+      { label: { en: "Blog", es: "Blog" }, href: "/blog" },
+      { label: { en: "Careers", es: "Carreras" }, href: "/company#careers" },
+      { label: { en: "Press", es: "Prensa" }, href: "/company#press" },
     ],
   },
   {
-    heading: "CONTACT",
+    heading: { en: "CONTACT", es: "CONTACTO" },
     links: [
-      { label: "info@mindfultech.ec", href: "mailto:info@mindfultech.ec" },
-      { label: "+593 958 73 1994", href: "tel:+593958731994" },
-      { label: "WhatsApp", href: "https://api.whatsapp.com/send?phone=593958731994" },
+      { label: { en: "info@mindfultech.ec", es: "info@mindfultech.ec" }, href: "mailto:info@mindfultech.ec" },
+      { label: { en: "+593 958 73 1994", es: "+593 958 73 1994" }, href: "tel:+593958731994" },
+      { label: { en: "WhatsApp", es: "WhatsApp" }, href: "https://api.whatsapp.com/send?phone=593958731994" },
     ],
   },
 ];
 
-const LEAD_EMAIL = "carlos@mindfultech.ec";
+const LEAD_EMAIL = "carlos@mindfultech.ec"; // relay target (never shown)
+const PUBLIC_EMAIL = "info@mindfultech.ec";
 const LEAD_SUBJECT = "Lead Website MindfulTech";
 
 export function ContactFooter() {
+  const { lang } = useLang();
+  const es = lang === "es";
   const [open, setOpen] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [sending, setSending] = React.useState(false);
@@ -82,7 +87,7 @@ export function ContactFooter() {
     } catch {
       // Fallback: hand off to the visitor's mail client with everything prefilled.
       const body = `Tema: ${tema}\n\n${desc}${files.length ? `\n\n(Adjuntos mencionados: ${files.map((f) => f.name).join(", ")})` : ""}`;
-      window.location.href = `mailto:${LEAD_EMAIL}?subject=${encodeURIComponent(LEAD_SUBJECT)}&body=${encodeURIComponent(body)}`;
+      window.location.href = `mailto:${PUBLIC_EMAIL}?subject=${encodeURIComponent(LEAD_SUBJECT)}&body=${encodeURIComponent(body)}`;
       setSubmitted(true);
     } finally {
       setSending(false);
@@ -142,7 +147,7 @@ export function ContactFooter() {
             color: "var(--ink)",
           }}
         >
-          Start building with MindfulTech
+          {es ? "Empieza a construir con MindfulTech" : "Start building with MindfulTech"}
         </h2>
         <p
           style={{
@@ -155,7 +160,7 @@ export function ContactFooter() {
             margin: "16px auto 0",
           }}
         >
-          From the first research session to production AI — one lab, end to end.
+          {es ? "De la primera sesión de investigación a la IA en producción — un solo lab, de inicio a fin." : "From the first research session to production AI — one lab, end to end."}
         </p>
         <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
           <a
@@ -177,7 +182,7 @@ export function ContactFooter() {
               borderRadius: 6,
             }}
           >
-            GET STARTED NOW
+            {es ? "EMPIEZA AHORA" : "GET STARTED NOW"}
           </a>
         </div>
 
@@ -216,7 +221,7 @@ export function ContactFooter() {
               }}
             >
               <span style={{ fontWeight: 500, fontSize: 22, letterSpacing: "-.02em", color: "var(--ink)" }}>
-                Start a project
+                {es ? "Inicia un proyecto" : "Start a project"}
               </span>
               <button
                 onClick={() => setOpen(false)}
@@ -246,28 +251,28 @@ export function ContactFooter() {
                 }}
               >
                 <div style={itemStyle(0)}>
-                  <label style={label}>TEMA</label>
+                  <label style={label}>{es ? "TEMA" : "TOPIC"}</label>
                   <input
                     required
                     value={tema}
                     onChange={(e) => setTema(e.target.value)}
-                    placeholder="Ej. App móvil para mi negocio"
+                    placeholder={es ? "Ej. App móvil para mi negocio" : "E.g. A mobile app for my business"}
                     style={input}
                   />
                 </div>
                 <div style={itemStyle(1)}>
-                  <label style={label}>DESCRIPCIÓN</label>
+                  <label style={label}>{es ? "DESCRIPCIÓN" : "DESCRIPTION"}</label>
                   <textarea
                     required
                     rows={4}
                     value={desc}
                     onChange={(e) => setDesc(e.target.value)}
-                    placeholder="Cuéntanos qué quieres construir…"
+                    placeholder={es ? "Cuéntanos qué quieres construir…" : "Tell us what you want to build…"}
                     style={{ ...input, resize: "vertical" }}
                   />
                 </div>
                 <div style={itemStyle(2)}>
-                  <label style={label}>ATTACHMENTS</label>
+                  <label style={label}>{es ? "ADJUNTOS" : "ATTACHMENTS"}</label>
                   <label
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -300,7 +305,7 @@ export function ContactFooter() {
                       <path d="M4 20h16" />
                     </svg>
                     <span style={{ fontSize: 13.5, color: "#6b6875" }}>
-                      Arrastra archivos aquí o haz click
+                      {es ? "Arrastra archivos aquí o haz click" : "Drag files here or click"}
                     </span>
                     <input
                       ref={fileRef}
@@ -352,7 +357,7 @@ export function ContactFooter() {
                     marginTop: 2,
                   }}
                 >
-                  {sending ? "ENVIANDO…" : "ENVIAR →"}
+                  {sending ? (es ? "ENVIANDO…" : "SENDING…") : es ? "ENVIAR →" : "SEND →"}
                 </button>
               </form>
             ) : (
@@ -374,12 +379,12 @@ export function ContactFooter() {
                   ✓
                 </span>
                 <div style={{ fontWeight: 500, fontSize: 22, letterSpacing: "-.01em", marginTop: 16, color: "var(--ink)" }}>
-                  ¡Recibido!
+                  {es ? "¡Recibido!" : "Received!"}
                 </div>
                 <div style={{ fontSize: 15, color: "#6b6875", marginTop: 6 }}>
-                  Te respondemos en 1 día hábil.
+                  {es ? "Te respondemos en 1 día hábil." : "We reply within one business day."}
                   <br />
-                  También puedes escribirnos:{" "}
+                  {es ? "También puedes escribirnos:" : "You can also write to us:"}{" "}
                   <a href="mailto:info@mindfultech.ec" style={{ color: "var(--ink)", fontWeight: 600 }}>
                     info@mindfultech.ec
                   </a>
@@ -414,7 +419,7 @@ export function ContactFooter() {
               <Logo size={36} />
             </div>
             {FOOTER_COLS.map((col) => (
-              <div key={col.heading}>
+              <div key={col.heading.en}>
                 <div
                   style={{
                     fontFamily: MONO,
@@ -427,13 +432,13 @@ export function ContactFooter() {
                     marginBottom: 16,
                   }}
                 >
-                  {col.heading}
+                  {col.heading[lang]}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
                   {col.links.map((l) => (
-                    <FooterLink key={l.label} href={l.href} label={l.label} />
+                    <FooterLink key={l.label.en} href={l.href} label={l.label[lang]} />
                   ))}
-                  {col.heading === "CONTACT" && (
+                  {col.heading.en === "CONTACT" && (
                     <span style={{ fontSize: 14, color: "#8b8896" }}>Quito · Ecuador</span>
                   )}
                 </div>
@@ -474,9 +479,9 @@ export function ContactFooter() {
               ALL RIGHTS RESERVED.
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-              <Link href="#contact" style={legal}>Privacy Policy</Link>
-              <Link href="#contact" style={legal}>Terms of service</Link>
-              <Link href="#contact" style={legal}>Cookie Policy</Link>
+              <Link href="#contact" style={legal}>{es ? "Política de privacidad" : "Privacy Policy"}</Link>
+              <Link href="#contact" style={legal}>{es ? "Términos del servicio" : "Terms of service"}</Link>
+              <Link href="#contact" style={legal}>{es ? "Política de cookies" : "Cookie Policy"}</Link>
               <div style={{ display: "flex", gap: 14, marginLeft: 10 }}>
                 <Social label="X">
                   <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1.6 2H8l4.4 5.8L18.9 2zm-1.1 18h1.7L7.1 3.9H5.3L17.8 20z" />

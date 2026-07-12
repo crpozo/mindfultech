@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, IBM_Plex_Mono } from "next/font/google";
 import { PageLoader } from "@/components/PageLoader";
+import { LanguageProvider } from "@/components/i18n";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -31,8 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${mono.variable}`}>
       <body>
-        {children}
-        <PageLoader />
+        <LanguageProvider>
+          {children}
+          <PageLoader />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -2,7 +2,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Hero } from "@/components/home/Hero";
 import { PlatformStats } from "@/components/home/PlatformStats";
 import { FullStackLab } from "@/components/home/FullStackLab";
-import { ResearchCarousel } from "@/components/home/ResearchCarousel";
+import { ProcessFlow } from "@/components/home/ProcessFlow";
 import { ClientStories } from "@/components/home/ClientStories";
 import { NewsGrid } from "@/components/home/NewsGrid";
 import { ContactFooter } from "@/components/home/ContactFooter";
@@ -18,7 +18,7 @@ export default function Home() {
       </div>
       <PlatformStats />
       <FullStackLab />
-      <ResearchCarousel />
+      <ProcessFlow />
       <ClientStories />
       <NewsGrid />
       <ContactFooter />

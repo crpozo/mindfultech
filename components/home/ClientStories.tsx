@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { useLang } from "../i18n";
 import { ImagePlaceholder } from "../ImagePlaceholder";
 
 const MONO = "var(--mono)";
@@ -8,6 +11,8 @@ const overlay =
   "linear-gradient(180deg,rgba(10,8,16,.28) 0%,transparent 30%,transparent 45%,rgba(10,8,16,.72) 100%)";
 
 export function ClientStories() {
+  const { lang } = useLang();
+  const es = lang === "es";
   return (
     <section id="stories" style={{ position: "relative", background: "#fff", padding: "110px 0 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
@@ -22,7 +27,7 @@ export function ClientStories() {
             color: "var(--ink)",
           }}
         >
-          Teams build with MindfulTech
+          {es ? "Equipos que construyen con MindfulTech" : "Teams build with MindfulTech"}
         </h2>
         <p
           style={{
@@ -35,7 +40,7 @@ export function ClientStories() {
             margin: "18px auto 54px",
           }}
         >
-          See how our clients ship people-first products with the lab.
+          {es ? "Mira cómo nuestros clientes lanzan productos centrados en personas con el lab." : "See how our clients ship people-first products with the lab."}
         </p>
 
         <div
@@ -43,7 +48,7 @@ export function ClientStories() {
           style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
         >
           {/* USFQ — wide */}
-          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" label="TEAM / CLIENT PHOTO">
+          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" label={es ? "FOTO DEL EQUIPO / CLIENTE" : "TEAM / CLIENT PHOTO"}>
             <div
               style={{
                 color: "#fff",
@@ -54,22 +59,21 @@ export function ClientStories() {
                 maxWidth: 420,
               }}
             >
-              How USFQ partnered with MindfulTech to serve 12,000 students in
-              real time
+              {es ? "Cómo USFQ se alió con MindfulTech para servir a 12.000 estudiantes en tiempo real" : "How USFQ partnered with MindfulTech to serve 12,000 students in real time"}
             </div>
-            <div style={metaLine}>PORTAL · AI ASSIST · ENTERPRISE</div>
+            <div style={metaLine}>{es ? "PORTAL · ASISTENTE IA · ENTERPRISE" : "PORTAL · AI ASSIST · ENTERPRISE"}</div>
           </StoryCard>
 
           {/* Waku */}
-          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Waku Inc." label="CLIENT PHOTO">
+          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Helixona" label={es ? "FOTO DEL CLIENTE" : "CLIENT PHOTO"}>
             <div style={bigStat}>80%</div>
-            <div style={metaLine}>LESS MANUAL ORDER PROCESSING</div>
+            <div style={metaLine}>{es ? "MENOS PROCESAMIENTO MANUAL" : "LESS MANUAL ORDER PROCESSING"}</div>
           </StoryCard>
 
           {/* KrugerLabs */}
-          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="KrugerLabs" label="CLIENT PHOTO">
+          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="KrugerLabs" label={es ? "FOTO DEL CLIENTE" : "CLIENT PHOTO"}>
             <div style={bigStat}>3×</div>
-            <div style={metaLine}>PLATFORMS, ONE DESIGN SYSTEM</div>
+            <div style={metaLine}>{es ? "PLATAFORMAS, UN DESIGN SYSTEM" : "PLATFORMS, ONE DESIGN SYSTEM"}</div>
           </StoryCard>
         </div>
 
@@ -89,7 +93,7 @@ export function ClientStories() {
               borderRadius: 6,
             }}
           >
-            VIEW ALL STORIES
+            {es ? "VER TODOS LOS CASOS" : "VIEW ALL STORIES"}
           </Link>
         </div>
 
