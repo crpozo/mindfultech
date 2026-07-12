@@ -45,14 +45,49 @@ const FOOTER_COLS: { heading: string; links: { label: string; href: string }[] }
   },
 ];
 
+const LEAD_EMAIL = "carlos@mindfultech.ec";
+const LEAD_SUBJECT = "Lead Website MindfulTech";
+
 export function ContactFooter() {
   const [open, setOpen] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
-  const [files, setFiles] = React.useState<string[]>([]);
+  const [sending, setSending] = React.useState(false);
+  const [tema, setTema] = React.useState("");
+  const [desc, setDesc] = React.useState("");
+  const [files, setFiles] = React.useState<File[]>([]);
   const [dragOver, setDragOver] = React.useState(false);
   const accRef = React.useRef<HTMLDivElement>(null);
   const innerRef = React.useRef<HTMLDivElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
+
+  const sendLead = async () => {
+    setSending(true);
+    try {
+      // FormSubmit relays the form to the studio inbox — works on a fully
+      // static site, no backend needed.
+      const fd = new FormData();
+      fd.append("_subject", LEAD_SUBJECT);
+      fd.append("_template", "table");
+      fd.append("_captcha", "false");
+      fd.append("Tema", tema);
+      fd.append("Descripción", desc);
+      files.forEach((f, i) => fd.append(i === 0 ? "attachment" : `attachment${i + 1}`, f));
+      const res = await fetch(`https://formsubmit.co/ajax/${LEAD_EMAIL}`, {
+        method: "POST",
+        body: fd,
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSubmitted(true);
+    } catch {
+      // Fallback: hand off to the visitor's mail client with everything prefilled.
+      const body = `Tema: ${tema}\n\n${desc}${files.length ? `\n\n(Adjuntos mencionados: ${files.map((f) => f.name).join(", ")})` : ""}`;
+      window.location.href = `mailto:${LEAD_EMAIL}?subject=${encodeURIComponent(LEAD_SUBJECT)}&body=${encodeURIComponent(body)}`;
+      setSubmitted(true);
+    } finally {
+      setSending(false);
+    }
+  };
 
   const scrollToAcc = React.useCallback(() => {
     const acc = accRef.current;
@@ -207,16 +242,29 @@ export function ContactFooter() {
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
                 onSubmit={(e) => {
                   e.preventDefault();
-                  setSubmitted(true);
+                  if (!sending) void sendLead();
                 }}
               >
                 <div style={itemStyle(0)}>
                   <label style={label}>TEMA</label>
-                  <input required placeholder="Ej. App móvil para mi negocio" style={input} />
+                  <input
+                    required
+                    value={tema}
+                    onChange={(e) => setTema(e.target.value)}
+                    placeholder="Ej. App móvil para mi negocio"
+                    style={input}
+                  />
                 </div>
                 <div style={itemStyle(1)}>
                   <label style={label}>DESCRIPCIÓN</label>
-                  <textarea required rows={4} placeholder="Cuéntanos qué quieres construir…" style={{ ...input, resize: "vertical" }} />
+                  <textarea
+                    required
+                    rows={4}
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                    placeholder="Cuéntanos qué quieres construir…"
+                    style={{ ...input, resize: "vertical" }}
+                  />
                 </div>
                 <div style={itemStyle(2)}>
                   <label style={label}>ATTACHMENTS</label>
@@ -229,7 +277,7 @@ export function ContactFooter() {
                     onDrop={(e) => {
                       e.preventDefault();
                       setDragOver(false);
-                      const f = Array.from(e.dataTransfer.files).map((x) => x.name);
+                      const f = Array.from(e.dataTransfer.files);
                       if (f.length) setFiles(f);
                     }}
                     style={{
@@ -259,13 +307,13 @@ export function ContactFooter() {
                       type="file"
                       multiple
                       style={{ display: "none" }}
-                      onChange={(e) => setFiles(Array.from(e.target.files || []).map((x) => x.name))}
+                      onChange={(e) => setFiles(Array.from(e.target.files || []))}
                     />
                   </label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                     {files.map((f) => (
                       <span
-                        key={f}
+                        key={f.name}
                         style={{
                           fontFamily: MONO,
                           fontSize: 10.5,
@@ -281,29 +329,30 @@ export function ContactFooter() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {f}
+                        {f.name}
                       </span>
                     ))}
                   </div>
                 </div>
                 <button
                   type="submit"
+                  disabled={sending}
                   style={{
                     ...itemStyle(3),
                     border: "none",
-                    cursor: "pointer",
+                    cursor: sending ? "wait" : "pointer",
                     fontFamily: MONO,
                     fontSize: 12.5,
                     fontWeight: 500,
                     letterSpacing: ".12em",
-                    background: "#0e0d12",
+                    background: sending ? "#44424d" : "#0e0d12",
                     color: "#fff",
                     padding: "16px 24px",
                     borderRadius: 8,
                     marginTop: 2,
                   }}
                 >
-                  ENVIAR →
+                  {sending ? "ENVIANDO…" : "ENVIAR →"}
                 </button>
               </form>
             ) : (
