@@ -251,7 +251,7 @@ a:hover {
 /* Responsive nav — mirrors the prototype's <1120px rules */
 @media (max-width: 1120px) {
   .nav-conn {
-    width: 22px !important;
+    width: 42px !important;
   }
   .navrow nav {
     gap: 14px !important;

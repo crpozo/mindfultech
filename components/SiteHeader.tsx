@@ -674,17 +674,22 @@ export function SiteHeader({
             </div>
           </nav>
 
-          {/* connector line — bridges the two white pills, together.ai-style */}
+          {/* connector line — bridges the two white pills, together.ai-style.
+              The ends tuck 10px under each pill (negative z paints below their
+              opaque backgrounds), so contact is guaranteed at any width. */}
           <span
             className="nav-conn"
             aria-hidden
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 34,
-              height: 4,
-              borderRadius: 2,
-              background: "color-mix(in srgb,var(--accent) 45%,#dbe3f0)",
+              width: 56,
+              height: 8,
+              borderRadius: 4,
+              margin: "0 -10px",
+              position: "relative",
+              zIndex: -1,
+              background: "color-mix(in srgb, #4FAE87 55%, #dfe7f2)",
             }}
           />
           <div
