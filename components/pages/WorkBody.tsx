@@ -216,15 +216,16 @@ export function WorkBody() {
                 <p style={{ fontSize: 15.5, lineHeight: 1.6, color: "#55525e", margin: "0 0 26px", maxWidth: 500 }}>{c.body[lang]}</p>
 
                 {/* stat strip with hairline dividers */}
-                <div className="stat-strip" style={{ display: "flex", flexWrap: "wrap", rowGap: 16 }}>
-                  {c.stats.map(([v, l], si) => (
+                <div style={{ overflow: "hidden" }}>
+                <div className="stat-strip" style={{ display: "flex", flexWrap: "wrap", rowGap: 16, marginLeft: -25 }}>
+                  {c.stats.map(([v, l]) => (
                     <div
                       key={l.en}
                       className="stat-cell"
                       style={{
                         paddingRight: 24,
-                        paddingLeft: si === 0 ? 0 : 24,
-                        borderLeft: si === 0 ? "none" : "1px solid rgba(14,13,18,.12)",
+                        paddingLeft: 24,
+                        borderLeft: "1px solid rgba(14,13,18,.12)",
                       }}
                     >
                       <div style={{ fontWeight: 700, fontSize: "clamp(24px,2.2vw,32px)", letterSpacing: "-.02em", color: BRAND_GREEN }}>
@@ -235,6 +236,7 @@ export function WorkBody() {
                       </div>
                     </div>
                   ))}
+                </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 30 }}>

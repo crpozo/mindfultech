@@ -322,11 +322,6 @@ a:hover {
   .footer-grid {
     grid-template-columns: 1fr !important;
   }
-  /* stat strips stack without orphaned hairline dividers */
-  .stat-cell {
-    border-left: none !important;
-    padding-left: 0 !important;
-  }
   /* icon-only logo so the CTA + burger always fit */
   .logo-word {
     display: none;
