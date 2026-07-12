@@ -92,6 +92,13 @@ export function DarkCTA({
       <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
         <a
           href={primary.href}
+          onClick={(e) => {
+            // the contact form lives in the shared footer on every page
+            if (primary.href === "#contact") {
+              e.preventDefault();
+              window.dispatchEvent(new CustomEvent("mt:open-form"));
+            }
+          }}
           className="btn-white"
           style={{
             textDecoration: "none",

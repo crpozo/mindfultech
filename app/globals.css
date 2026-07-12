@@ -244,7 +244,8 @@ a:hover {
     opacity: 0.65;
   }
 }
-.mt-loader svg {
+.mt-loader svg,
+.mt-loader img {
   animation: mtpulse 1.1s ease-in-out infinite;
 }
 
@@ -324,8 +325,11 @@ a:hover {
     grid-template-columns: 1fr !important;
   }
   /* icon-only logo so the CTA + burger always fit */
-  .logo-word {
-    display: none;
+  .logo-full {
+    display: none !important;
+  }
+  .logo-mark {
+    display: block !important;
   }
   .nav-mobile a {
     font-size: 10px !important;

@@ -5,8 +5,6 @@ import { FullStackLab } from "@/components/home/FullStackLab";
 import { ProcessFlow } from "@/components/home/ProcessFlow";
 import { ClientStories } from "@/components/home/ClientStories";
 import { NewsGrid } from "@/components/home/NewsGrid";
-import { ContactFooter } from "@/components/home/ContactFooter";
-import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 
 export default function Home() {
   return (
@@ -22,8 +20,6 @@ export default function Home() {
       <ProcessFlow />
       <ClientStories />
       <NewsGrid />
-      <ContactFooter />
-      <WhatsAppBubble />
     </div>
   );
 }

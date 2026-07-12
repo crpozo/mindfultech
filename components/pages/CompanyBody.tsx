@@ -3,7 +3,7 @@
 import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
-import { Pill, FooterLinks } from "@/components/internal/Shared";
+import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
 const MONO = "var(--mono)";
@@ -181,14 +181,6 @@ export function CompanyBody() {
               })}
             </div>
           </div>
-          <FooterLinks
-            links={[
-              { label: es ? "Inicio" : "Home", href: "/" },
-              { label: es ? "Servicios" : "Services", href: "/services" },
-              { label: es ? "Proyectos" : "Work", href: "/work" },
-              { label: "Blog", href: "/blog" },
-            ]}
-          />
         </div>
       </section>
     </div>

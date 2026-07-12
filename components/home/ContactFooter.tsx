@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Logo } from "../Logo";
 import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
@@ -416,7 +415,8 @@ export function ContactFooter() {
             }}
           >
             <div>
-              <Logo size={36} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/logo.png" alt="MindfulTech" style={{ height: 34, width: "auto", display: "block" }} />
             </div>
             {FOOTER_COLS.map((col) => (
               <div key={col.heading.en}>

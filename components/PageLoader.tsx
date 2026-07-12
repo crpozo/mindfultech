@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Logo } from "./Logo";
 
 /**
  * Branded overlay shown briefly on in-app navigation — the pulsing brand mark
@@ -40,7 +39,8 @@ export function PageLoader() {
 
   return (
     <div className={`mt-loader${show ? " show" : ""}`} aria-hidden={!show}>
-      <Logo size={46} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/logo-mark.png" alt="" width={52} height={52} />
 
       <div
         style={{

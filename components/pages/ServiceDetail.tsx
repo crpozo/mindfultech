@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Pill, FooterLinks, DarkCTA } from "@/components/internal/Shared";
+import { Pill, DarkCTA } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
 const MONO = "var(--mono)";
@@ -860,16 +860,8 @@ export function ServiceDetail({ slug }: { slug: string }) {
           <DarkCTA
             title={es ? `Inicia tu proyecto de ${s.name}` : `Start your ${s.name} project`}
             subtitle={es ? "Cuéntanos qué estás construyendo — respondemos en un día hábil." : "Tell us what you’re building — we’ll reply within one business day."}
-            primary={{ label: es ? "EMPIEZA AHORA" : "GET STARTED NOW", href: "mailto:info@mindfultech.ec" }}
+            primary={{ label: es ? "EMPIEZA AHORA" : "GET STARTED NOW", href: "#contact" }}
             secondary={{ label: "WHATSAPP →", href: "https://api.whatsapp.com/send?phone=593958731994" }}
-          />
-          <FooterLinks
-            links={[
-              { label: es ? "Inicio" : "Home", href: "/" },
-              { label: es ? "Servicios" : "Services", href: "/services" },
-              { label: es ? "Proyectos" : "Work", href: "/work" },
-              { label: es ? "Compañía" : "Company", href: "/company" },
-            ]}
           />
         </div>
       </section>

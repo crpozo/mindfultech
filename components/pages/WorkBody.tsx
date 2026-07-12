@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { FooterLinks, DarkCTA } from "@/components/internal/Shared";
+import { DarkCTA } from "@/components/internal/Shared";
 import { BRAND_GREEN } from "@/components/Logo";
 import { useLang } from "@/components/i18n";
 
@@ -155,7 +155,6 @@ function PolaroidWell({ brand, es }: { brand: string; es: boolean }) {
 export function WorkBody() {
   const { lang } = useLang();
   const es = lang === "es";
-  const meta = `0${CASES.length} ${es ? "CASOS DE ESTUDIO" : "CASE STUDIES"} · 2023—2026`;
 
   return (
     <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
@@ -164,7 +163,7 @@ export function WorkBody() {
       {/* page header — reference: bold title left, mono meta right */}
       <section style={{ background: "#fff", padding: "84px 0 30px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 24, flexWrap: "wrap" }}>
+          <div>
             <h1
               style={{
                 fontWeight: 700,
@@ -178,9 +177,6 @@ export function WorkBody() {
               {es ? "Entregado con clientes" : "Shipped with clients"}
               <span style={{ color: BRAND_GREEN }}>.</span>
             </h1>
-            <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "#8b8896", paddingTop: 18, whiteSpace: "nowrap" }}>
-              {meta}
-            </span>
           </div>
           <p style={{ fontSize: 17, lineHeight: 1.55, color: "#6b6875", maxWidth: 540, margin: "20px 0 0" }}>
             {es
@@ -411,15 +407,7 @@ export function WorkBody() {
           <DarkCTA
             title={es ? "Tu producto puede ser el próximo" : "Your product could be next"}
             subtitle={es ? "Cuéntanos dónde duele — te mostramos lo que es posible." : "Tell us where it hurts — we’ll show you what’s possible."}
-            primary={{ label: es ? "INICIAR PROYECTO" : "START A PROJECT", href: "mailto:info@mindfultech.ec" }}
-          />
-          <FooterLinks
-            links={[
-              { label: es ? "Inicio" : "Home", href: "/" },
-              { label: es ? "Servicios" : "Services", href: "/services" },
-              { label: "Blog", href: "/blog" },
-              { label: es ? "Compañía" : "Company", href: "/company" },
-            ]}
+            primary={{ label: es ? "INICIAR PROYECTO" : "START A PROJECT", href: "#contact" }}
           />
         </div>
       </section>

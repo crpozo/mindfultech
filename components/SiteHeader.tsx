@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Logo, BRAND_NAVY } from "./Logo";
 import { useLang, LangToggle, type Lang } from "./i18n";
 
 type Active = "home" | "services" | "process" | "work" | "blog" | "company";
@@ -378,7 +377,9 @@ function CompanyPanel({ lang }: { lang: Lang }) {
 export function SiteHeader({
   active = "home",
   megaMenus = false,
-  ctaMode = "mailto",
+  // the homepage footer (with the contact form) is on every page now,
+  // so all CTAs can open it in place
+  ctaMode = "form",
   blueBg = false,
 }: {
   active?: Active;
@@ -564,18 +565,20 @@ export function SiteHeader({
                 color: "var(--ink)",
               }}
             >
-              <Logo size={28} />
-              <span
-                className="logo-word"
-                style={{
-                  fontWeight: 600,
-                  fontSize: 20,
-                  letterSpacing: "-.02em",
-                  color: BRAND_NAVY,
-                }}
-              >
-                MindfulTech
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo.png"
+                alt="MindfulTech"
+                className="logo-full"
+                style={{ height: 36, width: "auto", display: "block" }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo-mark.png"
+                alt="MindfulTech"
+                className="logo-mark"
+                style={{ height: 32, width: "auto", display: "none" }}
+              />
             </Link>
             <div
               className="nav-center"

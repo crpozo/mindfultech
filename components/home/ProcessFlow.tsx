@@ -36,11 +36,67 @@ const T = {
 
 const WORKING_WITH = ["Claude", "OpenAI", "AWS", "Next.js", "LangChain", "Vercel"];
 
-function StepText({ s }: { s: { title: string; desc: string } }) {
+/* one icon per pipeline step (indexes match t.steps) */
+const STEP_ICONS: React.ReactNode[] = [
+  // requirements — clipboard list
+  <>
+    <rect x="8" y="3" width="8" height="4" rx="1" />
+    <path d="M16 5h2a1 1 0 011 1v14a1 1 0 01-1 1H6a1 1 0 01-1-1V6a1 1 0 011-1h2M9 11h6M9 15h4" />
+  </>,
+  // kick-off — rocket
+  <>
+    <path d="M12 15c5-4 6.5-8.5 6-12-3.5-.5-8 1-12 6l-2.5 3L8 16.5z" />
+    <path d="M9 12l3 3M5 16c-1.5 1-2 3.5-2 5 1.5 0 4-.5 5-2M15 6.5a1.5 1.5 0 100 .01" />
+  </>,
+  // ux/ui — pen tool
+  <>
+    <path d="M12 19l7-7 3 3-7 7-3-3z" />
+    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5zM2 2l7.6 7.6" />
+    <circle cx="11" cy="11" r="2" />
+  </>,
+  // implementation — code
+  <>
+    <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+  </>,
+  // testing — shield check
+  <>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" />
+  </>,
+  // continuous improvement — refresh cycle
+  <>
+    <path d="M23 4v6h-6M1 20v-6h6" />
+    <path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15" />
+  </>,
+];
+
+function StepText({ s, hot }: { s: { title: string; desc: string }; hot: boolean }) {
   return (
     <div>
-      <div style={{ color: "#fff", fontWeight: 600, fontSize: 18, letterSpacing: "-.01em", lineHeight: 1.25 }}>{s.title}</div>
-      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8f8ba4", marginTop: 8, maxWidth: 250, marginLeft: "auto", marginRight: "auto" }}>
+      <div
+        style={{
+          color: hot ? "var(--accent)" : "#fff",
+          fontWeight: 600,
+          fontSize: 18,
+          letterSpacing: "-.01em",
+          lineHeight: 1.25,
+          transition: "color .25s ease",
+        }}
+      >
+        {s.title}
+      </div>
+      <div
+        style={{
+          fontSize: 13.5,
+          lineHeight: 1.6,
+          color: hot ? "#b9b5cd" : "#8f8ba4",
+          marginTop: 8,
+          maxWidth: 250,
+          marginLeft: "auto",
+          marginRight: "auto",
+          transition: "color .25s ease",
+        }}
+      >
         {s.desc}
       </div>
     </div>
@@ -50,6 +106,11 @@ function StepText({ s }: { s: { title: string; desc: string } }) {
 export function ProcessFlow() {
   const { lang } = useLang();
   const t = T[lang];
+  const [hot, setHot] = React.useState<number | null>(null);
+  const hoverProps = (i: number) => ({
+    onMouseEnter: () => setHot(i),
+    onMouseLeave: () => setHot(null),
+  });
   return (
     <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "110px 0 90px" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
@@ -74,6 +135,7 @@ export function ProcessFlow() {
             {t.steps.map((s, i) => (
               <div
                 key={s.title}
+                {...(i % 2 === 1 ? hoverProps(i) : {})}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -82,7 +144,7 @@ export function ProcessFlow() {
                   padding: "0 6px",
                 }}
               >
-                {i % 2 === 1 && <StepText s={s} />}
+                {i % 2 === 1 && <StepText s={s} hot={hot === i} />}
               </div>
             ))}
           </div>
@@ -107,28 +169,31 @@ export function ProcessFlow() {
             {t.steps.map((s, i) => (
               <div
                 key={s.title}
+                {...hoverProps(i)}
                 style={{
                   position: "absolute",
                   left: `${((i + 0.5) * 100) / 6}%`,
                   top: i % 2 === 1 ? 62 : 158,
-                  transform: "translate(-50%,-50%)",
+                  transform: `translate(-50%,-50%) scale(${hot === i ? 1.12 : 1})`,
                   width: 52,
                   height: 52,
                   borderRadius: "50%",
-                  background: "#131024",
-                  border: "1.5px solid color-mix(in srgb,var(--accent) 55%,transparent)",
+                  background: hot === i ? "#182138" : "#131024",
+                  border: `1.5px solid color-mix(in srgb,var(--accent) ${hot === i ? 100 : 55}%,transparent)`,
                   boxShadow:
-                    "0 0 0 6px #0d0a1f, 0 0 26px 4px color-mix(in srgb,var(--accent) 26%,transparent), inset 0 0 14px color-mix(in srgb,var(--accent) 14%,transparent)",
+                    hot === i
+                      ? "0 0 0 6px #0d0a1f, 0 0 42px 12px color-mix(in srgb,var(--accent) 50%,transparent), inset 0 0 18px color-mix(in srgb,var(--accent) 28%,transparent)"
+                      : "0 0 0 6px #0d0a1f, 0 0 26px 4px color-mix(in srgb,var(--accent) 26%,transparent), inset 0 0 14px color-mix(in srgb,var(--accent) 14%,transparent)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: MONO,
-                  fontSize: 13,
-                  letterSpacing: ".08em",
                   color: "var(--accent)",
+                  transition: "transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease",
                 }}
               >
-                {String(i + 1).padStart(2, "0")}
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  {STEP_ICONS[i]}
+                </svg>
               </div>
             ))}
           </div>
@@ -136,8 +201,8 @@ export function ProcessFlow() {
           {/* texts for the LOW steps (01 · 03 · 05) sit below the wave */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 18 }}>
             {t.steps.map((s, i) => (
-              <div key={s.title} style={{ textAlign: "center", padding: "0 6px" }}>
-                {i % 2 === 0 && <StepText s={s} />}
+              <div key={s.title} {...(i % 2 === 0 ? hoverProps(i) : {})} style={{ textAlign: "center", padding: "0 6px" }}>
+                {i % 2 === 0 && <StepText s={s} hot={hot === i} />}
               </div>
             ))}
           </div>
@@ -146,23 +211,40 @@ export function ProcessFlow() {
         {/* pipeline — narrow screens: simple stacked grid */}
         <div className="flow-grid flow-stack" style={{ marginTop: 64 }}>
           {t.steps.map((s, i) => (
-            <div key={s.title} style={{ position: "relative" }}>
+            <div key={s.title} {...hoverProps(i)} style={{ position: "relative" }}>
               <span
                 style={{
-                  position: "relative",
-                  zIndex: 1,
-                  display: "block",
-                  width: 12,
-                  height: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 40,
+                  height: 40,
                   borderRadius: "50%",
-                  background: "var(--accent)",
-                  boxShadow: "0 0 0 4px #0d0a1f, 0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)",
+                  background: hot === i ? "#182138" : "#131024",
+                  border: `1.5px solid color-mix(in srgb,var(--accent) ${hot === i ? 100 : 55}%,transparent)`,
+                  boxShadow:
+                    hot === i
+                      ? "0 0 26px 6px color-mix(in srgb,var(--accent) 45%,transparent)"
+                      : "0 0 14px 2px color-mix(in srgb,var(--accent) 28%,transparent)",
+                  color: "var(--accent)",
+                  transition: "box-shadow .25s ease, border-color .25s ease, background .25s ease",
                 }}
-              />
-              <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".14em", color: "var(--accent)", margin: "18px 0 8px" }}>
-                {String(i + 1).padStart(2, "0")}
-              </div>
-              <div style={{ color: "#fff", fontWeight: 600, fontSize: 18.5, letterSpacing: "-.01em", lineHeight: 1.25 }}>
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  {STEP_ICONS[i]}
+                </svg>
+              </span>
+              <div
+                style={{
+                  color: hot === i ? "var(--accent)" : "#fff",
+                  fontWeight: 600,
+                  fontSize: 18.5,
+                  letterSpacing: "-.01em",
+                  lineHeight: 1.25,
+                  marginTop: 16,
+                  transition: "color .25s ease",
+                }}
+              >
                 {s.title}
               </div>
               <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8f8ba4", marginTop: 8 }}>{s.desc}</div>

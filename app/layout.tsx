@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Outfit, IBM_Plex_Mono } from "next/font/google";
 import { PageLoader } from "@/components/PageLoader";
 import { LanguageProvider } from "@/components/i18n";
+import { ContactFooter } from "@/components/home/ContactFooter";
+import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -34,6 +36,9 @@ export default function RootLayout({
       <body>
         <LanguageProvider>
           {children}
+          {/* the homepage footer (contact form + link columns) on every page */}
+          <ContactFooter />
+          <WhatsAppBubble />
           <PageLoader />
         </LanguageProvider>
       </body>
