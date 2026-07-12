@@ -35,7 +35,7 @@ const CARDS: Card[] = [
     value: "80%",
     caption: { en: "less order processing after AI workflows at Helixona.", es: "menos procesamiento manual con flujos de IA en Helixona." },
     captionColor: "#4a3040",
-    href: "/work#waku",
+    href: "/work#helixona",
     connector: true,
   },
   {

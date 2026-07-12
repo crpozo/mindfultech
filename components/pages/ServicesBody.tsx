@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
+import { Logo } from "@/components/Logo";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Pill, FooterLinks, DarkCTA } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
@@ -144,8 +145,8 @@ export function ServicesBody() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <Mark />
-                  <span style={{ fontWeight: 600, fontSize: 13.5 }}>mindfultech</span>
+                  <Logo size={17} />
+                  <span style={{ fontWeight: 600, fontSize: 13.5, color: "#24344E" }}>MindfulTech</span>
                 </div>
                 <div style={{ display: "flex", gap: 14, fontSize: 12.5, fontWeight: 500, color: "#6b6875" }}>
                   <span style={{ color: "var(--accent)" }}>Delivery</span>
@@ -436,15 +437,6 @@ export function ServicesBody() {
         </div>
       </section>
     </div>
-  );
-}
-
-function Mark() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
-      <circle cx="16" cy="16" r="11" stroke="url(#mt-mark)" strokeWidth="4.4" fill="none" strokeLinecap="round" strokeDasharray="53.5 15.6" transform="rotate(-52 16 16)" />
-      <circle cx="16" cy="16" r="3.9" fill="#0e0d12" />
-    </svg>
   );
 }
 

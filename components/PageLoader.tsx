@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 
 /**
- * Branded overlay shown briefly on in-app navigation — a spinning ensō over the
- * hero's blue wash, mirroring the prototype's nav-fix loader. It appears on a
- * click that leads to another route and clears once the pathname changes.
+ * Branded overlay shown briefly on in-app navigation — the pulsing brand mark
+ * over the hero's blue wash, mirroring the prototype's nav-fix loader. It
+ * appears on a click that leads to another route and clears once the pathname
+ * changes.
  */
 export function PageLoader() {
   const pathname = usePathname();
@@ -39,7 +40,7 @@ export function PageLoader() {
 
   return (
     <div className={`mt-loader${show ? " show" : ""}`} aria-hidden={!show}>
-      <Logo size={46} stroke="var(--accent)" />
+      <Logo size={46} />
 
       <div
         style={{

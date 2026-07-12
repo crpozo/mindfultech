@@ -459,7 +459,7 @@ export function ContactFooter() {
                 whiteSpace: "nowrap",
               }}
             >
-              mindfultech
+              MindfulTech
             </div>
           </div>
 

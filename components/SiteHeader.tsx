@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Logo, MarkDefs } from "./Logo";
+import { Logo, BRAND_NAVY } from "./Logo";
 import { useLang, LangToggle, type Lang } from "./i18n";
 
 type Active = "home" | "services" | "process" | "work" | "blog" | "company";
@@ -492,7 +492,6 @@ export function SiteHeader({
 
   return (
     <>
-      <MarkDefs />
       {/* announce bar */}
       <div
         style={{
@@ -535,7 +534,7 @@ export function SiteHeader({
           style={{
             position: "relative",
             display: "flex",
-            gap: 14,
+            gap: 0,
             padding: "16px 18px",
             maxWidth: 1560,
             margin: "0 auto",
@@ -569,12 +568,13 @@ export function SiteHeader({
               <span
                 className="logo-word"
                 style={{
-                  fontWeight: 500,
+                  fontWeight: 600,
                   fontSize: 20,
                   letterSpacing: "-.02em",
+                  color: BRAND_NAVY,
                 }}
               >
-                mindfultech
+                MindfulTech
               </span>
             </Link>
             <div
@@ -594,11 +594,11 @@ export function SiteHeader({
                   {es ? "Servicios" : "Services"}
                 </Link>
               )}
-              <Link href="/#research" style={linkStyle(active === "process")}>
-                {es ? "Proceso" : "Process"}
-              </Link>
               <Link href="/work" style={linkStyle(active === "work")}>
                 {es ? "Proyectos" : "Work"}
+              </Link>
+              <Link href="/#research" style={linkStyle(active === "process")}>
+                {es ? "Proceso" : "Process"}
               </Link>
               <Link href="/blog" style={linkStyle(active === "blog")}>
                 Blog
@@ -633,7 +633,7 @@ export function SiteHeader({
                 {es ? "INICIAR PROYECTO" : "START A PROJECT"}
               </a>
               <button
-                aria-label="Menu"
+                aria-label={es ? "Menú" : "Menu"}
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen((o) => !o)}
                 style={{
@@ -674,6 +674,19 @@ export function SiteHeader({
             </div>
           </nav>
 
+          {/* connector line — bridges the two white pills, together.ai-style */}
+          <span
+            className="nav-conn"
+            aria-hidden
+            style={{
+              flex: "none",
+              alignSelf: "center",
+              width: 34,
+              height: 4,
+              borderRadius: 2,
+              background: "color-mix(in srgb,var(--accent) 45%,#dbe3f0)",
+            }}
+          />
           <div
             className="nav-cta"
             style={{
@@ -687,14 +700,6 @@ export function SiteHeader({
               boxShadow: "0 6px 24px -18px rgba(14,13,18,.25)",
             }}
           >
-            <span
-              style={{
-                width: 34,
-                height: 4,
-                borderRadius: 2,
-                background: "color-mix(in srgb,var(--accent) 30%,#e6e4ee)",
-              }}
-            />
             <LangToggle />
             <a
               {...ctaProps(ctaStart)}
@@ -751,8 +756,8 @@ export function SiteHeader({
             >
               {[
                 { label: es ? "Servicios" : "Services", href: "/services", key: "services" },
-                { label: es ? "Proceso" : "Process", href: "/#research", key: "process" },
                 { label: es ? "Proyectos" : "Work", href: "/work", key: "work" },
+                { label: es ? "Proceso" : "Process", href: "/#research", key: "process" },
                 { label: "Blog", href: "/blog", key: "blog" },
                 { label: es ? "Compañía" : "Company", href: "/company", key: "company" },
               ].map((l) => (

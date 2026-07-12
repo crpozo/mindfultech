@@ -233,14 +233,25 @@ a:hover {
 .mt-loader.show {
   opacity: 1;
 }
+@keyframes mtpulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.65;
+  }
+}
 .mt-loader svg {
-  animation: mtspin 0.9s linear infinite;
+  animation: mtpulse 1.1s ease-in-out infinite;
 }
 
 /* Responsive nav — mirrors the prototype's <1120px rules */
 @media (max-width: 1120px) {
-  .navrow {
-    gap: 10px !important;
+  .nav-conn {
+    width: 22px !important;
   }
   .navrow nav {
     gap: 14px !important;
@@ -285,6 +296,9 @@ a:hover {
   .nav-cta {
     display: none !important;
   }
+  .nav-conn {
+    display: none !important;
+  }
   .nav-mobile {
     display: flex !important;
     align-items: center;
@@ -308,6 +322,11 @@ a:hover {
   .footer-grid {
     grid-template-columns: 1fr !important;
   }
+  /* stat strips stack without orphaned hairline dividers */
+  .stat-cell {
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
   /* icon-only logo so the CTA + burger always fit */
   .logo-word {
     display: none;
@@ -315,6 +334,35 @@ a:hover {
   .nav-mobile a {
     font-size: 10px !important;
     padding: 10px 12px !important;
+  }
+}
+
+/* Case-study polaroids: straighten + lift on hover */
+.polaroid {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.45s;
+  will-change: transform;
+}
+.polaroid:hover {
+  transform: rotate(0deg) translateY(-6px) !important;
+}
+/* alternate case rows: image on the left on desktop, text first on mobile */
+@media (min-width: 901px) {
+  .case-rev .case-media {
+    order: -1;
+  }
+}
+
+/* Very narrow phones: shrink the nav pill so the burger never clips */
+@media (max-width: 360px) {
+  .navrow nav {
+    padding: 10px 12px !important;
+    gap: 10px !important;
+  }
+  .nav-mobile a {
+    font-size: 9px !important;
+    padding: 8px 9px !important;
   }
 }
 
@@ -330,13 +378,20 @@ a:hover {
   grid-template-columns: repeat(6, 1fr);
   gap: 26px;
 }
+/* wave layout on wide screens, stacked grid below 1120px */
+.flow-stack {
+  display: none;
+}
 @media (max-width: 1120px) {
+  .flow-wave {
+    display: none;
+  }
+  .flow-stack {
+    display: grid;
+  }
   .flow-grid {
     grid-template-columns: repeat(3, 1fr);
     row-gap: 44px;
-  }
-  .flow-line {
-    display: none;
   }
 }
 @media (max-width: 640px) {

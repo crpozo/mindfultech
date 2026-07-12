@@ -36,6 +36,17 @@ const T = {
 
 const WORKING_WITH = ["Claude", "OpenAI", "AWS", "Next.js", "LangChain", "Vercel"];
 
+function StepText({ s }: { s: { title: string; desc: string } }) {
+  return (
+    <div>
+      <div style={{ color: "#fff", fontWeight: 600, fontSize: 18, letterSpacing: "-.01em", lineHeight: 1.25 }}>{s.title}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8f8ba4", marginTop: 8, maxWidth: 250, marginLeft: "auto", marginRight: "auto" }}>
+        {s.desc}
+      </div>
+    </div>
+  );
+}
+
 export function ProcessFlow() {
   const { lang } = useLang();
   const t = T[lang];
@@ -56,37 +67,107 @@ export function ProcessFlow() {
         </h2>
         <p style={{ fontSize: 19, color: "#8f8ba4", fontWeight: 400, margin: "16px 0 0", maxWidth: 620 }}>{t.sub}</p>
 
-        {/* pipeline */}
-        <div style={{ position: "relative", marginTop: 64 }}>
-          <div
-            className="mt-conn flow-line"
-            style={{ position: "absolute", left: 6, right: 6, top: 5, height: 2, borderRadius: 2, opacity: 0.6 }}
-          />
-          <div className="flow-grid">
+        {/* pipeline — desktop: nodes riding a dashed wave, text alternating above/below */}
+        <div className="flow-wave" style={{ position: "relative", marginTop: 30 }}>
+          {/* texts for the HIGH steps (02 · 04 · 06) sit above the wave */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 18 }}>
             {t.steps.map((s, i) => (
-              <div key={s.title} style={{ position: "relative" }}>
-                <span
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    display: "block",
-                    width: 12,
-                    height: 12,
-                    borderRadius: "50%",
-                    background: "var(--accent)",
-                    boxShadow: "0 0 0 4px #0d0a1f, 0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)",
-                  }}
-                />
-                <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".14em", color: "var(--accent)", margin: "18px 0 8px" }}>
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <div style={{ color: "#fff", fontWeight: 600, fontSize: 18.5, letterSpacing: "-.01em", lineHeight: 1.25 }}>
-                  {s.title}
-                </div>
-                <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8f8ba4", marginTop: 8 }}>{s.desc}</div>
+              <div
+                key={s.title}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  textAlign: "center",
+                  padding: "0 6px",
+                }}
+              >
+                {i % 2 === 1 && <StepText s={s} />}
               </div>
             ))}
           </div>
+
+          {/* the wave band */}
+          <div style={{ position: "relative", height: 220 }}>
+            <svg
+              viewBox="0 0 1200 220"
+              preserveAspectRatio="none"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+              aria-hidden
+            >
+              <path
+                d="M100 158 C190 158 210 62 300 62 C390 62 410 158 500 158 C590 158 610 62 700 62 C790 62 810 158 900 158 C990 158 1010 62 1100 62"
+                fill="none"
+                stroke="rgba(255,255,255,.3)"
+                strokeWidth="1.6"
+                strokeDasharray="5 8"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            {t.steps.map((s, i) => (
+              <div
+                key={s.title}
+                style={{
+                  position: "absolute",
+                  left: `${((i + 0.5) * 100) / 6}%`,
+                  top: i % 2 === 1 ? 62 : 158,
+                  transform: "translate(-50%,-50%)",
+                  width: 52,
+                  height: 52,
+                  borderRadius: "50%",
+                  background: "#131024",
+                  border: "1.5px solid color-mix(in srgb,var(--accent) 55%,transparent)",
+                  boxShadow:
+                    "0 0 0 6px #0d0a1f, 0 0 26px 4px color-mix(in srgb,var(--accent) 26%,transparent), inset 0 0 14px color-mix(in srgb,var(--accent) 14%,transparent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: MONO,
+                  fontSize: 13,
+                  letterSpacing: ".08em",
+                  color: "var(--accent)",
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </div>
+            ))}
+          </div>
+
+          {/* texts for the LOW steps (01 · 03 · 05) sit below the wave */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 18 }}>
+            {t.steps.map((s, i) => (
+              <div key={s.title} style={{ textAlign: "center", padding: "0 6px" }}>
+                {i % 2 === 0 && <StepText s={s} />}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* pipeline — narrow screens: simple stacked grid */}
+        <div className="flow-grid flow-stack" style={{ marginTop: 64 }}>
+          {t.steps.map((s, i) => (
+            <div key={s.title} style={{ position: "relative" }}>
+              <span
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  display: "block",
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  boxShadow: "0 0 0 4px #0d0a1f, 0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)",
+                }}
+              />
+              <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".14em", color: "var(--accent)", margin: "18px 0 8px" }}>
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <div style={{ color: "#fff", fontWeight: 600, fontSize: 18.5, letterSpacing: "-.01em", lineHeight: 1.25 }}>
+                {s.title}
+              </div>
+              <div style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8f8ba4", marginTop: 8 }}>{s.desc}</div>
+            </div>
+          ))}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 34, marginTop: 80, flexWrap: "wrap" }}>
