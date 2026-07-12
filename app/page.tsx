@@ -10,10 +10,11 @@ import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 
 export default function Home() {
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
-      {/* Header + hero share one full-viewport blue fold — no white peeks in. */}
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        <SiteHeader active="home" megaMenus blueBg ctaMode="form" />
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
+      {/* Header sits outside the fold so position:sticky can escape it. */}
+      <SiteHeader active="home" megaMenus blueBg ctaMode="form" />
+      {/* Hero fills the rest of the first viewport — no white peeks in. */}
+      <div style={{ minHeight: "max(560px, calc(100vh - 150px))", display: "flex", flexDirection: "column" }}>
         <Hero />
       </div>
       <PlatformStats />

@@ -71,7 +71,7 @@ export function ServicesBody() {
   const { lang } = useLang();
   const es = lang === "es";
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="services" megaMenus />
 
       {/* HERO */}

@@ -60,7 +60,7 @@ export function BlogBody() {
   const { lang } = useLang();
   const es = lang === "es";
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="blog" megaMenus />
 
       <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "80px 0 50px", textAlign: "center" }}>

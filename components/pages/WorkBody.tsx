@@ -16,6 +16,7 @@ type Case = {
   imageFirst: boolean;
   imageBg: string;
   image?: string;
+  imageFit?: "cover" | "contain";
   link?: { label: Bi; href: string };
   gallery?: { src: string; alt: string }[];
   tag: Bi;
@@ -29,13 +30,14 @@ const CASES: Case[] = [
     id: "themedmotion",
     brand: "ThemedMotion",
     imageFirst: true,
-    imageBg: "#0b0a09",
-    image: "/portfolio/tm-joey.webp",
+    imageBg: "#000",
+    image: "/portfolio/tm-site-hero.webp",
+    imageFit: "contain",
     link: { label: { en: "VISIT LIVE SITE →", es: "VER SITIO EN VIVO →" }, href: "https://crpozo.github.io/themed-motion/" },
     gallery: [
-      { src: "/portfolio/tm-build.webp", alt: "Finished character next to its mechanical skeleton" },
-      { src: "/portfolio/tm-skeleton.webp", alt: "Mechanical engineering figure" },
-      { src: "/portfolio/tm-creature.webp", alt: "Creature character design" },
+      { src: "/portfolio/tm-site-design.webp", alt: "ThemedMotion site — concept design chapter" },
+      { src: "/portfolio/tm-site-eng.webp", alt: "ThemedMotion site — interactive 3D engineering viewer" },
+      { src: "/portfolio/tm-site-finish.webp", alt: "ThemedMotion site — finishing and textures chapter" },
     ],
     tag: { en: "WEB · 3D · ANIMATRONICS", es: "WEB · 3D · ANIMATRÓNICOS" },
     title: {
@@ -116,7 +118,7 @@ export function WorkBody() {
   const { lang } = useLang();
   const es = lang === "es";
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="work" megaMenus />
 
       <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "90px 0 60px", textAlign: "center" }}>
@@ -152,7 +154,7 @@ export function WorkBody() {
                   <img
                     src={c.image}
                     alt={`${c.brand} project`}
-                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: c.imageFit ?? "cover" }}
                   />
                 ) : (
                   <div style={{ position: "absolute", inset: 0 }}>

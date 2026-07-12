@@ -25,7 +25,7 @@ export function CompanyBody() {
       ];
 
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="company" megaMenus />
 
       <section id="about" style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "90px 0 60px", textAlign: "center", scrollMarginTop: 120 }}>

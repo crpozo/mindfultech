@@ -529,7 +529,7 @@ export function ServiceDetail({ slug }: { slug: string }) {
   if (!s) return null;
 
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#fff" }}>
+    <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="services" megaMenus />
 
       {/* HERO */}

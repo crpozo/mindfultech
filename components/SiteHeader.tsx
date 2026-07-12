@@ -520,7 +520,16 @@ export function SiteHeader({
         </Link>
       </div>
 
-      <div style={{ background: blueBg ? "#edf2fa" : "transparent" }}>
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 900,
+          background: blueBg ? "rgba(237,242,250,.82)" : "rgba(255,255,255,.82)",
+          backdropFilter: "blur(14px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.4)",
+        }}
+      >
         <div
           ref={rowRef}
           className="navrow"
