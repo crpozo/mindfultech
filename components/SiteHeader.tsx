@@ -675,8 +675,8 @@ export function SiteHeader({
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 78,
-              height: 5,
+              width: 40,
+              height: 6,
               borderRadius: 3,
               margin: "0 -14px",
               position: "relative",
