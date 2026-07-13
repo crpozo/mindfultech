@@ -60,6 +60,8 @@ export function ContactFooter() {
   const [desc, setDesc] = React.useState("");
   const [files, setFiles] = React.useState<File[]>([]);
   const [dragOver, setDragOver] = React.useState(false);
+  // mobile footer accordion (together.ai-style); ignored on desktop via CSS
+  const [openCol, setOpenCol] = React.useState<string | null>(null);
   const accRef = React.useRef<HTMLDivElement>(null);
   const innerRef = React.useRef<HTMLDivElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -418,32 +420,56 @@ export function ContactFooter() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/logo.png" alt="MindfulTech" style={{ height: 34, width: "auto", display: "block" }} />
             </div>
-            {FOOTER_COLS.map((col) => (
-              <div key={col.heading.en}>
-                <div
-                  style={{
-                    fontFamily: MONO,
-                    fontSize: 10.5,
-                    fontWeight: 500,
-                    letterSpacing: ".14em",
-                    color: "#8b8896",
-                    borderTop: "1px solid rgba(14,13,18,.14)",
-                    paddingTop: 14,
-                    marginBottom: 16,
-                  }}
-                >
-                  {col.heading[lang]}
+            {FOOTER_COLS.map((col) => {
+              const colOpen = openCol === col.heading.en;
+              return (
+                <div key={col.heading.en}>
+                  <button
+                    className="foot-head"
+                    aria-expanded={colOpen}
+                    onClick={() => setOpenCol(colOpen ? null : col.heading.en)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      border: "none",
+                      background: "transparent",
+                      textAlign: "left",
+                      cursor: "default",
+                      fontFamily: MONO,
+                      fontSize: 10.5,
+                      fontWeight: 500,
+                      letterSpacing: ".14em",
+                      color: "#8b8896",
+                      borderTop: "1px solid rgba(14,13,18,.14)",
+                      padding: "14px 0 0",
+                      marginBottom: 16,
+                    }}
+                  >
+                    {col.heading[lang]}
+                    <svg
+                      className="foot-caret"
+                      width="11"
+                      height="7"
+                      viewBox="0 0 11 7"
+                      fill="none"
+                      style={{ transition: "transform .25s", transform: colOpen ? "rotate(180deg)" : "none" }}
+                    >
+                      <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                  <div className={`foot-body${colOpen ? " open" : ""}`} style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                    {col.links.map((l) => (
+                      <FooterLink key={l.label.en} href={l.href} label={l.label[lang]} />
+                    ))}
+                    {col.heading.en === "CONTACT" && (
+                      <span style={{ fontSize: 14, color: "#8b8896" }}>Quito · Ecuador</span>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                  {col.links.map((l) => (
-                    <FooterLink key={l.label.en} href={l.href} label={l.label[lang]} />
-                  ))}
-                  {col.heading.en === "CONTACT" && (
-                    <span style={{ fontSize: 14, color: "#8b8896" }}>Quito · Ecuador</span>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div style={{ overflow: "hidden", marginTop: 64 }}>

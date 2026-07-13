@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { DarkCTA } from "@/components/internal/Shared";
 import { BRAND_GREEN } from "@/components/Logo";
 import { useLang } from "@/components/i18n";
 
@@ -186,7 +185,7 @@ export function WorkBody() {
         </div>
       </section>
 
-      <section style={{ background: "#fff", padding: "40px 0 20px" }}>
+      <section style={{ background: "#fff", padding: "40px 0 90px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           {CASES.map((c, i) => {
             const num = String(i + 1).padStart(2, "0");
@@ -402,15 +401,6 @@ export function WorkBody() {
         </div>
       </section>
 
-      <section style={{ background: "#fff", padding: "90px 0 90px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <DarkCTA
-            title={es ? "Tu producto puede ser el próximo" : "Your product could be next"}
-            subtitle={es ? "Cuéntanos dónde duele — te mostramos lo que es posible." : "Tell us where it hurts — we’ll show you what’s possible."}
-            primary={{ label: es ? "INICIAR PROYECTO" : "START A PROJECT", href: "#contact" }}
-          />
-        </div>
-      </section>
     </div>
   );
 }

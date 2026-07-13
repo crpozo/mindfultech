@@ -666,18 +666,21 @@ export function SiteHeader({
             </div>
           </nav>
 
-          {/* hinge — together.ai structure: nav-box | hinge | nav-box.
-              The line spans the whole gap, flush against both pills, so it
-              reads as physically joining the two menus. */}
+          {/* hinge — thin line whose ends pass UNDER both white pills
+              (negative z paints below their opaque backgrounds), exactly
+              like together.ai's. */}
           <span
             className="nav-conn"
             aria-hidden
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 56,
-              height: 8,
-              borderRadius: 4,
+              width: 78,
+              height: 5,
+              borderRadius: 3,
+              margin: "0 -14px",
+              position: "relative",
+              zIndex: -1,
               background: "#90C8B7",
             }}
           />
