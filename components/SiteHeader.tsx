@@ -349,18 +349,7 @@ function CompanyPanel({ lang }: { lang: Lang }) {
           ),
         },
         {
-          href: "/company#press",
-          title: es ? "Prensa" : "Press",
-          sub: es ? "MindfulTech en los medios" : "MindfulTech in the news",
-          icon: (
-            <>
-              <rect x="9" y="3" width="6" height="11" rx="3" />
-              <path d="M5 11a7 7 0 0014 0M12 18v3" />
-            </>
-          ),
-        },
-        {
-          href: "mailto:info@mindfultech.ec",
+          href: "mailto:carlos@mindfultech.ec",
           title: es ? "Soporte" : "Support",
           sub: es ? "Habla con el equipo" : "Talk to the team",
           icon: (
@@ -678,18 +667,17 @@ export function SiteHeader({
           </nav>
 
           {/* hinge — together.ai structure: nav-box | hinge | nav-box.
-              A short thick line floating between the pills with equal
-              clearance on both sides. */}
+              The line spans the whole gap, flush against both pills, so it
+              reads as physically joining the two menus. */}
           <span
             className="nav-conn"
             aria-hidden
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 34,
+              width: 56,
               height: 8,
               borderRadius: 4,
-              margin: "0 12px",
               background: "#90C8B7",
             }}
           />
