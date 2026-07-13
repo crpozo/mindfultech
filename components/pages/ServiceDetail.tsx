@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Pill, DarkCTA } from "@/components/internal/Shared";
+import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
 const MONO = "var(--mono)";
@@ -855,16 +855,6 @@ export function ServiceDetail({ slug }: { slug: string }) {
       </section>
 
       {/* CTA + footer */}
-      <section style={{ background: "#fff", padding: "70px 0 90px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <DarkCTA
-            title={es ? `Inicia tu proyecto de ${s.name}` : `Start your ${s.name} project`}
-            subtitle={es ? "Cuéntanos qué estás construyendo — respondemos en un día hábil." : "Tell us what you’re building — we’ll reply within one business day."}
-            primary={{ label: es ? "EMPIEZA AHORA" : "GET STARTED NOW", href: "#contact" }}
-            secondary={{ label: "WHATSAPP →", href: "https://api.whatsapp.com/send?phone=593958731994" }}
-          />
-        </div>
-      </section>
     </div>
   );
 }

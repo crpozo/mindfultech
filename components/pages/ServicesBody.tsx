@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Logo } from "@/components/Logo";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
-import { Pill, DarkCTA } from "@/components/internal/Shared";
+import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
 const MONO = "var(--mono)";
@@ -418,16 +418,6 @@ export function ServicesBody() {
       </section>
 
       {/* CTA + footer */}
-      <section style={{ background: "#fff", padding: "60px 0 90px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <DarkCTA
-            title={es ? "Empieza a construir con MindfulTech" : "Start building with MindfulTech"}
-            subtitle={es ? "Cuéntanos qué estás construyendo — respondemos en un día hábil." : "Tell us what you’re building — we’ll reply within one business day."}
-            primary={{ label: es ? "EMPIEZA AHORA" : "GET STARTED NOW", href: "#contact" }}
-            secondary={{ label: "WHATSAPP →", href: "https://api.whatsapp.com/send?phone=593958731994" }}
-          />
-        </div>
-      </section>
     </div>
   );
 }
