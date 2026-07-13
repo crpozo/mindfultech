@@ -298,7 +298,7 @@ export function WorkBody() {
                   }}
                 >
                   {c.image ? (
-                    <div style={{ aspectRatio: "16/10", borderRadius: 10, overflow: "hidden", background: "#000", position: "relative" }}>
+                    <div style={{ aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "#000", position: "relative" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={c.image}
@@ -379,7 +379,7 @@ export function WorkBody() {
                             transform: `rotate(${[-1.2, 1, -0.8][gi % 3]}deg)`,
                           }}
                         >
-                          <div style={{ aspectRatio: "16/10", borderRadius: 8, overflow: "hidden", background: "#000", position: "relative" }}>
+                          <div style={{ aspectRatio: "16/9", borderRadius: 8, overflow: "hidden", background: "#000", position: "relative" }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={g.src}

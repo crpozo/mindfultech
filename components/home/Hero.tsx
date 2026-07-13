@@ -566,10 +566,12 @@ export function Hero() {
                 fontSize: 13,
                 fontWeight: 500,
                 letterSpacing: ".12em",
-                background: "#e9eaef",
+                background: "#fff",
                 color: "var(--ink)",
-                padding: "16px 26px",
+                border: "1.5px solid rgba(14,13,18,.28)",
+                padding: "14.5px 26px",
                 borderRadius: 6,
+                boxShadow: "0 8px 20px -14px rgba(14,13,18,.35)",
                 transition: "background .2s",
               }}
             >
