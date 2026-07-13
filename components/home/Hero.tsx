@@ -131,17 +131,32 @@ export function Hero() {
         overflow: "hidden",
       }}
     >
+      {/* one centered row: copy left, product visual right (together.ai layout).
+          DOM keeps the stage first; row-reverse puts the copy on the left. */}
+      <div
+        className="hero-row"
+        style={{
+          position: "relative",
+          zIndex: 2,
+          width: "100%",
+          maxWidth: 1560,
+          margin: "0 auto",
+          padding: "10px 48px 90px",
+          display: "flex",
+          flexDirection: "row-reverse",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 44,
+        }}
+      >
       {/* animation stage */}
       <div
         ref={stageRef}
         className="hero-stage"
         style={{
-          position: "absolute",
-          right: "2%",
-          top: 0,
+          flex: "0 1 46%",
           width: "46%",
-          height: "calc(100% - 70px)",
-          minHeight: 500,
+          minHeight: 520,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -509,25 +524,15 @@ export function Hero() {
       </div>
 
       {/* hero copy */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          width: "100%",
-          maxWidth: 1560,
-          margin: "0 auto",
-          padding: "0 48px 70px",
-        }}
-      >
+      <div className="hero-copy" style={{ flex: "0 1 660px", minWidth: 0 }}>
         <div>
           <h1
             style={{
               fontWeight: 500,
-              fontSize: "clamp(40px,4.2vw,74px)",
-              lineHeight: 1.02,
+              fontSize: "clamp(40px,4.2vw,70px)",
+              lineHeight: 1.04,
               letterSpacing: "-.025em",
               margin: 0,
-              maxWidth: 1000,
               color: "var(--ink)",
             }}
           >
@@ -541,8 +546,8 @@ export function Hero() {
               lineHeight: 1.5,
               color: "#4c4a55",
               fontWeight: 400,
-              margin: "26px 0 0",
-              maxWidth: "min(520px,calc(52vw - 80px))",
+              margin: "24px 0 0",
+              maxWidth: 560,
             }}
           >
             {es ? "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada." : "Full-stack software lab, powered by UX research and applied AI."}
@@ -579,6 +584,7 @@ export function Hero() {
             </a>
           </div>
         </div>
+      </div>
       </div>
 
       {/* TRUSTED BY marquee */}
