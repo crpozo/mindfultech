@@ -552,7 +552,15 @@ export function ServiceDetail({ slug }: { slug: string }) {
             {s.subtitle}
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 34, flexWrap: "wrap" }}>
-            <a href="mailto:info@mindfultech.ec" className="btn-dark" style={btnDark}>
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent("mt:open-form"));
+              }}
+              className="btn-dark"
+              style={btnDark}
+            >
               {es ? "INICIAR PROYECTO" : "START A PROJECT"}
             </a>
             <Link href="/services" className="btn-light" style={btnLight}>
@@ -561,24 +569,15 @@ export function ServiceDetail({ slug }: { slug: string }) {
           </div>
         </div>
 
-        {/* specs strip */}
-        <div style={{ maxWidth: 980, margin: "56px auto 0", padding: "0 40px" }}>
-          <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-            {s.specs.map(([k, v]) => (
-              <div
-                key={k}
-                style={{
-                  background: "#fff",
-                  border: "1px solid rgba(14,13,18,.09)",
-                  borderRadius: 12,
-                  padding: "20px 22px",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".12em", color: "#8b8896" }}>{k}</div>
-                <div style={{ fontWeight: 600, fontSize: 17.5, marginTop: 7 }}>{v}</div>
-              </div>
-            ))}
+        {/* hero figure — full-width visual, together.ai product-page style */}
+        <div style={{ maxWidth: 1280, margin: "64px auto 0", padding: "0 40px" }}>
+          <div style={{ position: "relative", borderRadius: 18, overflow: "hidden", aspectRatio: "21/8", minHeight: 220 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/services/hero-${slug}.webp`}
+              alt=""
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
         </div>
       </section>
