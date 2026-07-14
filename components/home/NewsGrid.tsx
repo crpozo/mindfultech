@@ -3,29 +3,31 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
-import { ImagePlaceholder } from "../ImagePlaceholder";
 
 const MONO = "var(--mono)";
 
 const SIDE = [
   {
     href: "/work#usfq",
+    img: "/art/eventflow.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
-    title: { en: "USFQ: a campus portal 12,000 students actually use", es: "USFQ: un portal que 12.000 estudiantes sí usan" },
-    body: { en: "Adoption tripled after we rebuilt onboarding around real course-planning behavior…", es: "La adopción se triplicó tras rediseñar el onboarding según el comportamiento real…" },
+    title: { en: "EventFlow: an iOS app for USFQ events in a two-week sprint", es: "EventFlow: una app iOS para eventos de USFQ en un sprint de dos semanas" },
+    body: { en: "Published in the App Store, with an AI-powered survey module…", es: "Publicada en el App Store, con un módulo de encuestas potenciado por IA…" },
     onDark: true,
   },
   {
-    href: "/work#helixona",
+    href: "/work#healthcare",
+    img: "/art/healthcare.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
     tag: { en: "ENGINEERING", es: "INGENIERÍA" },
-    title: { en: "How we cut Helixona’s fulfillment time with automation", es: "Cómo redujimos los tiempos de Helixona con automatización" },
-    body: { en: "Order processing dropped from hours to minutes with AI-checked workflows…", es: "El procesamiento de pedidos pasó de horas a minutos con flujos verificados por IA…" },
+    title: { en: "Inside the AI agent that runs a US clinic's medical billing", es: "Así opera el agente de IA que factura para una clínica en EE. UU." },
+    body: { en: "Claims in eClinicalWorks, Blue Shield submissions, and document pipelines — end to end…", es: "Reclamos en eClinicalWorks, envíos a Blue Shield y pipelines de documentos — de punta a punta…" },
     onDark: false,
   },
   {
     href: "/blog",
+    img: "/art/research.webp",
     bg: "linear-gradient(140deg,#dfe6f2,#c9d4e8)",
     tag: { en: "RESEARCH", es: "INVESTIGACIÓN" },
     title: { en: "Designing AI features people trust", es: "Diseñando funciones de IA en las que la gente confía" },
@@ -101,7 +103,8 @@ export function NewsGrid() {
                   "linear-gradient(140deg,color-mix(in srgb,var(--accent) 18%,#e8e4f4),#efeaf6 55%,color-mix(in srgb,var(--accent) 30%,#fff))",
               }}
             >
-              <ImagePlaceholder label="FEATURED IMAGE" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/art/ailab.webp" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span
               style={{
@@ -160,7 +163,8 @@ export function NewsGrid() {
                     background: s.bg,
                   }}
                 >
-                  <ImagePlaceholder label="THUMB" onDark={s.onDark} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div>
                   <span

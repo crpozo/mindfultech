@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
-import { ImagePlaceholder } from "../ImagePlaceholder";
 
 const MONO = "var(--mono)";
 
@@ -47,8 +46,8 @@ export function ClientStories() {
           className="stack-3"
           style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
         >
-          {/* USFQ — wide */}
-          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" label={es ? "FOTO DEL EQUIPO / CLIENTE" : "TEAM / CLIENT PHOTO"}>
+          {/* USFQ · EventFlow — wide */}
+          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/art/eventflow.webp" href="/work#usfq">
             <div
               style={{
                 color: "#fff",
@@ -59,21 +58,21 @@ export function ClientStories() {
                 maxWidth: 420,
               }}
             >
-              {es ? "Cómo USFQ se alió con MindfulTech para servir a 12.000 estudiantes en tiempo real" : "How USFQ partnered with MindfulTech to serve 12,000 students in real time"}
+              {es ? "Cómo USFQ lanzó EventFlow: una app iOS en el App Store en un sprint de dos semanas" : "How USFQ shipped EventFlow: an iOS app in the App Store in a two-week sprint"}
             </div>
-            <div style={metaLine}>{es ? "PORTAL · ASISTENTE IA · ENTERPRISE" : "PORTAL · AI ASSIST · ENTERPRISE"}</div>
+            <div style={metaLine}>{es ? "EVENTOS · iOS · ENCUESTAS CON IA" : "EVENTS · iOS · AI SURVEYS"}</div>
           </StoryCard>
 
-          {/* Waku */}
-          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Helixona" label={es ? "FOTO DEL CLIENTE" : "CLIENT PHOTO"}>
-            <div style={bigStat}>80%</div>
-            <div style={metaLine}>{es ? "MENOS PROCESAMIENTO MANUAL" : "LESS MANUAL ORDER PROCESSING"}</div>
+          {/* US clinic (NDA — anonymized) */}
+          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName={es ? "Clínica EE. UU." : "US Clinic"} img="/art/healthcare.webp" href="/work#healthcare">
+            <div style={bigStat}>24/7</div>
+            <div style={metaLine}>{es ? "AGENTE DE FACTURACIÓN MÉDICA CON IA" : "AI MEDICAL-BILLING AGENT"}</div>
           </StoryCard>
 
-          {/* KrugerLabs */}
-          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="KrugerLabs" label={es ? "FOTO DEL CLIENTE" : "CLIENT PHOTO"}>
-            <div style={bigStat}>3×</div>
-            <div style={metaLine}>{es ? "PLATAFORMAS, UN DESIGN SYSTEM" : "PLATFORMS, ONE DESIGN SYSTEM"}</div>
+          {/* Western Fence Supply */}
+          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="Western Fence Supply" img="/art/product.webp" href="/work#fence">
+            <div style={bigStat}>Excel → Odoo</div>
+            <div style={metaLine}>{es ? "CRM + RUTAS DE ENTREGA" : "CRM + DELIVERY ROUTES"}</div>
           </StoryCard>
         </div>
 
@@ -118,19 +117,24 @@ export function ClientStories() {
 function StoryCard({
   bg,
   brandName,
-  label,
+  img,
+  href,
   children,
 }: {
   bg: string;
   brandName: string;
-  label: string;
+  img: string;
+  href: string;
   children: React.ReactNode;
 }) {
   return (
-    <div
+    <Link
+      href={href}
       className="story-card"
       style={{
         position: "relative",
+        display: "block",
+        textDecoration: "none",
         borderRadius: 10,
         overflow: "hidden",
         minHeight: 420,
@@ -138,14 +142,15 @@ function StoryCard({
     >
       {/* zooming media layer (image + gradient) */}
       <div className="story-media" style={{ position: "absolute", inset: 0, background: bg }}>
-        <ImagePlaceholder label={label} onDark />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img} alt={brandName} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
       <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none", zIndex: 1 }} />
       <span style={brand}>{brandName}</span>
       <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none", zIndex: 2 }}>
         {children}
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -171,7 +176,7 @@ const metaLine: React.CSSProperties = {
 const bigStat: React.CSSProperties = {
   color: "#fff",
   fontWeight: 500,
-  fontSize: "clamp(34px,2.6vw,44px)",
+  fontSize: "clamp(28px,2.2vw,40px)",
   letterSpacing: "-.02em",
   lineHeight: 1,
 };

@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Logo } from "@/components/Logo";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
@@ -412,7 +411,8 @@ export function ServicesBody() {
               aspectRatio: "4 / 3.4",
             }}
           >
-            <ImagePlaceholder label={es ? "CAPTURA DEL PRODUCTO" : "PRODUCT SCREENSHOT"} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/art/product.webp" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
       </section>

@@ -22,9 +22,10 @@ const FOOTER_COLS: { heading: BiStr; links: { label: BiStr; href: string }[] }[]
     heading: { en: "WORK", es: "PROYECTOS" },
     links: [
       { label: { en: "Case studies", es: "Casos de estudio" }, href: "/work" },
-      { label: { en: "USFQ Portal", es: "Portal USFQ" }, href: "/work#usfq" },
-      { label: { en: "Helixona Automation", es: "Automatización Helixona" }, href: "/work#helixona" },
-      { label: { en: "KrugerLabs Systems", es: "Sistemas KrugerLabs" }, href: "/work#kruger" },
+      { label: { en: "ThemedMotion 3D", es: "ThemedMotion 3D" }, href: "/work#themedmotion" },
+      { label: { en: "Medical-billing AI", es: "IA de facturación médica" }, href: "/work#healthcare" },
+      { label: { en: "USFQ EventFlow", es: "USFQ EventFlow" }, href: "/work#usfq" },
+      { label: { en: "Odoo CRM & delivery", es: "CRM Odoo y entregas" }, href: "/work#fence" },
     ],
   },
   {

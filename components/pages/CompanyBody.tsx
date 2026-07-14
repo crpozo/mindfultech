@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
 
@@ -112,7 +111,8 @@ export function CompanyBody() {
               aspectRatio: "4 / 3",
             }}
           >
-            <ImagePlaceholder label={es ? "FOTO DEL EQUIPO" : "TEAM PHOTO"} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/art/team.webp" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
       </section>
