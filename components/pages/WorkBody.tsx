@@ -144,9 +144,31 @@ const CASES: Case[] = [
     tilt: 1.8,
   },
   {
+    id: "carcompra-crm",
+    brand: { en: "CarCompra", es: "CarCompra" },
+    imageFirst: true,
+    tag: { en: "AUTOMOTIVE · CRM · ECUADOR", es: "AUTOMOTRIZ · CRM · ECUADOR" },
+    title: {
+      en: "A custom CRM that sells cars with AI and Meta ads",
+      es: "Un CRM a medida que vende autos con IA y pautas de Meta",
+    },
+    body: {
+      en: "CarCompra, an Ecuadorian car dealership, wanted to automate sales with AI working alongside its sellers. We built a custom CRM platform for the sales team — integrated with Meta and its ad campaigns, running on AWS — so every campaign lead lands in a pipeline the team can actually close.",
+      es: "CarCompra, un patio de autos en Ecuador, quería automatizar sus ventas con IA trabajando junto a sus vendedores. Construimos una plataforma CRM a medida para el equipo de ventas — integrada con Meta y sus pautas publicitarias, sobre AWS — para que cada lead de campaña caiga en un pipeline que el equipo sí puede cerrar.",
+    },
+    stats: [
+      [{ en: "Meta Ads", es: "Pautas Meta" }, { en: "CAMPAIGN INTEGRATION", es: "INTEGRACIÓN DE PAUTAS" }],
+      [{ en: "AI", es: "IA" }, { en: "SALES AUTOMATION", es: "AUTOMATIZACIÓN DE VENTAS" }],
+      [{ en: "Custom", es: "A medida" }, { en: "SELLER PLATFORM", es: "PLATAFORMA DE VENDEDORES" }],
+    ],
+    image: "/art/carcrm.webp",
+    caption: { en: "AWS · META · AI", es: "AWS · META · IA" },
+    tilt: -1.8,
+  },
+  {
     id: "parc",
     brand: { en: "PARC Home Care", es: "PARC Home Care" },
-    imageFirst: true,
+    imageFirst: false,
     tag: { en: "HOME CARE · MOBILE · US", es: "HOME CARE · MÓVIL · EE. UU." },
     title: {
       en: "PARC Connect, in both app stores",
