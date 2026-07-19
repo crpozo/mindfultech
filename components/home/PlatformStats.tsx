@@ -33,7 +33,7 @@ const CARDS: Card[] = [
     hover: "#efa7d2",
     tag: { en: "↑ AUTOMATION", es: "↑ AUTOMATIZACIÓN" },
     value: "24/7",
-    caption: { en: "an AI agent runs medical billing for a US clinic.", es: "un agente de IA opera la facturación médica de una clínica en EE. UU." },
+    caption: { en: "an AI agent runs Helixona\u2019s medical billing end to end.", es: "un agente de IA opera la facturación médica de Helixona de punta a punta." },
     captionColor: "#4a3040",
     href: "/work#healthcare",
     connector: true,

@@ -23,7 +23,7 @@ const FOOTER_COLS: { heading: BiStr; links: { label: BiStr; href: string }[] }[]
     links: [
       { label: { en: "Case studies", es: "Casos de estudio" }, href: "/work" },
       { label: { en: "ThemedMotion 3D", es: "ThemedMotion 3D" }, href: "/work#themedmotion" },
-      { label: { en: "Medical-billing AI", es: "IA de facturación médica" }, href: "/work#healthcare" },
+      { label: { en: "Helixona billing AI", es: "IA de facturación Helixona" }, href: "/work#healthcare" },
       { label: { en: "USFQ EventFlow", es: "USFQ EventFlow" }, href: "/work#usfq" },
       { label: { en: "Odoo CRM & delivery", es: "CRM Odoo y entregas" }, href: "/work#fence" },
     ],

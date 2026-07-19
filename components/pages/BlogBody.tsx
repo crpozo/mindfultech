@@ -13,7 +13,7 @@ type Bi = { en: string; es: string };
 const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; title: Bi; body: Bi }[] = [
   {
     href: "/work#usfq",
-    img: "/art/eventflow.webp",
+    img: "/art/eventflow-login.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     onDark: true,
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
@@ -28,13 +28,13 @@ const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; 
   },
   {
     href: "/work#healthcare",
-    img: "/art/healthcare.webp",
+    img: "/art/helixona-hero.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
     onDark: false,
     tag: { en: "ENGINEERING", es: "INGENIERÍA" },
     title: {
       en: "Inside the AI agent that runs a US clinic's medical billing",
-      es: "Así opera el agente de IA que factura para una clínica en EE. UU.",
+      es: "Así opera el agente de IA que factura para Helixona",
     },
     body: {
       en: "Claims in eClinicalWorks, Blue Shield submissions, and document pipelines — end to end…",

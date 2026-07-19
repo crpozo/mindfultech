@@ -9,7 +9,7 @@ const MONO = "var(--mono)";
 const SIDE = [
   {
     href: "/work#usfq",
-    img: "/art/eventflow.webp",
+    img: "/art/eventflow-login.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
     title: { en: "EventFlow: an iOS app for USFQ events in a two-week sprint", es: "EventFlow: una app iOS para eventos de USFQ en un sprint de dos semanas" },
@@ -18,10 +18,10 @@ const SIDE = [
   },
   {
     href: "/work#healthcare",
-    img: "/art/healthcare.webp",
+    img: "/art/helixona-hero.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
     tag: { en: "ENGINEERING", es: "INGENIERÍA" },
-    title: { en: "Inside the AI agent that runs a US clinic's medical billing", es: "Así opera el agente de IA que factura para una clínica en EE. UU." },
+    title: { en: "Inside the AI agent that runs Helixona's medical billing", es: "Así opera el agente de IA que factura para Helixona" },
     body: { en: "Claims in eClinicalWorks, Blue Shield submissions, and document pipelines — end to end…", es: "Reclamos en eClinicalWorks, envíos a Blue Shield y pipelines de documentos — de punta a punta…" },
     onDark: false,
   },

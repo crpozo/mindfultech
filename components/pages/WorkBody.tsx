@@ -56,9 +56,8 @@ const CASES: Case[] = [
     ],
   },
   {
-    // Client under NDA — presented anonymously (US functional-medicine clinic)
     id: "healthcare",
-    brand: { en: "US Clinic", es: "Clínica EE. UU." },
+    brand: { en: "Helixona", es: "Helixona" },
     imageFirst: true,
     tag: { en: "HEALTHCARE · AI AGENT · US", es: "SALUD · AGENTE IA · EE. UU." },
     title: {
@@ -66,15 +65,15 @@ const CASES: Case[] = [
       es: "Un agente de IA que opera la facturación médica de punta a punta",
     },
     body: {
-      en: "For a functional-medicine clinic in the US, our agent in production handles the full billing cycle: processing insurance claims in eClinicalWorks, navigating Blue Shield submissions, and keeping documentation pipelines moving. Its companion tool, Plan Profile, analyzes policy documents (EOC/SPD) and builds medical-condition pages for the clinic's site.",
-      es: "Para una clínica de medicina funcional en EE. UU., nuestro agente en producción maneja el ciclo completo de facturación: procesa reclamos de seguros en eClinicalWorks, navega los envíos a Blue Shield y mantiene los pipelines de documentación en movimiento. Su herramienta complementaria, Plan Profile, analiza documentos de pólizas (EOC/SPD) y construye páginas de condiciones médicas para el sitio de la clínica.",
+      en: "For Helixona, a functional-medicine clinic in the US, our agent in production handles the full billing cycle: processing insurance claims in eClinicalWorks, navigating Blue Shield submissions, and keeping documentation pipelines moving. Its companion tool, Plan Profile, analyzes policy documents (EOC/SPD) and builds medical-condition pages for the clinic's site.",
+      es: "Para Helixona, una clínica de medicina funcional en EE. UU., nuestro agente en producción maneja el ciclo completo de facturación: procesa reclamos de seguros en eClinicalWorks, navega los envíos a Blue Shield y mantiene los pipelines de documentación en movimiento. Su herramienta complementaria, Plan Profile, analiza documentos de pólizas (EOC/SPD) y construye páginas de condiciones médicas para el sitio de la clínica.",
     },
     stats: [
       ["24/7", { en: "AGENT IN PRODUCTION", es: "AGENTE EN PRODUCCIÓN" }],
       [{ en: "End-to-end", es: "Punta a punta" }, { en: "BILLING CYCLE", es: "CICLO DE FACTURACIÓN" }],
       ["EOC/SPD", { en: "POLICY ANALYSIS", es: "ANÁLISIS DE PÓLIZAS" }],
     ],
-    image: "/art/healthcare.webp",
+    image: "/art/helixona-hero.webp",
     caption: { en: "PYTHON · PLAYWRIGHT · LLMs", es: "PYTHON · PLAYWRIGHT · LLMs" },
     tilt: -2,
   },
@@ -118,7 +117,7 @@ const CASES: Case[] = [
       [{ en: "2 weeks", es: "2 semanas" }, { en: "SPRINT TO DELIVERY", es: "SPRINT DE ENTREGA" }],
       ["AI", { en: "SURVEY MODULE", es: "MÓDULO DE ENCUESTAS" }],
     ],
-    image: "/art/eventflow.webp",
+    image: "/art/eventflow-login.webp",
     caption: { en: "EVENTFLOW · iOS · AI", es: "EVENTFLOW · iOS · IA" },
     tilt: -2,
   },
