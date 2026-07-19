@@ -12,7 +12,7 @@ const SIDE = [
     img: "/art/eventflow.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
-    title: { en: "EventFlow: an iOS app for USFQ events in a two-week sprint", es: "EventFlow: una app iOS para eventos de USFQ en un sprint de dos semanas" },
+    title: { en: "EventFlow: the iOS app behind USFQ campus events", es: "EventFlow: la app iOS detrás de los eventos de USFQ" },
     body: { en: "Published in the App Store, with an AI-powered survey module…", es: "Publicada en el App Store, con un módulo de encuestas potenciado por IA…" },
     onDark: true,
   },

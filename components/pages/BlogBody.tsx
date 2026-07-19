@@ -18,8 +18,8 @@ const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; 
     onDark: true,
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
     title: {
-      en: "EventFlow: an iOS app for USFQ events in a two-week sprint",
-      es: "EventFlow: una app iOS para eventos de USFQ en dos semanas",
+      en: "EventFlow: the iOS app behind USFQ campus events",
+      es: "EventFlow: la app iOS detrás de los eventos de USFQ",
     },
     body: {
       en: "Published in the App Store, with an AI-powered survey module…",

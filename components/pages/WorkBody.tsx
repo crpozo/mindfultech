@@ -109,12 +109,11 @@ const CASES: Case[] = [
       es: "EventFlow: eventos del campus, con app en el App Store",
     },
     body: {
-      en: "An event-management platform for Universidad San Francisco de Quito, with a published iOS app and an AI-powered survey module — delivered in a two-week sprint.",
-      es: "Una plataforma de gestión de eventos para la Universidad San Francisco de Quito, con app iOS publicada y un módulo de encuestas potenciado por IA — entregada en un sprint de dos semanas.",
+      en: "An event-management platform for Universidad San Francisco de Quito, with a published iOS app and an AI-powered survey module.",
+      es: "Una plataforma de gestión de eventos para la Universidad San Francisco de Quito, con app iOS publicada y un módulo de encuestas potenciado por IA.",
     },
     stats: [
       ["iOS", { en: "IN THE APP STORE", es: "EN EL APP STORE" }],
-      [{ en: "2 weeks", es: "2 semanas" }, { en: "SPRINT TO DELIVERY", es: "SPRINT DE ENTREGA" }],
       ["AI", { en: "SURVEY MODULE", es: "MÓDULO DE ENCUESTAS" }],
     ],
     image: "/art/eventflow-login.webp",
@@ -131,12 +130,12 @@ const CASES: Case[] = [
       es: "Leads de WhatsApp e Instagram, distribuidos automáticamente",
     },
     body: {
-      en: "Lead capture and automatic distribution from WhatsApp and Instagram to the sales team, built on Meta's WhatsApp Cloud API and AWS serverless — shipped to production in one week.",
-      es: "Captura y distribución automática de leads desde WhatsApp e Instagram hacia el equipo de ventas, sobre la Cloud API de WhatsApp de Meta y AWS serverless — lanzado a producción en una semana.",
+      en: "Lead capture and automatic distribution from WhatsApp and Instagram to the sales team, built on Meta's WhatsApp Cloud API and AWS serverless.",
+      es: "Captura y distribución automática de leads desde WhatsApp e Instagram hacia el equipo de ventas, sobre la Cloud API de WhatsApp de Meta y AWS serverless.",
     },
     stats: [
-      [{ en: "1 week", es: "1 semana" }, { en: "TO PRODUCTION", es: "A PRODUCCIÓN" }],
       ["2", { en: "LEAD CHANNELS", es: "CANALES DE LEADS" }],
+      ["AWS", { en: "SERVERLESS BACKEND", es: "BACKEND SERVERLESS" }],
     ],
     image: "/art/leads.webp",
     caption: { en: "META CLOUD API · AWS", es: "META CLOUD API · AWS" },

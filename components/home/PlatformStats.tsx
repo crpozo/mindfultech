@@ -41,11 +41,11 @@ const CARDS: Card[] = [
   {
     bg: "#f8d9c3",
     hover: "#f5bd90",
-    tag: { en: "↓ TIME TO SHIP", es: "↓ TIEMPO DE ENTREGA" },
-    value: "7d",
-    caption: { en: "from kickoff to production for CarCompraCorp's lead system.", es: "de kickoff a producción para el sistema de leads de CarCompraCorp." },
+    tag: { en: "↑ IN PRODUCTION", es: "↑ EN PRODUCCIÓN" },
+    value: "2",
+    caption: { en: "app stores carry PARC Connect — App Store and Google Play.", es: "tiendas tienen PARC Connect — App Store y Google Play." },
     captionColor: "#4c3628",
-    href: "/work#carcompra",
+    href: "/work#parc",
   },
 ];
 

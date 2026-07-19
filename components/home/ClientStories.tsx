@@ -58,7 +58,7 @@ export function ClientStories() {
                 maxWidth: 420,
               }}
             >
-              {es ? "Cómo USFQ lanzó EventFlow: una app iOS en el App Store en un sprint de dos semanas" : "How USFQ shipped EventFlow: an iOS app in the App Store in a two-week sprint"}
+              {es ? "Cómo USFQ lanzó EventFlow: su app de eventos en el App Store" : "How USFQ shipped EventFlow: its events app on the App Store"}
             </div>
             <div style={metaLine}>{es ? "EVENTOS · iOS · ENCUESTAS CON IA" : "EVENTS · iOS · AI SURVEYS"}</div>
           </StoryCard>
