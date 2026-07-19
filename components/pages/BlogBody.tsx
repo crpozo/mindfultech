@@ -13,7 +13,7 @@ type Bi = { en: string; es: string };
 const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; title: Bi; body: Bi }[] = [
   {
     href: "/work#usfq",
-    img: "/art/eventflow-login.webp",
+    img: "/art/eventflow.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     onDark: true,
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
@@ -28,7 +28,7 @@ const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; 
   },
   {
     href: "/work#healthcare",
-    img: "/art/helixona-hero.webp",
+    img: "/art/healthcare.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
     onDark: false,
     tag: { en: "ENGINEERING", es: "INGENIERÍA" },

@@ -47,7 +47,7 @@ export function ClientStories() {
           style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
         >
           {/* USFQ · EventFlow — wide */}
-          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/art/eventflow-login.webp" href="/work#usfq">
+          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/art/eventflow-wide.webp" href="/work#usfq">
             <div
               style={{
                 color: "#fff",
@@ -64,7 +64,7 @@ export function ClientStories() {
           </StoryCard>
 
           {/* Helixona */}
-          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Helixona" img="/art/helixona-hero.webp" href="/work#healthcare">
+          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Helixona" img="/art/helixona-tall.webp" href="/work#healthcare">
             <div style={bigStat}>24/7</div>
             <div style={metaLine}>{es ? "AGENTE DE FACTURACIÓN MÉDICA CON IA" : "AI MEDICAL-BILLING AGENT"}</div>
           </StoryCard>
