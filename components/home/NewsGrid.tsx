@@ -9,7 +9,7 @@ const MONO = "var(--mono)";
 const SIDE = [
   {
     href: "/work#usfq",
-    img: "/art/eventflow.webp",
+    img: "/portfolio/eventflow-banner.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
     title: { en: "EventFlow: the iOS app behind USFQ campus events", es: "EventFlow: la app iOS detrás de los eventos de USFQ" },

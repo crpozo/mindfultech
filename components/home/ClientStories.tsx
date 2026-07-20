@@ -47,7 +47,7 @@ export function ClientStories() {
           style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
         >
           {/* USFQ · EventFlow — wide */}
-          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/art/eventflow-wide.webp" href="/work#usfq">
+          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/portfolio/eventflow-banner.webp" href="/work#usfq">
             <div
               style={{
                 color: "#fff",

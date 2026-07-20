@@ -13,7 +13,7 @@ type Bi = { en: string; es: string };
 const POSTS: { href: string; img: string; bg: string; onDark: boolean; tag: Bi; title: Bi; body: Bi }[] = [
   {
     href: "/work#usfq",
-    img: "/art/eventflow.webp",
+    img: "/portfolio/eventflow-banner.webp",
     bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
     onDark: true,
     tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
