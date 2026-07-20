@@ -419,7 +419,7 @@ export function ContactFooter() {
           >
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.png" alt="MindfulTech" style={{ height: 34, width: "auto", display: "block" }} />
+              <img src="/brand/logo.webp" alt="MindfulTech" style={{ height: 34, width: "auto", display: "block" }} />
             </div>
             {FOOTER_COLS.map((col) => {
               const colOpen = openCol === col.heading.en;

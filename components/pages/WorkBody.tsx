@@ -116,7 +116,7 @@ const CASES: Case[] = [
       ["iOS", { en: "IN THE APP STORE", es: "EN EL APP STORE" }],
       ["AI", { en: "SURVEY MODULE", es: "MÓDULO DE ENCUESTAS" }],
     ],
-    image: "/art/eventflow-login.webp",
+    image: "/portfolio/eventflow-banner.webp",
     caption: { en: "EVENTFLOW · iOS · AI", es: "EVENTFLOW · iOS · IA" },
     tilt: -2,
   },

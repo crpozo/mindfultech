@@ -40,7 +40,7 @@ export function PageLoader() {
   return (
     <div className={`mt-loader${show ? " show" : ""}`} aria-hidden={!show}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/logo-mark.png" alt="" width={52} height={52} />
+      <img src="/brand/logo-mark.webp" alt="" width={52} height={52} />
 
       <div
         style={{

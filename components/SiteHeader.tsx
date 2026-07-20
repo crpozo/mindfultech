@@ -556,14 +556,14 @@ export function SiteHeader({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/logo.png"
+                src="/brand/logo.webp"
                 alt="MindfulTech"
                 className="logo-full"
                 style={{ height: 36, width: "auto", display: "block" }}
               />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/logo-mark.png"
+                src="/brand/logo-mark.webp"
                 alt="MindfulTech"
                 className="logo-mark"
                 style={{ height: 32, width: "auto", display: "none" }}
