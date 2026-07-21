@@ -122,9 +122,9 @@ const CHIPS: {
   },
   {
     label: { en: "FULL-STACK CODE", es: "CÓDIGO FULL-STACK" },
-    cx: 86,
+    cx: 98,
     cy: 336,
-    d: `M86 336 Q148 326 ${bx(16)} ${by(56)}`,
+    d: `M98 336 Q152 326 ${bx(16)} ${by(56)}`,
     node: 8,
   },
   {
@@ -135,6 +135,172 @@ const CHIPS: {
     node: 16,
   },
 ];
+
+/* ---- dense neural mesh -----------------------------------------------------
+   A particle constellation filling the brain silhouette: micro nodes joined
+   to their nearest neighbours, colour-graded violet → blue → teal → brand
+   green across the profile, with white sparks and background stars. Seeded
+   PRNG so the server-rendered markup matches hydration exactly. */
+function mulberry32(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const HULL: [number, number][] = [
+  [47, 11],
+  [63, 17],
+  [77, 28],
+  [84, 43],
+  [75, 57],
+  [60, 66],
+  [43, 69],
+  [27, 64],
+  [16, 56],
+  [9, 47],
+  [15, 30],
+  [29, 16],
+];
+
+function inHull(x: number, y: number) {
+  let inside = false;
+  for (let i = 0, j = HULL.length - 1; i < HULL.length; j = i++) {
+    const [xi, yi] = HULL[i];
+    const [xj, yj] = HULL[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)
+      inside = !inside;
+  }
+  return inside;
+}
+
+const G_STOPS: [number, [number, number, number]][] = [
+  [0, [143, 134, 242]],
+  [0.45, [95, 155, 232]],
+  [0.75, [67, 201, 176]],
+  [1, [79, 174, 135]],
+];
+
+function meshColor(t: number) {
+  const u = t <= 0 ? 0 : t >= 1 ? 1 : t;
+  let i = 0;
+  while (i < G_STOPS.length - 2 && u > G_STOPS[i + 1][0]) i++;
+  const [t0, a] = G_STOPS[i];
+  const [t1, b] = G_STOPS[i + 1];
+  const k = (u - t0) / (t1 - t0);
+  return `rgb(${Math.round(a[0] + (b[0] - a[0]) * k)},${Math.round(a[1] + (b[1] - a[1]) * k)},${Math.round(a[2] + (b[2] - a[2]) * k)})`;
+}
+
+type MeshPt = {
+  x: number;
+  y: number;
+  c: string;
+  r: number;
+  lo: number;
+  hi: number;
+  dur: number;
+  del: number;
+  band: number;
+  tw: boolean;
+};
+
+const MESH: MeshPt[] = (() => {
+  const rnd = mulberry32(1337);
+  const pts: MeshPt[] = [];
+  const push = (x: number, y: number) => {
+    const tx = (x - 9) / 75;
+    pts.push({
+      x: +bx(x).toFixed(1),
+      y: +by(y).toFixed(1),
+      c: meshColor(tx + (rnd() - 0.5) * 0.12),
+      r: +(1.0 + rnd() * 1.2).toFixed(2),
+      lo: +(0.25 + rnd() * 0.25).toFixed(2),
+      hi: +(0.7 + rnd() * 0.3).toFixed(2),
+      dur: +(2.8 + rnd() * 2.4).toFixed(2),
+      del: +(-rnd() * 4).toFixed(2),
+      band: tx < 0.33 ? 0 : tx < 0.66 ? 1 : 2,
+      tw: rnd() < 0.55,
+    });
+  };
+  let guard = 0;
+  while (pts.length < 430 && guard++ < 9000) {
+    const x = 9 + rnd() * 75;
+    const y = 11 + rnd() * 58;
+    if (inHull(x, y)) push(x, y);
+  }
+  // reinforce the outline — the reference reads densest along the silhouette
+  for (let i = 0; i < 110; i++) {
+    const e = HULL[i % 12];
+    const f = HULL[(i + 1) % 12];
+    const t = rnd();
+    let x = e[0] + (f[0] - e[0]) * t;
+    let y = e[1] + (f[1] - e[1]) * t;
+    const k = 0.02 + rnd() * 0.08;
+    x += (46.5 - x) * k;
+    y += (41 - y) * k;
+    push(x, y);
+  }
+  return pts;
+})();
+
+type MeshLink = { x1: number; y1: number; x2: number; y2: number; c: string; o: number; band: number };
+
+const LINKS: MeshLink[] = (() => {
+    const rnd = mulberry32(4242);
+    const out: MeshLink[] = [];
+    const used = new Set<string>();
+    MESH.forEach((p, i) => {
+      const near = MESH.map((q, j) => ({
+        j,
+        d: (p.x - q.x) ** 2 + (p.y - q.y) ** 2,
+      }))
+        .filter((o) => o.j !== i)
+        .sort((a, b) => a.d - b.d)
+        .slice(0, 3);
+      near.forEach(({ j, d }) => {
+        if (d > 900) return; // skip stragglers — keeps the web short-range
+        const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+        if (used.has(key)) return;
+        used.add(key);
+        out.push({
+          x1: p.x,
+          y1: p.y,
+          x2: MESH[j].x,
+          y2: MESH[j].y,
+          c: p.c,
+          o: +(0.16 + rnd() * 0.16).toFixed(2),
+          band: p.band,
+        });
+      });
+    });
+    return out;
+  })();
+
+const SPARKS = (() => {
+  const rnd = mulberry32(99);
+  return Array.from({ length: 22 }, () => {
+    const p = MESH[Math.floor(rnd() * MESH.length)];
+    return {
+      x: p.x,
+      y: p.y,
+      dur: +(4 + rnd() * 5).toFixed(2),
+      del: +(-rnd() * 9).toFixed(2),
+    };
+  });
+})();
+
+const STARS = (() => {
+  const rnd = mulberry32(2024);
+  return Array.from({ length: 40 }, () => ({
+    x: +(rnd() * 640).toFixed(1),
+    y: +(rnd() * 520).toFixed(1),
+    r: +(0.5 + rnd() * 0.7).toFixed(2),
+    o: +(0.06 + rnd() * 0.14).toFixed(2),
+  }));
+})();
 
 export function Hero() {
   const { lang } = useLang();
@@ -166,6 +332,9 @@ export function Hero() {
       ? Array.from(stage.querySelectorAll<HTMLElement>("[data-chip]"))
       : [];
     const halo = stage?.querySelector<SVGCircleElement>("[data-halo]") ?? null;
+    const meshes = stage
+      ? Array.from(stage.querySelectorAll<SVGGElement>("[data-mesh]"))
+      : [];
 
     const segLens = segs.map((l) =>
       Math.hypot(
@@ -226,10 +395,13 @@ export function Hero() {
 
       const t = now - t0;
 
-      // 1 — the mark draws itself, crown outward
+      // 1 — the mark draws itself, crown outward; the mesh wakes in 3 bands
       segs.forEach((l, k) => {
         const p = ease((t - (150 + k * 130)) / 340);
         l.style.strokeDashoffset = String(segLens[k] * (1 - p));
+      });
+      meshes.forEach((el, b) => {
+        el.setAttribute("opacity", ease((t - (900 + b * 550)) / 700).toFixed(2));
       });
 
       // 2 — ambient boosts: perimeter thought wave + pulse arrivals
@@ -279,7 +451,7 @@ export function Hero() {
         const n = NODES[j];
         const p = pop((t - n.d) / 340);
         const breath = 1 + 0.07 * Math.sin(t / 850 + j * 1.7);
-        const base = n.r * 2.7;
+        const base = n.r * 2.0;
         el.setAttribute(
           "r",
           Math.max(0, base * p * (breath + 0.3 * boost[j])).toFixed(2)
@@ -383,6 +555,12 @@ export function Hero() {
             position: "relative",
             width: "min(620px,100%)",
             aspectRatio: "640 / 520",
+            borderRadius: 20,
+            overflow: "hidden",
+            background:
+              "radial-gradient(120% 130% at 50% 38%,#16203a 0%,#0b1122 55%,#070b16 100%)",
+            border: "1px solid rgba(255,255,255,.08)",
+            boxShadow: "0 44px 90px -36px rgba(10,12,24,.65)",
           }}
         >
           <svg
@@ -393,31 +571,79 @@ export function Hero() {
               width: "100%",
               height: "100%",
               display: "block",
-              overflow: "visible",
             }}
             aria-hidden
           >
             <defs>
               <radialGradient id="mtHalo">
-                <stop offset="0%" stopColor="#4FAE87" stopOpacity="0.16" />
-                <stop offset="55%" stopColor="#4FAE87" stopOpacity="0.07" />
+                <stop offset="0%" stopColor="#4FD1B0" stopOpacity="0.2" />
+                <stop offset="55%" stopColor="#4FAE87" stopOpacity="0.08" />
                 <stop offset="100%" stopColor="#4FAE87" stopOpacity="0" />
               </radialGradient>
             </defs>
+            {STARS.map((s, i) => (
+              <circle key={"st" + i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity={s.o} />
+            ))}
             <circle data-halo cx="316" cy="248" r="215" fill="url(#mtHalo)" opacity="0" />
+            {[0, 1, 2].map((b) => (
+              <g key={"mb" + b} data-mesh={b} opacity="0">
+                {LINKS.filter((l) => l.band === b).map((l, i) => (
+                  <line
+                    key={i}
+                    x1={l.x1}
+                    y1={l.y1}
+                    x2={l.x2}
+                    y2={l.y2}
+                    stroke={l.c}
+                    strokeOpacity={l.o}
+                    strokeWidth="0.8"
+                  />
+                ))}
+                {MESH.filter((p) => p.band === b).map((p, i) => (
+                  <circle
+                    key={"p" + i}
+                    cx={p.x}
+                    cy={p.y}
+                    r={p.r}
+                    fill={p.c}
+                    style={
+                      p.tw
+                        ? ({
+                            "--tw-lo": String(p.lo),
+                            "--tw-hi": String(p.hi),
+                            animation: `mtTwinkle ${p.dur}s ease-in-out ${p.del}s infinite`,
+                          } as React.CSSProperties)
+                        : { opacity: (p.lo + p.hi) / 2 }
+                    }
+                  />
+                ))}
+              </g>
+            ))}
+            {SPARKS.map((s, i) => (
+              <g
+                key={"sp" + i}
+                style={{
+                  animation: `mtSpark ${s.dur}s linear ${s.del}s infinite`,
+                  opacity: 0,
+                }}
+              >
+                <circle cx={s.x} cy={s.y} r="4.5" fill="#fff" opacity="0.22" />
+                <circle cx={s.x} cy={s.y} r="1.6" fill="#fff" />
+              </g>
+            ))}
             {CHIPS.map((c, i) => (
               <g key={"c" + i}>
                 <path
                   data-conn={i}
                   d={c.d}
-                  stroke="#24344E"
+                  stroke="#9fb6d8"
                   strokeWidth="1.6"
                   strokeDasharray="3 8"
                   strokeLinecap="round"
                   fill="none"
                   opacity="0"
                 />
-                <circle data-pulse={i} r="4.5" fill="#4FAE87" opacity="0" />
+                <circle data-pulse={i} r="4.5" fill="#5fe0b0" opacity="0" />
               </g>
             ))}
             {SEGS.map((s, i) => (
@@ -428,8 +654,8 @@ export function Hero() {
                 y1={by(s[1])}
                 x2={bx(s[2])}
                 y2={by(s[3])}
-                stroke="#4FAE87"
-                strokeWidth="4.5"
+                stroke="#54BE92"
+                strokeWidth="3"
                 strokeLinecap="round"
               />
             ))}
@@ -440,7 +666,7 @@ export function Hero() {
                 cx={bx(n.x)}
                 cy={by(n.y)}
                 r={n.r * 7}
-                fill="#4FAE87"
+                fill="#54BE92"
                 opacity="0"
               />
             ))}
@@ -450,8 +676,8 @@ export function Hero() {
                 data-node={i}
                 cx={bx(n.x)}
                 cy={by(n.y)}
-                r={n.r * 2.7}
-                fill="#4FAE87"
+                r={n.r * 2.0}
+                fill="#54BE92"
                 opacity="0"
               />
             ))}
@@ -462,7 +688,7 @@ export function Hero() {
                 cx={bx(s[0])}
                 cy={by(s[1])}
                 r={s[2] * 2.4}
-                fill="#4FAE87"
+                fill="#54BE92"
                 opacity="0"
               />
             ))}
