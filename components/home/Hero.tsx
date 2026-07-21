@@ -178,10 +178,10 @@ function inHull(x: number, y: number) {
 }
 
 const G_STOPS: [number, [number, number, number]][] = [
-  [0, [143, 134, 242]],
-  [0.45, [95, 155, 232]],
-  [0.75, [67, 201, 176]],
-  [1, [79, 174, 135]],
+  [0, [108, 92, 225]],
+  [0.45, [58, 116, 205]],
+  [0.75, [42, 158, 133]],
+  [1, [63, 146, 112]],
 ];
 
 function meshColor(t: number) {
@@ -292,15 +292,6 @@ const SPARKS = (() => {
   });
 })();
 
-const STARS = (() => {
-  const rnd = mulberry32(2024);
-  return Array.from({ length: 40 }, () => ({
-    x: +(rnd() * 640).toFixed(1),
-    y: +(rnd() * 520).toFixed(1),
-    r: +(0.5 + rnd() * 0.7).toFixed(2),
-    o: +(0.06 + rnd() * 0.14).toFixed(2),
-  }));
-})();
 
 export function Hero() {
   const { lang } = useLang();
@@ -555,12 +546,6 @@ export function Hero() {
             position: "relative",
             width: "min(620px,100%)",
             aspectRatio: "640 / 520",
-            borderRadius: 20,
-            overflow: "hidden",
-            background:
-              "radial-gradient(120% 130% at 50% 38%,#16203a 0%,#0b1122 55%,#070b16 100%)",
-            border: "1px solid rgba(255,255,255,.08)",
-            boxShadow: "0 44px 90px -36px rgba(10,12,24,.65)",
           }}
         >
           <svg
@@ -576,14 +561,11 @@ export function Hero() {
           >
             <defs>
               <radialGradient id="mtHalo">
-                <stop offset="0%" stopColor="#4FD1B0" stopOpacity="0.2" />
-                <stop offset="55%" stopColor="#4FAE87" stopOpacity="0.08" />
+                <stop offset="0%" stopColor="#4FAE87" stopOpacity="0.16" />
+                <stop offset="55%" stopColor="#4FAE87" stopOpacity="0.07" />
                 <stop offset="100%" stopColor="#4FAE87" stopOpacity="0" />
               </radialGradient>
             </defs>
-            {STARS.map((s, i) => (
-              <circle key={"st" + i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity={s.o} />
-            ))}
             <circle data-halo cx="316" cy="248" r="215" fill="url(#mtHalo)" opacity="0" />
             {[0, 1, 2].map((b) => (
               <g key={"mb" + b} data-mesh={b} opacity="0">
@@ -627,8 +609,8 @@ export function Hero() {
                   opacity: 0,
                 }}
               >
-                <circle cx={s.x} cy={s.y} r="4.5" fill="#fff" opacity="0.22" />
-                <circle cx={s.x} cy={s.y} r="1.6" fill="#fff" />
+                <circle cx={s.x} cy={s.y} r="4.5" fill="#4FAE87" opacity="0.25" />
+                <circle cx={s.x} cy={s.y} r="1.6" fill="#2e8f6b" />
               </g>
             ))}
             {CHIPS.map((c, i) => (
@@ -636,14 +618,14 @@ export function Hero() {
                 <path
                   data-conn={i}
                   d={c.d}
-                  stroke="#9fb6d8"
+                  stroke="#24344E"
                   strokeWidth="1.6"
                   strokeDasharray="3 8"
                   strokeLinecap="round"
                   fill="none"
                   opacity="0"
                 />
-                <circle data-pulse={i} r="4.5" fill="#5fe0b0" opacity="0" />
+                <circle data-pulse={i} r="4.5" fill="#4FAE87" opacity="0" />
               </g>
             ))}
             {SEGS.map((s, i) => (
@@ -654,7 +636,7 @@ export function Hero() {
                 y1={by(s[1])}
                 x2={bx(s[2])}
                 y2={by(s[3])}
-                stroke="#54BE92"
+                stroke="#4FAE87"
                 strokeWidth="3"
                 strokeLinecap="round"
               />
@@ -666,7 +648,7 @@ export function Hero() {
                 cx={bx(n.x)}
                 cy={by(n.y)}
                 r={n.r * 7}
-                fill="#54BE92"
+                fill="#4FAE87"
                 opacity="0"
               />
             ))}
@@ -677,7 +659,7 @@ export function Hero() {
                 cx={bx(n.x)}
                 cy={by(n.y)}
                 r={n.r * 2.0}
-                fill="#54BE92"
+                fill="#4FAE87"
                 opacity="0"
               />
             ))}
@@ -688,7 +670,7 @@ export function Hero() {
                 cx={bx(s[0])}
                 cy={by(s[1])}
                 r={s[2] * 2.4}
-                fill="#54BE92"
+                fill="#4FAE87"
                 opacity="0"
               />
             ))}
