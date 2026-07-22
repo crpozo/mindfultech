@@ -105,10 +105,10 @@ export function Brain3D() {
         // ---- anatomy sampled as neurons; palette deep enough for light bg --
         const pts: number[] = [];
         const cols: number[] = [];
-        const colBack = new THREE.Color("#3a74cd"); // occipital blue
-        const colFront = new THREE.Color("#6c5ce1"); // frontal violet
-        const colCb = new THREE.Color("#2a9e85"); // cerebellum teal
-        const colSt = new THREE.Color("#4c6eb8"); // brainstem navy
+        const colBack = new THREE.Color("#3f9e76"); // deeper brand green
+        const colFront = new THREE.Color("#57c295"); // lighter brand green
+        const colCb = new THREE.Color("#2f8d6c"); // cerebellum, deeper
+        const colSt = new THREE.Color("#3f8f70"); // brainstem
         const tmpC = new THREE.Color();
         const pushPt = (x: number, y: number, z: number, c: { r: number; g: number; b: number }) => {
           pts.push(x, y, z);
@@ -119,7 +119,7 @@ export function Brain3D() {
           let n = 0;
           while (n < 1400) {
             const d = randDir();
-            if (d.x * side < 0.055) continue; // longitudinal fissure
+            if (d.x * side < 0.015) continue; // hairline longitudinal fissure
             let x = d.x * 0.6,
               y = d.y * 0.5,
               z = d.z * 0.78;
@@ -129,7 +129,7 @@ export function Brain3D() {
             x *= w;
             y *= w;
             z *= w;
-            x += side * 0.035;
+            x += side * 0.012;
             y += 0.1;
             const m = Math.min(Math.max((z + 0.85) / 1.7, 0), 1);
             tmpC.copy(colBack).lerp(colFront, m);
@@ -279,7 +279,7 @@ export function Brain3D() {
           TR = 3;
         const ppos = new Float32Array(NP * TR * 3);
         const pcol = new Float32Array(NP * TR * 3);
-        const headC = [0.16, 0.62, 0.45]; // brand-green heads read on light bg
+        const headC = [0.42, 0.36, 0.88]; // violet impulses pop on the green mesh
         const dim = [1, 0.55, 0.3];
         for (let p = 0; p < NP; p++)
           for (let s = 0; s < TR; s++)
