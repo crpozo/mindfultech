@@ -138,18 +138,20 @@ export function Brain3D() {
           }
         }
         let cb = 0;
-        while (cb < 620) {
+        while (cb < 340) {
           const d = randDir();
-          let x = d.x * 0.34,
-            y = d.y * 0.2,
-            z = d.z * 0.26;
+          // cerebellum — a small bulge tucked under the occipital lobe, not a
+          // second sphere; keep it modest so brain proportions read correctly
+          let x = d.x * 0.22,
+            y = d.y * 0.15,
+            z = d.z * 0.2;
           const bands = Math.sin(y * 46 + fbm(x * 5, y * 5, z * 5) * 3) * 0.5 + 0.5;
           const w = 1 + (bands - 0.5) * 0.16 + (fbm(x * 6, y * 6, z * 6) - 0.5) * 0.1;
           x *= w;
           y *= w;
           z *= w;
-          y -= 0.3;
-          z -= 0.56;
+          y -= 0.28;
+          z -= 0.52;
           pushPt(x, y, z, colCb);
           cb++;
         }
