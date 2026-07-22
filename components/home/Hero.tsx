@@ -12,12 +12,12 @@ function openForm(e: React.MouseEvent) {
 }
 
 const MARQUEE: { name: string; img?: string; h?: number }[] = [
-  { name: "USFQ" },
-  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: 36 },
-  { name: "Helixona" },
-  { name: "Western Fence Supply" },
+  { name: "USFQ", img: "/logo-usfq.svg", h: 34 },
+  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: 34 },
+  { name: "Helixona", img: "/helixona-logo.png", h: 21 },
+  { name: "Western Fence Supply", img: "/wfs-logo.svg", h: 30 },
   { name: "CarCompraCorp" },
-  { name: "PARC Home Care" },
+  { name: "PARC Home Care", img: "/parc-logo.png", h: 33 },
   { name: "AWS Partner" },
 ];
 
@@ -290,8 +290,10 @@ export function Hero() {
                       height: m.h || 26,
                       width: "auto",
                       display: "block",
-                      opacity: 0.55,
-                      filter: "grayscale(1)",
+                      opacity: 0.5,
+                      // uniform dark silhouette so every client logo reads the
+                      // same on the light strip — incl. Helixona's white mark
+                      filter: "brightness(0)",
                     }}
                   />
                 ) : (
