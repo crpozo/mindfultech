@@ -11,14 +11,15 @@ function openForm(e: React.MouseEvent) {
   window.dispatchEvent(new CustomEvent("mt:open-form"));
 }
 
+// Every client logo renders at this exact height for a uniform logo wall.
+const LOGO_H = 30;
 const MARQUEE: { name: string; img?: string; h?: number }[] = [
-  { name: "USFQ", img: "/logo-usfq.svg", h: 34 },
-  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: 34 },
-  { name: "Helixona", img: "/helixona-logo.png", h: 21 },
-  { name: "Western Fence Supply", img: "/wfs-logo.svg", h: 30 },
+  { name: "USFQ", img: "/logo-usfq.svg", h: LOGO_H },
+  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: LOGO_H },
+  { name: "Helixona", img: "/helixona-logo.png", h: LOGO_H },
+  { name: "Western Fence Supply", img: "/wfs-logo.svg", h: LOGO_H },
   { name: "CarCompraCorp" },
-  { name: "PARC Home Care", img: "/parc-logo.png", h: 33 },
-  { name: "AWS Partner" },
+  { name: "PARC Home Care", img: "/parc-logo.png", h: LOGO_H },
 ];
 
 // Discipline chips floating around the 3D brain (percent coords of the stage).
