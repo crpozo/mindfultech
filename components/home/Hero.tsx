@@ -87,22 +87,22 @@ export function Hero() {
           position: "relative",
           zIndex: 2,
           width: "100%",
-          maxWidth: 1560,
+          maxWidth: 1360,
           margin: "0 auto",
           padding: "10px 48px 90px",
           display: "flex",
           flexDirection: "row-reverse",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 44,
+          justifyContent: "center",
+          gap: 24,
         }}
       >
       {/* animation stage — the neural brain in 3D */}
       <div
         className="hero-stage"
         style={{
-          flex: "0 1 46%",
-          width: "46%",
+          flex: "0 1 600px",
+          width: "600px",
           minHeight: 520,
           display: "flex",
           flexDirection: "column",
@@ -168,7 +168,7 @@ export function Hero() {
       </div>
 
       {/* hero copy */}
-      <div className="hero-copy" style={{ flex: "0 1 660px", minWidth: 0 }}>
+      <div className="hero-copy" style={{ flex: "0 1 600px", minWidth: 0 }}>
         <div>
           <h1
             style={{

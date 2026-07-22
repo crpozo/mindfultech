@@ -48,7 +48,7 @@ export function Brain3D() {
           0.1,
           60
         );
-        camera.position.set(2.0, 0.3, 2.3);
+        camera.position.set(1.74, 0.26, 2.0); // ~0.87× → brain fills the canvas
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.target.set(0, -0.02, 0);
