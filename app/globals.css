@@ -428,13 +428,12 @@ a:hover {
   }
 }
 
-/* hero neural-mesh micro nodes */
-@keyframes mtTwinkle {
-  0%, 100% { opacity: var(--tw-lo, 0.2); }
-  50% { opacity: var(--tw-hi, 0.8); }
+/* hero 3D-brain discipline chips */
+@keyframes mtChipIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-@keyframes mtSpark {
-  0%, 86%, 100% { opacity: 0; }
-  90%, 93% { opacity: 1; }
-  97% { opacity: 0; }
+@keyframes mtChipBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
