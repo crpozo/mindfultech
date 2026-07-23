@@ -89,11 +89,13 @@ export function Hero() {
           width: "100%",
           maxWidth: 1360,
           margin: "0 auto",
-          padding: "10px 48px 90px",
+          // left inset 41 matches the header logo (navrow 18 + nav border 1 +
+          // nav padding 22) so the headline lines up with the mark
+          padding: "10px 41px 90px",
           display: "flex",
           flexDirection: "row-reverse",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
           gap: 24,
         }}
       >

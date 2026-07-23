@@ -526,7 +526,7 @@ export function SiteHeader({
             display: "flex",
             gap: 0,
             padding: "16px 18px",
-            maxWidth: 1560,
+            maxWidth: 1360,
             margin: "0 auto",
           }}
         >
