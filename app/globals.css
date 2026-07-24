@@ -437,3 +437,37 @@ a:hover {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+
+/* /tasks board */
+.tk-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.tk-col {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(14, 13, 18, 0.06);
+  border-radius: 14px;
+  padding: 14px 12px;
+  min-height: 120px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tk-col-over {
+  background: var(--accent-tint);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.tk-card {
+  transition: box-shadow 0.15s, transform 0.06s;
+}
+.tk-card:hover {
+  box-shadow: 0 8px 20px -12px rgba(14, 13, 18, 0.34);
+}
+.tk-card:active {
+  cursor: grabbing;
+}
+@media (max-width: 760px) {
+  .tk-board {
+    grid-template-columns: 1fr;
+  }
+}
