@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
-import { SectionKicker } from "../internal/Shared";
 
 const MONO = "var(--mono)";
 
@@ -16,7 +15,6 @@ export function ClientStories() {
   return (
     <section id="stories" style={{ position: "relative", background: "#fff", padding: "110px 0 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <SectionKicker n="03" label={es ? "Casos" : "Work"} align="center" />
         <h2
           style={{
             textAlign: "center",

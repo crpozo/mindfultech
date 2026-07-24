@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
-import { SectionKicker } from "../internal/Shared";
 import { POSTS } from "@/lib/blog/posts";
 
 const MONO = "var(--mono)";
@@ -17,7 +16,6 @@ export function NewsGrid() {
   return (
     <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <SectionKicker n="04" label="Blog" />
         <div
           style={{
             display: "flex",
