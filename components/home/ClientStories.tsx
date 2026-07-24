@@ -6,51 +6,40 @@ import { useLang } from "../i18n";
 
 const MONO = "var(--mono)";
 
-const overlay =
-  "linear-gradient(180deg,rgba(10,8,16,.28) 0%,transparent 30%,transparent 45%,rgba(10,8,16,.72) 100%)";
-
 type Bi = { en: string; es: string };
 type Project = {
-  span: "pf-4" | "pf-3" | "pf-2";
-  tall?: boolean;
   brand: string;
   img: string;
   href: string;
-  stat?: string;
-  title?: Bi;
+  title: Bi;
   meta: Bi;
 };
 
-// A bento grid over the 6-column track: row 1 = 4+2, row 2 = 2+2+2, row 3 = 3+3.
+// One full-height panel per project; hovering expands a panel and reveals its
+// title while the others recede.
 const PROJECTS: Project[] = [
   {
-    span: "pf-4",
-    tall: true,
     brand: "USFQ",
     img: "/portfolio/eventflow-banner.webp",
     href: "/work#usfq",
-    title: { en: "How USFQ shipped EventFlow on the App Store", es: "Cómo USFQ lanzó EventFlow en el App Store" },
+    title: { en: "EventFlow, shipped on the App Store", es: "EventFlow, publicada en el App Store" },
     meta: { en: "EVENTS · iOS · AI SURVEYS", es: "EVENTOS · iOS · ENCUESTAS IA" },
   },
   {
-    span: "pf-2",
-    tall: true,
     brand: "Helixona",
     img: "/art/helixona-tall.webp",
     href: "/work#healthcare",
-    stat: "24/7",
-    meta: { en: "AI MEDICAL-BILLING AGENT", es: "AGENTE DE FACTURACIÓN IA" },
+    title: { en: "An AI agent that runs medical billing", es: "Un agente de IA que factura en salud" },
+    meta: { en: "HEALTHCARE · AI AGENT", es: "SALUD · AGENTE DE IA" },
   },
   {
-    span: "pf-2",
     brand: "Western Fence Supply",
     img: "/art/product.webp",
     href: "/work#fence",
-    stat: "Excel → Odoo",
-    meta: { en: "CRM + DELIVERY ROUTES", es: "CRM + RUTAS DE ENTREGA" },
+    title: { en: "Excel → Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega" },
+    meta: { en: "CRM · LOGISTICS", es: "CRM · LOGÍSTICA" },
   },
   {
-    span: "pf-2",
     brand: "CarCompraCorp",
     img: "/art/leads.webp",
     href: "/work#carcompra",
@@ -58,15 +47,13 @@ const PROJECTS: Project[] = [
     meta: { en: "WHATSAPP · INSTAGRAM · AI", es: "WHATSAPP · INSTAGRAM · IA" },
   },
   {
-    span: "pf-2",
     brand: "PARC Home Care",
     img: "/art/parc-login.webp",
     href: "/work#parc",
-    title: { en: "PARC Connect home-care app", es: "App de cuidado PARC Connect" },
+    title: { en: "PARC Connect, home care in your pocket", es: "PARC Connect, cuidado en tu bolsillo" },
     meta: { en: "FLUTTER · iOS + ANDROID", es: "FLUTTER · iOS + ANDROID" },
   },
   {
-    span: "pf-3",
     brand: "ThemedMotion",
     img: "/portfolio/tm-site-hero.webp",
     href: "/work#themedmotion",
@@ -74,11 +61,10 @@ const PROJECTS: Project[] = [
     meta: { en: "WEBGL · THREE.JS", es: "WEBGL · THREE.JS" },
   },
   {
-    span: "pf-3",
     brand: "CarCompra",
     img: "/art/carcrm.webp",
     href: "/work#carcompra-crm",
-    title: { en: "A seller CRM wired to Meta & ads", es: "Un CRM de vendedores conectado a Meta y pautas" },
+    title: { en: "A seller CRM wired to Meta & ads", es: "Un CRM de vendedores conectado a Meta" },
     meta: { en: "CUSTOM CRM · AWS", es: "CRM A MEDIDA · AWS" },
   },
 ];
@@ -88,132 +74,94 @@ export function ClientStories() {
   const es = lang === "es";
   return (
     <section id="stories" className="pf-section">
-      <div className="pf-inner">
+      <div className="pf-head">
         <h2
           style={{
-            textAlign: "center",
             fontWeight: 500,
             fontSize: "clamp(32px,3.4vw,52px)",
             letterSpacing: "-.02em",
             lineHeight: 1.05,
             margin: 0,
             color: "var(--ink)",
-            flex: "none",
           }}
         >
           {es ? "Equipos que construyen con MindfulTech" : "Teams build with MindfulTech"}
         </h2>
         <p
           style={{
-            textAlign: "center",
             fontSize: 18,
             lineHeight: 1.5,
             color: "#8b8896",
             fontWeight: 400,
             maxWidth: 620,
-            margin: "14px auto 28px",
-            flex: "none",
+            margin: "14px auto 0",
           }}
         >
-          {es ? "Mira cómo nuestros clientes lanzan productos centrados en personas con el lab." : "See how our clients ship people-first products with the lab."}
+          {es
+            ? "Siete productos en producción — explóralos uno a uno."
+            : "Seven products in production — explore them one by one."}
         </p>
+      </div>
 
-        <div className="pf-grid">
-          {PROJECTS.map((p) => (
-            <StoryCard key={p.href} project={p} lang={lang} />
-          ))}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", margin: "26px 0 0", flex: "none" }}>
-          <Link
-            href="/work"
-            className="btn-dark"
-            style={{
-              textDecoration: "none",
-              fontFamily: MONO,
-              fontSize: 12,
-              fontWeight: 500,
-              letterSpacing: ".12em",
-              background: "#0e0d12",
-              color: "#fff",
-              padding: "15px 24px",
-              borderRadius: 6,
-            }}
-          >
-            {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
+      <div className="pf-strip">
+        {PROJECTS.map((p) => (
+          <Link key={p.href} href={p.href} className="pf-panel" aria-label={`${p.brand} — ${p.title[lang]}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="pf-img" src={p.img} alt="" />
+            <span className="pf-scrim" aria-hidden />
+            <span className="pf-vlabel">{p.brand}</span>
+            <div className="pf-reveal">
+              <div style={{ fontWeight: 600, fontSize: 15, color: "rgba(255,255,255,.82)", letterSpacing: ".01em" }}>
+                {p.brand}
+              </div>
+              <div
+                style={{
+                  color: "#fff",
+                  fontWeight: 500,
+                  fontSize: "clamp(19px,1.6vw,26px)",
+                  lineHeight: 1.25,
+                  letterSpacing: "-.015em",
+                  margin: "8px 0 0",
+                  maxWidth: 440,
+                }}
+              >
+                {p.title[lang]}
+              </div>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 10.5,
+                  letterSpacing: ".14em",
+                  color: "rgba(255,255,255,.72)",
+                  marginTop: 10,
+                }}
+              >
+                {p.meta[lang]}
+              </div>
+            </div>
           </Link>
-        </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 44 }}>
+        <Link
+          href="/work"
+          className="btn-dark"
+          style={{
+            textDecoration: "none",
+            fontFamily: MONO,
+            fontSize: 12,
+            fontWeight: 500,
+            letterSpacing: ".12em",
+            background: "#0e0d12",
+            color: "#fff",
+            padding: "15px 24px",
+            borderRadius: 6,
+          }}
+        >
+          {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
+        </Link>
       </div>
     </section>
   );
 }
-
-function StoryCard({ project: p, lang }: { project: Project; lang: "en" | "es" }) {
-  return (
-    <Link
-      href={p.href}
-      className={`story-card pf-card ${p.span}${p.tall ? " pf-tall" : ""}`}
-      style={{
-        position: "relative",
-        display: "block",
-        textDecoration: "none",
-        borderRadius: 12,
-        overflow: "hidden",
-      }}
-    >
-      {/* zooming media layer (image + gradient) */}
-      <div className="story-media" style={{ position: "absolute", inset: 0, background: "#141126" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={p.img} alt={p.brand} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
-      <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none", zIndex: 1 }} />
-      <span style={brand}>{p.brand}</span>
-      <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none", zIndex: 2 }}>
-        {p.stat ? (
-          <div style={bigStat}>{p.stat}</div>
-        ) : (
-          <div
-            style={{
-              color: "#fff",
-              fontWeight: 500,
-              fontSize: "clamp(17px,1.5vw,22px)",
-              lineHeight: 1.3,
-              letterSpacing: "-.01em",
-              maxWidth: 420,
-            }}
-          >
-            {p.title?.[lang]}
-          </div>
-        )}
-        <div style={metaLine}>{p.meta[lang]}</div>
-      </div>
-    </Link>
-  );
-}
-
-const brand: React.CSSProperties = {
-  position: "absolute",
-  left: 20,
-  top: 18,
-  fontWeight: 600,
-  fontSize: 18,
-  color: "#fff",
-  letterSpacing: ".01em",
-  zIndex: 2,
-};
-
-const metaLine: React.CSSProperties = {
-  fontFamily: MONO,
-  fontSize: 10.5,
-  letterSpacing: ".12em",
-  color: "rgba(255,255,255,.75)",
-  marginTop: 10,
-};
-
-const bigStat: React.CSSProperties = {
-  color: "#fff",
-  fontWeight: 500,
-  fontSize: "clamp(26px,2vw,38px)",
-  letterSpacing: "-.02em",
-  lineHeight: 1,
-};

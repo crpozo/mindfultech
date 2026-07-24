@@ -479,58 +479,101 @@ a:hover {
   border-radius: 6px;
 }
 
-/* homepage portfolio bento grid — fits one viewport on desktop */
+/* homepage portfolio — full-bleed strip of panels that expand on hover */
 .pf-section {
   position: relative;
   background: #fff;
-  padding: 96px 0 64px;
+  padding: 92px 0 72px;
 }
-.pf-inner {
+.pf-head {
   max-width: 1560px;
-  margin: 0 auto;
+  margin: 0 auto 40px;
   padding: 0 48px;
+  text-align: center;
 }
-.pf-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
+.pf-strip {
+  display: flex;
+  width: 100%;
+  height: min(72vh, 660px);
+  background: #0e0d12;
 }
-.pf-card { min-height: 260px; }
-.pf-tall { min-height: 300px; }
-.pf-4 { grid-column: span 4; }
-.pf-3 { grid-column: span 3; }
-.pf-2 { grid-column: span 2; }
+.pf-panel {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  display: block;
+  text-decoration: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  transition: flex-grow 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+    filter 0.4s ease;
+}
+.pf-panel:last-child { border-right: none; }
+.pf-panel .pf-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.pf-panel .pf-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 8, 16, 0.4) 0%, rgba(10, 8, 16, 0.12) 32%, rgba(10, 8, 16, 0.62) 66%, rgba(10, 8, 16, 0.94) 100%);
+  transition: opacity 0.4s ease;
+}
+/* dim the rest while one panel is hovered */
+.pf-strip:hover .pf-panel { flex-grow: 0.82; filter: saturate(0.55) brightness(0.72); }
+.pf-strip .pf-panel:hover { flex-grow: 2.7; filter: none; }
+.pf-strip .pf-panel:focus-visible { flex-grow: 2.7; filter: none; }
+.pf-panel:hover .pf-img { transform: scale(1.06); }
 
-/* desktop: the whole section is one screen; the 3 rows share the height */
-@media (min-width: 1101px) {
-  .pf-section {
-    min-height: 100vh;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 88px 0 48px;
-  }
-  .pf-inner {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-  }
-  .pf-grid {
-    flex: 1;
-    min-height: 0;
-    grid-template-rows: repeat(3, 1fr);
-  }
-  .pf-card, .pf-tall { min-height: 0; }
+/* collapsed state: the client name runs vertically up the panel */
+.pf-vlabel {
+  position: absolute;
+  left: 20px;
+  bottom: 22px;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.3s ease;
 }
+.pf-panel:hover .pf-vlabel,
+.pf-panel:focus-visible .pf-vlabel { opacity: 0; }
 
-@media (max-width: 1100px) {
-  .pf-grid { grid-template-columns: repeat(2, 1fr); }
-  .pf-4, .pf-3, .pf-2 { grid-column: span 1; }
-  .pf-tall { min-height: 260px; }
+/* expanded state: brand, title and meta fade in */
+.pf-reveal {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 26px;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s;
+  pointer-events: none;
 }
-@media (max-width: 620px) {
-  .pf-grid { grid-template-columns: 1fr; }
+.pf-panel:hover .pf-reveal,
+.pf-panel:focus-visible .pf-reveal { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  /* stack into full-width strips; everything visible, no hover needed */
+  .pf-strip { flex-direction: column; height: auto; background: transparent; }
+  .pf-panel {
+    flex: none;
+    min-height: 220px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .pf-strip:hover .pf-panel { flex-grow: 0; filter: none; }
+  .pf-strip .pf-panel:hover { flex-grow: 0; }
+  .pf-vlabel { display: none; }
+  .pf-reveal { opacity: 1; transform: none; }
 }
