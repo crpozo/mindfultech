@@ -3,45 +3,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionKicker } from "../internal/Shared";
+import { POSTS } from "@/lib/blog/posts";
 
 const MONO = "var(--mono)";
-
-const SIDE = [
-  {
-    href: "/work#usfq",
-    img: "/portfolio/eventflow-banner.webp",
-    bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
-    tag: { en: "CASE STUDY", es: "CASO DE ESTUDIO" },
-    title: { en: "EventFlow: the iOS app behind USFQ campus events", es: "EventFlow: la app iOS detrás de los eventos de USFQ" },
-    body: { en: "Published in the App Store, with an AI-powered survey module…", es: "Publicada en el App Store, con un módulo de encuestas potenciado por IA…" },
-    onDark: true,
-  },
-  {
-    href: "/work#healthcare",
-    img: "/art/healthcare.webp",
-    bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
-    tag: { en: "ENGINEERING", es: "INGENIERÍA" },
-    title: { en: "Inside the AI agent that runs Helixona's medical billing", es: "Así opera el agente de IA que factura para Helixona" },
-    body: { en: "Claims in eClinicalWorks, Blue Shield submissions, and document pipelines — end to end…", es: "Reclamos en eClinicalWorks, envíos a Blue Shield y pipelines de documentos — de punta a punta…" },
-    onDark: false,
-  },
-  {
-    href: "/blog",
-    img: "/art/research.webp",
-    bg: "linear-gradient(140deg,#dfe6f2,#c9d4e8)",
-    tag: { en: "RESEARCH", es: "INVESTIGACIÓN" },
-    title: { en: "Designing AI features people trust", es: "Diseñando funciones de IA en las que la gente confía" },
-    body: { en: "Our playbook for grounding, transparency, and human review in production AI…", es: "Nuestro playbook de grounding, transparencia y revisión humana en IA de producción…" },
-    onDark: false,
-  },
-];
 
 export function NewsGrid() {
   const { lang } = useLang();
   const es = lang === "es";
+  const featured = POSTS[0];
+  const side = POSTS.slice(1);
+
   return (
     <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+        <SectionKicker n="04" label="Blog" />
         <div
           style={{
             display: "flex",
@@ -92,19 +68,18 @@ export function NewsGrid() {
           }}
         >
           {/* featured */}
-          <div>
+          <Link href={`/blog/${featured.slug}`} className="blog-link" style={{ textDecoration: "none", color: "var(--ink)", display: "block" }}>
             <div
               style={{
                 borderRadius: 12,
                 overflow: "hidden",
                 aspectRatio: "16/10",
                 position: "relative",
-                background:
-                  "linear-gradient(140deg,color-mix(in srgb,var(--accent) 18%,#e8e4f4),#efeaf6 55%,color-mix(in srgb,var(--accent) 30%,#fff))",
+                background: featured.bg,
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/art/ailab.webp" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span
               style={{
@@ -119,7 +94,7 @@ export function NewsGrid() {
                 marginTop: 22,
               }}
             >
-              COMPANY
+              {featured.tag[lang]}
             </span>
             <h3
               style={{
@@ -130,19 +105,19 @@ export function NewsGrid() {
                 margin: "14px 0 10px",
               }}
             >
-              {es ? "MindfulTech ahora es un laboratorio de software AI-first" : "MindfulTech is now an AI-first software lab"}
+              {featured.title[lang]}
             </h3>
             <p style={{ fontSize: 16, lineHeight: 1.55, color: "#6b6875", margin: 0, maxWidth: 560 }}>
-              {es ? "Diez años de software centrado en personas, ahora con IA aplicada en cada proyecto. Esto es lo que cambia — y lo que nunca cambiará." : "Ten years of human-centered software, now with applied AI in every engagement. Here's what changes — and what never will."}
+              {featured.excerpt[lang]}
             </p>
-          </div>
+          </Link>
 
           {/* side list */}
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {SIDE.map((s, i) => (
+            {side.map((s, i) => (
               <Link
-                key={s.title.en}
-                href={s.href}
+                key={s.slug}
+                href={`/blog/${s.slug}`}
                 className="blog-link"
                 style={{
                   textDecoration: "none",
@@ -150,8 +125,8 @@ export function NewsGrid() {
                   display: "grid",
                   gridTemplateColumns: "150px 1fr",
                   gap: 20,
-                  padding: i === 0 ? "0 0 26px" : i === SIDE.length - 1 ? "26px 0 0" : "26px 0",
-                  borderBottom: i < SIDE.length - 1 ? "1px solid rgba(14,13,18,.1)" : "none",
+                  padding: i === 0 ? "0 0 26px" : i === side.length - 1 ? "26px 0 0" : "26px 0",
+                  borderBottom: i < side.length - 1 ? "1px solid rgba(14,13,18,.1)" : "none",
                 }}
               >
                 <div
@@ -164,7 +139,7 @@ export function NewsGrid() {
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={s.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div>
                   <span
@@ -192,9 +167,7 @@ export function NewsGrid() {
                   >
                     {s.title[lang]}
                   </h4>
-                  <p style={{ fontSize: 14, lineHeight: 1.5, color: "#6b6875", margin: 0 }}>
-                    {s.body[lang]}
-                  </p>
+                  <p style={{ fontSize: 14, lineHeight: 1.5, color: "#6b6875", margin: 0 }}>{s.excerpt[lang]}</p>
                 </div>
               </Link>
             ))}
