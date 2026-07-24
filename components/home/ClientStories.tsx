@@ -87,17 +87,18 @@ export function ClientStories() {
   const { lang } = useLang();
   const es = lang === "es";
   return (
-    <section id="stories" style={{ position: "relative", background: "#fff", padding: "110px 0 0" }}>
-      <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+    <section id="stories" className="pf-section">
+      <div className="pf-inner">
         <h2
           style={{
             textAlign: "center",
             fontWeight: 500,
-            fontSize: "clamp(34px,3.6vw,56px)",
+            fontSize: "clamp(32px,3.4vw,52px)",
             letterSpacing: "-.02em",
             lineHeight: 1.05,
             margin: 0,
             color: "var(--ink)",
+            flex: "none",
           }}
         >
           {es ? "Equipos que construyen con MindfulTech" : "Teams build with MindfulTech"}
@@ -105,12 +106,13 @@ export function ClientStories() {
         <p
           style={{
             textAlign: "center",
-            fontSize: 19,
+            fontSize: 18,
             lineHeight: 1.5,
             color: "#8b8896",
             fontWeight: 400,
             maxWidth: 620,
-            margin: "18px auto 54px",
+            margin: "14px auto 28px",
+            flex: "none",
           }}
         >
           {es ? "Mira cómo nuestros clientes lanzan productos centrados en personas con el lab." : "See how our clients ship people-first products with the lab."}
@@ -122,7 +124,7 @@ export function ClientStories() {
           ))}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", margin: "48px 0 0" }}>
+        <div style={{ display: "flex", justifyContent: "center", margin: "26px 0 0", flex: "none" }}>
           <Link
             href="/work"
             className="btn-dark"
