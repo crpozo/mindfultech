@@ -9,6 +9,80 @@ const MONO = "var(--mono)";
 const overlay =
   "linear-gradient(180deg,rgba(10,8,16,.28) 0%,transparent 30%,transparent 45%,rgba(10,8,16,.72) 100%)";
 
+type Bi = { en: string; es: string };
+type Project = {
+  span: "pf-4" | "pf-3" | "pf-2";
+  tall?: boolean;
+  brand: string;
+  img: string;
+  href: string;
+  stat?: string;
+  title?: Bi;
+  meta: Bi;
+};
+
+// A bento grid over the 6-column track: row 1 = 4+2, row 2 = 2+2+2, row 3 = 3+3.
+const PROJECTS: Project[] = [
+  {
+    span: "pf-4",
+    tall: true,
+    brand: "USFQ",
+    img: "/portfolio/eventflow-banner.webp",
+    href: "/work#usfq",
+    title: { en: "How USFQ shipped EventFlow on the App Store", es: "Cómo USFQ lanzó EventFlow en el App Store" },
+    meta: { en: "EVENTS · iOS · AI SURVEYS", es: "EVENTOS · iOS · ENCUESTAS IA" },
+  },
+  {
+    span: "pf-2",
+    tall: true,
+    brand: "Helixona",
+    img: "/art/helixona-tall.webp",
+    href: "/work#healthcare",
+    stat: "24/7",
+    meta: { en: "AI MEDICAL-BILLING AGENT", es: "AGENTE DE FACTURACIÓN IA" },
+  },
+  {
+    span: "pf-2",
+    brand: "Western Fence Supply",
+    img: "/art/product.webp",
+    href: "/work#fence",
+    stat: "Excel → Odoo",
+    meta: { en: "CRM + DELIVERY ROUTES", es: "CRM + RUTAS DE ENTREGA" },
+  },
+  {
+    span: "pf-2",
+    brand: "CarCompraCorp",
+    img: "/art/leads.webp",
+    href: "/work#carcompra",
+    title: { en: "Leads from Meta, answered by AI", es: "Leads de Meta, respondidos por IA" },
+    meta: { en: "WHATSAPP · INSTAGRAM · AI", es: "WHATSAPP · INSTAGRAM · IA" },
+  },
+  {
+    span: "pf-2",
+    brand: "PARC Home Care",
+    img: "/art/parc-login.webp",
+    href: "/work#parc",
+    title: { en: "PARC Connect home-care app", es: "App de cuidado PARC Connect" },
+    meta: { en: "FLUTTER · iOS + ANDROID", es: "FLUTTER · iOS + ANDROID" },
+  },
+  {
+    span: "pf-3",
+    brand: "ThemedMotion",
+    img: "/portfolio/tm-site-hero.webp",
+    href: "/work#themedmotion",
+    title: { en: "An interactive 3D portfolio on the web", es: "Un portafolio 3D interactivo en la web" },
+    meta: { en: "WEBGL · THREE.JS", es: "WEBGL · THREE.JS" },
+  },
+  {
+    span: "pf-3",
+    brand: "CarCompra",
+    img: "/art/carcrm.webp",
+    href: "/work#carcompra-crm",
+    title: { en: "A seller CRM wired to Meta & ads", es: "Un CRM de vendedores conectado a Meta y pautas" },
+    meta: { en: "CUSTOM CRM · AWS", es: "CRM A MEDIDA · AWS" },
+  },
+];
+
 export function ClientStories() {
   const { lang } = useLang();
   const es = lang === "es";
@@ -42,41 +116,13 @@ export function ClientStories() {
           {es ? "Mira cómo nuestros clientes lanzan productos centrados en personas con el lab." : "See how our clients ship people-first products with the lab."}
         </p>
 
-        <div
-          className="stack-3"
-          style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr 1fr", gap: 22 }}
-        >
-          {/* USFQ · EventFlow — wide */}
-          <StoryCard bg="linear-gradient(150deg,#2a2736,#141126)" brandName="USFQ" img="/portfolio/eventflow-banner.webp" href="/work#usfq">
-            <div
-              style={{
-                color: "#fff",
-                fontWeight: 500,
-                fontSize: "clamp(20px,1.8vw,26px)",
-                lineHeight: 1.3,
-                letterSpacing: "-.01em",
-                maxWidth: 420,
-              }}
-            >
-              {es ? "Cómo USFQ lanzó EventFlow: su app de eventos en el App Store" : "How USFQ shipped EventFlow: its events app on the App Store"}
-            </div>
-            <div style={metaLine}>{es ? "EVENTOS · iOS · ENCUESTAS CON IA" : "EVENTS · iOS · AI SURVEYS"}</div>
-          </StoryCard>
-
-          {/* Helixona */}
-          <StoryCard bg="linear-gradient(150deg,#39323f,#191521)" brandName="Helixona" img="/art/helixona-tall.webp" href="/work#healthcare">
-            <div style={bigStat}>24/7</div>
-            <div style={metaLine}>{es ? "AGENTE DE FACTURACIÓN MÉDICA CON IA" : "AI MEDICAL-BILLING AGENT"}</div>
-          </StoryCard>
-
-          {/* Western Fence Supply */}
-          <StoryCard bg="linear-gradient(150deg,#2c3340,#151a24)" brandName="Western Fence Supply" img="/art/product.webp" href="/work#fence">
-            <div style={bigStat}>Excel → Odoo</div>
-            <div style={metaLine}>{es ? "CRM + RUTAS DE ENTREGA" : "CRM + DELIVERY ROUTES"}</div>
-          </StoryCard>
+        <div className="pf-grid">
+          {PROJECTS.map((p) => (
+            <StoryCard key={p.href} project={p} lang={lang} />
+          ))}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 44 }}>
+        <div style={{ display: "flex", justifyContent: "center", margin: "48px 0 0" }}>
           <Link
             href="/work"
             className="btn-dark"
@@ -92,63 +138,52 @@ export function ClientStories() {
               borderRadius: 6,
             }}
           >
-            {es ? "VER TODOS LOS CASOS" : "VIEW ALL STORIES"}
+            {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
           </Link>
-        </div>
-
-        <div
-          className="stack-4"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-            gap: 26,
-            marginTop: 96,
-          }}
-        >
-          {[0, 1, 2, 3].map((i) => (
-            <span key={i} style={{ borderTop: "1px solid rgba(14,13,18,.16)" }} />
-          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function StoryCard({
-  bg,
-  brandName,
-  img,
-  href,
-  children,
-}: {
-  bg: string;
-  brandName: string;
-  img: string;
-  href: string;
-  children: React.ReactNode;
-}) {
+function StoryCard({ project: p, lang }: { project: Project; lang: "en" | "es" }) {
   return (
     <Link
-      href={href}
-      className="story-card"
+      href={p.href}
+      className={`story-card pf-card ${p.span}${p.tall ? " pf-tall" : ""}`}
       style={{
         position: "relative",
         display: "block",
         textDecoration: "none",
-        borderRadius: 10,
+        borderRadius: 12,
         overflow: "hidden",
-        minHeight: 420,
       }}
     >
       {/* zooming media layer (image + gradient) */}
-      <div className="story-media" style={{ position: "absolute", inset: 0, background: bg }}>
+      <div className="story-media" style={{ position: "absolute", inset: 0, background: "#141126" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img} alt={brandName} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src={p.img} alt={p.brand} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
       <div style={{ position: "absolute", inset: 0, background: overlay, pointerEvents: "none", zIndex: 1 }} />
-      <span style={brand}>{brandName}</span>
+      <span style={brand}>{p.brand}</span>
       <div style={{ position: "absolute", left: 20, right: 20, bottom: 18, pointerEvents: "none", zIndex: 2 }}>
-        {children}
+        {p.stat ? (
+          <div style={bigStat}>{p.stat}</div>
+        ) : (
+          <div
+            style={{
+              color: "#fff",
+              fontWeight: 500,
+              fontSize: "clamp(17px,1.5vw,22px)",
+              lineHeight: 1.3,
+              letterSpacing: "-.01em",
+              maxWidth: 420,
+            }}
+          >
+            {p.title?.[lang]}
+          </div>
+        )}
+        <div style={metaLine}>{p.meta[lang]}</div>
       </div>
     </Link>
   );
@@ -159,7 +194,7 @@ const brand: React.CSSProperties = {
   left: 20,
   top: 18,
   fontWeight: 600,
-  fontSize: 19,
+  fontSize: 18,
   color: "#fff",
   letterSpacing: ".01em",
   zIndex: 2,
@@ -170,13 +205,13 @@ const metaLine: React.CSSProperties = {
   fontSize: 10.5,
   letterSpacing: ".12em",
   color: "rgba(255,255,255,.75)",
-  marginTop: 12,
+  marginTop: 10,
 };
 
 const bigStat: React.CSSProperties = {
   color: "#fff",
   fontWeight: 500,
-  fontSize: "clamp(28px,2.2vw,40px)",
+  fontSize: "clamp(26px,2vw,38px)",
   letterSpacing: "-.02em",
   lineHeight: 1,
 };

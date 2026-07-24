@@ -478,3 +478,28 @@ a:hover {
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+/* homepage portfolio bento grid */
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 18px;
+  grid-auto-rows: 1fr;
+}
+.pf-card {
+  min-height: 300px;
+}
+.pf-tall {
+  min-height: 392px;
+}
+.pf-4 { grid-column: span 4; }
+.pf-3 { grid-column: span 3; }
+.pf-2 { grid-column: span 2; }
+@media (max-width: 1100px) {
+  .pf-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: auto; }
+  .pf-4, .pf-3, .pf-2 { grid-column: span 1; }
+  .pf-tall { min-height: 300px; }
+}
+@media (max-width: 620px) {
+  .pf-grid { grid-template-columns: 1fr; }
+}
