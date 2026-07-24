@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionKicker } from "../internal/Shared";
 
 const MONO = "var(--mono)";
 
@@ -163,6 +164,7 @@ export function FullStackLab() {
       }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+        <SectionKicker n="01" label={es ? "Servicios" : "Services"} align="center" />
         <h2
           style={{
             textAlign: "center",

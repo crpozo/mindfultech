@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useLang } from "@/components/i18n";
+import { SectionKicker } from "../internal/Shared";
 
 const MONO = "var(--mono)";
 
@@ -114,6 +115,7 @@ export function ProcessFlow() {
   return (
     <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "110px 0 90px" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+        <SectionKicker n="02" label={lang === "es" ? "Proceso" : "Process"} onDark />
         <h2
           style={{
             fontWeight: 500,
