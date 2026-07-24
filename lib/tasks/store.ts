@@ -145,11 +145,18 @@ export function hasPasscode(): boolean {
   }
 }
 
-export async function setPasscode(pass: string): Promise<void> {
+export async function setPasscode(pass: string): Promise<boolean> {
   const salt = randomSalt();
   const hash = await hashPass(salt, pass);
   const auth: Auth = { salt, hash };
-  localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+  try {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+    return true;
+  } catch {
+    // private mode / quota — let the caller surface a message instead of
+    // hanging the lock screen forever
+    return false;
+  }
 }
 
 export async function verifyPasscode(pass: string): Promise<boolean> {
@@ -207,20 +214,36 @@ export function exportState(s: TasksState): void {
   URL.revokeObjectURL(url);
 }
 
+// Only plain hex colors — an imported color is later dropped into a CSS
+// `background`, so a value like `url(http://…)` could pull a request off the
+// device. Reject anything that isn't a hex literal.
+const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 export function parseImport(text: string): TasksState | null {
   try {
     const s = JSON.parse(text) as TasksState;
     if (!s || !Array.isArray(s.projects) || !Array.isArray(s.tasks)) return null;
-    // sanitize to the shape we expect
+    // sanitize to the shape we expect, de-duplicating ids as we go
+    const seenIds = new Set<string>();
+    const freshId = (id: unknown): string => {
+      let v = typeof id === "string" && id ? id : uid();
+      while (seenIds.has(v)) v = uid();
+      seenIds.add(v);
+      return v;
+    };
     const projects: Project[] = s.projects
       .filter((p) => p && typeof p.name === "string")
-      .map((p) => ({ id: p.id || uid(), name: p.name, color: p.color || PROJECT_COLORS[0] }));
+      .map((p) => ({
+        id: freshId(p.id),
+        name: p.name,
+        color: typeof p.color === "string" && HEX_COLOR.test(p.color) ? p.color : PROJECT_COLORS[0],
+      }));
     const projIds = new Set(projects.map((p) => p.id));
     const tasks: Task[] = s.tasks
       .filter((t) => t && typeof t.title === "string")
       .map((t, i) => ({
-        id: t.id || uid(),
-        projectId: t.projectId && projIds.has(t.projectId) ? t.projectId : null,
+        id: freshId(t.id),
+        projectId: typeof t.projectId === "string" && projIds.has(t.projectId) ? t.projectId : null,
         title: t.title,
         notes: typeof t.notes === "string" ? t.notes : "",
         status: t.status === "doing" || t.status === "done" ? t.status : "todo",

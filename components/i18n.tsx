@@ -13,12 +13,23 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = React.useState<Lang>("en");
 
   // Resolve once on mount: saved choice wins, else browser language.
+  // Guarded — merely reading window.localStorage throws (SecurityError) when
+  // site data is blocked or inside a sandboxed iframe, which would otherwise
+  // crash this root provider and blank every page.
   React.useEffect(() => {
-    const saved = window.localStorage.getItem("mt-lang");
-    if (saved === "en" || saved === "es") {
-      setLangState(saved);
-    } else if (navigator.language?.toLowerCase().startsWith("es")) {
-      setLangState("es");
+    try {
+      const saved = window.localStorage.getItem("mt-lang");
+      if (saved === "en" || saved === "es") {
+        setLangState(saved);
+        return;
+      }
+    } catch {
+      /* storage blocked — fall through to browser language */
+    }
+    try {
+      if (navigator.language?.toLowerCase().startsWith("es")) setLangState("es");
+    } catch {
+      /* noop */
     }
   }, []);
 

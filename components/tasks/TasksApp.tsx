@@ -29,6 +29,8 @@ export function TasksApp() {
   const [ready, setReady] = React.useState(false);
   const [state, setState] = React.useState<TasksState>(() => ({ version: 1, projects: [], tasks: [] }));
   const loadedRef = React.useRef(false);
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
 
   // filter, editor, drag, modals
   const [filter, setFilter] = React.useState<string>("all"); // "all" | projectId | "none"
@@ -51,9 +53,25 @@ export function TasksApp() {
     loadedRef.current = true;
   }, [unlocked]);
 
+  // debounce writes so editing a title doesn't hit localStorage every keystroke
   React.useEffect(() => {
-    if (loadedRef.current) saveState(state);
+    if (!loadedRef.current) return;
+    const t = setTimeout(() => saveState(state), 250);
+    return () => clearTimeout(t);
   }, [state]);
+
+  // flush the latest state on tab hide / unload so the debounce never drops it
+  React.useEffect(() => {
+    const flush = () => {
+      if (loadedRef.current) saveState(stateRef.current);
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", flush);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", flush);
+    };
+  }, []);
 
   // ---- mutations ----
   const mutate = (fn: (s: TasksState) => TasksState) => setState((s) => fn(s));
@@ -146,6 +164,13 @@ export function TasksApp() {
 
   const hasUnassigned = React.useMemo(() => state.tasks.some((t) => !t.projectId), [state.tasks]);
 
+  // the "No project" chip only exists while unassigned tasks do — if the last
+  // one is reassigned/deleted, drop back to "All" so the board isn't stranded
+  // on an empty, unhighlighted filter
+  React.useEffect(() => {
+    if (filter === "none" && !hasUnassigned) setFilter("all");
+  }, [filter, hasUnassigned]);
+
   const visible = React.useMemo(() => {
     let ts = state.tasks;
     if (filter === "none") ts = ts.filter((t) => !t.projectId);
@@ -161,7 +186,7 @@ export function TasksApp() {
   const defaultProjectForNew = filter !== "all" && filter !== "none" ? filter : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg,#eef2fa 0%,#e9eef7 100%)", color: "var(--ink)" }}>
+    <div className="tk-app" style={{ minHeight: "100vh", background: "linear-gradient(180deg,#eef2fa 0%,#e9eef7 100%)", color: "var(--ink)" }}>
       {/* top bar */}
       <header
         style={{
@@ -276,7 +301,7 @@ export function TasksApp() {
                   <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: "#6c6a75" }}>
                     {es ? col.es : col.en}
                   </span>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: "#a2a0ab" }}>{colTasks.length}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: "#74727d" }}>{colTasks.length}</span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -352,6 +377,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -440,12 +466,24 @@ function TaskCard({
       >
         {done ? "✓" : ""}
       </button>
-      <div style={{ minWidth: 0, flex: 1 }} onClick={onOpen}>
+      <div
+        style={{ minWidth: 0, flex: 1, cursor: "pointer" }}
+        onClick={onOpen}
+        role="button"
+        tabIndex={0}
+        aria-label={(es ? "Editar tarea: " : "Edit task: ") + task.title}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen();
+          }
+        }}
+      >
         <div
           style={{
             fontSize: 14,
             lineHeight: 1.35,
-            color: done ? "#a2a0ab" : "var(--ink)",
+            color: done ? "#74727d" : "var(--ink)",
             textDecoration: done ? "line-through" : "none",
             wordBreak: "break-word",
           }}
@@ -455,11 +493,11 @@ function TaskCard({
         {(showProject || task.notes) && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, flexWrap: "wrap" }}>
             {showProject && (
-              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".06em", color: project ? "#6c6a75" : "#a2a0ab" }}>
+              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".06em", color: project ? "#6c6a75" : "#74727d" }}>
                 {project ? project.name : es ? "Sin proyecto" : "No project"}
               </span>
             )}
-            {task.notes && <span style={{ fontSize: 11, color: "#a2a0ab" }}>✎</span>}
+            {task.notes && <span style={{ fontSize: 11, color: "#74727d" }}>✎</span>}
           </div>
         )}
       </div>
@@ -535,7 +573,7 @@ function QuickAdd({ onAdd, es }: { onAdd: (title: string) => void; es: boolean }
           color: "var(--ink)",
         }}
       />
-      <span style={{ fontSize: 11, color: "#a2a0ab" }}>{es ? "Enter para añadir" : "Enter to add"}</span>
+      <span style={{ fontSize: 11, color: "#74727d" }}>{es ? "Enter para añadir" : "Enter to add"}</span>
     </div>
   );
 }
@@ -556,12 +594,18 @@ function TaskEditor({
   onClose: () => void;
   es: boolean;
 }) {
+  // never leave a blank card behind
+  const close = () => {
+    if (!task.title.trim()) onPatch({ title: es ? "Sin título" : "Untitled" });
+    onClose();
+  };
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={close} label={es ? "Editar tarea" : "Edit task"}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <textarea
           value={task.title}
           onChange={(e) => onPatch({ title: e.target.value })}
+          aria-label={es ? "Título de la tarea" : "Task title"}
           rows={2}
           style={{
             resize: "none",
@@ -583,6 +627,7 @@ function TaskEditor({
               <button
                 key={s.id}
                 onClick={() => onPatch({ status: s.id })}
+                aria-pressed={task.status === s.id}
                 style={{
                   flex: 1,
                   padding: "8px 6px",
@@ -605,6 +650,7 @@ function TaskEditor({
           <select
             value={task.projectId ?? ""}
             onChange={(e) => onPatch({ projectId: e.target.value || null })}
+            aria-label={es ? "Proyecto" : "Project"}
             style={{
               width: "100%",
               fontFamily: "inherit",
@@ -629,6 +675,7 @@ function TaskEditor({
           <textarea
             value={task.notes}
             onChange={(e) => onPatch({ notes: e.target.value })}
+            aria-label={es ? "Notas" : "Notes"}
             rows={4}
             placeholder={es ? "Detalles, enlaces, pasos…" : "Details, links, steps…"}
             style={{
@@ -657,7 +704,7 @@ function TaskEditor({
             {es ? "Eliminar" : "Delete"}
           </button>
           <button
-            onClick={onClose}
+            onClick={close}
             style={{
               fontFamily: MONO,
               fontSize: 12,
@@ -699,7 +746,7 @@ function ManageProjects({
 }) {
   const [newName, setNewName] = React.useState("");
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} label={es ? "Proyectos" : "Projects"}>
       <h2 style={{ fontSize: 18, fontWeight: 500, margin: "0 0 14px" }}>{es ? "Proyectos" : "Projects"}</h2>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: "50vh", overflowY: "auto" }}>
@@ -712,11 +759,16 @@ function ManageProjects({
                 value={p.color}
                 onChange={(e) => onPatch(p.id, { color: e.target.value })}
                 title={es ? "Color" : "Color"}
+                aria-label={(es ? "Color de " : "Color for ") + p.name}
                 style={{ width: 26, height: 26, padding: 0, border: "none", background: "none", cursor: "pointer", flex: "none" }}
               />
               <input
                 value={p.name}
                 onChange={(e) => onPatch(p.id, { name: e.target.value })}
+                onBlur={(e) => {
+                  if (!e.target.value.trim()) onPatch(p.id, { name: es ? "Proyecto" : "Project" });
+                }}
+                aria-label={es ? "Nombre del proyecto" : "Project name"}
                 style={{
                   flex: 1,
                   fontFamily: "inherit",
@@ -728,7 +780,7 @@ function ManageProjects({
                   color: "var(--ink)",
                 }}
               />
-              <span style={{ fontFamily: MONO, fontSize: 11, color: "#a2a0ab", flex: "none", width: 54, textAlign: "right" }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: "#74727d", flex: "none", width: 54, textAlign: "right" }}>
                 {count} {es ? "tareas" : "tasks"}
               </span>
               <button
@@ -766,6 +818,7 @@ function ManageProjects({
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder={es ? "Nuevo proyecto…" : "New project…"}
+          aria-label={es ? "Nuevo proyecto" : "New project"}
           style={{
             flex: 1,
             fontFamily: "inherit",
@@ -800,14 +853,57 @@ function ManageProjects({
 }
 
 /* ------------------------------------------------------------------ primitives */
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Modal({
+  children,
+  onClose,
+  label,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  label?: string;
+}) {
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const openerRef = React.useRef<Element | null>(null);
+
   React.useEffect(() => {
+    openerRef.current = document.activeElement;
+    // move focus into the dialog, and keep Tab from escaping it
+    const focusables = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      ).filter((el) => !el.hasAttribute("disabled"));
+    const first = focusables()[0];
+    (first ?? panelRef.current)?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab") {
+        const f = focusables();
+        if (f.length === 0) return;
+        const active = document.activeElement as HTMLElement;
+        const idx = f.indexOf(active);
+        if (e.shiftKey && (idx <= 0)) {
+          e.preventDefault();
+          f[f.length - 1].focus();
+        } else if (!e.shiftKey && idx === f.length - 1) {
+          e.preventDefault();
+          f[0].focus();
+        }
+      }
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      // restore focus to whatever opened the dialog
+      (openerRef.current as HTMLElement | null)?.focus?.();
+    };
   }, [onClose]);
+
   return (
     <div
       onMouseDown={onClose}
@@ -824,6 +920,11 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
       }}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        tabIndex={-1}
         onMouseDown={(e) => e.stopPropagation()}
         style={{
           width: "100%",
@@ -833,6 +934,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
           border: "1px solid rgba(14,13,18,.08)",
           boxShadow: "0 40px 90px -40px rgba(14,13,18,.5)",
           padding: 22,
+          outline: "none",
         }}
       >
         {children}

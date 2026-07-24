@@ -48,7 +48,16 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         return;
       }
       setBusy(true);
-      await setPasscode(pass);
+      const ok = await setPasscode(pass);
+      if (!ok) {
+        setBusy(false);
+        setErr(
+          es
+            ? "No se pudo guardar el código en este navegador (¿modo privado?)."
+            : "Couldn't save the passcode in this browser (private mode?)."
+        );
+        return;
+      }
       setUnlocked(true);
       onUnlock();
       return;
@@ -130,6 +139,7 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           value={pass}
           onChange={(e) => setPass(e.target.value)}
           placeholder={es ? "Código" : "Passcode"}
+          aria-label={es ? "Código" : "Passcode"}
           autoComplete={creating ? "new-password" : "current-password"}
           style={fieldStyle}
         />
@@ -139,13 +149,16 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder={es ? "Confirma el código" : "Confirm passcode"}
+            aria-label={es ? "Confirma el código" : "Confirm passcode"}
             autoComplete="new-password"
             style={{ ...fieldStyle, marginTop: 10 }}
           />
         )}
 
         {err && (
-          <div style={{ color: "#c0392b", fontSize: 12.5, marginTop: 10, fontWeight: 500 }}>{err}</div>
+          <div role="alert" style={{ color: "#c0392b", fontSize: 12.5, marginTop: 10, fontWeight: 500 }}>
+            {err}
+          </div>
         )}
 
         <button
@@ -203,7 +216,7 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           </button>
         )}
 
-        <p style={{ fontSize: 11, color: "#a2a0ab", margin: "16px 0 0", lineHeight: 1.5 }}>
+        <p style={{ fontSize: 11, color: "#74727d", margin: "16px 0 0", lineHeight: 1.5 }}>
           {es
             ? "Tus tareas se guardan solo en este navegador. No se envían a ningún servidor."
             : "Your tasks are stored only in this browser. Nothing is sent to a server."}
