@@ -17,10 +17,91 @@ import {
   setUnlocked,
   exportState,
   parseImport,
+  ICON_IDS,
+  type IconId,
 } from "@/lib/tasks/store";
 import { LockScreen } from "./LockScreen";
+import { SHAPES } from "@/lib/tasks/icon-shapes";
 
 const MONO = "var(--mono)";
+
+/**
+ * Brand colours are kept exactly as the owner set them, but a very light one
+ * (a neon yellow, say) is invisible drawn on a white chip. `inkable` darkens
+ * such a colour just for rendering on light surfaces; `fgOn` picks a readable
+ * foreground for a filled swatch. Neither changes the stored value.
+ */
+function inkable(hex: string): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255,
+    g = (n >> 8) & 255,
+    b = n & 255;
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  if (lum <= 0.62) return hex;
+  const k = 0.62 / lum;
+  const c = (v: number) => Math.max(0, Math.min(255, Math.round(v * k)));
+  return "#" + [c(r), c(g), c(b)].map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+function fgOn(hex: string): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return "#fff";
+  const n = parseInt(m[1], 16);
+  const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+  return lum > 0.6 ? "#14131a" : "#fff";
+}
+
+/** Project icon — stroke drawing on a 24x24 grid, tinted with the project colour. */
+function ProjectIcon({
+  id,
+  size = 16,
+  color = "currentColor",
+}: {
+  id?: IconId;
+  size?: number;
+  color?: string;
+}) {
+  const shapes = id ? SHAPES[id] : undefined;
+  if (!shapes)
+    return (
+      <span
+        style={{
+          width: size * 0.5,
+          height: size * 0.5,
+          borderRadius: "50%",
+          background: color,
+          flex: "none",
+          display: "inline-block",
+        }}
+      />
+    );
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ flex: "none", display: "block" }}
+      aria-hidden
+    >
+      {shapes.map((sh, i) =>
+        sh.t === "p" ? (
+          <path key={i} d={sh.d} />
+        ) : sh.t === "c" ? (
+          <circle key={i} cx={sh.cx} cy={sh.cy} r={sh.r} />
+        ) : (
+          <rect key={i} x={sh.x} y={sh.y} width={sh.w} height={sh.h} rx={sh.rx} />
+        )
+      )}
+    </svg>
+  );
+}
 
 export function TasksApp() {
   const { lang } = useLang();
@@ -108,7 +189,8 @@ export function TasksApp() {
     const n = name.trim();
     if (!n) return;
     const color = PROJECT_COLORS[state.projects.length % PROJECT_COLORS.length];
-    const p: Project = { id: uid(), name: n, color };
+    const icon = ICON_IDS[state.projects.length % ICON_IDS.length];
+    const p: Project = { id: uid(), name: n, color, icon };
     mutate((s) => ({ ...s, projects: [...s.projects, p] }));
     return p.id;
   };
@@ -253,6 +335,7 @@ export function TasksApp() {
               key={p.id}
               label={p.name}
               color={p.color}
+              icon={p.icon}
               active={filter === p.id}
               onClick={() => setFilter(p.id)}
               count={state.tasks.filter((t) => t.projectId === p.id).length}
@@ -364,12 +447,14 @@ export function TasksApp() {
 function FilterChip({
   label,
   color,
+  icon,
   active,
   onClick,
   count,
 }: {
   label: string;
   color?: string;
+  icon?: IconId;
   active: boolean;
   onClick: () => void;
   count: number;
@@ -393,7 +478,7 @@ function FilterChip({
         maxWidth: 200,
       }}
     >
-      {color && <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, flex: "none" }} />}
+      {color && <ProjectIcon id={icon} size={15} color={active ? "#fff" : inkable(color)} />}
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
       <span style={{ fontFamily: MONO, fontSize: 10.5, opacity: active ? 0.7 : 0.5 }}>{count}</span>
     </button>
@@ -437,7 +522,7 @@ function TaskCard({
         gap: 9,
         background: "#fff",
         border: "1px solid rgba(14,13,18,.08)",
-        borderLeft: `3px solid ${project?.color || "#c8c7cf"}`,
+        borderLeft: `3px solid ${project ? inkable(project.color) : "#c8c7cf"}`,
         borderRadius: 10,
         padding: "10px 11px",
         boxShadow: "0 2px 6px -4px rgba(14,13,18,.2)",
@@ -493,8 +578,11 @@ function TaskCard({
         {(showProject || task.notes) && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, flexWrap: "wrap" }}>
             {showProject && (
-              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".06em", color: project ? "#6c6a75" : "#74727d" }}>
-                {project ? project.name : es ? "Sin proyecto" : "No project"}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                {project && <ProjectIcon id={project.icon} size={13} color={inkable(project.color)} />}
+                <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".06em", color: project ? "#6c6a75" : "#74727d" }}>
+                  {project ? project.name : es ? "Sin proyecto" : "No project"}
+                </span>
               </span>
             )}
             {task.notes && <span style={{ fontSize: 11, color: "#74727d" }}>✎</span>}
@@ -745,6 +833,7 @@ function ManageProjects({
   es: boolean;
 }) {
   const [newName, setNewName] = React.useState("");
+  const [pickIcon, setPickIcon] = React.useState<string | null>(null);
   return (
     <Modal onClose={onClose} label={es ? "Proyectos" : "Projects"}>
       <h2 style={{ fontSize: 18, fontWeight: 500, margin: "0 0 14px" }}>{es ? "Proyectos" : "Projects"}</h2>
@@ -753,7 +842,27 @@ function ManageProjects({
         {projects.map((p) => {
           const count = tasks.filter((t) => t.projectId === p.id).length;
           return (
-            <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div key={p.id}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={() => setPickIcon((cur) => (cur === p.id ? null : p.id))}
+                title={es ? "Icono" : "Icon"}
+                aria-label={(es ? "Icono de " : "Icon for ") + p.name}
+                style={{
+                  flex: "none",
+                  width: 32,
+                  height: 32,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  background: pickIcon === p.id ? "var(--accent-tint)" : "#fff",
+                  border: `1.5px solid ${pickIcon === p.id ? "var(--accent)" : "rgba(14,13,18,.12)"}`,
+                }}
+              >
+                <ProjectIcon id={p.icon} size={17} color={inkable(p.color)} />
+              </button>
               <input
                 type="color"
                 value={p.color}
@@ -799,6 +908,46 @@ function ManageProjects({
               >
                 ✕
               </button>
+            </div>
+            {pickIcon === p.id && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(9,1fr)",
+                  gap: 6,
+                  padding: "10px 8px",
+                  marginTop: 8,
+                  borderRadius: 10,
+                  background: "#f7f8fb",
+                  border: "1px solid rgba(14,13,18,.08)",
+                }}
+              >
+                {ICON_IDS.map((ic) => (
+                  <button
+                    key={ic}
+                    onClick={() => {
+                      onPatch(p.id, { icon: ic });
+                      setPickIcon(null);
+                    }}
+                    title={ic}
+                    aria-label={ic}
+                    aria-pressed={p.icon === ic}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: 30,
+                      borderRadius: 7,
+                      cursor: "pointer",
+                      background: p.icon === ic ? p.color : "#fff",
+                      border: `1px solid ${p.icon === ic ? p.color : "rgba(14,13,18,.12)"}`,
+                    }}
+                  >
+                    <ProjectIcon id={ic} size={16} color={p.icon === ic ? fgOn(p.color) : "#54525c"} />
+                  </button>
+                ))}
+              </div>
+            )}
             </div>
           );
         })}

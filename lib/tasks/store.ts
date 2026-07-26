@@ -9,7 +9,33 @@ export interface Project {
   id: string;
   name: string;
   color: string;
+  icon?: IconId;
 }
+
+// Icon ids live here (plain data) so the store can validate them; the drawings
+// live in components/tasks/icons.tsx.
+export const ICON_IDS = [
+  "robot",
+  "dna",
+  "home-heart",
+  "ticket",
+  "fence",
+  "car",
+  "kanban",
+  "credit-card",
+  "rocket",
+  "code",
+  "chart",
+  "cloud",
+  "cart",
+  "message",
+  "camera",
+  "flask",
+  "shield",
+  "sparkle",
+] as const;
+export type IconId = (typeof ICON_IDS)[number];
+const ICON_SET = new Set<string>(ICON_IDS);
 
 export interface Task {
   id: string;
@@ -38,14 +64,17 @@ export const STATUSES: { id: Status; en: string; es: string }[] = [
 ];
 
 // Seed the user's real portfolio as project categories; all editable/deletable.
+// Brand colours and icons are also applied to an existing board by MIGRATIONS
+// below, so a device that already has the old seed picks them up.
 const SEED_PROJECTS: Omit<Project, "id">[] = [
-  { name: "Helixona", color: "#4FAE87" },
-  { name: "Western Fence Supply", color: "#3a74cd" },
-  { name: "CarCompraCorp", color: "#e0913a" },
-  { name: "USFQ · EventFlow", color: "#c0392b" },
-  { name: "PARC Home Care", color: "#8e44ad" },
-  { name: "ThemedMotion", color: "#16a085" },
-  { name: "CarCompra CRM", color: "#d081c0" },
+  { name: "Helixona", color: "#D6B981", icon: "dna" },
+  { name: "Western Fence Supply", color: "#3a74cd", icon: "fence" },
+  { name: "CarCompraCorp", color: "#e0913a", icon: "car" },
+  { name: "USFQ · EventFlow", color: "#c0392b", icon: "ticket" },
+  { name: "PARC Home Care", color: "#78B5EC", icon: "home-heart" },
+  { name: "ThemedMotion", color: "#F26B1F", icon: "robot" },
+  { name: "CarCompra CRM", color: "#d081c0", icon: "kanban" },
+  { name: "Creditazo", color: "#FFFF0C", icon: "credit-card" },
 ];
 
 export const PROJECT_COLORS = [
@@ -70,12 +99,37 @@ export function uid(): string {
   return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
 }
 
+export const STATE_VERSION = 2;
+
 export function seedState(): TasksState {
   return {
-    version: 1,
+    version: STATE_VERSION,
     projects: SEED_PROJECTS.map((p) => ({ ...p, id: uid() })),
     tasks: [],
   };
+}
+
+/**
+ * Bring a board saved by an older version up to date. Runs once — the state is
+ * stamped with the new version afterwards, so a colour or icon the owner
+ * changes later is never overwritten on a subsequent load.
+ */
+function migrate(s: TasksState): TasksState {
+  if ((s.version ?? 1) >= STATE_VERSION) return s;
+
+  const bySeedName = new Map(SEED_PROJECTS.map((p) => [p.name, p]));
+  const projects = s.projects.map((p) => {
+    const seed = bySeedName.get((p.name || "").trim());
+    return seed ? { ...p, color: seed.color, icon: seed.icon } : p;
+  });
+
+  // add seeded projects the board doesn't have yet (e.g. a newly added client)
+  const have = new Set(projects.map((p) => (p.name || "").trim()));
+  for (const seed of SEED_PROJECTS) {
+    if (!have.has(seed.name)) projects.push({ ...seed, id: uid() });
+  }
+
+  return { ...s, version: STATE_VERSION, projects };
 }
 
 export function loadState(): TasksState | null {
@@ -84,7 +138,7 @@ export function loadState(): TasksState | null {
     if (!raw) return null;
     const s = JSON.parse(raw) as TasksState;
     if (!s || !Array.isArray(s.projects) || !Array.isArray(s.tasks)) return null;
-    return s;
+    return migrate(s);
   } catch {
     return null;
   }
@@ -237,6 +291,7 @@ export function parseImport(text: string): TasksState | null {
         id: freshId(p.id),
         name: p.name,
         color: typeof p.color === "string" && HEX_COLOR.test(p.color) ? p.color : PROJECT_COLORS[0],
+        icon: typeof p.icon === "string" && ICON_SET.has(p.icon) ? (p.icon as IconId) : undefined,
       }));
     const projIds = new Set(projects.map((p) => p.id));
     const tasks: Task[] = s.tasks
@@ -250,7 +305,7 @@ export function parseImport(text: string): TasksState | null {
         createdAt: typeof t.createdAt === "number" ? t.createdAt : Date.now(),
         order: typeof t.order === "number" ? t.order : i,
       }));
-    return { version: 1, projects, tasks };
+    return { version: STATE_VERSION, projects, tasks };
   } catch {
     return null;
   }
