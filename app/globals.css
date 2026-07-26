@@ -107,6 +107,31 @@ a:hover {
   opacity: 0.85;
 }
 
+/* Blog card rows (home "What's new" + /blog list).
+   Thumb beside the copy on desktop; on phones the fixed thumb left the text
+   column ~90px wide, so stack the image above the text instead. */
+.news-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+}
+.news-thumb {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+@media (max-width: 680px) {
+  .news-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .news-thumb {
+    aspect-ratio: 16 / 10;
+    border-radius: 10px;
+  }
+}
+
 /* Story cards: zoom the image layer on hover (Together-style) */
 .story-card .story-media {
   transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -479,11 +504,14 @@ a:hover {
   border-radius: 6px;
 }
 
-/* homepage portfolio — full-bleed strip of panels that expand on hover */
+/* homepage portfolio — full-bleed strip of panels that expand on hover.
+   The section stays dark so it continues the dark process section above it
+   instead of dropping a black strip into white; .pf-outro fades it back to
+   white for the news section below. */
 .pf-section {
   position: relative;
-  background: #fff;
-  padding: 92px 0 72px;
+  background: #0d0a1f;
+  padding: 84px 0 0;
 }
 .pf-head {
   max-width: 1560px;
@@ -495,7 +523,19 @@ a:hover {
   display: flex;
   width: 100%;
   height: min(72vh, 660px);
-  background: #0e0d12;
+  background: #0d0a1f;
+}
+.pf-outro {
+  height: clamp(120px, 15vw, 190px);
+  background: linear-gradient(
+    180deg,
+    #0d0a1f 0%,
+    #171331 30%,
+    #322d55 52%,
+    #7a769b 72%,
+    #c8c9da 88%,
+    #ffffff 100%
+  );
 }
 .pf-panel {
   position: relative;
@@ -564,16 +604,33 @@ a:hover {
 .pf-panel:focus-visible .pf-reveal { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 900px) {
-  /* stack into full-width strips; everything visible, no hover needed */
-  .pf-strip { flex-direction: column; height: auto; background: transparent; }
+  .pf-head { padding-left: 24px; padding-right: 24px; }
+  /* Stack into cards: artwork on top, copy below on the dark background.
+     Overlaying the copy (the desktop treatment) collided with the centered
+     mockups at phone widths. */
+  .pf-strip { flex-direction: column; height: auto; }
   .pf-panel {
     flex: none;
-    min-height: 220px;
+    display: block;
+    padding-bottom: 26px;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   }
   .pf-strip:hover .pf-panel { flex-grow: 0; filter: none; }
   .pf-strip .pf-panel:hover { flex-grow: 0; }
+  .pf-panel .pf-img {
+    position: static;
+    display: block;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .pf-panel:hover .pf-img { transform: none; }
+  .pf-scrim { display: none; }
   .pf-vlabel { display: none; }
-  .pf-reveal { opacity: 1; transform: none; }
+  .pf-reveal {
+    position: static;
+    opacity: 1;
+    transform: none;
+    padding: 18px 24px 0;
+  }
 }

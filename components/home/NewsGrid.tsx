@@ -15,7 +15,7 @@ export function NewsGrid() {
 
   return (
     <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
-      <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+      <div className="pad-x" style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <div
           style={{
             display: "flex",
@@ -116,26 +116,15 @@ export function NewsGrid() {
               <Link
                 key={s.slug}
                 href={`/blog/${s.slug}`}
-                className="blog-link"
+                className="blog-link news-row"
                 style={{
                   textDecoration: "none",
                   color: "var(--ink)",
-                  display: "grid",
-                  gridTemplateColumns: "150px 1fr",
-                  gap: 20,
                   padding: i === 0 ? "0 0 26px" : i === side.length - 1 ? "26px 0 0" : "26px 0",
                   borderBottom: i < side.length - 1 ? "1px solid rgba(14,13,18,.1)" : "none",
                 }}
               >
-                <div
-                  style={{
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    aspectRatio: "4/3",
-                    position: "relative",
-                    background: s.bg,
-                  }}
-                >
+                <div className="news-thumb" style={{ background: s.bg }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={s.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>

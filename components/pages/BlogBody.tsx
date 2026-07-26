@@ -43,7 +43,7 @@ export function BlogBody() {
       </section>
 
       <section id="featured" style={{ background: "#fff", padding: "50px 0 90px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+        <div className="pad-x" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           <div
             className="stack-2"
             style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: "clamp(30px,4vw,64px)", alignItems: "start" }}
@@ -89,15 +89,12 @@ export function BlogBody() {
                 const style: React.CSSProperties = {
                   textDecoration: "none",
                   color: "var(--ink)",
-                  display: "grid",
-                  gridTemplateColumns: "150px 1fr",
-                  gap: 20,
                   padding: i === 0 ? "0 0 26px" : i === list.length - 1 ? "26px 0 0" : "26px 0",
                   borderBottom: i < list.length - 1 ? "1px solid rgba(14,13,18,.1)" : "none",
                 };
                 return (
-                  <Link key={p.slug} href={`/blog/${p.slug}`} className="blog-link" style={style}>
-                    <div style={{ borderRadius: 8, overflow: "hidden", aspectRatio: "4/3", position: "relative", background: p.bg }}>
+                  <Link key={p.slug} href={`/blog/${p.slug}`} className="blog-link news-row" style={style}>
+                    <div className="news-thumb" style={{ background: p.bg }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={p.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>

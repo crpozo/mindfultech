@@ -82,7 +82,7 @@ export function ClientStories() {
             letterSpacing: "-.02em",
             lineHeight: 1.05,
             margin: 0,
-            color: "var(--ink)",
+            color: "#fff",
           }}
         >
           {es ? "Equipos que construyen con MindfulTech" : "Teams build with MindfulTech"}
@@ -91,7 +91,7 @@ export function ClientStories() {
           style={{
             fontSize: 18,
             lineHeight: 1.5,
-            color: "#8b8896",
+            color: "#8f8ba4",
             fontWeight: 400,
             maxWidth: 620,
             margin: "14px auto 0",
@@ -143,18 +143,18 @@ export function ClientStories() {
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 44 }}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 54px" }}>
         <Link
           href="/work"
-          className="btn-dark"
+          className="btn-white"
           style={{
             textDecoration: "none",
             fontFamily: MONO,
             fontSize: 12,
             fontWeight: 500,
             letterSpacing: ".12em",
-            background: "#0e0d12",
-            color: "#fff",
+            background: "#fff",
+            color: "#0d0a1f",
             padding: "15px 24px",
             borderRadius: 6,
           }}
@@ -162,6 +162,9 @@ export function ClientStories() {
           {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
         </Link>
       </div>
+
+      {/* dark → white ramp so the next (white) section doesn't cut in hard */}
+      <div className="pf-outro" aria-hidden />
     </section>
   );
 }
