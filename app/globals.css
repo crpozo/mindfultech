@@ -506,12 +506,11 @@ a:hover {
 
 /* homepage portfolio — full-bleed strip of panels that expand on hover.
    The section stays dark so it continues the dark process section above it
-   instead of dropping a black strip into white; .pf-outro fades it back to
-   white for the news section below. */
+   instead of dropping a black strip into white. */
 .pf-section {
   position: relative;
   background: #0d0a1f;
-  padding: 84px 0 0;
+  padding: 84px 0 90px;
 }
 .pf-head {
   max-width: 1560px;
@@ -524,18 +523,6 @@ a:hover {
   width: 100%;
   height: min(72vh, 660px);
   background: #0d0a1f;
-}
-.pf-outro {
-  height: clamp(120px, 15vw, 190px);
-  background: linear-gradient(
-    180deg,
-    #0d0a1f 0%,
-    #171331 30%,
-    #322d55 52%,
-    #7a769b 72%,
-    #c8c9da 88%,
-    #ffffff 100%
-  );
 }
 .pf-panel {
   position: relative;

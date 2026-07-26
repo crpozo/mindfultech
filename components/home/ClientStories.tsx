@@ -143,7 +143,7 @@ export function ClientStories() {
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 54px" }}>
+      <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 0" }}>
         <Link
           href="/work"
           className="btn-white"
@@ -162,9 +162,6 @@ export function ClientStories() {
           {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
         </Link>
       </div>
-
-      {/* dark → white ramp so the next (white) section doesn't cut in hard */}
-      <div className="pf-outro" aria-hidden />
     </section>
   );
 }
