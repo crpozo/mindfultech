@@ -482,32 +482,6 @@ export function SiteHeader({
 
   return (
     <>
-      {/* announce bar */}
-      <div
-        style={{
-          background: "#0a0a0c",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "13px 20px",
-        }}
-      >
-        <Link
-          href="/#news"
-          className="announce-link"
-          style={{
-            textDecoration: "none",
-            color: "#fff",
-            fontFamily: MONO,
-            fontSize: 13,
-            letterSpacing: ".02em",
-          }}
-        >
-          {es ? "Anunciamos nuestra práctica de IA. Productos inteligentes, hechos para humanos →" : "Announcing our AI practice. Intelligent products, built for humans →"}
-        </Link>
-      </div>
-
       <div
         style={{
           position: "sticky",

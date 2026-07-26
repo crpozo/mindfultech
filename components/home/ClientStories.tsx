@@ -11,17 +11,20 @@ type Project = {
   brand: string;
   img: string;
   href: string;
+  /* drives the card's tint, ring and CTA — picked from each cover's artwork */
+  accent: string;
   title: Bi;
   meta: Bi;
 };
 
-// One full-height panel per project; hovering expands a panel and reveals its
-// title while the others recede.
+// One card per project; hovering expands a card and reveals its story while the
+// others recede to a vertical label.
 const PROJECTS: Project[] = [
   {
     brand: "USFQ",
     img: "/art/panel-usfq.webp",
     href: "/work#usfq",
+    accent: "#e2566b",
     title: { en: "EventFlow, shipped on the App Store", es: "EventFlow, publicada en el App Store" },
     meta: { en: "EVENTS · iOS · AI SURVEYS", es: "EVENTOS · iOS · ENCUESTAS IA" },
   },
@@ -29,6 +32,7 @@ const PROJECTS: Project[] = [
     brand: "Helixona",
     img: "/art/panel-helixona.webp",
     href: "/work#healthcare",
+    accent: "#dba64a",
     title: { en: "An AI agent that runs medical billing", es: "Un agente de IA que factura en salud" },
     meta: { en: "HEALTHCARE · AI AGENT", es: "SALUD · AGENTE DE IA" },
   },
@@ -36,6 +40,7 @@ const PROJECTS: Project[] = [
     brand: "Western Fence Supply",
     img: "/art/panel-wfs.webp",
     href: "/work#fence",
+    accent: "#6a9ede",
     title: { en: "Excel → Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega" },
     meta: { en: "CRM · LOGISTICS", es: "CRM · LOGÍSTICA" },
   },
@@ -43,6 +48,7 @@ const PROJECTS: Project[] = [
     brand: "CarCompraCorp",
     img: "/art/panel-carcompra.webp",
     href: "/work#carcompra",
+    accent: "#52c98d",
     title: { en: "Leads from Meta, answered by AI", es: "Leads de Meta, respondidos por IA" },
     meta: { en: "WHATSAPP · INSTAGRAM · AI", es: "WHATSAPP · INSTAGRAM · IA" },
   },
@@ -50,6 +56,7 @@ const PROJECTS: Project[] = [
     brand: "PARC Home Care",
     img: "/art/panel-parc.webp",
     href: "/work#parc",
+    accent: "#63aee8",
     title: { en: "PARC Connect, home care in your pocket", es: "PARC Connect, cuidado en tu bolsillo" },
     meta: { en: "FLUTTER · iOS + ANDROID", es: "FLUTTER · iOS + ANDROID" },
   },
@@ -57,6 +64,7 @@ const PROJECTS: Project[] = [
     brand: "ThemedMotion",
     img: "/art/panel-themedmotion.webp",
     href: "/work#themedmotion",
+    accent: "#e5893f",
     title: { en: "An interactive 3D portfolio on the web", es: "Un portafolio 3D interactivo en la web" },
     meta: { en: "WEBGL · THREE.JS", es: "WEBGL · THREE.JS" },
   },
@@ -64,6 +72,7 @@ const PROJECTS: Project[] = [
     brand: "CarCompra",
     img: "/art/panel-carcrm.webp",
     href: "/work#carcompra-crm",
+    accent: "#5cc9c2",
     title: { en: "A seller CRM wired to Meta & ads", es: "Un CRM de vendedores conectado a Meta" },
     meta: { en: "CUSTOM CRM · AWS", es: "CRM A MEDIDA · AWS" },
   },
@@ -105,24 +114,29 @@ export function ClientStories() {
 
       <div className="pf-strip">
         {PROJECTS.map((p) => (
-          <Link key={p.href} href={p.href} className="pf-panel" aria-label={`${p.brand} — ${p.title[lang]}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="pf-img" src={p.img} alt="" />
-            <span className="pf-scrim" aria-hidden />
+          <Link
+            key={p.href}
+            href={p.href}
+            className="pf-panel"
+            aria-label={`${p.brand} — ${p.title[lang]}`}
+            style={{ "--pf": p.accent } as React.CSSProperties}
+          >
+            <span className="pf-media" aria-hidden>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="pf-img" src={p.img} alt="" />
+            </span>
             <span className="pf-vlabel">{p.brand}</span>
             <div className="pf-reveal">
-              <div style={{ fontWeight: 600, fontSize: 15, color: "rgba(255,255,255,.82)", letterSpacing: ".01em" }}>
-                {p.brand}
-              </div>
+              <div className="pf-eyebrow">{p.brand}</div>
               <div
                 style={{
                   color: "#fff",
                   fontWeight: 500,
-                  fontSize: "clamp(19px,1.6vw,26px)",
-                  lineHeight: 1.25,
-                  letterSpacing: "-.015em",
-                  margin: "8px 0 0",
-                  maxWidth: 440,
+                  fontSize: "clamp(23px,2.1vw,36px)",
+                  lineHeight: 1.18,
+                  letterSpacing: "-.02em",
+                  margin: "14px 0 0",
+                  maxWidth: 480,
                 }}
               >
                 {p.title[lang]}
@@ -132,12 +146,14 @@ export function ClientStories() {
                   fontFamily: MONO,
                   fontSize: 10.5,
                   letterSpacing: ".14em",
-                  color: "rgba(255,255,255,.72)",
-                  marginTop: 10,
+                  color: "rgba(255,255,255,.6)",
+                  marginTop: 14,
                 }}
               >
                 {p.meta[lang]}
               </div>
+              {/* not an <a> — the whole card is already the link */}
+              <span className="pf-cta">{es ? "VER EL CASO →" : "VIEW CASE STUDY →"}</span>
             </div>
           </Link>
         ))}

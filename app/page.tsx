@@ -12,7 +12,7 @@ export default function Home() {
       {/* Header sits outside the fold so position:sticky can escape it. */}
       <SiteHeader active="home" megaMenus blueBg ctaMode="form" />
       {/* Hero fills the rest of the first viewport — no white peeks in. */}
-      <div style={{ minHeight: "max(560px, calc(100vh - 150px))", display: "flex", flexDirection: "column" }}>
+      <div style={{ minHeight: "max(560px, calc(100vh - 104px))", display: "flex", flexDirection: "column" }}>
         <Hero />
       </div>
       <PlatformStats />
