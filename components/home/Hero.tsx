@@ -16,10 +16,10 @@ const LOGO_H = 30;
 const MARQUEE: { name: string; img?: string; h?: number }[] = [
   { name: "USFQ", img: "/logo-usfq.svg", h: LOGO_H },
   { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: LOGO_H },
-  { name: "Helixona", img: "/helixona-logo.png", h: LOGO_H },
+  { name: "Helixona", img: "/helixona-logo.webp", h: LOGO_H },
   { name: "Western Fence Supply", img: "/wfs-logo.svg", h: LOGO_H },
   { name: "CarCompraCorp" },
-  { name: "PARC Home Care", img: "/parc-logo.png", h: LOGO_H },
+  { name: "PARC Home Care", img: "/parc-logo.webp", h: LOGO_H },
 ];
 
 // Discipline chips floating around the 3D brain (percent coords of the stage).
@@ -245,61 +245,103 @@ export function Hero() {
                    Centering lives here because mtfade animates transform. */
                 position: "absolute",
                 left: "50%",
-                top: "calc(100% + 4px)",
+                top: "calc(100% - 6px)",
                 transform: "translateX(-50%)",
                 zIndex: 4,
-                width: "min(430px, 92%)",
+                width: "min(392px, 94%)",
               }}
             >
-            <div
-              style={{
-                /* opaque: it sits over the client logo strip */
-                background: "#fff",
-                border: "1px solid rgba(36,52,78,.12)",
-                borderRadius: 14,
-                padding: "18px 20px 16px",
-                boxShadow: "0 24px 60px -28px rgba(14,13,18,.45)",
-                animation: "mtfade .35s ease both",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  position: "relative",
+                  /* opaque: it sits over the client logo strip */
+                  background: "#fff",
+                  border: "1px solid rgba(36,52,78,.1)",
+                  borderRadius: 14,
+                  padding: "13px 16px 15px",
+                  boxShadow: "0 22px 50px -26px rgba(14,13,18,.42)",
+                  animation: "mtfade .3s ease both",
+                }}
+              >
+                {/* notch, nudged toward the chip that opened it so the card
+                    reads as its callout instead of a loose panel */}
                 <span
+                  aria-hidden
                   style={{
-                    fontFamily: MONO,
-                    fontSize: 10.5,
-                    fontWeight: 500,
-                    letterSpacing: ".14em",
-                    color: "var(--accent-deep)",
+                    position: "absolute",
+                    top: -6,
+                    left: `${Math.min(88, Math.max(12, ((chip.x - 26) / 48) * 100))}%`,
+                    width: 11,
+                    height: 11,
+                    background: "#fff",
+                    borderLeft: "1px solid rgba(36,52,78,.1)",
+                    borderTop: "1px solid rgba(36,52,78,.1)",
+                    transform: "rotate(45deg)",
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    paddingBottom: 10,
+                    borderBottom: "1px solid rgba(36,52,78,.08)",
                   }}
                 >
-                  {chip.label[lang]}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setActive(null)}
-                  aria-label={es ? "Cerrar" : "Close"}
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: "var(--accent)",
+                      flex: "none",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: 10,
+                      fontWeight: 500,
+                      letterSpacing: ".14em",
+                      color: "#24344E",
+                    }}
+                  >
+                    {chip.label[lang]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActive(null)}
+                    aria-label={es ? "Cerrar" : "Close"}
+                    style={{
+                      marginLeft: "auto",
+                      marginRight: -4,
+                      width: 20,
+                      height: 20,
+                      display: "grid",
+                      placeItems: "center",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "transparent",
+                      color: "#9a97a6",
+                      cursor: "pointer",
+                      fontSize: 15,
+                      lineHeight: 1,
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <p
                   style={{
-                    marginLeft: "auto",
-                    width: 24,
-                    height: 24,
-                    display: "grid",
-                    placeItems: "center",
-                    borderRadius: "50%",
-                    border: "none",
-                    background: "#f1f2f6",
-                    color: "#6b6875",
-                    cursor: "pointer",
-                    fontSize: 14,
-                    lineHeight: 1,
+                    margin: "10px 0 0",
+                    fontSize: 13.5,
+                    lineHeight: 1.5,
+                    color: "#55525f",
                   }}
                 >
-                  ×
-                </button>
+                  {chip.note[lang]}
+                </p>
               </div>
-              <p style={{ margin: "10px 0 0", fontSize: 14.5, lineHeight: 1.55, color: "#4a4757" }}>
-                {chip.note[lang]}
-              </p>
-            </div>
             </div>
           )}
         </div>

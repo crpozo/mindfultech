@@ -153,13 +153,16 @@ export function ClientStories() {
           <Link
             key={p.href}
             href={p.href}
+            /* seven cards, one destination: without this Next prefetches the
+               same /work payload once per card, mid-scroll */
+            prefetch={false}
             className="pf-panel"
             aria-label={`${p.brand} — ${p.title[lang]}`}
             style={{ "--pf": p.accent } as React.CSSProperties}
           >
             <span className="pf-media" aria-hidden>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="pf-img" src={p.img} alt="" />
+              <img decoding="async" className="pf-img" src={p.img} alt="" />
             </span>
             <div className="pf-reveal">
               <div className="pf-eyebrow">{p.brand}</div>

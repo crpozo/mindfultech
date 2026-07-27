@@ -77,7 +77,7 @@ export function NewsGrid() {
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <img decoding="async" src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span
               style={{
@@ -116,6 +116,9 @@ export function NewsGrid() {
               <Link
                 key={s.slug}
                 href={`/blog/${s.slug}`}
+                /* the featured post keeps its prefetch; these four fired four
+                   more payload fetches right as the section scrolled in */
+                prefetch={false}
                 className="blog-link news-row"
                 style={{
                   textDecoration: "none",
@@ -126,7 +129,7 @@ export function NewsGrid() {
               >
                 <div className="news-thumb" style={{ background: s.bg }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img decoding="async" src={s.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div>
                   <span

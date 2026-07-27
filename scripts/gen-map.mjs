@@ -13,7 +13,7 @@ const topo = JSON.parse(readFileSync(new URL('../node_modules/world-atlas/land-5
 const land = feature(topo, topo.objects.land);
 
 const WIN = { lon0: -128, lon1: 26, lat0: -16, lat1: 66 };
-const STEP = 1.15;
+const STEP = 1.4;
 const W = 1000;
 const H = Math.round((W * (WIN.lat1 - WIN.lat0)) / (WIN.lon1 - WIN.lon0));
 

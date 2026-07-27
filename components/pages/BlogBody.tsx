@@ -60,7 +60,7 @@ export function BlogBody() {
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                <img decoding="async" src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <span
                 style={{
@@ -96,7 +96,7 @@ export function BlogBody() {
                   <Link key={p.slug} href={`/blog/${p.slug}`} className="blog-link news-row" style={style}>
                     <div className="news-thumb" style={{ background: p.bg }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img decoding="async" src={p.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                     <div>
                       <span

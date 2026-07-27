@@ -527,7 +527,7 @@ a:hover {
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -580,12 +580,22 @@ a:hover {
 }
 .pf-media {
   display: block;
+  position: relative;
   flex: none;
   /* keep the crop close to the mockup — a taller box just adds dead gradient */
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
+}
+/* fades the shot into the card. Deliberately an overlay and not mask-image:
+   a mask puts every card in its own compositing pass, and with a scaled
+   bitmap inside, scrolling re-rasterises all seven. */
+.pf-media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 22%;
+  background: linear-gradient(180deg, rgba(12, 10, 26, 0), #0c0a1a);
+  pointer-events: none;
 }
 .pf-panel .pf-img {
   width: 100%;

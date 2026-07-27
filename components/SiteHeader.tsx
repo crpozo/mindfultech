@@ -487,9 +487,10 @@ export function SiteHeader({
           position: "sticky",
           top: 0,
           zIndex: 900,
-          background: blueBg ? "rgba(237,242,250,.82)" : "rgba(255,255,255,.82)",
-          backdropFilter: "blur(14px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.4)",
+          /* Opaque on purpose. With a translucent backdrop-filter here, the
+             browser re-blurs whatever scrolls underneath on every frame, and
+             a hard dark→light section edge passing behind it flashes. */
+          background: blueBg ? "#edf2fa" : "#ffffff",
         }}
       >
         <div
