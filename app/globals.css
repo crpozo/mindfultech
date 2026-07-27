@@ -583,10 +583,11 @@ a:hover {
 .pf-media {
   display: block;
   flex: none;
-  aspect-ratio: 4 / 3;
+  /* keep the crop close to the mockup — a taller box just adds dead gradient */
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
 }
 .pf-panel .pf-img {
   width: 100%;
@@ -614,7 +615,7 @@ a:hover {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 6px 26px 28px;
+  padding: 14px 26px 28px;
   pointer-events: none;
 }
 .pf-eyebrow {
@@ -662,9 +663,7 @@ a:hover {
   .pf-panel { flex: none; }
   .pf-strip:hover .pf-panel { filter: none; }
   .pf-strip .pf-panel:hover { transform: none; }
-  .pf-media { aspect-ratio: 16 / 11; }
   .pf-panel .pf-img,
   .pf-panel:hover .pf-img { transform: none; }
-  .pf-reveal { padding: 8px 24px 26px; }
-  .pf-cta { margin-top: 22px; }
+  .pf-reveal { padding: 14px 24px 26px; }
 }

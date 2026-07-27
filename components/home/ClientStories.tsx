@@ -181,7 +181,9 @@ export function ClientStories() {
                   fontSize: 10.5,
                   letterSpacing: ".14em",
                   color: "rgba(255,255,255,.6)",
-                  marginTop: 14,
+                  /* the CTA's margin-top:auto collapses to 0 on a full card,
+                     so the gap above it lives here */
+                  margin: "13px 0 24px",
                 }}
               >
                 {p.meta[lang]}
