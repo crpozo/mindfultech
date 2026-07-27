@@ -1,0 +1,282 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  MindfulTech Finance — motor en la nube para el dashboard de mindfultech.ec/finance.
+  Lee los correos de consumo (Diners/Titanium y otros bancos) desde Outlook vía
+  Microsoft Graph, los convierte en transacciones categorizadas en DynamoDB, y
+  genera diagnósticos financieros con Claude en Amazon Bedrock.
+
+Parameters:
+  SiteOrigin:
+    Type: String
+    Default: https://mindfultech.ec
+    Description: Origen del dashboard (para CORS y el callback de Cognito).
+  DevOrigin:
+    Type: String
+    Default: http://localhost:3000
+    Description: Origen local para desarrollo.
+  OwnerEmail:
+    Type: String
+    Default: crpozo95@gmail.com
+    Description: Único usuario que puede entrar al dashboard.
+  BedrockModelId:
+    Type: String
+    Default: anthropic.claude-opus-5
+    Description: >
+      Model id de Claude en Amazon Bedrock. Si tu cuenta aún no tiene acceso a
+      Opus 5, cambia a anthropic.claude-sonnet-5 sin tocar el código.
+  MailSenders:
+    Type: String
+    Default: servicios@titanium.com.ec,notificaciones@dinersclub.com.ec,servicios@dinersclub.com.ec
+    Description: >
+      Remitentes (separados por coma) cuyos correos se ingieren. Agrega aquí los
+      de otros bancos (Pichincha, Guayaquil, Produbanco...) cuando los tengas.
+  IngestRate:
+    Type: String
+    Default: rate(15 minutes)
+    Description: Cada cuánto se revisa el correo.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    MemorySize: 512
+    Timeout: 60
+    Architectures: [arm64]
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref FinanceTable
+        SECRET_ID: !Ref GraphSecret
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        MAIL_SENDERS: !Ref MailSenders
+        SITE_ORIGIN: !Ref SiteOrigin
+        DEV_ORIGIN: !Ref DevOrigin
+        LOG_LEVEL: INFO
+
+Resources:
+  # ---------------------------------------------------------------- datos ----
+  FinanceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-data"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+
+  # Credenciales de Microsoft Graph. El client_id/client_secret los pones tú una
+  # sola vez (ver README); el refresh_token lo escribe la lambda de OAuth.
+  GraphSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "${AWS::StackName}/msgraph"
+      Description: Microsoft Graph (Outlook) delegated credentials + refresh token
+      SecretString: '{"client_id":"","client_secret":"","tenant":"common","refresh_token":"","state_key":""}'
+
+  # ----------------------------------------------------------- identidad ----
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${AWS::StackName}-users"
+      # Sin auto-registro: el dueño se crea con `aws cognito-idp admin-create-user`.
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      MfaConfiguration: "OPTIONAL"
+      EnabledMfas: [SOFTWARE_TOKEN_MFA]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      UserPoolAddOns:
+        AdvancedSecurityMode: AUDIT
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Sub "mft-finance-${AWS::AccountId}"
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: finance-web
+      # Público + PKCE: no hay secreto que exponer en el navegador.
+      GenerateSecret: false
+      AllowedOAuthFlows: [code]
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes: [openid, email, profile]
+      SupportedIdentityProviders: [COGNITO]
+      CallbackURLs:
+        - !Sub "${SiteOrigin}/finance/"
+        - !Sub "${DevOrigin}/finance/"
+      LogoutURLs:
+        - !Sub "${SiteOrigin}/finance/"
+        - !Sub "${DevOrigin}/finance/"
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      PreventUserExistenceErrors: ENABLED
+      ExplicitAuthFlows: [ALLOW_REFRESH_TOKEN_AUTH]
+
+  # ------------------------------------------------------------------ API ----
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: v1
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref SiteOrigin
+          - !Ref DevOrigin
+        AllowHeaders: [authorization, content-type]
+        AllowMethods: [GET, POST, PATCH, DELETE, OPTIONS]
+        MaxAge: 600
+      Auth:
+        Authorizers:
+          CognitoAuth:
+            IdentitySource: "$request.header.Authorization"
+            JwtConfiguration:
+              audience:
+                - !Ref UserPoolClient
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+        DefaultAuthorizer: CognitoAuth
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: api.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FinanceTable
+        - Statement:
+            - Effect: Allow
+              Action: [secretsmanager:GetSecretValue]
+              Resource: !Ref GraphSecret
+            - Effect: Allow
+              Action: [lambda:InvokeFunction]
+              Resource:
+                - !GetAtt IngestFunction.Arn
+                - !GetAtt InsightsFunction.Arn
+      Environment:
+        Variables:
+          INGEST_FUNCTION: !Ref IngestFunction
+          INSIGHTS_FUNCTION: !Ref InsightsFunction
+          COGNITO_CLIENT_ID: !Ref UserPoolClient
+      Events:
+        Any:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /{proxy+}
+            Method: ANY
+
+  # Rutas públicas del OAuth de Microsoft: el navegador es redirigido aquí, así
+  # que no puede mandar cabecera Authorization. La seguridad va en el `state`
+  # firmado (HMAC) que emite /oauth/url, que sí está autenticado.
+  OAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: oauth.handler
+      Timeout: 30
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [secretsmanager:GetSecretValue, secretsmanager:PutSecretValue]
+              Resource: !Ref GraphSecret
+      Events:
+        Callback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /oauth/callback
+            Method: GET
+            Auth:
+              Authorizer: NONE
+
+  # ------------------------------------------------------------- ingesta ----
+  IngestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: ingest.handler
+      Timeout: 300
+      MemorySize: 1024
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FinanceTable
+        - Statement:
+            - Effect: Allow
+              Action: [secretsmanager:GetSecretValue, secretsmanager:PutSecretValue]
+              Resource: !Ref GraphSecret
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource: "*"
+      Events:
+        Schedule:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref IngestRate
+            Description: Revisa el correo en busca de consumos nuevos
+
+  InsightsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: insights.handler
+      Timeout: 300
+      MemorySize: 1024
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FinanceTable
+        - Statement:
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource: "*"
+      Events:
+        Daily:
+          Type: ScheduleV2
+          Properties:
+            # 07:00 en Ecuador (UTC-5) = 12:00 UTC
+            ScheduleExpression: cron(0 12 * * ? *)
+            Description: Diagnóstico financiero diario con Claude
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base del API — va en public/finance/config.json (apiBase)
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/v1"
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Description: va en config.json (clientId)
+    Value: !Ref UserPoolClient
+  CognitoDomain:
+    Description: va en config.json (cognitoDomain)
+    Value: !Sub "https://mft-finance-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com"
+  GraphSecretName:
+    Description: Aquí van client_id/client_secret de la app de Azure
+    Value: !Ref GraphSecret
+  OAuthRedirectUri:
+    Description: Redirect URI que debes registrar en la app de Azure
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/v1/oauth/callback"

@@ -1,0 +1,3 @@
+# El SDK de Anthropic trae el cliente de Bedrock (AnthropicBedrockMantle).
+# boto3/botocore ya vienen en el runtime de Lambda, no se instalan aquí.
+anthropic[bedrock]>=0.80.0

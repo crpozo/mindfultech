@@ -1,0 +1,6 @@
+{
+  "_comment": "Llena estos tres valores con los outputs de `sam deploy` (infra/finance) y haz push. Ninguno es secreto: el client id de Cognito y la URL del API son públicos por diseño; lo que protege los datos es el login.",
+  "apiBase": "",
+  "cognitoDomain": "",
+  "clientId": ""
+}
