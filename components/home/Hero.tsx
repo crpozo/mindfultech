@@ -23,18 +23,73 @@ const MARQUEE: { name: string; img?: string; h?: number }[] = [
 ];
 
 // Discipline chips floating around the 3D brain (percent coords of the stage).
-const CHIPS: { label: { en: string; es: string }; x: number; y: number }[] = [
-  { label: { en: "UX RESEARCH", es: "UX RESEARCH" }, x: 15, y: 27 },
-  { label: { en: "AI AGENTS", es: "AGENTES DE IA" }, x: 85, y: 24 },
-  { label: { en: "AWS CLOUD", es: "AWS CLOUD" }, x: 88, y: 60 },
-  { label: { en: "FULL-STACK CODE", es: "CÓDIGO FULL-STACK" }, x: 15, y: 66 },
-  { label: { en: "MOBILE APPS", es: "APPS MÓVILES" }, x: 50, y: 88 },
+// `key` matches BRAIN_REGIONS — clicking one flies the brain to that region
+// and opens the note underneath.
+const CHIPS: {
+  key: string;
+  label: { en: string; es: string };
+  x: number;
+  y: number;
+  note: { en: string; es: string };
+}[] = [
+  {
+    key: "ux",
+    label: { en: "UX RESEARCH", es: "UX RESEARCH" },
+    x: 15,
+    y: 27,
+    note: {
+      en: "We listen first: goals, users and constraints. Research-driven prototypes get tested with real people before a line of production code is written.",
+      es: "Primero escuchamos: objetivos, usuarios y restricciones. Los prototipos nacen de investigación y se prueban con personas reales antes de escribir código de producción.",
+    },
+  },
+  {
+    key: "agents",
+    label: { en: "AI AGENTS", es: "AGENTES DE IA" },
+    x: 85,
+    y: 24,
+    note: {
+      en: "Agents that do real work in production — like the one running a US clinic's billing cycle end to end, with a human check where it counts.",
+      es: "Agentes que hacen trabajo real en producción — como el que corre el ciclo de facturación de una clínica en EE. UU. de inicio a fin, con revisión humana donde importa.",
+    },
+  },
+  {
+    key: "cloud",
+    label: { en: "AWS CLOUD", es: "AWS CLOUD" },
+    x: 88,
+    y: 60,
+    note: {
+      en: "Serverless on AWS: the infrastructure behind custom CRMs, transactional email and integrations — monitored and accounted for after launch.",
+      es: "Serverless sobre AWS: la infraestructura detrás de CRMs a medida, email transaccional e integraciones — monitoreada y con responsabilidad después del launch.",
+    },
+  },
+  {
+    key: "code",
+    label: { en: "FULL-STACK CODE", es: "CÓDIGO FULL-STACK" },
+    x: 15,
+    y: 66,
+    note: {
+      en: "Next.js, Python and Odoo, shipped weekly as working software. Automated tests, QA and a security review before every release.",
+      es: "Next.js, Python y Odoo, entregados semanalmente como software funcionando. Pruebas automatizadas, QA y revisión de seguridad antes de cada release.",
+    },
+  },
+  {
+    key: "mobile",
+    label: { en: "MOBILE APPS", es: "APPS MÓVILES" },
+    x: 50,
+    y: 88,
+    note: {
+      en: "Apps that reach the stores: EventFlow on the App Store for USFQ, PARC Connect on both stores from a single Flutter codebase.",
+      es: "Apps que llegan a las tiendas: EventFlow en el App Store para la USFQ, y PARC Connect en ambas tiendas desde un solo código Flutter.",
+    },
+  },
 ];
 
 export function Hero() {
   const { lang } = useLang();
   const es = lang === "es";
   const marqRef = React.useRef<HTMLDivElement>(null);
+  const [active, setActive] = React.useState<string | null>(null);
+  const chip = CHIPS.find((c) => c.key === active) ?? null;
 
   React.useEffect(() => {
     // TRUSTED BY marquee — driven here (not CSS) so we can wrap on the exact
@@ -119,53 +174,131 @@ export function Hero() {
             aspectRatio: "640 / 520",
           }}
         >
-          <Brain3D />
-          {CHIPS.map((c, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${c.x}%`,
-                top: `${c.y}%`,
-                transform: "translate(-50%,-50%)",
-                pointerEvents: "none",
-                opacity: 0,
-                animation: `mtChipIn .6s ease ${900 + i * 150}ms forwards`,
-              }}
-            >
+          <Brain3D focus={active} />
+          {CHIPS.map((c, i) => {
+            const on = active === c.key;
+            return (
               <div
+                key={c.key}
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "rgba(255,255,255,.9)",
-                  border: "1.5px solid rgba(79,174,135,.35)",
-                  borderRadius: 999,
-                  padding: "8px 14px",
-                  fontFamily: MONO,
-                  fontSize: 10.5,
-                  fontWeight: 500,
-                  letterSpacing: ".14em",
-                  color: "#24344E",
-                  boxShadow: "0 12px 28px -14px rgba(14,13,18,.3)",
-                  backdropFilter: "blur(6px)",
-                  whiteSpace: "nowrap",
-                  animation: `mtChipBob ${3.4 + i * 0.4}s ease-in-out ${-i * 1.1}s infinite`,
+                  position: "absolute",
+                  left: `${c.x}%`,
+                  top: `${c.y}%`,
+                  transform: "translate(-50%,-50%)",
+                  zIndex: on ? 3 : 2,
+                  opacity: 0,
+                  animation: `mtChipIn .6s ease ${900 + i * 150}ms forwards`,
                 }}
               >
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setActive(on ? null : c.key)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    cursor: "pointer",
+                    background: on ? "#24344E" : "rgba(255,255,255,.9)",
+                    border: `1.5px solid ${on ? "#24344E" : "rgba(79,174,135,.35)"}`,
+                    borderRadius: 999,
+                    padding: "8px 14px",
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    fontWeight: 500,
+                    letterSpacing: ".14em",
+                    color: on ? "#fff" : "#24344E",
+                    boxShadow: on
+                      ? "0 16px 34px -14px rgba(36,52,78,.55)"
+                      : "0 12px 28px -14px rgba(14,13,18,.3)",
+                    whiteSpace: "nowrap",
+                    transition: "background .25s ease, color .25s ease, border-color .25s ease",
+                    /* the bob pauses while open so the note stays put */
+                    animation: on
+                      ? "none"
+                      : `mtChipBob ${3.4 + i * 0.4}s ease-in-out ${-i * 1.1}s infinite`,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: on ? "var(--accent)" : "#4FAE87",
+                      flex: "none",
+                    }}
+                  />
+                  {c.label[lang]}
+                </button>
+              </div>
+            );
+          })}
+
+          {chip && (
+            <div
+              key={chip.key}
+              style={{
+                /* below the stage, not inside it — it would land on the
+                   MOBILE APPS chip; absolute so opening shifts no layout.
+                   Centering lives here because mtfade animates transform. */
+                position: "absolute",
+                left: "50%",
+                top: "calc(100% + 4px)",
+                transform: "translateX(-50%)",
+                zIndex: 4,
+                width: "min(430px, 92%)",
+              }}
+            >
+            <div
+              style={{
+                background: "rgba(255,255,255,.95)",
+                border: "1px solid rgba(36,52,78,.1)",
+                borderRadius: 14,
+                padding: "18px 20px 16px",
+                boxShadow: "0 24px 60px -28px rgba(14,13,18,.5)",
+                animation: "mtfade .35s ease both",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span
                   style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: "#4FAE87",
-                    flex: "none",
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    fontWeight: 500,
+                    letterSpacing: ".14em",
+                    color: "var(--accent-deep)",
                   }}
-                />
-                {c.label[lang]}
+                >
+                  {chip.label[lang]}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActive(null)}
+                  aria-label={es ? "Cerrar" : "Close"}
+                  style={{
+                    marginLeft: "auto",
+                    width: 24,
+                    height: 24,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "#f1f2f6",
+                    color: "#6b6875",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </button>
               </div>
+              <p style={{ margin: "10px 0 0", fontSize: 14.5, lineHeight: 1.55, color: "#4a4757" }}>
+                {chip.note[lang]}
+              </p>
             </div>
-          ))}
+            </div>
+          )}
         </div>
       </div>
 

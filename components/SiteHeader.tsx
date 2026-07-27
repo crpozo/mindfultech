@@ -640,9 +640,8 @@ export function SiteHeader({
             </div>
           </nav>
 
-          {/* hinge — thin line whose ends pass UNDER both white pills
-              (negative z paints below their opaque backgrounds), exactly
-              like together.ai's. */}
+          {/* hinge — a thin line drawn ON TOP of both white pills, its ends
+              overlapping each one so it reads as a bridge between them. */}
           <span
             className="nav-conn"
             aria-hidden
@@ -650,11 +649,11 @@ export function SiteHeader({
               flex: "none",
               alignSelf: "center",
               width: 40,
-              height: 6,
-              borderRadius: 3,
+              height: 4,
+              borderRadius: 2,
               margin: "0 -14px",
               position: "relative",
-              zIndex: -1,
+              zIndex: 2,
               background: "#90C8B7",
             }}
           />

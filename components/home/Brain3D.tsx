@@ -2,6 +2,16 @@
 
 import * as React from "react";
 
+/** Where each discipline lives on the brain, and where the camera sits to
+ *  look at it. Points are in the same space as the sampled anatomy below. */
+export const BRAIN_REGIONS: Record<string, { p: [number, number, number]; cam: [number, number, number] }> = {
+  ux: { p: [-0.34, 0.24, 0.55], cam: [-0.95, 0.5, 1.45] },
+  agents: { p: [0.38, 0.44, 0.28], cam: [1.15, 1.0, 1.15] },
+  cloud: { p: [0.42, 0.26, -0.5], cam: [1.35, 0.55, -1.05] },
+  code: { p: [-0.5, -0.04, 0.06], cam: [-1.55, 0.05, 0.6] },
+  mobile: { p: [0.02, -0.3, -0.5], cam: [0.5, -0.42, 1.5] },
+};
+
 /**
  * 3D neural brain for the hero — anatomical point cloud (two hemispheres with
  * gyri, cerebellum, brainstem) whose neurons link to near neighbours and carry
@@ -9,10 +19,19 @@ import * as React from "react";
  * the light hero wash, auto-rotates slowly and can be dragged. The scene
  * assembles on mount, pauses while offscreen, and falls back to the brand
  * mark if WebGL is unavailable.
+ *
+ * `focus` (a BRAIN_REGIONS key) flies the camera to that region, lights the
+ * neurons around it and holds the rotation still; null returns to the idle
+ * orbit.
  */
-export function Brain3D() {
+export function Brain3D({ focus = null }: { focus?: string | null }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [failed, setFailed] = React.useState(false);
+  // the scene is built once; the loop reads the live focus through this ref
+  const focusRef = React.useRef<string | null>(focus);
+  React.useEffect(() => {
+    focusRef.current = focus;
+  }, [focus]);
 
   React.useEffect(() => {
     const mount = ref.current;
@@ -348,6 +367,87 @@ export function Brain3D() {
         brain.rotation.x = 0.05;
         scene.add(brain);
 
+        // ---- focus: fly to a region and light the neurons around it ----
+        const baseCol = colArr.slice();
+        const HOT = new THREE.Color("#6f5ae0"); // same violet as the impulses
+        const FADE = new THREE.Color("#aebbd2"); // pale, so the rest recedes
+        // halo marking the focused region
+        const halo = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glow,
+            color: new THREE.Color("#7d67f0"),
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+            depthTest: false,
+          })
+        );
+        halo.scale.setScalar(0.6);
+        brain.add(halo); // declared after the group, so attach it here
+        const HOME_CAM = camera.position.clone();
+        const HOME_TARGET = controls.target.clone();
+        const goalCam = HOME_CAM.clone();
+        const goalTarget = HOME_TARGET.clone();
+        let applied: string | null = null;
+
+        const paintFocus = (key: string | null) => {
+          const region = key ? BRAIN_REGIONS[key] : null;
+          if (!region) {
+            colArr.set(baseCol);
+            halo.material.opacity = 0;
+          } else {
+            const [fx, fy, fz] = region.p;
+            const R = 0.62;
+            const hot = [HOT.r, HOT.g, HOT.b];
+            const fade = [FADE.r, FADE.g, FADE.b];
+            for (let i = 0; i < N; i++) {
+              const dx = posArr[i * 3] - fx,
+                dy = posArr[i * 3 + 1] - fy,
+                dz = posArr[i * 3 + 2] - fz;
+              const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+              // 1 at the anchor → 0 past R; ^0.8 so the lit patch reads wide
+              const t = Math.pow(Math.max(0, 1 - d / R), 0.8);
+              for (let k = 0; k < 3; k++) {
+                // everything else washes out toward the page, not to black
+                const rest = baseCol[i * 3 + k] + (fade[k] - baseCol[i * 3 + k]) * 0.74;
+                colArr[i * 3 + k] = rest + (hot[k] - rest) * t;
+              }
+            }
+            halo.position.set(fx, fy, fz);
+            halo.material.opacity = 0.36;
+          }
+          geo.attributes.color.needsUpdate = true;
+          lMat.opacity = region ? 0.14 : 0.34;
+          pMat.opacity = region ? 0.35 : 0.9;
+        };
+
+        // while flying (either way) the auto-orbit is off, or it would fight
+        // the lerp; it resumes once the camera settles back home
+        let flying = false;
+        let dragging = false;
+        controls.addEventListener("start", () => {
+          dragging = true;
+          flying = false;
+        });
+        controls.addEventListener("end", () => {
+          dragging = false;
+        });
+
+        const applyFocus = (key: string | null) => {
+          applied = key;
+          const region = key ? BRAIN_REGIONS[key] : null;
+          if (region) {
+            goalCam.set(region.cam[0], region.cam[1], region.cam[2]);
+            goalTarget.set(region.p[0], region.p[1], region.p[2]);
+          } else {
+            goalCam.copy(HOME_CAM);
+            goalTarget.copy(HOME_TARGET);
+          }
+          controls.autoRotate = false;
+          flying = true;
+          paintFocus(key);
+        };
+
         // ---- run: assemble intro, breathe, pause offscreen ----
         const clock = new THREE.Clock();
         let raf = 0;
@@ -371,6 +471,20 @@ export function Brain3D() {
             const breathe = 1 + Math.sin(t * 1.35) * 0.012;
             brain.scale.setScalar(breathe);
             ptsMat.opacity = 0.88 + Math.sin(t * 1.35) * 0.07;
+          }
+          if (focusRef.current !== applied) applyFocus(focusRef.current);
+          if (flying && !dragging && intro >= 1) {
+            // ease camera + orbit target toward the goal, framerate-independent
+            const k = 1 - Math.pow(0.006, dt);
+            camera.position.lerp(goalCam, k);
+            controls.target.lerp(goalTarget, k);
+            if (
+              camera.position.distanceTo(goalCam) < 0.01 &&
+              controls.target.distanceTo(goalTarget) < 0.01
+            ) {
+              flying = false;
+              if (!applied) controls.autoRotate = !reduced; // idle orbit resumes
+            }
           }
           if (!reduced || intro < 1) updatePulses(dt);
           controls.update();
@@ -425,6 +539,7 @@ export function Brain3D() {
           ptsMat.dispose();
           lMat.dispose();
           pMat.dispose();
+          halo.material.dispose();
           glow.dispose();
           renderer.dispose();
           renderer.domElement.remove();

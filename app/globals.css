@@ -544,10 +544,8 @@ a:hover {
   border-radius: 50%;
   cursor: pointer;
   color: #fff;
-  background: rgba(12, 10, 26, 0.72);
+  background: #1a1633;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   transition: background 0.2s ease, border-color 0.2s ease, opacity 0.25s ease;
 }
 .pf-nav:hover {
@@ -598,8 +596,9 @@ a:hover {
   transform: scale(1.18);
   transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-/* dim the rest while one card is hovered; the hovered one lifts and lights up */
-.pf-strip:hover .pf-panel { filter: saturate(0.82) brightness(0.84); }
+/* The hovered card lifts and lights up. Deliberately no strip-wide dim: it
+   repainted all seven cards whenever the pointer entered the strip, which
+   flickered as the section scrolled past a stationary cursor. */
 .pf-strip .pf-panel:hover,
 .pf-strip .pf-panel:focus-visible {
   filter: none;
@@ -661,9 +660,94 @@ a:hover {
     scroll-snap-type: none;
   }
   .pf-panel { flex: none; }
-  .pf-strip:hover .pf-panel { filter: none; }
   .pf-strip .pf-panel:hover { transform: none; }
   .pf-panel .pf-img,
   .pf-panel:hover .pf-img { transform: none; }
   .pf-reveal { padding: 14px 24px 26px; }
+}
+
+/* client map — dotted basemap beside the location list */
+.map-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: clamp(24px, 3vw, 54px);
+  align-items: center;
+}
+.map-canvas {
+  min-width: 0;
+}
+.map-pin {
+  cursor: pointer;
+}
+.map-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.map-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(14, 13, 18, 0.07);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--ink);
+  font: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.map-row:hover,
+.map-row.on {
+  background: #fff;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  transform: translateY(-2px);
+}
+.map-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.map-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+.map-row.on .map-dot {
+  background: var(--accent-deep);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+.map-clients {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding-left: 19px;
+}
+.map-client {
+  display: flex;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #6b6875;
+}
+.map-client b {
+  font-weight: 600;
+  color: var(--ink);
+  flex: none;
+}
+
+@media (max-width: 900px) {
+  .map-grid {
+    grid-template-columns: 1fr;
+  }
+  .map-client {
+    flex-direction: column;
+    gap: 1px;
+  }
 }
