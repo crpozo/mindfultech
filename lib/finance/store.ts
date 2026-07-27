@@ -52,6 +52,22 @@ export interface Receivable {
   note?: string;
 }
 
+/**
+ * Obligación fija que se repite cada mes y no es deuda: no tiene saldo que
+ * amortizar, se paga mientras siga vigente. El aporte al IESS es el caso
+ * exacto — dejar de pagarlo no libera un saldo, corre la fecha en que el
+ * BIESS presta.
+ */
+export interface Commitment {
+  id: string;
+  name: string;
+  /** Cuánto se paga cada mes. */
+  amount: number;
+  /** Rubro de EXPENSE_CATEGORIES, para que cuadre con los movimientos. */
+  category: string;
+  note?: string;
+}
+
 export interface Settings {
   currency: string;
   monthlyIncomeGoal: number;
@@ -74,6 +90,7 @@ export interface FinanceState {
   accounts: Account[];
   debts: Debt[];
   receivables: Receivable[];
+  commitments: Commitment[];
   settings: Settings;
 }
 
@@ -156,6 +173,15 @@ export function seedState(): FinanceState {
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       { id: "andrew", client: "Andrew", amount: 500, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
+    ],
+    commitments: [
+      {
+        id: "iess",
+        name: "IESS — aporte voluntario",
+        amount: 176,
+        category: "salud",
+        note: "Mensual. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
+      },
     ],
     settings: {
       currency: "USD",
@@ -275,6 +301,21 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
         name: d.name,
         balance: num(d.balance),
         monthlyPayment: num(d.monthlyPayment),
+      })),
+    // sin la clave (estado guardado antes de que existieran) entra la semilla,
+    // así el compromiso aparece sin tener que reimportar nada; una lista vacía
+    // sí se respeta, para que borrarlos no los resucite en la próxima carga
+    commitments: (Array.isArray(s.commitments)
+      ? s.commitments
+      : base.commitments
+    )
+      .filter((c) => c && typeof c.name === "string")
+      .map((c) => ({
+        id: freshId(c.id),
+        name: c.name,
+        amount: num(c.amount),
+        category: str(c.category, "otros"),
+        note: str(c.note) || undefined,
       })),
     receivables: (Array.isArray(s.receivables)
       ? s.receivables

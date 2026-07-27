@@ -18,6 +18,7 @@ import type { NetWorth } from "@/lib/finance/analysis";
 import {
   uid,
   type Account,
+  type Commitment,
   type Debt,
   type FinanceState,
   type Receivable,
@@ -247,6 +248,8 @@ export function Patrimonio({
     update((s) => ({ ...s, debts: fn(s.debts) }));
   const setArs = (fn: (r: Receivable[]) => Receivable[]) =>
     update((s) => ({ ...s, receivables: fn(s.receivables) }));
+  const setCommitments = (fn: (c: Commitment[]) => Commitment[]) =>
+    update((s) => ({ ...s, commitments: fn(s.commitments) }));
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
@@ -272,6 +275,11 @@ export function Patrimonio({
             label: "Deuda",
             value: nw.debt,
             hint: `${m(nw.monthlyDebtPayment)}/${"mes"}`,
+          },
+          {
+            label: "Fijo al mes",
+            value: nw.monthlyDebtPayment + nw.monthlyCommitments,
+            hint: `deuda + compromisos`,
           },
           {
             label: "Por cobrar",
@@ -577,6 +585,81 @@ export function Patrimonio({
                   name: v.name.trim(),
                   balance: toNum(v.balance),
                   monthlyPayment: toNum(v.monthlyPayment),
+                },
+              ])
+            }
+          />
+        </div>
+      </Panel>
+
+      <Panel
+        title={"Compromisos fijos"}
+        subtitle={
+          "Se pagan todos los meses y no son deuda: no hay saldo que baje, corren mientras sigan vigentes."
+        }
+        total={`${m(nw.monthlyCommitments)}/mes`}
+      >
+        <div style={{ display: "grid", gap: 10 }}>
+          {state.commitments.map((c) => (
+            <Row
+              key={c.id}
+              label={"Borrar compromiso"}
+              onDelete={() =>
+                setCommitments((cur) => cur.filter((x) => x.id !== c.id))
+              }
+            >
+              <input
+                value={c.name}
+                onChange={(e) =>
+                  setCommitments((cur) =>
+                    cur.map((x) =>
+                      x.id === c.id ? { ...x, name: e.target.value } : x,
+                    ),
+                  )
+                }
+                style={inputStyle}
+              />
+              <input
+                defaultValue={String(c.amount)}
+                inputMode="decimal"
+                title={"Cuánto al mes"}
+                onBlur={(e) =>
+                  setCommitments((cur) =>
+                    cur.map((x) =>
+                      x.id === c.id ? { ...x, amount: toNum(e.target.value) } : x,
+                    ),
+                  )
+                }
+                style={numInput}
+              />
+            </Row>
+          ))}
+          {state.commitments.some((c) => c.note) && (
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: 12,
+                lineHeight: 1.5,
+                color: MUTED,
+              }}
+            >
+              {state.commitments.find((c) => c.note)?.note}
+            </p>
+          )}
+          <NewRow
+            lang={lang}
+            fields={[
+              { key: "name", placeholder: "Compromiso" },
+              { key: "amount", placeholder: "Al mes", numeric: true },
+            ]}
+            onAdd={(v) =>
+              setCommitments((cur) => [
+                ...cur,
+                {
+                  id: uid(),
+                  name: v.name.trim(),
+                  amount: toNum(v.amount),
+                  category: "otros",
                 },
               ])
             }

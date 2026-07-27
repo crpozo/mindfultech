@@ -27,6 +27,8 @@ export interface NetWorth {
   assets: number;
   debt: number;
   monthlyDebtPayment: number;
+  /** Obligaciones fijas recurrentes que no son deuda (IESS, seguros). */
+  monthlyCommitments: number;
   netWorth: number;
   receivablesPending: number;
   netWorthWithReceivables: number;
@@ -144,16 +146,21 @@ export function summarize(state: FinanceState, months = 6): MonthSummary[] {
  * el gasto que el dueño declara que la suma de los presupuestos por rubro:
  * esos cubren una parte del gasto, no todo, y usarlos como total infla el
  * runway. La suma presupuesto + cuota de deuda queda como último recurso.
+ *
+ * Los compromisos fijos se suman solo a las estimaciones declaradas, nunca al
+ * promedio medido: ahí ya vienen dentro de los movimientos del mes, y contarlos
+ * otra vez encogería el runway con un gasto que no existe.
  */
 export function baselineExpense(
   state: FinanceState,
   summaries: MonthSummary[],
 ): number {
+  const commitments = state.commitments.reduce((s, c) => s + c.amount, 0);
   const closed = summaries.slice(0, -1).filter((m) => m.count > 0);
   if (closed.length)
     return round2(closed.reduce((s, m) => s + m.expense, 0) / closed.length);
   if (state.settings.monthlyExpenseEstimate > 0)
-    return round2(state.settings.monthlyExpenseEstimate);
+    return round2(state.settings.monthlyExpenseEstimate + commitments);
   const current = summaries[summaries.length - 1];
   if (current && current.expense > 0) return current.expense;
   const budget = Object.values(state.settings.budgets).reduce(
@@ -161,7 +168,7 @@ export function baselineExpense(
     0,
   );
   const debt = state.debts.reduce((s, d) => s + d.monthlyPayment, 0);
-  return round2(budget + debt) || 0;
+  return round2(budget + debt + commitments) || 0;
 }
 
 export function netWorth(state: FinanceState, baseline: number): NetWorth {
@@ -176,6 +183,10 @@ export function netWorth(state: FinanceState, baseline: number): NetWorth {
     (s, d) => s + d.monthlyPayment,
     0,
   );
+  const monthlyCommitments = state.commitments.reduce(
+    (s, c) => s + c.amount,
+    0,
+  );
   const pending = state.receivables
     .filter((r) => r.status !== "paid")
     .reduce((s, r) => s + r.amount, 0);
@@ -186,6 +197,7 @@ export function netWorth(state: FinanceState, baseline: number): NetWorth {
     assets: round2(assets),
     debt: round2(debt),
     monthlyDebtPayment: round2(monthlyDebtPayment),
+    monthlyCommitments: round2(monthlyCommitments),
     netWorth: round2(assets - debt),
     receivablesPending: round2(pending),
     netWorthWithReceivables: round2(assets - debt + pending),
@@ -556,6 +568,7 @@ export function claudePrompt(
     gastoMensualDeReferencia: baseline,
     cuentas: state.accounts,
     deudas: state.debts,
+    compromisosFijosMensuales: state.commitments,
     porCobrar: state.receivables.filter((r) => r.status !== "paid"),
     meses: summaries.map((m) => ({
       mes: m.month,
@@ -575,6 +588,7 @@ Contexto que importa:
 - Mi ingreso es freelance por proyectos: irregular por naturaleza. No leas un mes flojo como deterioro ni uno bueno como tendencia.
 - Lo que está en "porCobrar" es dinero facturado y no cobrado: no cuenta como patrimonio hasta que entra.
 - El runway (meses que aguanta el efectivo sin cobros nuevos) me importa más que la foto de un mes.
+- "compromisosFijosMensuales" son obligaciones que se pagan cada mes y no negocio: el aporte al IESS entra ahí porque cortarlo reinicia el historial de aportaciones que el BIESS pide para el crédito hipotecario. No lo propongas como recorte.
 - No busco recomendaciones de instrumentos de inversión. Háblame de gasto, ahorro, flujo de caja, deuda y hábitos.
 
 Dame: un veredicto de salud financiera de 0 a 100 con su justificación, lo que está a favor, lo que está en contra, y una lista de acciones concretas ordenadas por cuántos dólares al mes liberan. Si algo en los datos no alcanza para concluir, dilo en vez de estirarlo.

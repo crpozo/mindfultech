@@ -1664,7 +1664,7 @@ function Ajustes({
               }}
             >
               {
-                "Es el denominador del runway mientras no tengas meses completos registrados. En cuanto haya historial real, manda el promedio medido."
+                "Es el denominador del runway mientras no tengas meses completos registrados. En cuanto haya historial real, manda el promedio medido. No incluyas aquí los compromisos fijos de Patrimonio: esos se suman aparte."
               }
             </span>
           </Field>
