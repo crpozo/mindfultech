@@ -114,7 +114,43 @@ def build_summary(months_data: dict[str, list[dict]], settings: dict | None = No
     }
 
 
-def insight_payload(months_data: dict[str, list[dict]], settings: dict) -> dict:
+def build_networth(accounts: list[dict], debts: list[dict], receivables: list[dict], avg_expense: Decimal) -> dict:
+    """
+    Patrimonio, y las dos cifras que dicen si hay estabilidad:
+
+    - `runway`: meses que aguanta el efectivo si mañana no entra un dólar. Para
+      alguien que factura por proyecto es el número más honesto de todos.
+    - `pending`: lo facturado y no cobrado. No es patrimonio (todavía), pero sí
+      explica por qué la cuenta puede verse floja un mes bueno.
+    """
+    liquid = sum((money(a.get("balance")) for a in accounts if a.get("kind") != "investment"), ZERO)
+    invested = sum((money(a.get("balance")) for a in accounts if a.get("kind") == "investment"), ZERO)
+    debt_total = sum((money(d.get("balance")) for d in debts), ZERO)
+    monthly_debt = sum((money(d.get("monthlyPayment")) for d in debts), ZERO)
+    pending = sum((money(r.get("amount")) for r in receivables if r.get("status") != "paid"), ZERO)
+    assets = liquid + invested
+    runway = (liquid / avg_expense).quantize(Decimal("0.1")) if avg_expense > 0 else ZERO
+    return {
+        "liquid": liquid,
+        "invested": invested,
+        "assets": assets,
+        "debt": debt_total,
+        "monthlyDebtPayment": monthly_debt,
+        "netWorth": assets - debt_total,
+        "receivablesPending": pending,
+        # Con lo cobrado encima: el colchón real si los clientes pagan.
+        "netWorthWithReceivables": assets - debt_total + pending,
+        "runwayMonths": runway,
+    }
+
+
+def insight_payload(
+    months_data: dict[str, list[dict]],
+    settings: dict,
+    networth: dict | None = None,
+    debts: list[dict] | None = None,
+    receivables: list[dict] | None = None,
+) -> dict:
     """
     Versión compacta para mandarle a Claude: agregados y los movimientos más
     grandes, nunca el listado completo (ni hace falta, ni cabe barato).
@@ -136,11 +172,27 @@ def insight_payload(months_data: dict[str, list[dict]], settings: dict) -> dict:
             )
     return {
         "moneda": settings.get("currency", "USD"),
+        "perfil": settings.get("profile", ""),
         "metas": {
             "ingresoMensualObjetivo": money(settings.get("monthlyIncomeGoal")),
             "tasaAhorroObjetivo": money(settings.get("savingsRateGoal")),
             "fondoEmergenciaObjetivo": money(settings.get("emergencyFundGoal")),
         },
+        "patrimonio": networth or {},
+        "deudas": [
+            {
+                "nombre": d.get("name"),
+                "saldo": money(d.get("balance")),
+                "cuotaMensual": money(d.get("monthlyPayment")),
+                "tipo": d.get("kind"),
+            }
+            for d in (debts or [])
+        ],
+        "porCobrar": [
+            {"cliente": r.get("client"), "monto": money(r.get("amount")), "estado": r.get("status")}
+            for r in (receivables or [])
+            if r.get("status") != "paid"
+        ],
         "meses": [
             {
                 "mes": m["month"],

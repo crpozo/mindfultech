@@ -45,6 +45,52 @@ export interface Settings {
   savingsRateGoal: number;
   emergencyFundGoal: number;
   budgets: Record<string, number>;
+  /** Contexto en prosa que la IA lee junto a los números. */
+  profile: string;
+}
+
+export interface Account {
+  id: string;
+  name: string;
+  /** investment queda fuera del runway: no es dinero disponible mañana. */
+  kind: "cash" | "bank" | "investment";
+  balance: number;
+  currency?: string;
+  note?: string;
+  updatedAt?: string;
+}
+
+export interface Debt {
+  id: string;
+  name: string;
+  kind: string;
+  balance: number;
+  monthlyPayment: number;
+  rate?: number;
+  note?: string;
+  updatedAt?: string;
+}
+
+export interface Receivable {
+  id: string;
+  client: string;
+  amount: number;
+  status: "pending" | "paid";
+  dueDate?: string;
+  note?: string;
+  updatedAt?: string;
+}
+
+export interface NetWorth {
+  liquid: number;
+  invested: number;
+  assets: number;
+  debt: number;
+  monthlyDebtPayment: number;
+  netWorth: number;
+  receivablesPending: number;
+  netWorthWithReceivables: number;
+  runwayMonths: number;
 }
 
 export interface Summary {
@@ -55,6 +101,10 @@ export interface Summary {
   averages: { expense: number; income: number };
   projectedExpense: number;
   budgets: BudgetStatus[];
+  networth: NetWorth;
+  accounts: Account[];
+  debts: Debt[];
+  receivables: Receivable[];
   settings: Settings;
   categories: { expense: string[]; income: string[] };
   generatedAt: string;
@@ -142,5 +192,17 @@ export const api = {
       body: JSON.stringify(days ? { days } : {}),
     }),
   status: () => request<Status>("/status"),
+  saveAccount: (body: Partial<Account>) =>
+    request<{ item: Account }>("/accounts", { method: "POST", body: JSON.stringify(body) }),
+  deleteAccount: (id: string) =>
+    request<{ ok: boolean }>(`/accounts/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  saveDebt: (body: Partial<Debt>) =>
+    request<{ item: Debt }>("/debts", { method: "POST", body: JSON.stringify(body) }),
+  deleteDebt: (id: string) =>
+    request<{ ok: boolean }>(`/debts/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  saveReceivable: (body: Partial<Receivable>) =>
+    request<{ item: Receivable }>("/receivables", { method: "POST", body: JSON.stringify(body) }),
+  deleteReceivable: (id: string) =>
+    request<{ ok: boolean }>(`/receivables/${encodeURIComponent(id)}`, { method: "DELETE" }),
   connectOutlook: () => request<{ url: string }>("/oauth/url", { method: "POST" }),
 };

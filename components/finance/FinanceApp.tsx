@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useLang, LangToggle } from "../i18n";
 import { SignIn } from "./SignIn";
+import { Patrimonio } from "./Patrimonio";
 import { TrendChart, CategoryBars, HealthGauge, SERIES } from "./charts";
 import { api, ApiError, type Insight, type Status, type Summary, type Transaction } from "@/lib/finance/api";
 import { completeSignIn, isSignedIn, signIn, signOut, userEmail } from "@/lib/finance/auth";
@@ -23,7 +24,7 @@ const INK = "var(--ink)";
 const MUTED = "#8b8896";
 const HAIRLINE = "1px solid rgba(14,13,18,.08)";
 
-type Tab = "resumen" | "movimientos" | "ajustes";
+type Tab = "resumen" | "patrimonio" | "movimientos" | "ajustes";
 
 // ------------------------------------------------------------ primitivas ---
 
@@ -414,6 +415,7 @@ export function FinanceApp() {
             {(
               [
                 ["resumen", es ? "Resumen" : "Overview"],
+                ["patrimonio", es ? "Patrimonio" : "Net worth"],
                 ["movimientos", es ? "Movimientos" : "Transactions"],
                 ["ajustes", es ? "Ajustes" : "Settings"],
               ] as [Tab, string][]
@@ -499,6 +501,22 @@ export function FinanceApp() {
                     ? `${es ? "Meta" : "Goal"} ${fmtPct(summary.settings.savingsRateGoal)}`
                     : undefined
                 }
+              />
+              <Kpi
+                lang={lang}
+                label={es ? "Patrimonio neto" : "Net worth"}
+                value={fmtMoney(summary?.networth?.netWorth ?? 0, lang, currency)}
+                hint={
+                  summary?.networth
+                    ? `${es ? "Por cobrar" : "Receivables"} ${fmtMoney(summary.networth.receivablesPending, lang, currency)}`
+                    : undefined
+                }
+              />
+              <Kpi
+                lang={lang}
+                label={es ? "Runway" : "Runway"}
+                value={`${(summary?.networth?.runwayMonths ?? 0).toFixed(1)} ${es ? "meses" : "months"}`}
+                hint={es ? "efectivo / gasto promedio" : "cash / average burn"}
               />
             </div>
 
@@ -711,6 +729,10 @@ export function FinanceApp() {
               </div>
             </div>
           </>
+        )}
+
+        {tab === "patrimonio" && (
+          <Patrimonio lang={lang} summary={summary} onChanged={() => void loadAll()} onError={handleApiError} />
         )}
 
         {tab === "movimientos" && (
@@ -1051,6 +1073,7 @@ function SettingsTab({
   const [incomeGoal, setIncomeGoal] = React.useState("");
   const [rateGoal, setRateGoal] = React.useState("");
   const [fundGoal, setFundGoal] = React.useState("");
+  const [profile, setProfile] = React.useState("");
   const [budgets, setBudgets] = React.useState<Record<string, string>>({});
   const [saving, setSaving] = React.useState(false);
 
@@ -1059,6 +1082,7 @@ function SettingsTab({
     setIncomeGoal(String(s.monthlyIncomeGoal ?? 0));
     setRateGoal(String(s.savingsRateGoal ?? 20));
     setFundGoal(String(s.emergencyFundGoal ?? 0));
+    setProfile(String(s.profile ?? ""));
     setBudgets(Object.fromEntries(Object.entries(s.budgets ?? {}).map(([k, v]) => [k, String(v)])));
   }, [s]);
 
@@ -1069,6 +1093,7 @@ function SettingsTab({
         monthlyIncomeGoal: Number(incomeGoal) || 0,
         savingsRateGoal: Number(rateGoal) || 0,
         emergencyFundGoal: Number(fundGoal) || 0,
+        profile,
         budgets: Object.fromEntries(
           Object.entries(budgets)
             .map(([k, v]) => [k, Number(v) || 0])
@@ -1172,6 +1197,27 @@ function SettingsTab({
               : "The AI uses these goals as the yardstick when judging how you're doing."}
           </p>
         </div>
+      </Card>
+
+      <Card
+        title={es ? "Contexto para la IA" : "Context for the AI"}
+        subtitle={
+          es
+            ? "Lo que los números no dicen: cómo ganas, qué quieres lograr, qué restricciones tienes."
+            : "What the numbers don't say: how you earn, what you're aiming at, what constrains you."
+        }
+      >
+        <textarea
+          value={profile}
+          onChange={(e) => setProfile(e.target.value)}
+          rows={12}
+          style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6, fontSize: 13 }}
+        />
+        <p style={{ fontSize: 12, color: MUTED, margin: "10px 0 0", lineHeight: 1.55 }}>
+          {es
+            ? "Esto viaja con tus cifras en cada análisis. Mientras más concreto (metas, plazos, clientes recurrentes), más útil el diagnóstico."
+            : "This travels with your figures on every analysis. The more concrete (goals, deadlines, recurring clients), the sharper the diagnosis."}
+        </p>
       </Card>
 
       <Card title={es ? "Presupuesto por rubro" : "Budget by category"} subtitle={es ? "Deja en blanco para no controlar ese rubro" : "Leave blank to skip a category"}>

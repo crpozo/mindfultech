@@ -12,7 +12,7 @@ import logging
 import os
 
 from finance import ai, store
-from finance.analytics import default_months, insight_payload
+from finance.analytics import build_networth, default_months, insight_payload
 from finance.util import money, now_ec
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
@@ -27,10 +27,20 @@ def run() -> dict:
     settings = store.get_settings()
 
     total = sum(len(v) for v in data.values())
-    if total == 0:
+    has_balance = bool(store.list_balance("ACCOUNT") or store.list_balance("DEBT"))
+    if total == 0 and not has_balance:
         return {"ok": False, "reason": "sin_datos"}
 
-    payload = insight_payload(data, settings)
+    accounts = store.list_balance("ACCOUNT")
+    debts = store.list_balance("DEBT")
+    receivables = store.list_balance("AR")
+    from finance.analytics import build_summary
+
+    summary = build_summary(data, settings)
+    avg = money(summary["averages"]["expense"]) or money((summary["current"] or {}).get("expense"))
+    networth = build_networth(accounts, debts, receivables, avg)
+
+    payload = insight_payload(data, settings, networth, debts, receivables)
     verdict = ai.diagnose(payload)
     if not verdict:
         return {"ok": False, "reason": "modelo_no_disponible"}

@@ -86,7 +86,18 @@ aws secretsmanager put-secret-value \
 
 `Mail.Read` es solo lectura: el stack no puede enviar ni borrar correo.
 
-## 4. Conectar el dashboard
+## 4. Sembrar el punto de partida
+
+`seed.py` carga saldos, deudas, cuentas por cobrar y el perfil que la IA lee
+junto a los números. Revisa los montos antes de correrlo — están tomados del
+27 de julio de 2026 y se editan después desde la pestaña **Patrimonio**.
+
+```bash
+python3 seed.py --dry-run                       # ver qué escribiría
+python3 seed.py --table mft-finance-data --region us-east-1
+```
+
+## 5. Conectar el dashboard
 
 En `public/finance/config.json` del repo del sitio:
 

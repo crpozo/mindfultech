@@ -10,6 +10,9 @@ esta lambda ni se ejecuta.
   DELETE /transactions/{month}/{sk}
   GET    /insights                  último diagnóstico guardado
   POST   /insights/refresh          regenerar ahora (async)
+  GET    /accounts      POST /accounts      DELETE /accounts/{id}
+  GET    /debts         POST /debts         DELETE /debts/{id}
+  GET    /receivables   POST /receivables   DELETE /receivables/{id}
   GET    /rules   POST /rules   DELETE /rules/{pattern}
   GET    /settings  POST /settings
   POST   /sync                      correr la ingesta ahora  (body: {days})
@@ -29,7 +32,7 @@ from datetime import datetime
 import boto3
 
 from finance import graph, store
-from finance.analytics import build_summary, default_months
+from finance.analytics import build_networth, build_summary, default_months
 from finance.categories import CATEGORIES, INCOME_CATEGORIES, is_valid
 from finance.util import EC, money, month_key, now_ec, respond, sign_state, txn_id
 
@@ -87,9 +90,46 @@ def get_summary(event: dict) -> tuple[int, dict]:
     data = store.list_months(months)
     settings = store.get_settings()
     summary = build_summary(data, settings)
+
+    accounts = store.list_balance("ACCOUNT")
+    debts = store.list_balance("DEBT")
+    receivables = store.list_balance("AR")
+    # El runway se mide contra el gasto promedio de meses cerrados; si aún no
+    # hay historial, contra el gasto del mes en curso.
+    avg = money(summary["averages"]["expense"]) or money((summary["current"] or {}).get("expense"))
+    summary["networth"] = build_networth(accounts, debts, receivables, avg)
+    summary["accounts"] = accounts
+    summary["debts"] = debts
+    summary["receivables"] = receivables
     summary["settings"] = settings
     summary["categories"] = {"expense": CATEGORIES, "income": INCOME_CATEGORIES}
     return 200, summary
+
+
+# --- cuentas / deudas / por cobrar ------------------------------------------
+
+_BALANCE_PK = {"accounts": "ACCOUNT", "debts": "DEBT", "receivables": "AR"}
+
+
+def get_balance(kind: str) -> tuple[int, dict]:
+    return 200, {kind: store.list_balance(_BALANCE_PK[kind])}
+
+
+def post_balance(event: dict, kind: str) -> tuple[int, dict]:
+    body = _body(event)
+    pk = _BALANCE_PK[kind]
+    label = str(body.get("name") or body.get("client") or "").strip()
+    if not label:
+        return 400, {"error": "falta el nombre"}
+    # El id lo manda el cliente al editar; al crear lo derivamos del nombre para
+    # que reenviar el mismo registro actualice en vez de duplicar.
+    item_id = str(body.get("id") or "").strip() or txn_id("", f"{pk}{label}{time.time()}")
+    return 200, {"item": store.put_balance(pk, item_id, body)}
+
+
+def delete_balance(kind: str, item_id: str) -> tuple[int, dict]:
+    store.delete_balance(_BALANCE_PK[kind], urllib.parse.unquote(item_id))
+    return 200, {"ok": True}
 
 
 def get_transactions(event: dict) -> tuple[int, dict]:
@@ -306,6 +346,17 @@ def handler(event, context):  # noqa: ARG001
             return respond(status, body, origin)
 
         parts = [p for p in path.split("/") if p]
+        if parts and parts[0] in _BALANCE_PK:
+            kind = parts[0]
+            if len(parts) == 1 and method == "GET":
+                status, body = get_balance(kind)
+                return respond(status, body, origin)
+            if len(parts) == 1 and method == "POST":
+                status, body = post_balance(event, kind)
+                return respond(status, body, origin)
+            if len(parts) == 2 and method == "DELETE":
+                status, body = delete_balance(kind, parts[1])
+                return respond(status, body, origin)
         if len(parts) == 3 and parts[0] == "transactions":
             month, sk = parts[1], parts[2]
             if method == "PATCH":

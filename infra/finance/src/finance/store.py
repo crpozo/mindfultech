@@ -7,8 +7,11 @@ Layout de claves
   MSG            / <message-id>      marca de correo ya procesado (dedupe)
   RULE           / <patrón>          regla de categorización del usuario
   INSIGHT        / <ISO-8601>        diagnóstico generado por Claude
-  SETTINGS       / v1                metas, presupuestos, moneda
+  SETTINGS       / v1                metas, presupuestos, moneda, perfil
   STATE          / ingest            última marca de tiempo leída del correo
+  ACCOUNT        / <id>              saldo de una cuenta (banco, efectivo, inversión)
+  DEBT           / <id>              deuda: saldo pendiente + cuota mensual
+  AR             / <id>              cuenta por cobrar de un cliente
 
 Consultar un mes es un solo Query sobre TXN#<mes>, que es la operación que el
 dashboard hace todo el tiempo; por eso el mes va en la partition key.
@@ -147,6 +150,9 @@ DEFAULT_SETTINGS = {
     "savingsRateGoal": Decimal("20"),
     "emergencyFundGoal": Decimal("0"),
     "budgets": {},
+    # Contexto en prosa que la IA lee junto a los números: naturaleza del
+    # ingreso, metas de vida, cosas que los montos no dicen.
+    "profile": "",
 }
 
 
@@ -166,8 +172,48 @@ def put_settings(settings: dict) -> dict:
         current["budgets"] = {k: money(v) for k, v in settings["budgets"].items()}
     if "currency" in settings:
         current["currency"] = str(settings["currency"])[:4]
+    if "profile" in settings:
+        current["profile"] = str(settings["profile"])[:4000]
     table().put_item(Item={"pk": "SETTINGS", "sk": "v1", **current})
     return current
+
+
+# ------------------------------------------ balance: cuentas, deudas, cobros --
+#
+# Los movimientos cuentan el flujo; esto cuenta el stock. Sin ambos no hay
+# patrimonio neto, y sin patrimonio neto no se puede responder la pregunta que
+# de verdad importa: ¿estoy acumulando o solo rotando dinero?
+
+_BALANCE_FIELDS = {
+    "ACCOUNT": ("name", "kind", "balance", "currency", "note"),
+    "DEBT": ("name", "kind", "balance", "monthlyPayment", "rate", "note"),
+    "AR": ("client", "amount", "status", "dueDate", "invoicedAt", "note"),
+}
+_NUMERIC = {"balance", "monthlyPayment", "rate", "amount"}
+
+
+def list_balance(pk: str) -> list[dict]:
+    resp = table().query(KeyConditionExpression=Key("pk").eq(pk))
+    out = []
+    for item in resp.get("Items", []):
+        row = {k: v for k, v in item.items() if k != "pk"}
+        row["id"] = item["sk"]
+        out.append(row)
+    return sorted(out, key=lambda r: str(r.get("name") or r.get("client") or ""))
+
+
+def put_balance(pk: str, item_id: str, data: dict) -> dict:
+    fields = _BALANCE_FIELDS[pk]
+    row: dict[str, Any] = {"pk": pk, "sk": item_id, "updatedAt": now_ec().isoformat()}
+    for f in fields:
+        if f in data and data[f] is not None:
+            row[f] = money(data[f]) if f in _NUMERIC else str(data[f])[:120]
+    table().put_item(Item=row)
+    return {**{k: v for k, v in row.items() if k != "pk"}, "id": item_id}
+
+
+def delete_balance(pk: str, item_id: str) -> None:
+    table().delete_item(Key={"pk": pk, "sk": item_id})
 
 
 def get_state(name: str) -> dict:
