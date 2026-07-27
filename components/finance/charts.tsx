@@ -14,7 +14,7 @@
 import * as React from "react";
 import { fmtMoney, fmtMonth, fmtShort, catLabel } from "@/lib/finance/format";
 import type { Lang } from "@/components/i18n";
-import type { MonthSummary } from "@/lib/finance/api";
+import type { MonthSummary } from "@/lib/finance/analysis";
 
 export const SERIES = {
   income: "#1baf7a", // slot 3 — aqua

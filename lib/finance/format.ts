@@ -95,10 +95,3 @@ export function catLabel(id: string, lang: Lang = "es"): string {
   if (!entry) return id;
   return lang === "es" ? entry.es : entry.en;
 }
-
-export function currentMonthKey(): string {
-  // El backend trabaja en hora de Ecuador (UTC-5); replicamos el mismo corte
-  // para que "mes actual" signifique lo mismo en los dos lados.
-  const now = new Date(Date.now() - 5 * 3600 * 1000);
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-}

@@ -1,4 +1,12 @@
-# MindfulTech Finance — backend
+# MindfulTech Finance — backend (en pausa)
+
+> **Nada de esto está desplegado, y por ahora no hace falta.** El dashboard de
+> `mindfultech.ec/finance` funciona entero en el navegador: entrada manual,
+> datos en localStorage, respaldo en JSON. Este stack queda escrito y validado
+> (`sam validate` pasa) para el día que la entrada manual empiece a pesar y
+> convenga que los consumos de Diners entren solos desde el correo. El modelo
+> de datos del front es el mismo que usa aquí, así que migrar será subir el
+> JSON exportado — no reescribir.
 
 Motor en la nube de `mindfultech.ec/finance`. Corre entero en AWS: lee los
 correos de consumo de Diners (y de cualquier otro banco que agregues) desde
