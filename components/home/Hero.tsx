@@ -140,7 +140,9 @@ export function Hero() {
         className="hero-row"
         style={{
           position: "relative",
-          zIndex: 2,
+          // above the TRUSTED BY marquee (z 2): the discipline note hangs below
+          // the stage, and at equal z the later sibling painted over its text
+          zIndex: 3,
           width: "100%",
           maxWidth: 1360,
           margin: "0 auto",
@@ -251,11 +253,12 @@ export function Hero() {
             >
             <div
               style={{
-                background: "rgba(255,255,255,.95)",
-                border: "1px solid rgba(36,52,78,.1)",
+                /* opaque: it sits over the client logo strip */
+                background: "#fff",
+                border: "1px solid rgba(36,52,78,.12)",
                 borderRadius: 14,
                 padding: "18px 20px 16px",
-                boxShadow: "0 24px 60px -28px rgba(14,13,18,.5)",
+                boxShadow: "0 24px 60px -28px rgba(14,13,18,.45)",
                 animation: "mtfade .35s ease both",
               }}
             >
