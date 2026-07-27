@@ -161,7 +161,6 @@ export function ClientStories() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="pf-img" src={p.img} alt="" />
             </span>
-            <span className="pf-vlabel">{p.brand}</span>
             <div className="pf-reveal">
               <div className="pf-eyebrow">{p.brand}</div>
               <div

@@ -500,9 +500,9 @@ a:hover {
   border-radius: 6px;
 }
 
-/* homepage portfolio — a snap carousel of rounded cards, four per view.
-   Hovering a card lifts it and reveals its story in place. Each card carries
-   its cover's hue in --pf (set inline per project). */
+/* homepage portfolio — a snap carousel of rounded cards, four per view. Each
+   card carries its cover's hue in --pf (set inline per project), driving the
+   tint, the ring on hover, the eyebrow and the CTA. */
 .pf-section {
   position: relative;
   background: #0d0a1f;
@@ -514,7 +514,6 @@ a:hover {
   padding: 0 48px;
   text-align: center;
 }
-/* carousel: four cards per view, snap-scrolled, arrows overlaid at the sides */
 .pf-carousel {
   position: relative;
   padding: 0 22px;
@@ -523,7 +522,6 @@ a:hover {
   display: flex;
   gap: 14px;
   width: 100%;
-  height: min(68vh, 640px);
   /* room for the hover lift and glow — overflow-x:auto would clip them */
   padding: 12px 0 26px;
   overflow-x: auto;
@@ -562,45 +560,45 @@ a:hover {
 }
 .pf-prev { left: 4px; }
 .pf-next { right: 4px; }
+
+/* the card sizes itself: cover on top, copy below, CTA pinned to the bottom.
+   Equal-height flex items keep every CTA on the same line. */
 .pf-panel {
   position: relative;
   flex: 0 0 calc((100% - 3 * 14px) / 4);
   scroll-snap-align: start;
   min-width: 0;
   overflow: hidden;
-  display: block;
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background:
-    radial-gradient(125% 55% at 50% 2%, color-mix(in srgb, var(--pf) 34%, transparent) 0%, transparent 74%),
-    linear-gradient(180deg, #17132f 0%, #0c0a1a 58%, #090714 100%);
+    radial-gradient(125% 46% at 50% 0%, color-mix(in srgb, var(--pf) 34%, transparent) 0%, transparent 74%),
+    linear-gradient(180deg, #17132f 0%, #0c0a1a 62%, #090714 100%);
   transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
     filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
-/* the cover art reads as a device shot near the top, fading into the card */
 .pf-media {
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 38%;
+  flex: none;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 80%, transparent 100%);
 }
 .pf-panel .pf-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 50%;
-  /* collapsed cards are narrow, so zoom the shot to keep it readable */
-  transform: scale(1.24);
+  /* the cards are quarter-width, so zoom the shot to keep it readable */
+  transform: scale(1.18);
   transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-/* dim the rest while one card is hovered; the open one lifts and lights its ring */
-.pf-strip:hover .pf-panel { filter: saturate(0.8) brightness(0.8); }
+/* dim the rest while one card is hovered; the hovered one lifts and lights up */
+.pf-strip:hover .pf-panel { filter: saturate(0.82) brightness(0.84); }
 .pf-strip .pf-panel:hover,
 .pf-strip .pf-panel:focus-visible {
   filter: none;
@@ -610,41 +608,15 @@ a:hover {
     0 40px 90px -44px color-mix(in srgb, var(--pf) 60%, transparent);
 }
 .pf-panel:hover .pf-img,
-.pf-panel:focus-visible .pf-img { transform: scale(1); }
+.pf-panel:focus-visible .pf-img { transform: scale(1.04); }
 
-/* collapsed state: the client name runs vertically up the card */
-.pf-vlabel {
-  position: absolute;
-  left: 22px;
-  bottom: 26px;
-  z-index: 2;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-weight: 600;
-  font-size: 17px;
-  letter-spacing: 0.01em;
-  color: #fff;
-  white-space: nowrap;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
-  transition: opacity 0.3s ease;
-}
-.pf-panel:hover .pf-vlabel,
-.pf-panel:focus-visible .pf-vlabel { opacity: 0; }
-
-/* expanded state: brand, title, meta and CTA fade in */
 .pf-reveal {
-  position: absolute;
-  left: 34px;
-  right: 34px;
-  bottom: 34px;
-  z-index: 2;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 26px 28px;
   pointer-events: none;
 }
-.pf-panel:hover .pf-reveal,
-.pf-panel:focus-visible .pf-reveal { opacity: 1; transform: translateY(0); }
 .pf-eyebrow {
   font-family: var(--mono);
   font-size: 11.5px;
@@ -653,8 +625,8 @@ a:hover {
   color: var(--pf);
 }
 .pf-cta {
-  display: inline-block;
-  margin-top: 26px;
+  align-self: flex-start;
+  margin-top: auto;
   padding: 13px 20px;
   border: 1px solid color-mix(in srgb, var(--pf) 55%, transparent);
   border-radius: 8px;
@@ -678,39 +650,21 @@ a:hover {
   .pf-head { padding-left: 24px; padding-right: 24px; }
   .pf-carousel { padding: 0; }
   .pf-nav { display: none; }
-  /* Stack into cards: cover on top, copy below — no hover to rely on, and
-     overlaying the copy collided with the centered mockups at phone widths. */
+  /* phones: a plain vertical stack, no scroller */
   .pf-strip {
     flex-direction: column;
-    height: auto;
     gap: 14px;
     padding: 0 18px;
     overflow-x: visible;
     overflow-y: visible;
     scroll-snap-type: none;
   }
-  .pf-panel {
-    flex: none;
-    display: block;
-    padding-bottom: 4px;
-  }
+  .pf-panel { flex: none; }
   .pf-strip:hover .pf-panel { filter: none; }
   .pf-strip .pf-panel:hover { transform: none; }
-  .pf-media {
-    position: static;
-    height: auto;
-    aspect-ratio: 16 / 11;
-    -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 84%, transparent 100%);
-  }
+  .pf-media { aspect-ratio: 16 / 11; }
   .pf-panel .pf-img,
   .pf-panel:hover .pf-img { transform: none; }
-  .pf-vlabel { display: none; }
-  .pf-reveal {
-    position: static;
-    opacity: 1;
-    transform: none;
-    padding: 4px 24px 26px;
-  }
+  .pf-reveal { padding: 8px 24px 26px; }
   .pf-cta { margin-top: 22px; }
 }
