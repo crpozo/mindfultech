@@ -1,19 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { useLang } from "../i18n";
-import { ensureDefaultPasscode, hasPasscode, setPasscode, verifyPasscode, setUnlocked } from "@/lib/finance/store";
+import {
+  ensureDefaultPasscode,
+  hasPasscode,
+  setPasscode,
+  verifyPasscode,
+  setUnlocked,
+} from "@/lib/finance/store";
 
 const MONO = "var(--mono)";
 
 /**
- * Compuerta suave para /finance. La primera vez pide crear un código; después
- * pide desbloquear. No es cifrado — mantiene el tablero privado de una mirada
- * casual, y por eso resetear el código nunca pierde datos.
+ * Compuerta suave para /finance. No es cifrado — mantiene el tablero privado de
+ * una mirada casual, y por eso resetear el código nunca pierde datos.
  */
 export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
-  const { lang } = useLang();
-  const es = lang === "es";
   const [creating, setCreating] = React.useState(false);
   const [ready, setReady] = React.useState(false);
   const [pass, setPass] = React.useState("");
@@ -43,11 +45,11 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     setErr("");
     if (creating) {
       if (pass.length < 4) {
-        setErr(es ? "Usa al menos 4 caracteres." : "Use at least 4 characters.");
+        setErr("Usa al menos 4 caracteres.");
         return;
       }
       if (pass !== confirm) {
-        setErr(es ? "Los códigos no coinciden." : "The codes don't match.");
+        setErr("Los códigos no coinciden.");
         return;
       }
       setBusy(true);
@@ -55,9 +57,7 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       if (!ok) {
         setBusy(false);
         setErr(
-          es
-            ? "No se pudo guardar el código en este navegador (¿modo privado?)."
-            : "Couldn't save the passcode in this browser (private mode?)."
+          "No se pudo guardar el código en este navegador (¿modo privado?).",
         );
         return;
       }
@@ -69,7 +69,7 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     const ok = await verifyPasscode(pass);
     setBusy(false);
     if (!ok) {
-      setErr(es ? "Código incorrecto." : "Wrong passcode.");
+      setErr("Código incorrecto.");
       setPass("");
       inputRef.current?.focus();
       return;
@@ -90,7 +90,8 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     marginBottom: 10,
   };
 
-  if (!ready) return <div style={{ minHeight: "100vh", background: "#eef2f9" }} />;
+  if (!ready)
+    return <div style={{ minHeight: "100vh", background: "#eef2f9" }} />;
 
   return (
     <div
@@ -117,7 +118,13 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/logo-mark.webp" alt="" width={46} height={46} style={{ margin: "0 auto 14px" }} />
+        <img
+          src="/brand/logo-mark.webp"
+          alt=""
+          width={46}
+          height={46}
+          style={{ margin: "0 auto 14px" }}
+        />
         <div
           style={{
             fontFamily: MONO,
@@ -129,23 +136,28 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         >
           MindfulTech · Finanzas
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", margin: "10px 0 4px", color: "var(--ink)" }}>
-          {creating
-            ? es
-              ? "Crea tu código"
-              : "Create your passcode"
-            : es
-              ? "Abre tu tablero"
-              : "Open your board"}
+        <h1
+          style={{
+            fontSize: 22,
+            fontWeight: 500,
+            letterSpacing: "-.01em",
+            margin: "10px 0 4px",
+            color: "var(--ink)",
+          }}
+        >
+          {creating ? "Crea tu código" : "Abre tu tablero"}
         </h1>
-        <p style={{ fontSize: 13.5, color: "#6c6a75", margin: "0 0 20px", lineHeight: 1.5 }}>
+        <p
+          style={{
+            fontSize: 13.5,
+            color: "#6c6a75",
+            margin: "0 0 20px",
+            lineHeight: 1.5,
+          }}
+        >
           {creating
-            ? es
-              ? "Un código simple para mantener tus finanzas privadas en este dispositivo."
-              : "A simple code to keep your finances private on this device."
-            : es
-              ? "Ingresa tu código para ver tus números."
-              : "Enter your code to see your numbers."}
+            ? "Un código simple para mantener tus finanzas privadas en este dispositivo."
+            : "Ingresa tu código para ver tus números."}
         </p>
 
         <input
@@ -162,7 +174,7 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            placeholder={es ? "repite el código" : "repeat the code"}
+            placeholder={"repite el código"}
             autoComplete="new-password"
             style={input}
           />
@@ -184,20 +196,36 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {creating ? (es ? "Guardar" : "Save") : es ? "Entrar" : "Unlock"}
+          {creating ? "Guardar" : "Entrar"}
         </button>
 
-        {err && <p style={{ fontSize: 12.5, color: "#c2410c", margin: "12px 0 0" }}>{err}</p>}
+        {err && (
+          <p style={{ fontSize: 12.5, color: "#c2410c", margin: "12px 0 0" }}>
+            {err}
+          </p>
+        )}
 
-        <p style={{ fontSize: 11.5, color: "#9a97a6", margin: "18px 0 0", lineHeight: 1.5 }}>
-          {es
-            ? "Tus datos viven solo en este navegador. Exporta un respaldo de vez en cuando."
-            : "Your data lives only in this browser. Export a backup once in a while."}
+        <p
+          style={{
+            fontSize: 11.5,
+            color: "#9a97a6",
+            margin: "18px 0 0",
+            lineHeight: 1.5,
+          }}
+        >
+          {
+            "Tus datos viven solo en este navegador. Exporta un respaldo de vez en cuando."
+          }
         </p>
-        <p style={{ fontSize: 11.5, color: "#9a97a6", margin: "8px 0 0", lineHeight: 1.5 }}>
-          {es
-            ? "Puedes cambiar el código desde Ajustes cuando quieras."
-            : "You can change the passcode from Settings whenever you like."}
+        <p
+          style={{
+            fontSize: 11.5,
+            color: "#9a97a6",
+            margin: "8px 0 0",
+            lineHeight: 1.5,
+          }}
+        >
+          {"Puedes cambiar el código desde Ajustes cuando quieras."}
         </p>
       </form>
     </div>

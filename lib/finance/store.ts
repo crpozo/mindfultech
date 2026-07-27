@@ -128,14 +128,31 @@ export function seedState(): FinanceState {
       { id: "wise", name: "Wise", kind: "bank", balance: 3600 },
       { id: "procredit", name: "ProCredit", kind: "bank", balance: 3000 },
       { id: "pichincha", name: "Pichincha", kind: "bank", balance: 2500 },
-      { id: "ibkr", name: "Interactive Brokers", kind: "investment", balance: 2000 },
+      {
+        id: "ibkr",
+        name: "Interactive Brokers",
+        kind: "investment",
+        balance: 2000,
+      },
     ],
-    debts: [{ id: "auto", name: "Préstamo vehículo", balance: 12800, monthlyPayment: 520 }],
+    debts: [
+      {
+        id: "auto",
+        name: "Préstamo vehículo",
+        balance: 12800,
+        monthlyPayment: 520,
+      },
+    ],
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "wfs-1", client: "WFS", amount: 1500, status: "pending" },
       { id: "wfs-2", client: "WFS", amount: 3200, status: "pending" },
-      { id: "theme-motion", client: "Theme Motion", amount: 1000, status: "pending" },
+      {
+        id: "theme-motion",
+        client: "Theme Motion",
+        amount: 1000,
+        status: "pending",
+      },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       { id: "andrew", client: "Andrew", amount: 500, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
@@ -171,11 +188,17 @@ Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobr
 
 export function uid(): string {
   try {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+    if (typeof crypto !== "undefined" && crypto.randomUUID)
+      return crypto.randomUUID();
   } catch {
     /* noop */
   }
-  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  return (
+    "id-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2, 8)
+  );
 }
 
 export function loadState(): FinanceState {
@@ -201,7 +224,8 @@ export function saveState(s: FinanceState): boolean {
 }
 
 function num(v: unknown, fallback = 0): number {
-  const n = typeof v === "number" ? v : Number(String(v ?? "").replace(",", "."));
+  const n =
+    typeof v === "number" ? v : Number(String(v ?? "").replace(",", "."));
   return Number.isFinite(n) ? n : fallback;
 }
 
@@ -252,7 +276,10 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
         balance: num(d.balance),
         monthlyPayment: num(d.monthlyPayment),
       })),
-    receivables: (Array.isArray(s.receivables) ? s.receivables : base.receivables)
+    receivables: (Array.isArray(s.receivables)
+      ? s.receivables
+      : base.receivables
+    )
       .filter((r) => r && typeof r.client === "string")
       .map((r) => ({
         id: freshId(r.id),
@@ -263,19 +290,28 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
       })),
     settings: {
       currency: str(s.settings?.currency, "USD"),
-      monthlyIncomeGoal: num(s.settings?.monthlyIncomeGoal, base.settings.monthlyIncomeGoal),
-      savingsRateGoal: num(s.settings?.savingsRateGoal, base.settings.savingsRateGoal),
-      emergencyFundGoal: num(s.settings?.emergencyFundGoal, base.settings.emergencyFundGoal),
+      monthlyIncomeGoal: num(
+        s.settings?.monthlyIncomeGoal,
+        base.settings.monthlyIncomeGoal,
+      ),
+      savingsRateGoal: num(
+        s.settings?.savingsRateGoal,
+        base.settings.savingsRateGoal,
+      ),
+      emergencyFundGoal: num(
+        s.settings?.emergencyFundGoal,
+        base.settings.emergencyFundGoal,
+      ),
       monthlyExpenseEstimate: num(
         s.settings?.monthlyExpenseEstimate,
-        base.settings.monthlyExpenseEstimate
+        base.settings.monthlyExpenseEstimate,
       ),
       budgets:
         s.settings?.budgets && typeof s.settings.budgets === "object"
           ? Object.fromEntries(
               Object.entries(s.settings.budgets)
                 .map(([k, v]) => [k, num(v)])
-                .filter(([, v]) => (v as number) > 0)
+                .filter(([, v]) => (v as number) > 0),
             )
           : base.settings.budgets,
       profile: str(s.settings?.profile, base.settings.profile),
@@ -286,7 +322,9 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
 // ------------------------------------------------------- respaldo y rescate --
 
 export function exportState(s: FinanceState): void {
-  const blob = new Blob([JSON.stringify(s, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(s, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

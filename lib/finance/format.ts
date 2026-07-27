@@ -2,7 +2,11 @@
 
 import type { Lang } from "@/components/i18n";
 
-export function fmtMoney(v: number, lang: Lang = "es", currency = "USD"): string {
+export function fmtMoney(
+  v: number,
+  lang: Lang = "es",
+  currency = "USD",
+): string {
   return new Intl.NumberFormat(lang === "es" ? "es-EC" : "en-US", {
     style: "currency",
     currency,
@@ -21,8 +25,34 @@ export function fmtPct(v: number): string {
   return `${(Number.isFinite(v) ? v : 0).toFixed(1)}%`;
 }
 
-const MONTHS_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const MONTHS_EN = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+const MONTHS_ES = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+];
+const MONTHS_EN = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
 
 /** "2026-07" → "jul 26" */
 export function fmtMonth(key: string, lang: Lang = "es"): string {
@@ -56,7 +86,8 @@ export function fmtDateTime(iso: string, lang: Lang = "es"): string {
 export function timeAgo(iso: string, lang: Lang = "es"): string {
   if (!iso) return lang === "es" ? "nunca" : "never";
   const diff = Date.now() - new Date(iso).getTime();
-  if (!Number.isFinite(diff) || diff < 0) return lang === "es" ? "recién" : "just now";
+  if (!Number.isFinite(diff) || diff < 0)
+    return lang === "es" ? "recién" : "just now";
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return lang === "es" ? "recién" : "just now";
   if (mins < 60) return lang === "es" ? `hace ${mins} min` : `${mins} min ago`;

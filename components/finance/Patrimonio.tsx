@@ -15,7 +15,13 @@ import * as React from "react";
 import type { Lang } from "@/components/i18n";
 import { fmtMoney } from "@/lib/finance/format";
 import type { NetWorth } from "@/lib/finance/analysis";
-import { uid, type Account, type Debt, type FinanceState, type Receivable } from "@/lib/finance/store";
+import {
+  uid,
+  type Account,
+  type Debt,
+  type FinanceState,
+  type Receivable,
+} from "@/lib/finance/store";
 
 const MONO = "var(--mono)";
 const INK = "var(--ink)";
@@ -52,14 +58,51 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section style={{ background: "#fff", border: HAIRLINE, borderRadius: 16, padding: 20 }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, marginBottom: 14 }}>
+    <section
+      style={{
+        background: "#fff",
+        border: HAIRLINE,
+        borderRadius: 16,
+        padding: 20,
+      }}
+    >
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 500, color: INK, margin: 0 }}>{title}</h2>
-          {subtitle && <p style={{ fontSize: 12.5, color: MUTED, margin: "3px 0 0", lineHeight: 1.5 }}>{subtitle}</p>}
+          <h2 style={{ fontSize: 15, fontWeight: 500, color: INK, margin: 0 }}>
+            {title}
+          </h2>
+          {subtitle && (
+            <p
+              style={{
+                fontSize: 12.5,
+                color: MUTED,
+                margin: "3px 0 0",
+                lineHeight: 1.5,
+              }}
+            >
+              {subtitle}
+            </p>
+          )}
         </div>
         {total && (
-          <span style={{ fontSize: 17, color: INK, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{total}</span>
+          <span
+            style={{
+              fontSize: 17,
+              color: INK,
+              fontVariantNumeric: "tabular-nums",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {total}
+          </span>
         )}
       </header>
       {children}
@@ -67,17 +110,47 @@ function Panel({
   );
 }
 
-function Row({ children, onDelete, label }: { children: React.ReactNode; onDelete: () => void; label: string }) {
+function Row({
+  children,
+  onDelete,
+  label,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void;
+  label: string;
+}) {
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "center", borderTop: HAIRLINE, paddingTop: 10 }}>
-      <div style={{ flex: 1, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(110px,1fr))" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+        borderTop: HAIRLINE,
+        paddingTop: 10,
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          display: "grid",
+          gap: 8,
+          gridTemplateColumns: "repeat(auto-fit,minmax(110px,1fr))",
+        }}
+      >
         {children}
       </div>
       <button
         onClick={onDelete}
         aria-label={label}
         title={label}
-        style={{ border: "none", background: "transparent", color: "#c2410c", cursor: "pointer", fontSize: 13, padding: "8px 4px" }}
+        style={{
+          border: "none",
+          background: "transparent",
+          color: "#c2410c",
+          cursor: "pointer",
+          fontSize: 13,
+          padding: "8px 4px",
+        }}
       >
         ✕
       </button>
@@ -104,25 +177,49 @@ function NewRow({
         onAdd(values);
         setValues({});
       }}
-      style={{ display: "flex", gap: 8, alignItems: "center", borderTop: HAIRLINE, paddingTop: 10 }}
+      style={{
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+        borderTop: HAIRLINE,
+        paddingTop: 10,
+      }}
     >
-      <div style={{ flex: 1, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(110px,1fr))" }}>
+      <div
+        style={{
+          flex: 1,
+          display: "grid",
+          gap: 8,
+          gridTemplateColumns: "repeat(auto-fit,minmax(110px,1fr))",
+        }}
+      >
         {fields.map((f) => (
           <input
             key={f.key}
             value={values[f.key] ?? ""}
             placeholder={f.placeholder}
             inputMode={f.numeric ? "decimal" : undefined}
-            onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, [f.key]: e.target.value }))
+            }
             style={f.numeric ? numInput : inputStyle}
           />
         ))}
       </div>
       <button
         type="submit"
-        style={{ border: "none", background: "#f1f2f6", color: INK, borderRadius: 9, padding: "8px 14px", fontSize: 12.5, cursor: "pointer", whiteSpace: "nowrap" }}
+        style={{
+          border: "none",
+          background: "#f1f2f6",
+          color: INK,
+          borderRadius: 9,
+          padding: "8px 14px",
+          fontSize: 12.5,
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+        }}
       >
-        {lang === "es" ? "Agregar" : "Add"}
+        {"Agregar"}
       </button>
     </form>
   );
@@ -141,37 +238,81 @@ export function Patrimonio({
   baseline: number;
   update: (fn: (s: FinanceState) => FinanceState) => void;
 }) {
-  const es = lang === "es";
   const currency = state.settings.currency;
   const m = (v: number) => fmtMoney(v, lang, currency);
 
-  const setAccounts = (fn: (a: Account[]) => Account[]) => update((s) => ({ ...s, accounts: fn(s.accounts) }));
-  const setDebts = (fn: (d: Debt[]) => Debt[]) => update((s) => ({ ...s, debts: fn(s.debts) }));
-  const setArs = (fn: (r: Receivable[]) => Receivable[]) => update((s) => ({ ...s, receivables: fn(s.receivables) }));
+  const setAccounts = (fn: (a: Account[]) => Account[]) =>
+    update((s) => ({ ...s, accounts: fn(s.accounts) }));
+  const setDebts = (fn: (d: Debt[]) => Debt[]) =>
+    update((s) => ({ ...s, debts: fn(s.debts) }));
+  const setArs = (fn: (r: Receivable[]) => Receivable[]) =>
+    update((s) => ({ ...s, receivables: fn(s.receivables) }));
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
-      <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))" }}>
+      <div
+        style={{
+          display: "grid",
+          gap: 12,
+          gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))",
+        }}
+      >
         {[
-          { label: es ? "Patrimonio neto" : "Net worth", value: nw.netWorth, hint: es ? "activos − deuda" : "assets − debt" },
-          { label: es ? "Disponible" : "Liquid", value: nw.liquid, hint: es ? "sin contar inversiones" : "excludes investments" },
           {
-            label: es ? "Deuda" : "Debt",
-            value: nw.debt,
-            hint: `${m(nw.monthlyDebtPayment)}/${es ? "mes" : "mo"}`,
+            label: "Patrimonio neto",
+            value: nw.netWorth,
+            hint: "activos − deuda",
           },
           {
-            label: es ? "Por cobrar" : "Receivables",
+            label: "Disponible",
+            value: nw.liquid,
+            hint: "sin contar inversiones",
+          },
+          {
+            label: "Deuda",
+            value: nw.debt,
+            hint: `${m(nw.monthlyDebtPayment)}/${"mes"}`,
+          },
+          {
+            label: "Por cobrar",
             value: nw.receivablesPending,
-            hint: es ? "facturado, no cobrado" : "invoiced, unpaid",
+            hint: "facturado, no cobrado",
           },
         ].map((k) => (
-          <div key={k.label} style={{ background: "#fff", border: HAIRLINE, borderRadius: 14, padding: "16px 18px" }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".18em", color: MUTED, textTransform: "uppercase" }}>
+          <div
+            key={k.label}
+            style={{
+              background: "#fff",
+              border: HAIRLINE,
+              borderRadius: 14,
+              padding: "16px 18px",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: MONO,
+                fontSize: 10,
+                letterSpacing: ".18em",
+                color: MUTED,
+                textTransform: "uppercase",
+              }}
+            >
               {k.label}
             </div>
-            <div style={{ fontSize: 24, fontWeight: 500, color: INK, marginTop: 8, letterSpacing: "-.02em" }}>{m(k.value)}</div>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 5 }}>{k.hint}</div>
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 500,
+                color: INK,
+                marginTop: 8,
+                letterSpacing: "-.02em",
+              }}
+            >
+              {m(k.value)}
+            </div>
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 5 }}>
+              {k.hint}
+            </div>
           </div>
         ))}
       </div>
@@ -189,20 +330,53 @@ export function Patrimonio({
           lineHeight: 1.7,
         }}
       >
-        <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".18em", color: MUTED, textTransform: "uppercase", marginBottom: 10 }}>
-          {es ? "De dónde sale el patrimonio neto" : "Where net worth comes from"}
+        <div
+          style={{
+            fontFamily: MONO,
+            fontSize: 10,
+            letterSpacing: ".18em",
+            color: MUTED,
+            textTransform: "uppercase",
+            marginBottom: 10,
+          }}
+        >
+          {"De dónde sale el patrimonio neto"}
         </div>
-        <div style={{ display: "grid", gap: 4, fontVariantNumeric: "tabular-nums" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <span>{es ? "Disponible en cuentas" : "Cash in accounts"}</span>
+        <div
+          style={{
+            display: "grid",
+            gap: 4,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <span>{"Disponible en cuentas"}</span>
             <span style={{ color: INK }}>{m(nw.liquid)}</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <span>+ {es ? "Inversiones" : "Investments"}</span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <span>+ {"Inversiones"}</span>
             <span style={{ color: INK }}>{m(nw.invested)}</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <span>− {es ? "Deuda pendiente" : "Outstanding debt"}</span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <span>− {"Deuda pendiente"}</span>
             <span style={{ color: INK }}>{m(nw.debt)}</span>
           </div>
           <div
@@ -217,14 +391,19 @@ export function Patrimonio({
               fontSize: 15,
             }}
           >
-            <span>{es ? "Patrimonio neto" : "Net worth"}</span>
+            <span>{"Patrimonio neto"}</span>
             <span>{m(nw.netWorth)}</span>
           </div>
         </div>
-        <p style={{ margin: "12px 0 0", fontSize: 12.5, color: MUTED, lineHeight: 1.6 }}>
-          {es
-            ? `Los ${m(nw.receivablesPending)} por cobrar no entran en esa cuenta: es dinero que ganaste pero que todavía tiene otro dueño. Si te pagaran todo hoy, tu patrimonio neto sería ${m(nw.netWorthWithReceivables)} — por eso cobrar mueve más la aguja que ahorrar.`
-            : `The ${m(nw.receivablesPending)} receivable stays out of that sum: money you earned that someone else still holds. If it all landed today, net worth would be ${m(nw.netWorthWithReceivables)} — which is why collecting moves the needle more than saving.`}
+        <p
+          style={{
+            margin: "12px 0 0",
+            fontSize: 12.5,
+            color: MUTED,
+            lineHeight: 1.6,
+          }}
+        >
+          {`Los ${m(nw.receivablesPending)} por cobrar no entran en esa cuenta: es dinero que ganaste pero que todavía tiene otro dueño. Si te pagaran todo hoy, tu patrimonio neto sería ${m(nw.netWorthWithReceivables)} — por eso cobrar mueve más la aguja que ahorrar.`}
         </p>
       </div>
 
@@ -241,81 +420,65 @@ export function Patrimonio({
           }}
         >
           <strong>
-            Runway: {nw.runwayMonths.toFixed(1)} {es ? "meses" : "months"}
+            Runway: {nw.runwayMonths.toFixed(1)} {"meses"}
           </strong>{" "}
-          {es
-            ? `— lo que aguanta tu efectivo gastando ${m(baseline)} al mes, si no entrara un solo cobro nuevo.`
-            : `— how long your cash lasts at ${m(baseline)} a month with no new payment coming in.`}
+          {`— lo que aguanta tu efectivo gastando ${m(baseline)} al mes, si no entrara un solo cobro nuevo.`}
         </div>
       )}
 
       <Panel
-        title={es ? "Cuentas" : "Accounts"}
-        subtitle={es ? "Saldos actuales. Las inversiones no cuentan para el runway." : "Current balances. Investments don't count toward runway."}
+        title={"Cuentas"}
+        subtitle={"Saldos actuales. Las inversiones no cuentan para el runway."}
         total={m(nw.assets)}
       >
         <div style={{ display: "grid", gap: 10 }}>
           {state.accounts.map((a) => (
-            <Row key={a.id} label={es ? "Borrar cuenta" : "Delete account"} onDelete={() => setAccounts((cur) => cur.filter((x) => x.id !== a.id))}>
+            <Row
+              key={a.id}
+              label={"Borrar cuenta"}
+              onDelete={() =>
+                setAccounts((cur) => cur.filter((x) => x.id !== a.id))
+              }
+            >
               <input
                 value={a.name}
-                onChange={(e) => setAccounts((cur) => cur.map((x) => (x.id === a.id ? { ...x, name: e.target.value } : x)))}
+                onChange={(e) =>
+                  setAccounts((cur) =>
+                    cur.map((x) =>
+                      x.id === a.id ? { ...x, name: e.target.value } : x,
+                    ),
+                  )
+                }
                 style={inputStyle}
               />
               <select
                 value={a.kind}
                 onChange={(e) =>
-                  setAccounts((cur) => cur.map((x) => (x.id === a.id ? { ...x, kind: e.target.value as Account["kind"] } : x)))
+                  setAccounts((cur) =>
+                    cur.map((x) =>
+                      x.id === a.id
+                        ? { ...x, kind: e.target.value as Account["kind"] }
+                        : x,
+                    ),
+                  )
                 }
                 style={inputStyle}
               >
-                <option value="bank">{es ? "Banco" : "Bank"}</option>
-                <option value="cash">{es ? "Efectivo" : "Cash"}</option>
-                <option value="investment">{es ? "Inversión" : "Investment"}</option>
+                <option value="bank">{"Banco"}</option>
+                <option value="cash">{"Efectivo"}</option>
+                <option value="investment">{"Inversión"}</option>
               </select>
               <input
                 defaultValue={String(a.balance)}
                 inputMode="decimal"
-                onBlur={(e) => setAccounts((cur) => cur.map((x) => (x.id === a.id ? { ...x, balance: toNum(e.target.value) } : x)))}
-                style={numInput}
-              />
-            </Row>
-          ))}
-          <NewRow
-            lang={lang}
-            fields={[
-              { key: "name", placeholder: es ? "Nombre de la cuenta" : "Account name" },
-              { key: "balance", placeholder: es ? "Saldo" : "Balance", numeric: true },
-            ]}
-            onAdd={(v) =>
-              setAccounts((cur) => [...cur, { id: uid(), name: v.name.trim(), kind: "bank", balance: toNum(v.balance) }])
-            }
-          />
-        </div>
-      </Panel>
-
-      <Panel title={es ? "Deudas" : "Debts"} subtitle={es ? "Saldo pendiente y cuota mensual." : "Outstanding balance and monthly payment."} total={m(nw.debt)}>
-        <div style={{ display: "grid", gap: 10 }}>
-          {state.debts.map((d) => (
-            <Row key={d.id} label={es ? "Borrar deuda" : "Delete debt"} onDelete={() => setDebts((cur) => cur.filter((x) => x.id !== d.id))}>
-              <input
-                value={d.name}
-                onChange={(e) => setDebts((cur) => cur.map((x) => (x.id === d.id ? { ...x, name: e.target.value } : x)))}
-                style={inputStyle}
-              />
-              <input
-                defaultValue={String(d.balance)}
-                inputMode="decimal"
-                title={es ? "Saldo pendiente" : "Outstanding balance"}
-                onBlur={(e) => setDebts((cur) => cur.map((x) => (x.id === d.id ? { ...x, balance: toNum(e.target.value) } : x)))}
-                style={numInput}
-              />
-              <input
-                defaultValue={String(d.monthlyPayment)}
-                inputMode="decimal"
-                title={es ? "Cuota mensual" : "Monthly payment"}
                 onBlur={(e) =>
-                  setDebts((cur) => cur.map((x) => (x.id === d.id ? { ...x, monthlyPayment: toNum(e.target.value) } : x)))
+                  setAccounts((cur) =>
+                    cur.map((x) =>
+                      x.id === a.id
+                        ? { ...x, balance: toNum(e.target.value) }
+                        : x,
+                    ),
+                  )
                 }
                 style={numInput}
               />
@@ -324,14 +487,18 @@ export function Patrimonio({
           <NewRow
             lang={lang}
             fields={[
-              { key: "name", placeholder: es ? "Deuda" : "Debt" },
-              { key: "balance", placeholder: es ? "Saldo" : "Balance", numeric: true },
-              { key: "monthlyPayment", placeholder: es ? "Cuota" : "Payment", numeric: true },
+              { key: "name", placeholder: "Nombre de la cuenta" },
+              { key: "balance", placeholder: "Saldo", numeric: true },
             ]}
             onAdd={(v) =>
-              setDebts((cur) => [
+              setAccounts((cur) => [
                 ...cur,
-                { id: uid(), name: v.name.trim(), balance: toNum(v.balance), monthlyPayment: toNum(v.monthlyPayment) },
+                {
+                  id: uid(),
+                  name: v.name.trim(),
+                  kind: "bank",
+                  balance: toNum(v.balance),
+                },
               ])
             }
           />
@@ -339,55 +506,174 @@ export function Patrimonio({
       </Panel>
 
       <Panel
-        title={es ? "Por cobrar" : "Receivables"}
+        title={"Deudas"}
+        subtitle={"Saldo pendiente y cuota mensual."}
+        total={m(nw.debt)}
+      >
+        <div style={{ display: "grid", gap: 10 }}>
+          {state.debts.map((d) => (
+            <Row
+              key={d.id}
+              label={"Borrar deuda"}
+              onDelete={() =>
+                setDebts((cur) => cur.filter((x) => x.id !== d.id))
+              }
+            >
+              <input
+                value={d.name}
+                onChange={(e) =>
+                  setDebts((cur) =>
+                    cur.map((x) =>
+                      x.id === d.id ? { ...x, name: e.target.value } : x,
+                    ),
+                  )
+                }
+                style={inputStyle}
+              />
+              <input
+                defaultValue={String(d.balance)}
+                inputMode="decimal"
+                title={"Saldo pendiente"}
+                onBlur={(e) =>
+                  setDebts((cur) =>
+                    cur.map((x) =>
+                      x.id === d.id
+                        ? { ...x, balance: toNum(e.target.value) }
+                        : x,
+                    ),
+                  )
+                }
+                style={numInput}
+              />
+              <input
+                defaultValue={String(d.monthlyPayment)}
+                inputMode="decimal"
+                title={"Cuota mensual"}
+                onBlur={(e) =>
+                  setDebts((cur) =>
+                    cur.map((x) =>
+                      x.id === d.id
+                        ? { ...x, monthlyPayment: toNum(e.target.value) }
+                        : x,
+                    ),
+                  )
+                }
+                style={numInput}
+              />
+            </Row>
+          ))}
+          <NewRow
+            lang={lang}
+            fields={[
+              { key: "name", placeholder: "Deuda" },
+              { key: "balance", placeholder: "Saldo", numeric: true },
+              { key: "monthlyPayment", placeholder: "Cuota", numeric: true },
+            ]}
+            onAdd={(v) =>
+              setDebts((cur) => [
+                ...cur,
+                {
+                  id: uid(),
+                  name: v.name.trim(),
+                  balance: toNum(v.balance),
+                  monthlyPayment: toNum(v.monthlyPayment),
+                },
+              ])
+            }
+          />
+        </div>
+      </Panel>
+
+      <Panel
+        title={"Por cobrar"}
         subtitle={
-          es
-            ? "Facturado y no cobrado. No suma al patrimonio hasta que entra."
-            : "Invoiced and unpaid. Not net worth until it lands."
+          "Facturado y no cobrado. No suma al patrimonio hasta que entra."
         }
         total={m(nw.receivablesPending)}
       >
         <div style={{ display: "grid", gap: 10 }}>
           {state.receivables.map((r) => (
-            <Row key={r.id} label={es ? "Borrar" : "Delete"} onDelete={() => setArs((cur) => cur.filter((x) => x.id !== r.id))}>
+            <Row
+              key={r.id}
+              label={"Borrar"}
+              onDelete={() => setArs((cur) => cur.filter((x) => x.id !== r.id))}
+            >
               <input
                 value={r.client}
-                onChange={(e) => setArs((cur) => cur.map((x) => (x.id === r.id ? { ...x, client: e.target.value } : x)))}
+                onChange={(e) =>
+                  setArs((cur) =>
+                    cur.map((x) =>
+                      x.id === r.id ? { ...x, client: e.target.value } : x,
+                    ),
+                  )
+                }
                 style={inputStyle}
               />
               <input
                 defaultValue={String(r.amount)}
                 inputMode="decimal"
-                onBlur={(e) => setArs((cur) => cur.map((x) => (x.id === r.id ? { ...x, amount: toNum(e.target.value) } : x)))}
+                onBlur={(e) =>
+                  setArs((cur) =>
+                    cur.map((x) =>
+                      x.id === r.id
+                        ? { ...x, amount: toNum(e.target.value) }
+                        : x,
+                    ),
+                  )
+                }
                 style={numInput}
               />
               <select
                 value={r.status}
                 onChange={(e) =>
-                  setArs((cur) => cur.map((x) => (x.id === r.id ? { ...x, status: e.target.value as Receivable["status"] } : x)))
+                  setArs((cur) =>
+                    cur.map((x) =>
+                      x.id === r.id
+                        ? {
+                            ...x,
+                            status: e.target.value as Receivable["status"],
+                          }
+                        : x,
+                    ),
+                  )
                 }
                 style={inputStyle}
               >
-                <option value="pending">{es ? "Pendiente" : "Pending"}</option>
-                <option value="paid">{es ? "Cobrado" : "Paid"}</option>
+                <option value="pending">{"Pendiente"}</option>
+                <option value="paid">{"Cobrado"}</option>
               </select>
             </Row>
           ))}
           <NewRow
             lang={lang}
             fields={[
-              { key: "client", placeholder: es ? "Cliente" : "Client" },
-              { key: "amount", placeholder: es ? "Monto" : "Amount", numeric: true },
+              { key: "client", placeholder: "Cliente" },
+              { key: "amount", placeholder: "Monto", numeric: true },
             ]}
             onAdd={(v) =>
-              setArs((cur) => [...cur, { id: uid(), client: v.client.trim(), amount: toNum(v.amount), status: "pending" }])
+              setArs((cur) => [
+                ...cur,
+                {
+                  id: uid(),
+                  client: v.client.trim(),
+                  amount: toNum(v.amount),
+                  status: "pending",
+                },
+              ])
             }
           />
         </div>
-        <p style={{ fontSize: 12, color: MUTED, margin: "14px 0 0", lineHeight: 1.55 }}>
-          {es
-            ? "Cuando te paguen, márcalo como cobrado y registra el ingreso en Movimientos: así entra a la tendencia y a la tasa de ahorro."
-            : "When you get paid, mark it as paid and log the income under Transactions so it lands in the trend and savings rate."}
+        <p
+          style={{
+            fontSize: 12,
+            color: MUTED,
+            margin: "14px 0 0",
+            lineHeight: 1.55,
+          }}
+        >
+          {
+            "Cuando te paguen, márcalo como cobrado y registra el ingreso en Movimientos: así entra a la tendencia y a la tasa de ahorro."
+          }
         </p>
       </Panel>
     </div>

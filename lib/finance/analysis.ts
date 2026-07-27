@@ -121,13 +121,13 @@ export function summarizeMonth(month: string, txns: Txn[]): MonthSummary {
     byCategory: Object.fromEntries(
       Object.entries(byCategory)
         .map(([k, v]) => [k, round2(v)])
-        .sort((a, b) => (b[1] as number) - (a[1] as number))
+        .sort((a, b) => (b[1] as number) - (a[1] as number)),
     ),
     topMerchants: Object.fromEntries(
       Object.entries(byMerchant)
         .map(([k, v]) => [k, round2(v)])
         .sort((a, b) => (b[1] as number) - (a[1] as number))
-        .slice(0, 10)
+        .slice(0, 10),
     ),
   };
 }
@@ -145,13 +145,21 @@ export function summarize(state: FinanceState, months = 6): MonthSummary[] {
  * esos cubren una parte del gasto, no todo, y usarlos como total infla el
  * runway. La suma presupuesto + cuota de deuda queda como último recurso.
  */
-export function baselineExpense(state: FinanceState, summaries: MonthSummary[]): number {
+export function baselineExpense(
+  state: FinanceState,
+  summaries: MonthSummary[],
+): number {
   const closed = summaries.slice(0, -1).filter((m) => m.count > 0);
-  if (closed.length) return round2(closed.reduce((s, m) => s + m.expense, 0) / closed.length);
-  if (state.settings.monthlyExpenseEstimate > 0) return round2(state.settings.monthlyExpenseEstimate);
+  if (closed.length)
+    return round2(closed.reduce((s, m) => s + m.expense, 0) / closed.length);
+  if (state.settings.monthlyExpenseEstimate > 0)
+    return round2(state.settings.monthlyExpenseEstimate);
   const current = summaries[summaries.length - 1];
   if (current && current.expense > 0) return current.expense;
-  const budget = Object.values(state.settings.budgets).reduce((s, v) => s + v, 0);
+  const budget = Object.values(state.settings.budgets).reduce(
+    (s, v) => s + v,
+    0,
+  );
   const debt = state.debts.reduce((s, d) => s + d.monthlyPayment, 0);
   return round2(budget + debt) || 0;
 }
@@ -164,7 +172,10 @@ export function netWorth(state: FinanceState, baseline: number): NetWorth {
     .filter((a) => a.kind === "investment")
     .reduce((s, a) => s + a.balance, 0);
   const debt = state.debts.reduce((s, d) => s + d.balance, 0);
-  const monthlyDebtPayment = state.debts.reduce((s, d) => s + d.monthlyPayment, 0);
+  const monthlyDebtPayment = state.debts.reduce(
+    (s, d) => s + d.monthlyPayment,
+    0,
+  );
   const pending = state.receivables
     .filter((r) => r.status !== "paid")
     .reduce((s, r) => s + r.amount, 0);
@@ -184,16 +195,16 @@ export function netWorth(state: FinanceState, baseline: number): NetWorth {
 
 // ------------------------------------------------------------ diagnóstico ---
 
-type Lang = "es" | "en";
-
 /**
  * Reglas, en orden de lo que más pesa para alguien que factura por proyecto:
  * cuánto aguanta el efectivo, cuánto depende de un solo cliente, y si la
  * cartera por cobrar crece más rápido de lo que se cobra.
  */
-export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: Lang = "es"): Diagnosis {
-  const t = (es: string, en: string) => (lang === "es" ? es : en);
-  const m = (v: number) => money(v, lang);
+export function diagnose(
+  state: FinanceState,
+  summaries: MonthSummary[],
+): Diagnosis {
+  const m = (v: number) => money(v);
   const baseline = baselineExpense(state, summaries);
   const nw = netWorth(state, baseline);
   const findings: Finding[] = [];
@@ -206,51 +217,39 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
     score += 18;
     findings.push({
       tone: "good",
-      title: t(`Runway de ${rw} meses`, `${rw} months of runway`),
-      detail: t(
+      title: `Runway de ${rw} meses`,
+      detail:
         "Tu efectivo aguanta medio año sin un solo cobro nuevo. Ese es el colchón que da estabilidad real.",
-        "Your cash lasts half a year with no new payment coming in. That's the cushion that buys real stability."
-      ),
     });
   } else if (nw.runwayMonths >= 3) {
     score += 6;
     findings.push({
       tone: "warn",
-      title: t(`Runway de ${rw} meses`, `${rw} months of runway`),
-      detail: t(
-        `Aguantas ${rw} meses gastando ${m(baseline)} al mes. Con ingreso por proyecto, la meta razonable son 6.`,
-        `You last ${rw} months at ${m(baseline)} a month. With project-based income, 6 is the sane target.`
-      ),
+      title: `Runway de ${rw} meses`,
+      detail: `Aguantas ${rw} meses gastando ${m(baseline)} al mes. Con ingreso por proyecto, la meta razonable son 6.`,
     });
     actions.push({
-      title: t(`Llevar el colchón a ${m(baseline * 6)}`, `Grow the cushion to ${m(baseline * 6)}`),
-      why: t(
-        `Seis meses de gasto. Hoy te faltan ${m(Math.max(0, baseline * 6 - nw.liquid))} para llegar.`,
-        `Six months of spending. You're ${m(Math.max(0, baseline * 6 - nw.liquid))} short today.`
-      ),
+      title: `Llevar el colchón a ${m(baseline * 6)}`,
+      why: `Seis meses de gasto. Hoy te faltan ${m(Math.max(0, baseline * 6 - nw.liquid))} para llegar.`,
     });
   } else if (nw.runwayMonths > 0) {
     score -= 20;
     findings.push({
       tone: "risk",
-      title: t(`Runway de solo ${rw} meses`, `Only ${rw} months of runway`),
-      detail: t(
+      title: `Runway de solo ${rw} meses`,
+      detail:
         "Un mes sin proyecto nuevo te deja contra la pared. Esto es lo primero que hay que corregir.",
-        "One month without a new project puts you against the wall. Fix this before anything else."
-      ),
     });
     actions.push({
-      title: t("Reconstruir el colchón antes que cualquier otra cosa", "Rebuild the cushion before anything else"),
-      why: t(
-        "Por debajo de 3 meses, cualquier retraso de un cliente se convierte en un problema de caja.",
-        "Under 3 months, any client delay turns into a cash problem."
-      ),
+      title: "Reconstruir el colchón antes que cualquier otra cosa",
+      why: "Por debajo de 3 meses, cualquier retraso de un cliente se convierte en un problema de caja.",
     });
   }
 
   // 2. Cartera por cobrar frente al patrimonio real.
   if (nw.receivablesPending > 0) {
-    const ratio = nw.netWorth > 0 ? nw.receivablesPending / nw.netWorth : Infinity;
+    const ratio =
+      nw.netWorth > 0 ? nw.receivablesPending / nw.netWorth : Infinity;
     const top = [...state.receivables]
       .filter((r) => r.status !== "paid")
       .sort((a, b) => b.amount - a.amount)[0];
@@ -258,32 +257,22 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
       score -= 12;
       findings.push({
         tone: "risk",
-        title: t(
-          `${m(nw.receivablesPending)} por cobrar contra ${m(nw.netWorth)} de patrimonio`,
-          `${m(nw.receivablesPending)} receivable against ${m(nw.netWorth)} of net worth`
-        ),
-        detail: t(
+        title: `${m(nw.receivablesPending)} por cobrar contra ${m(nw.netWorth)} de patrimonio`,
+        detail:
           "Casi todo tu patrimonio está en facturas que otros todavía no pagan. No es problema de ingresos: es de cobranza.",
-          "Almost all your net worth sits in invoices nobody has paid yet. That's not an income problem — it's collections."
-        ),
       });
       if (top) {
         actions.push({
-          title: t(`Cobrar ${top.client} (${m(top.amount)})`, `Collect from ${top.client} (${m(top.amount)})`),
-          why: t(
-            "Es tu factura más grande pendiente. Cobrarla mueve el runway más que cualquier recorte de gasto.",
-            "It's your largest open invoice. Collecting it moves the runway more than any spending cut."
-          ),
+          title: `Cobrar ${top.client} (${m(top.amount)})`,
+          why: "Es tu factura más grande pendiente. Cobrarla mueve el runway más que cualquier recorte de gasto.",
         });
       }
     } else {
       findings.push({
         tone: "warn",
-        title: t(`${m(nw.receivablesPending)} facturados sin cobrar`, `${m(nw.receivablesPending)} invoiced and unpaid`),
-        detail: t(
+        title: `${m(nw.receivablesPending)} facturados sin cobrar`,
+        detail:
           "Dinero ganado que todavía no es tuyo. Revísalo cada semana, no cada mes.",
-          "Money earned that isn't yours yet. Chase it weekly, not monthly."
-        ),
       });
     }
   }
@@ -293,7 +282,9 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
   for (const r of state.receivables.filter((x) => x.status !== "paid")) {
     byClient.set(r.client, (byClient.get(r.client) ?? 0) + r.amount);
   }
-  for (const tx of state.transactions.filter((x) => x.kind === "income" && !x.excluded)) {
+  for (const tx of state.transactions.filter(
+    (x) => x.kind === "income" && !x.excluded,
+  )) {
     byClient.set(tx.merchant, (byClient.get(tx.merchant) ?? 0) + tx.amount);
   }
   const clientTotal = [...byClient.values()].reduce((s, v) => s + v, 0);
@@ -303,14 +294,9 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
     const pct = Math.round((biggest[1] / clientTotal) * 100);
     findings.push({
       tone: "warn",
-      title: t(
-        `${biggest[0]} pesa ${pct}% de tu facturación`,
-        `${biggest[0]} is ${pct}% of your billing`
-      ),
-      detail: t(
+      title: `${biggest[0]} pesa ${pct}% de tu facturación`,
+      detail:
         "Un cliente que se enfría te mueve el piso. Diversificar vale tanto como vender más.",
-        "One client going cold moves the floor under you. Diversifying is worth as much as selling more."
-      ),
     });
   }
 
@@ -325,18 +311,15 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
       score -= 10;
       findings.push({
         tone: "risk",
-        title: t(`Las cuotas se llevan ${load}% de tu ingreso`, `Debt payments eat ${load}% of your income`),
-        detail: t(
-          `${m(nw.monthlyDebtPayment)} al mes en deuda. Sobre 25% del ingreso empieza a comerse la capacidad de ahorrar.`,
-          `${m(nw.monthlyDebtPayment)} a month. Above 25% of income it starts eating your ability to save.`
-        ),
+        title: `Las cuotas se llevan ${load}% de tu ingreso`,
+        detail: `${m(nw.monthlyDebtPayment)} al mes en deuda. Sobre 25% del ingreso empieza a comerse la capacidad de ahorrar.`,
       });
     } else {
       score += 5;
       findings.push({
         tone: "good",
-        title: t(`Deuda bajo control (${load}% del ingreso)`, `Debt under control (${load}% of income)`),
-        detail: `${m(nw.debt)} ${t("de saldo", "outstanding")}, ${m(nw.monthlyDebtPayment)}/${t("mes", "mo")}.`,
+        title: `Deuda bajo control (${load}% del ingreso)`,
+        detail: `${m(nw.debt)} ${"de saldo"}, ${m(nw.monthlyDebtPayment)}/${"mes"}.`,
       });
     }
   }
@@ -350,25 +333,22 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
       score += 10;
       findings.push({
         tone: "good",
-        title: t(`Ahorro de ${rate}% este mes`, `${rate}% saved this month`),
-        detail: t(`Por encima de tu meta de ${goal}%.`, `Above your ${goal}% goal.`),
+        title: `Ahorro de ${rate}% este mes`,
+        detail: `Por encima de tu meta de ${goal}%.`,
       });
     } else if (current.savingsRate < 0) {
       score -= 12;
       findings.push({
         tone: "risk",
-        title: t("Este mes gastaste más de lo que entró", "You spent more than you earned this month"),
-        detail: t(
-          `Neto de ${m(current.net)}. Si se repite, sale del colchón.`,
-          `Net ${m(current.net)}. Repeat it and it comes out of the cushion.`
-        ),
+        title: "Este mes gastaste más de lo que entró",
+        detail: `Neto de ${m(current.net)}. Si se repite, sale del colchón.`,
       });
     } else {
       const gap = (current.income * goal) / 100 - current.net;
       findings.push({
         tone: "warn",
-        title: t(`Ahorro de ${rate}%, meta ${goal}%`, `${rate}% saved, goal ${goal}%`),
-        detail: t(`Te faltan ${m(gap)} para llegar a la meta este mes.`, `You're ${m(gap)} short of the goal this month.`),
+        title: `Ahorro de ${rate}%, meta ${goal}%`,
+        detail: `Te faltan ${m(gap)} para llegar a la meta este mes.`,
       });
     }
   }
@@ -381,11 +361,8 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
         score -= 3;
         findings.push({
           tone: "warn",
-          title: t(
-            `${cat}: ${m(spent)} sobre un presupuesto de ${m(limit)}`,
-            `${cat}: ${m(spent)} against a ${m(limit)} budget`
-          ),
-          detail: t(`Excedido en ${m(spent - limit)}.`, `Over by ${m(spent - limit)}.`),
+          title: `${cat}: ${m(spent)} sobre un presupuesto de ${m(limit)}`,
+          detail: `Excedido en ${m(spent - limit)}.`,
         });
       }
     }
@@ -396,22 +373,14 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
     const aportando = state.transactions.some((x) => /iess/i.test(x.merchant));
     if (!aportando) {
       actions.push({
-        title: t(
-          "Afiliarte al IESS y registrar la aportación mensual",
-          "Enroll in IESS and log the monthly contribution"
-        ),
-        why: t(
-          "El BIESS pide 2-3 años de aportaciones continuas para un crédito hipotecario. Cada mes sin aportar corre la fecha en que puedes comprar departamento — el monto importa menos que arrancar el reloj.",
-          "BIESS requires 2-3 years of continuous contributions for a mortgage. Every month without one pushes back the date you can buy — starting the clock matters more than the amount."
-        ),
+        title: "Afiliarte al IESS y registrar la aportación mensual",
+        why: "El BIESS pide 2-3 años de aportaciones continuas para un crédito hipotecario. Cada mes sin aportar corre la fecha en que puedes comprar departamento — el monto importa menos que arrancar el reloj.",
       });
       findings.push({
         tone: "warn",
-        title: t("Sin aportaciones al IESS registradas", "No IESS contributions logged"),
-        detail: t(
+        title: "Sin aportaciones al IESS registradas",
+        detail:
           "Es el requisito de entrada para el crédito de vivienda que quieres. No aparece todavía en tus movimientos.",
-          "It's the entry requirement for the mortgage you want, and it isn't in your transactions yet."
-        ),
       });
     }
   }
@@ -420,44 +389,36 @@ export function diagnose(state: FinanceState, summaries: MonthSummary[], lang: L
   if (state.transactions.length === 0) {
     findings.push({
       tone: "warn",
-      title: t("Todavía no hay movimientos cargados", "No transactions logged yet"),
-      detail: t(
+      title: "Todavía no hay movimientos cargados",
+      detail:
         "El patrimonio ya se lee, pero las tendencias y la tasa de ahorro necesitan que registres ingresos y gastos.",
-        "Net worth already reads, but trends and the savings rate need you to log income and expenses."
-      ),
     });
   }
 
   score = Math.max(0, Math.min(100, Math.round(score)));
   const verdict: Diagnosis["verdict"] =
-    score >= 81 ? "excelente" : score >= 61 ? "bien" : score >= 41 ? "atencion" : "riesgo";
+    score >= 81
+      ? "excelente"
+      : score >= 61
+        ? "bien"
+        : score >= 41
+          ? "atencion"
+          : "riesgo";
 
   const headline =
     nw.runwayMonths > 0 && nw.runwayMonths < 3
-      ? t(
-          "Tu colchón es corto: prioriza caja sobre cualquier otra cosa.",
-          "Your cushion is thin: prioritise cash over everything else."
-        )
+      ? "Tu colchón es corto: prioriza caja sobre cualquier otra cosa."
       : nw.receivablesPending > nw.netWorth && nw.netWorth > 0
-        ? t(
-            "Ganas bien, pero tu patrimonio está atrapado en facturas sin cobrar.",
-            "You earn well, but your net worth is stuck in unpaid invoices."
-          )
+        ? "Ganas bien, pero tu patrimonio está atrapado en facturas sin cobrar."
         : nw.runwayMonths >= 6
-          ? t(
-              "Base sólida: el colchón aguanta y la deuda no aprieta.",
-              "Solid base: the cushion holds and debt isn't squeezing you."
-            )
-          : t(
-              "Vas encaminado; el siguiente salto está en el colchón y la cobranza.",
-              "You're on track; the next jump is cushion and collections."
-            );
+          ? "Base sólida: el colchón aguanta y la deuda no aprieta."
+          : "Vas encaminado; el siguiente salto está en el colchón y la cobranza.";
 
   return { score, verdict, headline, findings, actions };
 }
 
-function money(v: number, lang: Lang = "es"): string {
-  return new Intl.NumberFormat(lang === "es" ? "es-EC" : "en-US", {
+function money(v: number): string {
+  return new Intl.NumberFormat("es-EC", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
@@ -475,11 +436,13 @@ function money(v: number, lang: Lang = "es"): string {
  * colchón queda a la mitad. Es cambiar liquidez, que es lo que protege de un
  * mes sin proyecto, por un ahorro de intereses que llega mucho después.
  */
-export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang: Lang = "es"): CapitalPlan {
-  const t = (es: string, en: string) => (lang === "es" ? es : en);
+export function capitalPlan(
+  state: FinanceState,
+  summaries: MonthSummary[],
+): CapitalPlan {
   const baseline = baselineExpense(state, summaries);
   const nw = netWorth(state, baseline);
-  const m = (v: number) => money(v, lang);
+  const m = (v: number) => money(v);
 
   const target = round2(baseline * 6);
   const gap = round2(Math.max(0, target - nw.liquid));
@@ -489,21 +452,15 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
   // 1. Colchón de seis meses.
   if (gap > 0) {
     steps.push({
-      title: t(`Completar el colchón hasta ${m(target)}`, `Top the cushion up to ${m(target)}`),
-      detail: t(
-        `Seis meses de tu gasto (${m(baseline)} al mes). Tienes ${m(nw.liquid)} disponibles: te faltan ${m(gap)}. Mientras esto no esté, cualquier otro destino del dinero compite con tu tranquilidad.`,
-        `Six months of your spend (${m(baseline)} a month). You have ${m(nw.liquid)}: ${m(gap)} short. Until this is done, any other use of the money competes with your peace of mind.`
-      ),
+      title: `Completar el colchón hasta ${m(target)}`,
+      detail: `Seis meses de tu gasto (${m(baseline)} al mes). Tienes ${m(nw.liquid)} disponibles: te faltan ${m(gap)}. Mientras esto no esté, cualquier otro destino del dinero compite con tu tranquilidad.`,
       amount: gap,
       when: "ahora",
     });
   } else {
     steps.push({
-      title: t("Colchón de seis meses: listo", "Six-month cushion: done"),
-      detail: t(
-        `${m(nw.liquid)} disponibles contra ${m(target)} de meta.`,
-        `${m(nw.liquid)} available against a ${m(target)} target.`
-      ),
+      title: "Colchón de seis meses: listo",
+      detail: `${m(nw.liquid)} disponibles contra ${m(target)} de meta.`,
       amount: 0,
       when: "listo",
     });
@@ -513,11 +470,9 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
   const contributing = state.transactions.some((x) => /iess/i.test(x.merchant));
   if (/iess/i.test(state.settings.profile) && !contributing) {
     steps.push({
-      title: t("Empezar a aportar al IESS este mes", "Start contributing to IESS this month"),
-      detail: t(
+      title: "Empezar a aportar al IESS este mes",
+      detail:
         "No compite con el colchón: la aportación mínima es un gasto mensual pequeño, y lo que compra es tiempo. El BIESS cuenta meses de aportación continua, no montos, así que empezar hoy adelanta la fecha en que calificas para el crédito de vivienda. Registra el pago aquí cada mes para que el conteo quede a la vista.",
-        "It doesn't compete with the cushion: the minimum contribution is a small monthly expense, and what it buys is time. BIESS counts months of continuous contributions, not amounts, so starting today pulls forward the date you qualify for the mortgage. Log the payment here each month so the count stays visible."
-      ),
       amount: 0,
       when: "ahora",
     });
@@ -528,21 +483,16 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
     if (surplus > 0) {
       const pay = round2(Math.min(surplus, nw.debt));
       steps.push({
-        title: t(`Abonar ${m(pay)} al capital de la deuda`, `Put ${m(pay)} against the loan principal`),
-        detail: t(
+        title: `Abonar ${m(pay)} al capital de la deuda`,
+        detail:
           "Ya tienes el colchón completo, así que este excedente sí puede ir a la deuda. Pide que el abono se aplique a capital y que reduzca el plazo o la cuota — dilo explícitamente, porque por defecto muchos bancos lo aplican a cuotas futuras y no cambia nada.",
-          "The cushion is full, so this surplus can go to the loan. Ask for it to hit principal and shorten the term or the payment — say it explicitly, since many banks default to applying it to future instalments, which changes nothing."
-        ),
         amount: pay,
         when: "ahora",
       });
     } else {
       steps.push({
-        title: t("Abonar a la deuda: todavía no", "Paying down the loan: not yet"),
-        detail: t(
-          `Con ${m(nw.liquid)} en caja, cada dólar que abones sale del colchón. El disparador es claro: cuando tu efectivo pase de ${m(target)}, lo que sobre va al capital de la deuda.`,
-          `With ${m(nw.liquid)} on hand, every dollar you prepay comes out of the cushion. The trigger is clear: once cash passes ${m(target)}, whatever is above that goes to principal.`
-        ),
+        title: "Abonar a la deuda: todavía no",
+        detail: `Con ${m(nw.liquid)} en caja, cada dólar que abones sale del colchón. El disparador es claro: cuando tu efectivo pase de ${m(target)}, lo que sobre va al capital de la deuda.`,
         amount: 0,
         when: "despues",
       });
@@ -553,11 +503,8 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
   if (nw.receivablesPending > 0) {
     const after = round2(nw.liquid + nw.receivablesPending);
     steps.push({
-      title: t(`Cobrar los ${m(nw.receivablesPending)} pendientes`, `Collect the ${m(nw.receivablesPending)} outstanding`),
-      detail: t(
-        `Es la palanca más grande que tienes hoy: si entra todo, tu efectivo pasa a ${m(after)} y el runway a ${(after / (baseline || 1)).toFixed(1)} meses. Ningún recorte de gasto se le acerca.`,
-        `It's your biggest lever today: if it all lands, cash goes to ${m(after)} and runway to ${(after / (baseline || 1)).toFixed(1)} months. No spending cut comes close.`
-      ),
+      title: `Cobrar los ${m(nw.receivablesPending)} pendientes`,
+      detail: `Es la palanca más grande que tienes hoy: si entra todo, tu efectivo pasa a ${m(after)} y el runway a ${(after / (baseline || 1)).toFixed(1)} meses. Ningún recorte de gasto se le acerca.`,
       amount: nw.receivablesPending,
       when: "ahora",
     });
@@ -568,10 +515,7 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
   if (nw.debt > 0 && baseline > 0) {
     const half = round2(nw.debt / 2);
     const afterRunway = round2(Math.max(0, nw.liquid - half) / baseline);
-    tradeoff = t(
-      `Si abonaras hoy la mitad de la deuda (${m(half)}), tu runway pasaría de ${nw.runwayMonths.toFixed(1)} a ${afterRunway.toFixed(1)} meses y la cuota seguiría en ${m(nw.monthlyDebtPayment)}: en un préstamo amortizado el abono acorta el plazo, no el pago mensual. Cambiarías la liquidez que te protege de un mes sin proyecto por un ahorro de intereses que recién se siente al final del crédito.`,
-      `If you paid down half the loan today (${m(half)}), your runway would drop from ${nw.runwayMonths.toFixed(1)} to ${afterRunway.toFixed(1)} months and the payment would stay at ${m(nw.monthlyDebtPayment)}: on an amortised loan, prepaying shortens the term, not the instalment. You'd trade the liquidity that protects you through a dry month for interest savings you only feel at the end.`
-    );
+    tradeoff = `Si abonaras hoy la mitad de la deuda (${m(half)}), tu runway pasaría de ${nw.runwayMonths.toFixed(1)} a ${afterRunway.toFixed(1)} meses y la cuota seguiría en ${m(nw.monthlyDebtPayment)}: en un préstamo amortizado el abono acorta el plazo, no el pago mensual. Cambiarías la liquidez que te protege de un mes sin proyecto por un ahorro de intereses que recién se siente al final del crédito.`;
   }
 
   return { steps, tradeoff };
@@ -584,14 +528,22 @@ export function capitalPlan(state: FinanceState, summaries: MonthSummary[], lang
  * agregados y los movimientos más grandes, no el listado completo: es lo que
  * hace falta para opinar, y evita pegar cientos de líneas.
  */
-export function claudePrompt(state: FinanceState, summaries: MonthSummary[]): string {
+export function claudePrompt(
+  state: FinanceState,
+  summaries: MonthSummary[],
+): string {
   const baseline = baselineExpense(state, summaries);
   const nw = netWorth(state, baseline);
   const biggest = [...state.transactions]
     .filter((t) => !t.excluded && t.kind === "expense")
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 20)
-    .map((t) => ({ fecha: t.date.slice(0, 10), comercio: t.merchant, monto: t.amount, rubro: t.category }));
+    .map((t) => ({
+      fecha: t.date.slice(0, 10),
+      comercio: t.merchant,
+      monto: t.amount,
+      rubro: t.category,
+    }));
 
   const payload = {
     perfil: state.settings.profile,
