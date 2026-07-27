@@ -500,9 +500,9 @@ a:hover {
   border-radius: 6px;
 }
 
-/* homepage portfolio — a strip of rounded cards, one per project. Hovering
-   expands a card into its story; the rest recede to a vertical label. Each
-   card carries its cover's hue in --pf (set inline per project). */
+/* homepage portfolio — a snap carousel of rounded cards, four per view.
+   Hovering a card lifts it and reveals its story in place. Each card carries
+   its cover's hue in --pf (set inline per project). */
 .pf-section {
   position: relative;
   background: #0d0a1f;
@@ -514,16 +514,58 @@ a:hover {
   padding: 0 48px;
   text-align: center;
 }
-.pf-strip {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  height: min(74vh, 700px);
+/* carousel: four cards per view, snap-scrolled, arrows overlaid at the sides */
+.pf-carousel {
+  position: relative;
   padding: 0 22px;
 }
+.pf-strip {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  height: min(68vh, 640px);
+  /* room for the hover lift and glow — overflow-x:auto would clip them */
+  padding: 12px 0 26px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.pf-strip::-webkit-scrollbar { display: none; }
+.pf-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(12, 10, 26, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.25s ease;
+}
+.pf-nav:hover {
+  background: rgba(34, 29, 66, 0.92);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+.pf-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.pf-prev { left: 4px; }
+.pf-next { right: 4px; }
 .pf-panel {
   position: relative;
-  flex: 1 1 0;
+  flex: 0 0 calc((100% - 3 * 14px) / 4);
+  scroll-snap-align: start;
   min-width: 0;
   overflow: hidden;
   display: block;
@@ -533,7 +575,7 @@ a:hover {
   background:
     radial-gradient(125% 55% at 50% 2%, color-mix(in srgb, var(--pf) 34%, transparent) 0%, transparent 74%),
     linear-gradient(180deg, #17132f 0%, #0c0a1a 58%, #090714 100%);
-  transition: flex-grow 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
     filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 /* the cover art reads as a device shot near the top, fading into the card */
@@ -557,12 +599,12 @@ a:hover {
   transform: scale(1.24);
   transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-/* dim the rest while one card is hovered; the open one lights its ring */
-.pf-strip:hover .pf-panel { flex-grow: 0.82; filter: saturate(0.8) brightness(0.82); }
+/* dim the rest while one card is hovered; the open one lifts and lights its ring */
+.pf-strip:hover .pf-panel { filter: saturate(0.8) brightness(0.8); }
 .pf-strip .pf-panel:hover,
 .pf-strip .pf-panel:focus-visible {
-  flex-grow: 3.4;
   filter: none;
+  transform: translateY(-5px);
   border-color: color-mix(in srgb, var(--pf) 42%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--pf) 16%, transparent),
     0 40px 90px -44px color-mix(in srgb, var(--pf) 60%, transparent);
@@ -628,8 +670,14 @@ a:hover {
   border-color: color-mix(in srgb, var(--pf) 80%, transparent);
 }
 
+@media (max-width: 1240px) {
+  .pf-panel { flex-basis: calc((100% - 2 * 14px) / 3); }
+}
+
 @media (max-width: 900px) {
   .pf-head { padding-left: 24px; padding-right: 24px; }
+  .pf-carousel { padding: 0; }
+  .pf-nav { display: none; }
   /* Stack into cards: cover on top, copy below — no hover to rely on, and
      overlaying the copy collided with the centered mockups at phone widths. */
   .pf-strip {
@@ -637,14 +685,17 @@ a:hover {
     height: auto;
     gap: 14px;
     padding: 0 18px;
+    overflow-x: visible;
+    overflow-y: visible;
+    scroll-snap-type: none;
   }
   .pf-panel {
     flex: none;
     display: block;
     padding-bottom: 4px;
   }
-  .pf-strip:hover .pf-panel { flex-grow: 0; filter: none; }
-  .pf-strip .pf-panel:hover { flex-grow: 0; }
+  .pf-strip:hover .pf-panel { filter: none; }
+  .pf-strip .pf-panel:hover { transform: none; }
   .pf-media {
     position: static;
     height: auto;

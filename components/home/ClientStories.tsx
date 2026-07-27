@@ -78,9 +78,44 @@ const PROJECTS: Project[] = [
   },
 ];
 
+/* keep in sync with the .pf-strip gap in globals.css */
+const GAP = 14;
+
 export function ClientStories() {
   const { lang } = useLang();
   const es = lang === "es";
+
+  // carousel: four cards per view, arrows step one card at a time
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = React.useState(true);
+  const [atEnd, setAtEnd] = React.useState(false);
+
+  const sync = React.useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft <= 2);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+  }, []);
+
+  React.useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    sync();
+    el.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    return () => {
+      el.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, [sync]);
+
+  const step = (dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>(".pf-panel");
+    el.scrollBy({ left: dir * (card ? card.offsetWidth + GAP : el.clientWidth / 4), behavior: "smooth" });
+  };
+
   return (
     <section id="stories" className="pf-section">
       <div className="pf-head">
@@ -94,7 +129,7 @@ export function ClientStories() {
             color: "#fff",
           }}
         >
-          {es ? "Equipos que construyen con MindfulTech" : "Teams build with MindfulTech"}
+          {es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
         </h2>
         <p
           style={{
@@ -112,7 +147,8 @@ export function ClientStories() {
         </p>
       </div>
 
-      <div className="pf-strip">
+      <div className="pf-carousel">
+        <div className="pf-strip" ref={trackRef}>
         {PROJECTS.map((p) => (
           <Link
             key={p.href}
@@ -132,11 +168,10 @@ export function ClientStories() {
                 style={{
                   color: "#fff",
                   fontWeight: 500,
-                  fontSize: "clamp(23px,2.1vw,36px)",
-                  lineHeight: 1.18,
+                  fontSize: "clamp(20px,1.45vw,25px)",
+                  lineHeight: 1.2,
                   letterSpacing: "-.02em",
-                  margin: "14px 0 0",
-                  maxWidth: 480,
+                  margin: "13px 0 0",
                 }}
               >
                 {p.title[lang]}
@@ -157,6 +192,30 @@ export function ClientStories() {
             </div>
           </Link>
         ))}
+        </div>
+
+        <button
+          type="button"
+          className="pf-nav pf-prev"
+          onClick={() => step(-1)}
+          disabled={atStart}
+          aria-label={es ? "Proyectos anteriores" : "Previous projects"}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="pf-nav pf-next"
+          onClick={() => step(1)}
+          disabled={atEnd}
+          aria-label={es ? "Siguientes proyectos" : "Next projects"}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
 
       <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 0" }}>
