@@ -106,7 +106,6 @@ export function ClientMap() {
   const { lang } = useLang();
   const es = lang === "es";
   const [active, setActive] = React.useState<string | null>(null);
-  const countries = new Set(SITES.map((s) => s.country.en)).size;
 
   return (
     <section
@@ -143,7 +142,9 @@ export function ClientMap() {
               color: "var(--ink)",
             }}
           >
-            {es ? `Proyectos en ${countries} países` : `Projects in ${countries} countries`}
+            {es
+              ? "MindfulTech ayuda a empresas de todo el mundo"
+              : "MindfulTech helps companies worldwide"}
           </h2>
           <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "14px 0 0" }}>
             {es
@@ -168,7 +169,7 @@ export function ClientMap() {
               {/* basemap: one path, each zero-length segment a round dot */}
               <path
                 d={LAND_PATH}
-                stroke="#8d9db8"
+                stroke="#b7c2d4"
                 strokeWidth={6.4}
                 strokeLinecap="round"
                 fill="none"
@@ -184,15 +185,15 @@ export function ClientMap() {
                     onMouseEnter={() => setActive(s.id)}
                     onMouseLeave={() => setActive(null)}
                   >
-                    {on && <circle cx={x} cy={y} r={24} fill="var(--accent)" opacity={0.2} />}
-                    <circle cx={x} cy={y} r={on ? 12 : 9} fill="var(--accent-deep)" opacity={0.2} />
+                    {on && <circle cx={x} cy={y} r={26} fill="var(--accent)" opacity={0.3} />}
+                    <circle cx={x} cy={y} r={on ? 14 : 11} fill="var(--accent)" opacity={0.28} />
                     <circle
                       cx={x}
                       cy={y}
-                      r={on ? 7.5 : 6}
-                      fill="var(--accent-deep)"
+                      r={on ? 8 : 6.5}
+                      fill={on ? "#1c6459" : "#2f7d71"}
                       stroke="#fff"
-                      strokeWidth={2.5}
+                      strokeWidth={3}
                     />
                     {(() => {
                       const text = s.place[lang].toUpperCase();
