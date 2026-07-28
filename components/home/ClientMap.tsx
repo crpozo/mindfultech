@@ -13,13 +13,12 @@ type Site = {
   lon: number;
   place: Bi;
   country: Bi;
-  clients: { name: string; what: Bi }[];
-  /** nudges the label off the pin so labels never sit on top of each other */
-  label: "left" | "right";
+  /** where the label sits relative to the pin, so none of them collide */
+  label: "left" | "right" | "top" | "bottom";
 };
 
-// Real coordinates — the pin positions are computed from these, so the map
-// stays honest even though the basemap coastlines are stylised.
+// Real coordinates — pin positions are computed from these, so the map stays
+// truthful even though the dotted basemap is a stylisation.
 const SITES: Site[] = [
   {
     id: "quito",
@@ -28,11 +27,6 @@ const SITES: Site[] = [
     place: { en: "Quito", es: "Quito" },
     country: { en: "Ecuador", es: "Ecuador" },
     label: "left",
-    clients: [
-      { name: "USFQ", what: { en: "Campus events, iOS + AI surveys", es: "Eventos de campus, iOS + encuestas IA" } },
-      { name: "CarCompra", what: { en: "Seller CRM wired to Meta & ads", es: "CRM de vendedores conectado a Meta" } },
-      { name: "CarCompraCorp", what: { en: "Leads from Meta, answered by AI", es: "Leads de Meta, respondidos por IA" } },
-    ],
   },
   {
     id: "california",
@@ -41,9 +35,14 @@ const SITES: Site[] = [
     place: { en: "California", es: "California" },
     country: { en: "United States", es: "Estados Unidos" },
     label: "right",
-    clients: [
-      { name: "Helixona", what: { en: "AI agent running medical billing", es: "Agente de IA que factura en salud" } },
-    ],
+  },
+  {
+    id: "chicago",
+    lat: 41.88,
+    lon: -87.63,
+    place: { en: "Chicago", es: "Chicago" },
+    country: { en: "United States", es: "Estados Unidos" },
+    label: "top",
   },
   {
     id: "florida",
@@ -52,20 +51,30 @@ const SITES: Site[] = [
     place: { en: "Southwest Florida", es: "Suroeste de Florida" },
     country: { en: "United States", es: "Estados Unidos" },
     label: "right",
-    clients: [
-      { name: "Western Fence Supply", what: { en: "Excel → Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega" } },
-    ],
   },
   {
     id: "netherlands",
-    lat: 51.65,
+    lat: 52.1,
     lon: 5.3,
     place: { en: "Netherlands", es: "Países Bajos" },
-    country: { en: "Europe", es: "Europa" },
+    country: { en: "Netherlands", es: "Países Bajos" },
+    label: "top",
+  },
+  {
+    id: "germany",
+    lat: 51.1,
+    lon: 10.45,
+    place: { en: "Germany", es: "Alemania" },
+    country: { en: "Germany", es: "Alemania" },
+    label: "bottom",
+  },
+  {
+    id: "spain",
+    lat: 40.3,
+    lon: -3.7,
+    place: { en: "Spain", es: "España" },
+    country: { en: "Spain", es: "España" },
     label: "left",
-    clients: [
-      { name: "ThemedMotion", what: { en: "Interactive 3D portfolio on the web", es: "Portafolio 3D interactivo en la web" } },
-    ],
   },
 ];
 
@@ -74,12 +83,30 @@ const project = (lat: number, lon: number) => ({
   y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h,
 });
 
+/** Label offset + anchor for each placement. */
+const LABEL = {
+  left: { dx: -18, dy: 5, anchor: "end" as const },
+  right: { dx: 18, dy: 5, anchor: "start" as const },
+  top: { dx: 0, dy: -20, anchor: "middle" as const },
+  bottom: { dx: 0, dy: 30, anchor: "middle" as const },
+};
+
+const FONT = 15;
+const CHAR = FONT * 0.6 + 1.4; // monospace advance + letter-spacing
+const PAD = 9;
+
+/** Plate behind a label, so it stays legible over the dot grid. */
+function labelPlate(text: string, x: number, anchor: "start" | "middle" | "end") {
+  const w = text.length * CHAR + PAD * 2;
+  const left = anchor === "start" ? x - PAD : anchor === "end" ? x - w + PAD : x - w / 2;
+  return { x: left, w };
+}
+
 export function ClientMap() {
   const { lang } = useLang();
   const es = lang === "es";
-  const [active, setActive] = React.useState<string>(SITES[0].id);
-  const site = SITES.find((s) => s.id === active) ?? SITES[0];
-  const clientCount = SITES.reduce((n, s) => n + s.clients.length, 0);
+  const [active, setActive] = React.useState<string | null>(null);
+  const countries = new Set(SITES.map((s) => s.country.en)).size;
 
   return (
     <section
@@ -116,12 +143,12 @@ export function ClientMap() {
               color: "var(--ink)",
             }}
           >
-            {es ? "Clientes en tres países" : "Clients in three countries"}
+            {es ? `Proyectos en ${countries} países` : `Projects in ${countries} countries`}
           </h2>
           <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "14px 0 0" }}>
             {es
-              ? `Desde Quito construimos para ${clientCount} equipos en Ecuador, Estados Unidos y Europa.`
-              : `From Quito we build for ${clientCount} teams across Ecuador, the United States and Europe.`}
+              ? "Desde Quito, para equipos en América y Europa."
+              : "From Quito, for teams across the Americas and Europe."}
           </p>
         </div>
 
@@ -133,46 +160,70 @@ export function ClientMap() {
               role="img"
               aria-label={
                 es
-                  ? "Mapa con las ubicaciones de nuestros clientes"
-                  : "Map showing our client locations"
+                  ? "Mapa con las ubicaciones de nuestros proyectos"
+                  : "Map of the places our projects are in"
               }
               style={{ display: "block", overflow: "visible" }}
             >
               {/* basemap: one path, each zero-length segment a round dot */}
               <path
                 d={LAND_PATH}
-                stroke="#b4c0d4"
-                strokeWidth={5}
+                stroke="#8d9db8"
+                strokeWidth={6.4}
                 strokeLinecap="round"
                 fill="none"
               />
               {SITES.map((s) => {
                 const { x, y } = project(s.lat, s.lon);
                 const on = s.id === active;
+                const l = LABEL[s.label];
                 return (
-                  <g key={s.id} className="map-pin" onMouseEnter={() => setActive(s.id)}>
-                    {on && <circle cx={x} cy={y} r={26} fill="var(--accent)" opacity={0.16} />}
-                    <circle cx={x} cy={y} r={on ? 13 : 9} fill="var(--accent-deep)" opacity={0.18} />
+                  <g
+                    key={s.id}
+                    className="map-pin"
+                    onMouseEnter={() => setActive(s.id)}
+                    onMouseLeave={() => setActive(null)}
+                  >
+                    {on && <circle cx={x} cy={y} r={24} fill="var(--accent)" opacity={0.2} />}
+                    <circle cx={x} cy={y} r={on ? 12 : 9} fill="var(--accent-deep)" opacity={0.2} />
                     <circle
                       cx={x}
                       cy={y}
-                      r={on ? 7.5 : 5.5}
-                      fill={on ? "var(--accent-deep)" : "var(--accent)"}
+                      r={on ? 7.5 : 6}
+                      fill="var(--accent-deep)"
                       stroke="#fff"
                       strokeWidth={2.5}
                     />
-                    <text
-                      x={s.label === "left" ? x - 18 : x + 18}
-                      y={y + 4.5}
-                      textAnchor={s.label === "left" ? "end" : "start"}
-                      fontFamily="var(--mono)"
-                      fontSize={17}
-                      letterSpacing="1.6"
-                      fill={on ? "#24344E" : "#7c8598"}
-                      style={{ transition: "fill .2s ease" }}
-                    >
-                      {s.place[lang].toUpperCase()}
-                    </text>
+                    {(() => {
+                      const text = s.place[lang].toUpperCase();
+                      const plate = labelPlate(text, x + l.dx, l.anchor);
+                      return (
+                        <>
+                          <rect
+                            x={plate.x}
+                            y={y + l.dy - FONT + 3}
+                            width={plate.w}
+                            height={FONT + 8}
+                            rx={6}
+                            fill="#fff"
+                            opacity={on ? 1 : 0.88}
+                          />
+                          <text
+                            x={x + l.dx}
+                            y={y + l.dy}
+                            textAnchor={l.anchor}
+                            fontFamily="var(--mono)"
+                            fontSize={FONT}
+                            letterSpacing="1.4"
+                            fontWeight={500}
+                            fill={on ? "#16233a" : "#4d5b75"}
+                            style={{ transition: "fill .2s ease" }}
+                          >
+                            {text}
+                          </text>
+                        </>
+                      );
+                    })()}
                   </g>
                 );
               })}
@@ -183,40 +234,36 @@ export function ClientMap() {
           <ul className="map-list">
             {SITES.map((s) => {
               const on = s.id === active;
+              const sameName = s.place.en === s.country.en;
               return (
                 <li key={s.id}>
                   <button
                     type="button"
                     className={`map-row${on ? " on" : ""}`}
                     onMouseEnter={() => setActive(s.id)}
+                    onMouseLeave={() => setActive(null)}
                     onFocus={() => setActive(s.id)}
-                    onClick={() => setActive(s.id)}
+                    onBlur={() => setActive(null)}
                     aria-pressed={on}
                   >
                     <span className="map-row-head">
                       <span className="map-dot" aria-hidden />
-                      <span style={{ fontWeight: 600, fontSize: 16.5, letterSpacing: "-.01em" }}>
+                      <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: "-.01em" }}>
                         {s.place[lang]}
                       </span>
-                      <span
-                        style={{
-                          fontFamily: MONO,
-                          fontSize: 10.5,
-                          letterSpacing: ".12em",
-                          color: "#8b8896",
-                          marginLeft: "auto",
-                        }}
-                      >
-                        {s.country[lang].toUpperCase()}
-                      </span>
-                    </span>
-                    <span className="map-clients">
-                      {s.clients.map((c) => (
-                        <span key={c.name} className="map-client">
-                          <b>{c.name}</b>
-                          <span>{c.what[lang]}</span>
+                      {!sameName && (
+                        <span
+                          style={{
+                            fontFamily: MONO,
+                            fontSize: 10.5,
+                            letterSpacing: ".12em",
+                            color: "#8b8896",
+                            marginLeft: "auto",
+                          }}
+                        >
+                          {s.country[lang].toUpperCase()}
                         </span>
-                      ))}
+                      )}
                     </span>
                   </button>
                 </li>
@@ -224,19 +271,6 @@ export function ClientMap() {
             })}
           </ul>
         </div>
-
-        <p
-          style={{
-            fontFamily: MONO,
-            fontSize: 11,
-            letterSpacing: ".1em",
-            color: "#9a97a6",
-            textAlign: "center",
-            margin: "34px 0 0",
-          }}
-        >
-          {es ? `${site.place.es.toUpperCase()} · ${site.clients.length} PROYECTO${site.clients.length > 1 ? "S" : ""}` : `${site.place.en.toUpperCase()} · ${site.clients.length} PROJECT${site.clients.length > 1 ? "S" : ""}`}
-        </p>
       </div>
     </section>
   );

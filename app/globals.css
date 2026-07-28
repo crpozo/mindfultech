@@ -679,7 +679,7 @@ a:hover {
 /* client map — dotted basemap beside the location list */
 .map-grid {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
+  grid-template-columns: 1.75fr 1fr;
   gap: clamp(24px, 3vw, 54px);
   align-items: center;
 }
@@ -695,7 +695,7 @@ a:hover {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .map-row {
   display: block;
@@ -704,8 +704,8 @@ a:hover {
   cursor: pointer;
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(14, 13, 18, 0.07);
-  border-radius: 14px;
-  padding: 16px 18px;
+  border-radius: 12px;
+  padding: 13px 16px;
   color: var(--ink);
   font: inherit;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
@@ -732,32 +732,8 @@ a:hover {
   background: var(--accent-deep);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 26%, transparent);
 }
-.map-clients {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 10px;
-  padding-left: 19px;
-}
-.map-client {
-  display: flex;
-  gap: 8px;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: #6b6875;
-}
-.map-client b {
-  font-weight: 600;
-  color: var(--ink);
-  flex: none;
-}
-
 @media (max-width: 900px) {
   .map-grid {
     grid-template-columns: 1fr;
-  }
-  .map-client {
-    flex-direction: column;
-    gap: 1px;
   }
 }
