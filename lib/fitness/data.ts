@@ -482,6 +482,25 @@ export const LOG: FitState = {
 
   food: [
     {
+      id: "f-2026-07-29-01",
+      at: "2026-07-29T07:30",
+      meal: "breakfast",
+      name: "Café con leche de proteína",
+      kcal: 135,
+      protein_g: 18,
+      carbs_g: 10,
+      fat_g: 2.5,
+      micros: {
+        Calcio: { amount: 300, unit: "mg" },
+        "Vitamina B12": { amount: 1.2, unit: "µg" },
+        Potasio: { amount: 380, unit: "mg" },
+      },
+      // estimado sobre ~250 ml de leche alta en proteína; la marca cambia
+      // bastante el número, así que queda marcado como poco fiable
+      confidence: 0.5,
+      source: "claude",
+    },
+    {
       id: "f-2026-07-28-01",
       at: "2026-07-28T08:00",
       meal: "breakfast",
