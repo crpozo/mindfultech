@@ -28,8 +28,8 @@ export const LOG: FitState = {
 
   food: [
     {
-      id: "f-2026-07-29-01",
-      at: "2026-07-29T08:00",
+      id: "f-2026-07-28-01",
+      at: "2026-07-28T08:00",
       meal: "breakfast",
       name: "Pancake de proteína",
       kcal: 220,
@@ -45,8 +45,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-02",
-      at: "2026-07-29T08:15",
+      id: "f-2026-07-28-02",
+      at: "2026-07-28T08:15",
       meal: "breakfast",
       name: "Shake de proteína",
       kcal: 120,
@@ -62,8 +62,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-03",
-      at: "2026-07-29T11:30",
+      id: "f-2026-07-28-03",
+      at: "2026-07-28T11:30",
       meal: "snack",
       name: "Sardinas con crackers",
       kcal: 320,
@@ -87,8 +87,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-04",
-      at: "2026-07-29T16:00",
+      id: "f-2026-07-28-04",
+      at: "2026-07-28T16:00",
       meal: "snack",
       name: "2 mandarinas, 2 kiwis y 1 manzana",
       kcal: 273,
@@ -108,8 +108,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-05",
-      at: "2026-07-29T20:00",
+      id: "f-2026-07-28-05",
+      at: "2026-07-28T20:00",
       meal: "dinner",
       name: "Pizza capricciosa — Via Partenope",
       kcal: 950,
@@ -131,8 +131,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-06",
-      at: "2026-07-29T21:30",
+      id: "f-2026-07-28-06",
+      at: "2026-07-28T21:30",
       meal: "snack",
       name: "Vaso de kéfir deslactosado",
       kcal: 110,
@@ -148,8 +148,8 @@ export const LOG: FitState = {
       source: "claude",
     },
     {
-      id: "f-2026-07-29-07",
-      at: "2026-07-29T21:45",
+      id: "f-2026-07-28-07",
+      at: "2026-07-28T21:45",
       meal: "snack",
       name: "Helado de proteína",
       kcal: 320,
@@ -169,8 +169,8 @@ export const LOG: FitState = {
 
   workouts: [
     {
-      id: "w-2026-07-29-01",
-      at: "2026-07-29T18:30",
+      id: "w-2026-07-28-01",
+      at: "2026-07-28T18:30",
       type: "strength",
       name: "Pecho y tríceps",
       // no cargas ni series todavía — duración y gasto estimados a partir de
@@ -192,8 +192,8 @@ export const LOG: FitState = {
       source: "manual",
     },
     {
-      id: "b-2026-07-29",
-      at: "2026-07-29T07:00",
+      id: "b-2026-07-28",
+      at: "2026-07-28T07:00",
       weight_kg: 84,
       source: "manual",
     },
@@ -201,32 +201,32 @@ export const LOG: FitState = {
 
   insights: [
     {
-      id: "i-2026-07-29-01",
-      at: "2026-07-29T22:00",
+      id: "i-2026-07-28-01",
+      at: "2026-07-28T22:00",
       title: "Día redondo en proteína, la pizza se comió el margen",
       body:
         "2 313 kcal y 150 g de proteína: casi clavado a tu objetivo. La pizza sola aportó 950 kcal (41 % del día) y 1 800 mg de sodio. No es un problema una vez por semana; si se repite, cámbiala por media pizza + ensalada y recuperas ~450 kcal.",
       tags: ["nutricion"],
     },
     {
-      id: "i-2026-07-29-02",
-      at: "2026-07-29T22:00",
+      id: "i-2026-07-28-02",
+      at: "2026-07-28T22:00",
       title: "Micronutrientes: fuerte en C, B12 y omega-3",
       body:
         "Las sardinas te dieron omega-3, vitamina D y B12 de golpe, y la fruta disparó la vitamina C a ~210 % del valor diario. Lo más flojo del día fue el hierro (~44 %) y el potasio (~19 %): más hoja verde y legumbre lo arreglan.",
       tags: ["micronutrientes"],
     },
     {
-      id: "i-2026-07-29-03",
-      at: "2026-07-29T22:00",
+      id: "i-2026-07-28-03",
+      at: "2026-07-28T22:00",
       title: "Pecho y tríceps: el día cierra en déficit",
       body:
         "60 min de fuerza (~380 kcal) contra 2 313 comidas deja un neto de ~1 933 kcal, unas 470 por debajo de tu objetivo. Con 150 g de proteína encima, es justo el escenario donde se pierde grasa sin tocar músculo.",
       tags: ["entrenamiento"],
     },
     {
-      id: "i-2026-07-29-04",
-      at: "2026-07-29T22:05",
+      id: "i-2026-07-28-04",
+      at: "2026-07-28T22:05",
       title: "Falta el volumen para poder medir progreso",
       body:
         "Registré la sesión, pero sin cargas ni repeticiones no puedo seguir tu progresión. Pásame peso × reps × series de los ejercicios principales (banca, inclinado, fondos…) y empiezo a graficar el tonelaje semana a semana.",

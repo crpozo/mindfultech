@@ -9,6 +9,7 @@ import {
   type Insight,
   type Targets,
   type DayStats,
+  dayKey,
   exportFit,
   lastNDays,
   microCoverage,
@@ -61,9 +62,30 @@ export function FitnessApp() {
     setMenuOpen(false);
   };
 
-  const days = React.useMemo(() => lastNDays(range), [range]);
+  // The log is written from chat, so its clock may be a few hours off this
+  // device's (a UTC-stamped entry looks like "tomorrow" in Ecuador). End the
+  // window on the newest entry when it is ahead of today, so a timezone skew
+  // never hides the data.
+  const lastAt = React.useMemo(() => {
+    let m = "";
+    for (const e of [...state.food, ...state.workouts, ...state.body]) if (e.at > m) m = e.at;
+    return m;
+  }, [state]);
+
+  const endDate = React.useMemo(() => {
+    const today = new Date();
+    if (lastAt) {
+      const [y, mo, d] = lastAt.slice(0, 10).split("-").map(Number);
+      const last = new Date(y, mo - 1, d);
+      if (last > today) return last;
+    }
+    return today;
+  }, [lastAt]);
+
+  const days = React.useMemo(() => lastNDays(range, endDate), [range, endDate]);
   const stats = React.useMemo(() => statsByDay(state, days), [state, days]);
   const today = stats[stats.length - 1];
+  const isToday = today?.day === dayKey(new Date());
   const daySet = React.useMemo(() => new Set(days), [days]);
   const micros = React.useMemo(() => microCoverage(state, daySet), [state, daySet]);
   const streak = React.useMemo(() => streakDays(state), [state]);
@@ -110,7 +132,7 @@ export function FitnessApp() {
 
       <main className="fit-wrap" style={{ padding: "20px 20px 80px" }}>
         <Progress state={state} />
-        <TodayCard today={today} targets={state.targets} />
+        <TodayCard today={today} targets={state.targets} isToday={isToday} />
 
         <div className="fit-grid2">
           <Panel title="Calorías por día" sub={`Objetivo ${fmt(state.targets.kcal)} kcal`}>
@@ -335,7 +357,7 @@ function FitLock({ onUnlock }: { onUnlock: () => void }) {
 
 /* ------------------------------------------------------------------ today card */
 
-function TodayCard({ today, targets }: { today: DayStats; targets: Targets }) {
+function TodayCard({ today, targets, isToday }: { today: DayStats; targets: Targets; isToday: boolean }) {
   const net = today.kcal - today.workoutKcal;
   const pct = targets.kcal ? (today.kcal / targets.kcal) * 100 : 0;
   const tone = pct > 110 ? C_BAD : pct >= 85 ? C_GOOD : C_WARN;
@@ -343,7 +365,7 @@ function TodayCard({ today, targets }: { today: DayStats; targets: Targets }) {
     <section className="fit-panel">
       <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ minWidth: 190 }}>
-          <div className="fit-eyebrow">HOY</div>
+          <div className="fit-eyebrow">{isToday ? "HOY" : `ÚLTIMO DÍA · ${shortDay(today.day)}`}</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
             <span style={{ fontSize: 46, fontWeight: 500, letterSpacing: "-.03em", color: INK, lineHeight: 1 }}>
               {fmt(today.kcal)}
