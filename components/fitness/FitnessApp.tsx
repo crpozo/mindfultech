@@ -764,41 +764,63 @@ function Tips() {
  * be read.
  */
 function Stack() {
+  // collapsed by default — the panel is a reference, not something to read
+  // top to bottom every visit
+  const [open, setOpen] = React.useState<string | null>(null);
+
   return (
     <section className="fit-panel">
       <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Tu stack diario</h2>
       <p style={{ margin: "0 0 16px", fontSize: 13.5, color: MUTED }}>
-        Lo que tomas todos los días, y qué implica para los números de arriba.
+        Lo que tomas todos los días. Toca uno para ver qué implica para los números de arriba.
       </p>
-      <div className="fit-research">
-        {STACK.map((s) => (
-          <article key={s.id} className="fit-res-card">
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span className="fit-prio" style={{ background: s.kind === "medicación" ? "#8a3d8a" : "#0b7a2f" }}>
-                {s.kind.toUpperCase()}
-              </span>
-              <span className="fit-eyebrow">{s.route === "oral" ? "VÍA ORAL" : "TÓPICO"}</span>
+      <div className="fit-acc">
+        {STACK.map((s) => {
+          const on = open === s.id;
+          return (
+            <div key={s.id} className={`fit-acc-item${on ? " on" : ""}`}>
+              <button
+                type="button"
+                className="fit-acc-head"
+                onClick={() => setOpen(on ? null : s.id)}
+                aria-expanded={on}
+                aria-controls={`acc-${s.id}`}
+              >
+                <span
+                  className="fit-prio"
+                  style={{ background: s.kind === "medicación" ? "#8a3d8a" : "#0b7a2f" }}
+                >
+                  {s.kind.toUpperCase()}
+                </span>
+                <span className="fit-acc-name">{s.name}</span>
+                <span className="fit-acc-dose">{s.dose}</span>
+                {s.caution && <span className="fit-acc-flag" title="Tiene una advertencia">!</span>}
+                <Caret on={on} />
+              </button>
+              {on && (
+                <div className="fit-acc-body" id={`acc-${s.id}`}>
+                  <p className="fit-acc-route">{s.route === "oral" ? "VÍA ORAL" : "TÓPICO"}</p>
+                  <p>{s.why}</p>
+                  <dl className="fit-res-dl">
+                    {s.note && (
+                      <>
+                        <dt>En tu tablero</dt>
+                        <dd>{s.note}</dd>
+                      </>
+                    )}
+                    {s.caution && (
+                      <>
+                        <dt style={{ color: C_BAD }}>Ojo</dt>
+                        <dd>{s.caution}</dd>
+                      </>
+                    )}
+                  </dl>
+                  {s.confirm && <p className="fit-res-yours fit-res-ask">{s.confirm}</p>}
+                </div>
+              )}
             </div>
-            <h3>{s.name}</h3>
-            <p style={{ fontFamily: MONO, fontSize: 12, color: INK, margin: "0 0 8px" }}>{s.dose}</p>
-            <p>{s.why}</p>
-            <dl className="fit-res-dl">
-              {s.note && (
-                <>
-                  <dt>En tu tablero</dt>
-                  <dd>{s.note}</dd>
-                </>
-              )}
-              {s.caution && (
-                <>
-                  <dt style={{ color: C_BAD }}>Ojo</dt>
-                  <dd>{s.caution}</dd>
-                </>
-              )}
-            </dl>
-            {s.confirm && <p className="fit-res-yours fit-res-ask">{s.confirm}</p>}
-          </article>
-        ))}
+          );
+        })}
       </div>
       <p style={{ fontSize: 11.5, color: MUTED, margin: "16px 0 0", lineHeight: 1.6 }}>
         Nada de esto reemplaza a quien te lo recetó. El minoxidil oral pide control de presión y

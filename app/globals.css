@@ -1130,3 +1130,55 @@ a:hover {
   /* the full-stack lab diagrams need width to read — drop them on phones */
   .lab-visual { display: none; }
 }
+
+/* /fitness — stack accordion. Collapsed by default: the panel is a reference,
+   and four open cards was a wall of text on every visit. */
+.fit-acc { border-top: 1px solid rgba(14, 13, 18, 0.09); }
+.fit-acc-item { border-bottom: 1px solid rgba(14, 13, 18, 0.09); }
+.fit-acc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 4px;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: #0e0d12;
+  text-align: left;
+  cursor: pointer;
+}
+.fit-acc-head:hover { background: rgba(14, 13, 18, 0.02); }
+.fit-acc-name { font-weight: 600; font-size: 14.5px; }
+.fit-acc-dose {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #6b6875;
+  margin-left: auto;
+  text-align: right;
+}
+.fit-acc-flag {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #d03b3b;
+  background: rgba(208, 59, 59, 0.12);
+}
+.fit-acc-body { padding: 2px 4px 18px; }
+.fit-acc-body > p { margin: 0 0 12px; font-size: 13px; line-height: 1.6; color: #4c4a55; }
+.fit-acc-route {
+  font-family: var(--mono);
+  font-size: 10px !important;
+  letter-spacing: 0.16em;
+  color: #9b98a6 !important;
+  margin-bottom: 8px !important;
+}
+@media (max-width: 560px) {
+  .fit-acc-dose { display: none; }
+}
