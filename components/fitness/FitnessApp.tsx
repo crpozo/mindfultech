@@ -19,7 +19,7 @@ import {
   statsByDay,
   streakDays,
 } from "@/lib/fitness/model";
-import { LOG, PROFILE, TIPS } from "@/lib/fitness/data";
+import { LOG, PROFILE, RESEARCH, TIPS } from "@/lib/fitness/data";
 import {
   hasPasscode,
   isUnlocked,
@@ -180,6 +180,7 @@ export function FitnessApp() {
         )}
 
         <Tips />
+        <Research micros={micros} range={range} />
         <Insights state={state} stats={stats} />
         <Log state={state} />
 
@@ -750,6 +751,128 @@ function Tips() {
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------- research */
+
+const EV_TONE: Record<string, { color: string; label: string }> = {
+  fuerte: { color: "#0b7a2f", label: "EVIDENCIA FUERTE" },
+  moderada: { color: "#9a6300", label: "EVIDENCIA MODERADA" },
+  condicional: { color: "#5d5a68", label: "SOLO SI HAY DÉFICIT" },
+};
+
+type Bucket = "gap" | "blind" | "ok";
+
+/**
+ * The nutrients with real scientific backing, sorted by what's actually
+ * missing from the log rather than alphabetically — a nutrient covered at
+ * 19 % deserves the top of the page, one at 200 % does not.
+ */
+function Research({ micros, range }: { micros: { id: string; pct: number }[]; range: number }) {
+  const [all, setAll] = React.useState(false);
+  const pctById = React.useMemo(() => new Map(micros.map((m) => [m.id, m.pct])), [micros]);
+
+  const rows = RESEARCH.map((r) => {
+    const pct = r.micro ? pctById.get(r.micro) : undefined;
+    // no `micro` at all → the log can't see it; a `micro` with no data → it was
+    // never recorded, which is itself a gap worth showing
+    const bucket: Bucket = !r.micro ? "blind" : pct == null || pct < 70 ? "gap" : "ok";
+    return { ...r, pct, bucket, tracked: !!r.micro };
+  });
+
+  const GROUPS: { key: Bucket; title: string; sub: string }[] = [
+    { key: "gap", title: "Te falta", sub: "por debajo del 70 % del valor diario, o sin aparecer en el registro" },
+    { key: "blind", title: "Sin medir", sub: "el registro no los captura todavía — vale la pena tenerlos en el radar" },
+    { key: "ok", title: "Ya lo llevas bien", sub: "cubiertos; aquí el trabajo es sostener, no añadir" },
+  ];
+  const visible = all ? GROUPS : GROUPS.filter((g) => g.key !== "ok");
+
+  return (
+    <section className="fit-panel">
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 320px" }}>
+          <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Vitaminas, minerales y suplementos con research</h2>
+          <p style={{ margin: 0, fontSize: 13.5, color: MUTED }}>
+            Lo que la evidencia respalda, cruzado con tu cobertura media de los últimos {range} días.
+            Primero lo que te falta.
+          </p>
+        </div>
+        <div className="fit-seg" role="group" aria-label="Filtro">
+          <button onClick={() => setAll(false)} aria-pressed={!all} className={!all ? "on" : ""}>
+            Lo que falta
+          </button>
+          <button onClick={() => setAll(true)} aria-pressed={all} className={all ? "on" : ""}>
+            Todo
+          </button>
+        </div>
+      </div>
+
+      {visible.map((g) => {
+        const items = rows
+          .filter((r) => r.bucket === g.key)
+          .sort((a, b) => (a.pct ?? -1) - (b.pct ?? -1));
+        if (!items.length) return null;
+        return (
+          <div key={g.key} style={{ marginTop: 20 }}>
+            <div className="fit-eyebrow">{g.title.toUpperCase()}</div>
+            <p style={{ margin: "3px 0 12px", fontSize: 12.5, color: MUTED }}>{g.sub}</p>
+            <div className="fit-research">
+              {items.map((r) => {
+                const ev = EV_TONE[r.evidence];
+                return (
+                  <article key={r.id} className="fit-res-card">
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span className="fit-prio" style={{ background: ev.color }}>{ev.label}</span>
+                      {r.tracked && (
+                        <span
+                          className="fit-res-pct"
+                          style={{ color: r.pct == null ? C_BAD : r.pct >= 100 ? C_GOOD : r.pct < 70 ? C_BAD : C_WARN }}
+                        >
+                          {r.pct == null ? "sin registro" : `${fmt(r.pct)} % del valor diario`}
+                        </span>
+                      )}
+                    </div>
+                    <h3>{r.name}</h3>
+                    {r.tracked && (
+                      <div className="fit-track" style={{ height: 6, margin: "2px 0 10px" }}>
+                        <span
+                          style={{
+                            width: `${Math.min(100, ((r.pct ?? 0) / 200) * 100)}%`,
+                            background: r.pct == null ? "transparent" : r.pct >= 100 ? C_GOOD : r.pct < 70 ? C_BAD : C_WARN,
+                          }}
+                        />
+                      </div>
+                    )}
+                    <p>{r.what}</p>
+                    <dl className="fit-res-dl">
+                      <dt>Dosis</dt>
+                      <dd>{r.dose}</dd>
+                      <dt>De dónde</dt>
+                      <dd>{r.sources}</dd>
+                      {r.caution && (
+                        <>
+                          <dt style={{ color: C_BAD }}>Ojo</dt>
+                          <dd>{r.caution}</dd>
+                        </>
+                      )}
+                    </dl>
+                    {r.yours && <p className="fit-res-yours">{r.yours}</p>}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <p style={{ fontSize: 11.5, color: MUTED, margin: "18px 0 0", lineHeight: 1.6 }}>
+        Consenso científico general, no un diagnóstico. Los porcentajes salen de la comida que
+        registraste, así que un 0 % puede significar «no lo comiste» o «no se anotó». Antes de
+        suplementar hierro, zinc o vitamina D, una analítica cuesta poco y evita corregir algo que
+        no estaba roto.
+      </p>
     </section>
   );
 }
