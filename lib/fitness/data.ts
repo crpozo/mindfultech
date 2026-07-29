@@ -12,6 +12,72 @@ export const PROFILE = {
   baseline: { at: "2026-01-15", weight_kg: 86.8, bodyfat_pct: 15.8 },
 };
 
+/** Consejos accionables, revisados cada vez que llegan datos nuevos. */
+export const TIPS: {
+  id: string;
+  priority: "alta" | "media" | "baja";
+  tag: string;
+  title: string;
+  body: string;
+}[] = [
+  {
+    id: "t-01",
+    priority: "alta",
+    tag: "Medición",
+    title: "Mídete el % de grasa antes de sacar conclusiones",
+    body:
+      "El 13,0 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas —mismo día, en ayunas— convierte esa suposición en un dato.",
+  },
+  {
+    id: "t-02",
+    priority: "alta",
+    tag: "Entrenamiento",
+    title: "Anota peso × reps × series",
+    body:
+      "Sin cargas no hay progresión que medir: podrías estar entrenando 6 meses sin subir un kilo en banca y el panel no lo notaría. Con esos números te grafico el tonelaje semanal, que es la señal real de si estás ganando fuerza mientras bajas grasa.",
+  },
+  {
+    id: "t-03",
+    priority: "alta",
+    tag: "Micronutrientes",
+    title: "Sube hierro y potasio — son tus dos huecos",
+    body:
+      "Hoy quedaste en 44 % de hierro y 19 % de potasio. Lenteja, espinaca y carne roja magra 1–2 veces por semana cubren el hierro (acompáñalo con tu kiwi o mandarina: la vitamina C multiplica la absorción). Para potasio: plátano, papa con cáscara, aguacate y agua de coco — baratos y de aquí.",
+  },
+  {
+    id: "t-04",
+    priority: "media",
+    tag: "Nutrición",
+    title: "Reparte la proteína, no la concentres en la cena",
+    body:
+      "Llegaste a 150 g, pero 40 vinieron de la pizza a las 20:00 y el bloque de la tarde fue solo fruta. Apunta a 35–40 g en cada comida principal: el músculo se sintetiza mejor en pulsos repartidos que en un pico nocturno.",
+  },
+  {
+    id: "t-05",
+    priority: "media",
+    tag: "Entrenamiento",
+    title: "Tres o cuatro sesiones de fuerza por semana",
+    body:
+      "Hoy fue pecho y tríceps. Con tu objetivo de recomposición, agenda pierna y espalda esta semana: los grupos grandes son los que más masa magra sostienen y más gasto generan, que es justo lo que protege el déficit.",
+  },
+  {
+    id: "t-06",
+    priority: "media",
+    tag: "Nutrición",
+    title: "El sodio del día vino casi todo de un plato",
+    body:
+      "2 450 mg en total y 1 800 salieron de la pizza. No es dañino de forma aislada, pero explica la retención de líquido del día siguiente — y por eso la báscula miente si te pesas justo después. Usa el promedio semanal, nunca el dato de un día.",
+  },
+  {
+    id: "t-07",
+    priority: "baja",
+    tag: "Suplementos",
+    title: "La creatina también los días que no entrenas",
+    body:
+      "5 g diarios sin saltarte los días de descanso: funciona por saturación del músculo, no por el estímulo del día. Lo que ya haces está bien, solo mantenlo constante.",
+  },
+];
+
 export const LOG: FitState = {
   version: 1,
   targets: {

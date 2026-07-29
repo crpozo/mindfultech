@@ -121,27 +121,38 @@ export function uid(): string {
 
 // Canonical micronutrient list with adult daily values, used to turn whatever
 // Claude reports into a comparable "% of daily value".
-export const DV: { id: string; label: string; unit: string; dv: number }[] = [
-  { id: "vit_a", label: "Vitamina A", unit: "µg", dv: 900 },
-  { id: "vit_c", label: "Vitamina C", unit: "mg", dv: 90 },
-  { id: "vit_d", label: "Vitamina D", unit: "µg", dv: 20 },
-  { id: "vit_e", label: "Vitamina E", unit: "mg", dv: 15 },
-  { id: "vit_k", label: "Vitamina K", unit: "µg", dv: 120 },
-  { id: "b1", label: "Tiamina (B1)", unit: "mg", dv: 1.2 },
-  { id: "b2", label: "Riboflavina (B2)", unit: "mg", dv: 1.3 },
-  { id: "b3", label: "Niacina (B3)", unit: "mg", dv: 16 },
-  { id: "b6", label: "Vitamina B6", unit: "mg", dv: 1.7 },
-  { id: "b9", label: "Folato (B9)", unit: "µg", dv: 400 },
-  { id: "b12", label: "Vitamina B12", unit: "µg", dv: 2.4 },
-  { id: "calcium", label: "Calcio", unit: "mg", dv: 1300 },
-  { id: "iron", label: "Hierro", unit: "mg", dv: 18 },
-  { id: "magnesium", label: "Magnesio", unit: "mg", dv: 420 },
-  { id: "zinc", label: "Zinc", unit: "mg", dv: 11 },
-  { id: "potassium", label: "Potasio", unit: "mg", dv: 4700 },
-  { id: "phosphorus", label: "Fósforo", unit: "mg", dv: 1250 },
-  { id: "selenium", label: "Selenio", unit: "µg", dv: 55 },
-  { id: "omega3", label: "Omega-3", unit: "mg", dv: 1600 },
-  { id: "sodium", label: "Sodio", unit: "mg", dv: 2300 },
+export type MicroFamily = "lipo" | "hidro" | "mineral" | "grasa";
+
+/** Nutrient groups — the colour in the panel comes from the group, the shade
+ *  from the nutrient's place in it. Hues are the validated categorical slots. */
+export const FAMILIES: { key: MicroFamily; label: string; color: string }[] = [
+  { key: "lipo", label: "Vitaminas liposolubles", color: "#eb6834" },
+  { key: "hidro", label: "Vitaminas hidrosolubles", color: "#2a78d6" },
+  { key: "mineral", label: "Minerales", color: "#1baf7a" },
+  { key: "grasa", label: "Grasas esenciales", color: "#4a3aa7" },
+];
+
+export const DV: { id: string; label: string; unit: string; dv: number; family: MicroFamily }[] = [
+  { id: "vit_a", label: "Vitamina A", unit: "µg", dv: 900 , family: "lipo" },
+  { id: "vit_c", label: "Vitamina C", unit: "mg", dv: 90 , family: "hidro" },
+  { id: "vit_d", label: "Vitamina D", unit: "µg", dv: 20 , family: "lipo" },
+  { id: "vit_e", label: "Vitamina E", unit: "mg", dv: 15 , family: "lipo" },
+  { id: "vit_k", label: "Vitamina K", unit: "µg", dv: 120 , family: "lipo" },
+  { id: "b1", label: "Tiamina (B1)", unit: "mg", dv: 1.2 , family: "hidro" },
+  { id: "b2", label: "Riboflavina (B2)", unit: "mg", dv: 1.3 , family: "hidro" },
+  { id: "b3", label: "Niacina (B3)", unit: "mg", dv: 16 , family: "hidro" },
+  { id: "b6", label: "Vitamina B6", unit: "mg", dv: 1.7 , family: "hidro" },
+  { id: "b9", label: "Folato (B9)", unit: "µg", dv: 400 , family: "hidro" },
+  { id: "b12", label: "Vitamina B12", unit: "µg", dv: 2.4 , family: "hidro" },
+  { id: "calcium", label: "Calcio", unit: "mg", dv: 1300 , family: "mineral" },
+  { id: "iron", label: "Hierro", unit: "mg", dv: 18 , family: "mineral" },
+  { id: "magnesium", label: "Magnesio", unit: "mg", dv: 420 , family: "mineral" },
+  { id: "zinc", label: "Zinc", unit: "mg", dv: 11 , family: "mineral" },
+  { id: "potassium", label: "Potasio", unit: "mg", dv: 4700 , family: "mineral" },
+  { id: "phosphorus", label: "Fósforo", unit: "mg", dv: 1250 , family: "mineral" },
+  { id: "selenium", label: "Selenio", unit: "µg", dv: 55 , family: "mineral" },
+  { id: "omega3", label: "Omega-3", unit: "mg", dv: 1600 , family: "grasa" },
+  { id: "sodium", label: "Sodio", unit: "mg", dv: 2300 , family: "mineral" },
 ];
 
 const DV_BY_ID = new Map(DV.map((d) => [d.id, d]));

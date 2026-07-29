@@ -9,14 +9,17 @@ import {
   type Insight,
   type Targets,
   type DayStats,
+  atDay,
   dayKey,
+  DV,
+  FAMILIES,
   exportFit,
   lastNDays,
   microCoverage,
   statsByDay,
   streakDays,
 } from "@/lib/fitness/model";
-import { LOG, PROFILE } from "@/lib/fitness/data";
+import { LOG, PROFILE, TIPS } from "@/lib/fitness/data";
 import {
   hasPasscode,
   isUnlocked,
@@ -86,6 +89,10 @@ export function FitnessApp() {
   const stats = React.useMemo(() => statsByDay(state, days), [state, days]);
   const today = stats[stats.length - 1];
   const isToday = today?.day === dayKey(new Date());
+  const dayFoods = React.useMemo(
+    () => state.food.filter((f) => atDay(f.at) === today?.day),
+    [state.food, today?.day]
+  );
   const daySet = React.useMemo(() => new Set(days), [days]);
   const micros = React.useMemo(() => microCoverage(state, daySet), [state, daySet]);
   const streak = React.useMemo(() => streakDays(state), [state]);
@@ -132,7 +139,7 @@ export function FitnessApp() {
 
       <main className="fit-wrap" style={{ padding: "20px 20px 80px" }}>
         <Progress state={state} />
-        <TodayCard today={today} targets={state.targets} isToday={isToday} />
+        <TodayCard today={today} targets={state.targets} isToday={isToday} foods={dayFoods} />
 
         <div className="fit-grid2">
           <Panel title="Calorías por día" sub={`Objetivo ${fmt(state.targets.kcal)} kcal`}>
@@ -172,6 +179,7 @@ export function FitnessApp() {
           </Panel>
         )}
 
+        <Tips />
         <Insights state={state} stats={stats} />
         <Log state={state} />
 
@@ -357,21 +365,44 @@ function FitLock({ onUnlock }: { onUnlock: () => void }) {
 
 /* ------------------------------------------------------------------ today card */
 
-function TodayCard({ today, targets, isToday }: { today: DayStats; targets: Targets; isToday: boolean }) {
+type MacroKey = "kcal" | "protein_g" | "carbs_g" | "fat_g";
+
+function TodayCard({
+  today,
+  targets,
+  isToday,
+  foods,
+}: {
+  today: DayStats;
+  targets: Targets;
+  isToday: boolean;
+  foods: FoodEntry[];
+}) {
+  const [open, setOpen] = React.useState<MacroKey | null>(null);
   const net = today.kcal - today.workoutKcal;
   const pct = targets.kcal ? (today.kcal / targets.kcal) * 100 : 0;
   const tone = pct > 110 ? C_BAD : pct >= 85 ? C_GOOD : C_WARN;
+  const toggle = (k: MacroKey) => setOpen((cur) => (cur === k ? null : k));
+
   return (
     <section className="fit-panel">
       <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ minWidth: 190 }}>
           <div className="fit-eyebrow">{isToday ? "HOY" : `ÚLTIMO DÍA · ${shortDay(today.day)}`}</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
-            <span style={{ fontSize: 46, fontWeight: 500, letterSpacing: "-.03em", color: INK, lineHeight: 1 }}>
-              {fmt(today.kcal)}
+          <button
+            className="fit-drill"
+            onClick={() => toggle("kcal")}
+            aria-expanded={open === "kcal"}
+            title="Ver de dónde salen"
+          >
+            <span style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
+              <span style={{ fontSize: 46, fontWeight: 500, letterSpacing: "-.03em", color: INK, lineHeight: 1 }}>
+                {fmt(today.kcal)}
+              </span>
+              <span style={{ fontSize: 14, color: MUTED }}>/ {fmt(targets.kcal)} kcal</span>
+              <Caret on={open === "kcal"} />
             </span>
-            <span style={{ fontSize: 14, color: MUTED }}>/ {fmt(targets.kcal)} kcal</span>
-          </div>
+          </button>
           <div className="fit-track" style={{ marginTop: 12 }}>
             <span style={{ width: `${Math.min(100, pct)}%`, background: tone }} />
           </div>
@@ -382,9 +413,9 @@ function TodayCard({ today, targets, isToday }: { today: DayStats; targets: Targ
         </div>
 
         <div style={{ flex: 1, minWidth: 260, display: "flex", flexDirection: "column", gap: 12 }}>
-          <MacroBar label="Proteína" value={today.protein_g} target={targets.protein_g} color={C_PROTEIN} />
-          <MacroBar label="Carbohidratos" value={today.carbs_g} target={targets.carbs_g} color={C_CARBS} />
-          <MacroBar label="Grasa" value={today.fat_g} target={targets.fat_g} color={C_FAT} />
+          <MacroBar label="Proteína" k="protein_g" value={today.protein_g} target={targets.protein_g} color={C_PROTEIN} open={open} onToggle={toggle} />
+          <MacroBar label="Carbohidratos" k="carbs_g" value={today.carbs_g} target={targets.carbs_g} color={C_CARBS} open={open} onToggle={toggle} />
+          <MacroBar label="Grasa" k="fat_g" value={today.fat_g} target={targets.fat_g} color={C_FAT} open={open} onToggle={toggle} />
         </div>
 
         <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
@@ -394,7 +425,82 @@ function TodayCard({ today, targets, isToday }: { today: DayStats; targets: Targ
           <Stat label="Ejercicio" value={today.workoutMin ? `${fmt(today.workoutMin)} min` : "—"} />
         </div>
       </div>
+
+      {open && <Breakdown k={open} foods={foods} />}
+      {!open && (
+        <p style={{ fontSize: 12, color: MUTED, margin: "16px 0 0" }}>
+          Toca una cifra para ver de qué comida sale.
+        </p>
+      )}
     </section>
+  );
+}
+
+const MACRO_META: Record<MacroKey, { label: string; unit: string; color: string }> = {
+  kcal: { label: "Calorías", unit: "kcal", color: C_GOOD },
+  protein_g: { label: "Proteína", unit: "g", color: C_PROTEIN },
+  carbs_g: { label: "Carbohidratos", unit: "g", color: C_CARBS },
+  fat_g: { label: "Grasa", unit: "g", color: C_FAT },
+};
+
+/** Which foods made up a number, biggest contributor first. */
+function Breakdown({ k, foods }: { k: MacroKey; foods: FoodEntry[] }) {
+  const meta = MACRO_META[k];
+  const rows = foods
+    .map((f) => ({ name: f.name, at: f.at, value: (f[k] as number) || 0, confidence: f.confidence }))
+    .filter((r) => r.value > 0)
+    .sort((a, b) => b.value - a.value);
+  const total = rows.reduce((a, r) => a + r.value, 0);
+  if (!rows.length) return <div className="fit-empty">Sin comidas registradas este día.</div>;
+
+  return (
+    <div className="fit-break">
+      <div className="fit-eyebrow" style={{ marginBottom: 10 }}>
+        {meta.label.toUpperCase()} · DE DÓNDE SALE
+      </div>
+      {rows.map((r) => {
+        const share = total ? (r.value / total) * 100 : 0;
+        return (
+          <div key={r.at + r.name} className="fit-breakrow">
+            <span className="fit-breakname">
+              {r.name}
+              {r.confidence != null && r.confidence < 0.7 && (
+                <em title="Estimación con menos certeza — confírmame la porción"> · est.</em>
+              )}
+            </span>
+            <span className="fit-breakbar">
+              <span style={{ width: `${share}%`, background: meta.color }} />
+            </span>
+            <span className="fit-breakval">
+              {fmt(r.value)} {meta.unit}
+              <em>{fmt(share)}%</em>
+            </span>
+          </div>
+        );
+      })}
+      <div className="fit-breaktotal">
+        Total {fmt(total)} {meta.unit}
+      </div>
+    </div>
+  );
+}
+
+function Caret({ on }: { on: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={MUTED}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transform: on ? "rotate(180deg)" : "none", transition: "transform .2s", flex: "none" }}
+      aria-hidden
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }
 
@@ -407,21 +513,40 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MacroBar({ label, value, target, color }: { label: string; value: number; target: number; color: string }) {
+function MacroBar({
+  label,
+  k,
+  value,
+  target,
+  color,
+  open,
+  onToggle,
+}: {
+  label: string;
+  k: MacroKey;
+  value: number;
+  target: number;
+  color: string;
+  open: MacroKey | null;
+  onToggle: (k: MacroKey) => void;
+}) {
   const pct = target ? (value / target) * 100 : 0;
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
-        <span style={{ color: INK, fontWeight: 500 }}>{label}</span>
+    <button className="fit-drill" onClick={() => onToggle(k)} aria-expanded={open === k} style={{ width: "100%" }}>
+      <span style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5, alignItems: "center", gap: 8 }}>
+        <span style={{ color: INK, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+          {label}
+          <Caret on={open === k} />
+        </span>
         {/* direct label — the aqua slot needs relief on a light surface */}
         <span style={{ color: MUTED, fontFamily: MONO, fontSize: 12 }}>
           {fmt(value)} / {fmt(target)} g · {fmt(pct)}%
         </span>
-      </div>
-      <div className="fit-track">
+      </span>
+      <span className="fit-track">
         <span style={{ width: `${Math.min(100, pct)}%`, background: color }} />
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -532,24 +657,100 @@ function Line({ points, unit }: { points: { key: string; value: number }[]; unit
   );
 }
 
+/** Lighten / darken a hex so each nutrient gets its own shade of the family hue. */
+function shade(hex: string, amt: number): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) =>
+    Math.max(0, Math.min(255, Math.round(amt >= 0 ? v + (255 - v) * amt : v * (1 + amt))))
+  );
+  return "#" + ch.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+const FAM_BY_ID = new Map(DV.map((d) => [d.id, d.family]));
+
 function Micros({ rows }: { rows: { id: string; label: string; pct: number }[] }) {
+  // group by family so the colour legend means something, and give each
+  // nutrient its own step of the family hue
+  const groups = FAMILIES.map((f) => ({
+    ...f,
+    items: rows.filter((r) => FAM_BY_ID.get(r.id) === f.key).sort((x, y) => y.pct - x.pct),
+  })).filter((g) => g.items.length);
+
+  // the track runs 0–200 % with a mark at 100, so adequacy reads by position
+  const SCALE = 200;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      {rows.slice(0, 12).map((r) => {
-        const tone = r.pct >= 90 ? C_GOOD : r.pct >= 50 ? C_WARN : C_BAD;
-        return (
-          <div key={r.id}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
-              <span style={{ color: INK }}>{r.label}</span>
-              <span style={{ fontFamily: MONO, fontSize: 11.5, color: MUTED }}>{fmt(r.pct)}%</span>
-            </div>
-            <div className="fit-track" style={{ height: 8 }}>
-              <span style={{ width: `${Math.min(100, r.pct)}%`, background: tone }} />
-            </div>
+    <div>
+      <div className="fit-legend">
+        {groups.map((g) => (
+          <span key={g.key}>
+            <i style={{ background: g.color }} />
+            {g.label}
+          </span>
+        ))}
+      </div>
+
+      {groups.map((g) => (
+        <div key={g.key} style={{ marginTop: 16 }}>
+          <div className="fit-eyebrow" style={{ marginBottom: 8 }}>{g.label}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            {g.items.map((r, i) => {
+              const step = g.items.length > 1 ? (i / (g.items.length - 1)) * 0.42 - 0.14 : 0;
+              const color = shade(g.color, step);
+              return (
+                <div key={r.id}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
+                    <span style={{ color: INK, display: "inline-flex", alignItems: "center", gap: 7 }}>
+                      <i style={{ width: 9, height: 9, borderRadius: 3, background: color, display: "inline-block", flex: "none" }} />
+                      {r.label}
+                    </span>
+                    <span style={{ fontFamily: MONO, fontSize: 11.5, color: r.pct >= 100 ? C_GOOD : MUTED }}>
+                      {fmt(r.pct)}%
+                    </span>
+                  </div>
+                  <div className="fit-track fit-track-dv" style={{ height: 9 }}>
+                    <span style={{ width: `${Math.min(100, (r.pct / SCALE) * 100)}%`, background: color }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      ))}
+      <p style={{ fontSize: 11.5, color: MUTED, margin: "16px 0 0" }}>
+        La línea marca el 100 % del valor diario; la barra llega al final a partir de 200 %.
+      </p>
     </div>
+  );
+}
+
+/* ----------------------------------------------------------------------- tips */
+
+function Tips() {
+  const tone: Record<string, string> = { alta: C_BAD, media: C_WARN, baja: C_GOOD };
+  return (
+    <section className="fit-panel">
+      <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Consejos para mejorar</h2>
+      <p style={{ margin: "0 0 16px", fontSize: 13.5, color: MUTED }}>
+        Ordenados por lo que más mueve la aguja con tus datos de hoy.
+      </p>
+      <div className="fit-tips">
+        {TIPS.map((t) => (
+          <article key={t.id} className="fit-tip-card">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span className="fit-prio" style={{ background: tone[t.priority] }}>
+                {t.priority.toUpperCase()}
+              </span>
+              <span className="fit-eyebrow">{t.tag}</span>
+            </div>
+            <h3>{t.title}</h3>
+            <p>{t.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
