@@ -649,10 +649,12 @@ export function SiteHeader({
             style={{
               flex: "none",
               alignSelf: "center",
-              width: 40,
+              /* width + the negative margins must net 12px, or the pill
+                 spacing shifts — shorten both together */
+              width: 22,
               height: 4,
               borderRadius: 2,
-              margin: "0 -14px",
+              margin: "0 -5px",
               position: "relative",
               zIndex: 2,
               background: "#90C8B7",
