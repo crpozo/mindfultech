@@ -44,6 +44,8 @@ export interface Task {
   notes: string;
   status: Status;
   createdAt: number;
+  /** stamped when the task moves to done — drives the weekly sweep */
+  completedAt?: number;
   order: number;
 }
 
@@ -51,6 +53,8 @@ export interface TasksState {
   version: number;
   projects: Project[];
   tasks: Task[];
+  /** the last weekly sweep, kept so it can be undone */
+  lastSweep?: { at: number; tasks: Task[] };
 }
 
 export const STATE_KEY = "mt_tasks_state_v1";
@@ -97,7 +101,7 @@ export function uid(): string {
   return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
 }
 
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3;
 
 export function seedState(): TasksState {
   return {
@@ -127,7 +131,39 @@ function migrate(s: TasksState): TasksState {
     if (!have.has(seed.name)) projects.push({ ...seed, id: uid() });
   }
 
-  return { ...s, version: STATE_VERSION, projects };
+  let tasks = s.tasks;
+  if ((s.version ?? 1) < 3) {
+    // tasks finished before this feature existed have no completion time —
+    // stamp them now so the first sweep doesn't take them by surprise
+    const now = Date.now();
+    tasks = tasks.map((t) => (t.status === "done" && t.completedAt == null ? { ...t, completedAt: now } : t));
+  }
+
+  return { ...s, version: STATE_VERSION, projects, tasks };
+}
+
+/** Local Monday 00:00 of the week containing `d`. */
+export function startOfWeek(d: Date = new Date()): number {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); // 0 = Monday
+  return x.getTime();
+}
+
+/**
+ * Clear the tasks finished before this week. Runs on load, so a board opened
+ * after a month away still lands on a clean Done column. The swept tasks are
+ * kept on the state so the owner can undo it.
+ */
+export function sweepDone(s: TasksState, now: number = Date.now()): { next: TasksState; swept: Task[] } {
+  const cutoff = startOfWeek(new Date(now));
+  const swept = s.tasks.filter((t) => t.status === "done" && (t.completedAt ?? 0) < cutoff);
+  if (!swept.length) return { next: s, swept };
+  const ids = new Set(swept.map((t) => t.id));
+  return {
+    next: { ...s, tasks: s.tasks.filter((t) => !ids.has(t.id)), lastSweep: { at: now, tasks: swept } },
+    swept,
+  };
 }
 
 export function loadState(): TasksState | null {
@@ -212,6 +248,7 @@ export function parseImport(text: string): TasksState | null {
         notes: typeof t.notes === "string" ? t.notes : "",
         status: t.status === "doing" || t.status === "done" ? t.status : "todo",
         createdAt: typeof t.createdAt === "number" ? t.createdAt : Date.now(),
+        completedAt: typeof t.completedAt === "number" ? t.completedAt : undefined,
         order: typeof t.order === "number" ? t.order : i,
       }));
     return { version: STATE_VERSION, projects, tasks };

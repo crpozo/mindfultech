@@ -17,6 +17,7 @@ import {
   setUnlocked,
   exportState,
   parseImport,
+  sweepDone,
   ICON_IDS,
   type IconId,
 } from "@/lib/tasks/store";
@@ -127,12 +128,29 @@ export function TasksApp() {
     setReady(true);
   }, []);
 
+  const [sweptCount, setSweptCount] = React.useState(0);
+
   React.useEffect(() => {
     if (!unlocked || loadedRef.current) return;
-    const s = loadState() ?? seedState();
-    setState(s);
+    // done tasks are cleared once a week — anything finished before this
+    // Monday goes, and stays recoverable until the next sweep
+    const { next, swept } = sweepDone(loadState() ?? seedState());
+    setState(next);
+    setSweptCount(swept.length);
     loadedRef.current = true;
   }, [unlocked]);
+
+  const undoSweep = () => {
+    setState((s) => {
+      if (!s.lastSweep) return s;
+      // re-stamp them as completed now, otherwise the next load sweeps the
+      // very tasks the owner just asked to keep
+      const now = Date.now();
+      const restored = s.lastSweep.tasks.map((t) => ({ ...t, completedAt: now }));
+      return { ...s, tasks: [...s.tasks, ...restored], lastSweep: undefined };
+    });
+    setSweptCount(0);
+  };
 
   // debounce writes so editing a title doesn't hit localStorage every keystroke
   React.useEffect(() => {
@@ -178,7 +196,18 @@ export function TasksApp() {
   };
 
   const patchTask = (id: string, patch: Partial<Task>) =>
-    mutate((s) => ({ ...s, tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) }));
+    mutate((s) => ({
+      ...s,
+      tasks: s.tasks.map((t) => {
+        if (t.id !== id) return t;
+        const next = { ...t, ...patch };
+        if (patch.status && patch.status !== t.status) {
+          // the completion time is what the weekly sweep reads
+          next.completedAt = patch.status === "done" ? Date.now() : undefined;
+        }
+        return next;
+      }),
+    }));
 
   const deleteTask = (id: string) => {
     mutate((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
@@ -357,6 +386,19 @@ export function TasksApp() {
 
       {/* board */}
       <main style={{ maxWidth: 1180, margin: "0 auto", padding: 20 }}>
+        {sweptCount > 0 && (
+          <div className="tk-sweep" role="status">
+            <span>
+              {es
+                ? `Se limpiaron ${sweptCount} ${sweptCount === 1 ? "tarea completada" : "tareas completadas"} de semanas anteriores.`
+                : `Cleared ${sweptCount} completed ${sweptCount === 1 ? "task" : "tasks"} from previous weeks.`}
+            </span>
+            <button onClick={undoSweep}>{es ? "Deshacer" : "Undo"}</button>
+            <button className="x" onClick={() => setSweptCount(0)} aria-label={es ? "Cerrar" : "Dismiss"}>
+              ✕
+            </button>
+          </div>
+        )}
         <div className="tk-board">
           {STATUSES.map((col) => {
             const colTasks = visible
@@ -385,6 +427,14 @@ export function TasksApp() {
                     {es ? col.es : col.en}
                   </span>
                   <span style={{ fontFamily: MONO, fontSize: 11, color: "#74727d" }}>{colTasks.length}</span>
+                  {col.id === "done" && (
+                    <span
+                      style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "#9c9aa5" }}
+                      title={es ? "Cada lunes se borran las tareas completadas la semana anterior" : "Every Monday last week's completed tasks are cleared"}
+                    >
+                      {es ? "SE LIMPIA CADA LUNES" : "CLEARS EACH MONDAY"}
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
