@@ -19,7 +19,7 @@ import {
   statsByDay,
   streakDays,
 } from "@/lib/fitness/model";
-import { LOG, PROFILE, RESEARCH, TIPS } from "@/lib/fitness/data";
+import { LOG, PROFILE, RESEARCH, STACK, TIPS } from "@/lib/fitness/data";
 import {
   hasPasscode,
   isUnlocked,
@@ -180,6 +180,7 @@ export function FitnessApp() {
         )}
 
         <Tips />
+        <Stack />
         <Research micros={micros} range={range} />
         <Insights state={state} stats={stats} />
         <Log state={state} />
@@ -755,6 +756,59 @@ function Tips() {
   );
 }
 
+/* ---------------------------------------------------------------------- stack */
+
+/**
+ * Supplements and medication, kept out of the food log because they aren't
+ * food — and because a couple of them change how the rest of the board should
+ * be read.
+ */
+function Stack() {
+  return (
+    <section className="fit-panel">
+      <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Tu stack diario</h2>
+      <p style={{ margin: "0 0 16px", fontSize: 13.5, color: MUTED }}>
+        Lo que tomas todos los días, y qué implica para los números de arriba.
+      </p>
+      <div className="fit-research">
+        {STACK.map((s) => (
+          <article key={s.id} className="fit-res-card">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span className="fit-prio" style={{ background: s.kind === "medicación" ? "#8a3d8a" : "#0b7a2f" }}>
+                {s.kind.toUpperCase()}
+              </span>
+              <span className="fit-eyebrow">{s.route === "oral" ? "VÍA ORAL" : "TÓPICO"}</span>
+            </div>
+            <h3>{s.name}</h3>
+            <p style={{ fontFamily: MONO, fontSize: 12, color: INK, margin: "0 0 8px" }}>{s.dose}</p>
+            <p>{s.why}</p>
+            <dl className="fit-res-dl">
+              {s.note && (
+                <>
+                  <dt>En tu tablero</dt>
+                  <dd>{s.note}</dd>
+                </>
+              )}
+              {s.caution && (
+                <>
+                  <dt style={{ color: C_BAD }}>Ojo</dt>
+                  <dd>{s.caution}</dd>
+                </>
+              )}
+            </dl>
+            {s.confirm && <p className="fit-res-yours fit-res-ask">{s.confirm}</p>}
+          </article>
+        ))}
+      </div>
+      <p style={{ fontSize: 11.5, color: MUTED, margin: "16px 0 0", lineHeight: 1.6 }}>
+        Nada de esto reemplaza a quien te lo recetó. El minoxidil oral pide control de presión y
+        frecuencia cardíaca; si aparece hinchazón en tobillos o palpitaciones, eso se consulta, no se
+        anota.
+      </p>
+    </section>
+  );
+}
+
 /* ------------------------------------------------------------------- research */
 
 const EV_TONE: Record<string, { color: string; label: string }> = {
@@ -776,16 +830,17 @@ function Research({ micros, range }: { micros: { id: string; pct: number }[]; ra
 
   const rows = RESEARCH.map((r) => {
     const pct = r.micro ? pctById.get(r.micro) : undefined;
-    // no `micro` at all → the log can't see it; a `micro` with no data → it was
-    // never recorded, which is itself a gap worth showing
-    const bucket: Bucket = !r.micro ? "blind" : pct == null || pct < 70 ? "gap" : "ok";
+    // anything he already supplements is not a gap, whatever the food says —
+    // the log only sees plates. Otherwise: no `micro` → the log can't see it;
+    // a `micro` with no data → never recorded, which is a gap worth showing
+    const bucket: Bucket = r.supplemented ? "ok" : !r.micro ? "blind" : pct == null || pct < 70 ? "gap" : "ok";
     return { ...r, pct, bucket, tracked: !!r.micro };
   });
 
   const GROUPS: { key: Bucket; title: string; sub: string }[] = [
     { key: "gap", title: "Te falta", sub: "por debajo del 70 % del valor diario, o sin aparecer en el registro" },
     { key: "blind", title: "Sin medir", sub: "el registro no los captura todavía — vale la pena tenerlos en el radar" },
-    { key: "ok", title: "Ya lo llevas bien", sub: "cubiertos; aquí el trabajo es sostener, no añadir" },
+    { key: "ok", title: "Ya lo llevas bien", sub: "cubiertos por la comida o por tu stack; aquí el trabajo es sostener, no añadir" },
   ];
   const visible = all ? GROUPS : GROUPS.filter((g) => g.key !== "ok");
 
@@ -825,12 +880,15 @@ function Research({ micros, range }: { micros: { id: string; pct: number }[]; ra
                   <article key={r.id} className="fit-res-card">
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                       <span className="fit-prio" style={{ background: ev.color }}>{ev.label}</span>
+                      {r.supplemented && <span className="fit-res-supp">LO SUPLEMENTAS</span>}
                       {r.tracked && (
                         <span
                           className="fit-res-pct"
                           style={{ color: r.pct == null ? C_BAD : r.pct >= 100 ? C_GOOD : r.pct < 70 ? C_BAD : C_WARN }}
                         >
-                          {r.pct == null ? "sin registro" : `${fmt(r.pct)} % del valor diario`}
+                          {r.pct == null
+                            ? "sin registro"
+                            : `${fmt(r.pct)} % ${r.supplemented ? "solo desde comida" : "del valor diario"}`}
                         </span>
                       )}
                     </div>

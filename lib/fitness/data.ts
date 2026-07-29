@@ -12,6 +12,78 @@ export const PROFILE = {
   baseline: { at: "2026-01-15", weight_kg: 86.8, bodyfat_pct: 15.8 },
 };
 
+/**
+ * Lo que toma todos los días. Va aparte del registro de comida porque no es
+ * comida: son suplementos y medicación, y algunos cambian cómo hay que leer
+ * el resto del tablero (el minoxidil oral retiene líquido, así que la báscula
+ * deja de ser una lectura limpia de grasa).
+ */
+export const STACK: {
+  id: string;
+  name: string;
+  kind: "suplemento" | "medicación";
+  route: "oral" | "tópico";
+  dose: string;
+  why: string;
+  /** qué implica para los números de este tablero */
+  note?: string;
+  caution?: string;
+  /** dato que falta confirmar antes de dar el nutriente por cubierto */
+  confirm?: string;
+}[] = [
+  {
+    id: "s-magnesio",
+    name: "Citrato de magnesio",
+    kind: "suplemento",
+    route: "oral",
+    dose: "diario — dosis por confirmar",
+    why:
+      "Cofactor de más de 300 reacciones: contracción muscular, metabolismo energético y sueño. El citrato es de las sales que mejor se absorben, bastante por encima del óxido, que es el barato de farmacia.",
+    note:
+      "Tu comida registrada cubre 45 % del valor diario; el suplemento se suma encima. Con esto el magnesio deja de ser un hueco real.",
+    confirm: "¿Cuántos mg por toma? El rango útil está en 200–400 mg de magnesio elemental.",
+  },
+  {
+    id: "s-dk2",
+    name: "Vitamina D3 + K2",
+    kind: "suplemento",
+    route: "oral",
+    dose: "diario — dosis por confirmar",
+    why:
+      "La combinación tiene lógica fisiológica: la D3 sube la absorción intestinal de calcio y la K2 activa las proteínas que lo depositan en el hueso en vez de en la pared arterial. Tomadas juntas se cubren la espalda.",
+    note:
+      "Tapa dos cosas que el registro marcaba en rojo: vitamina D al 35 % desde comida, y la K2 que no aparecía por ningún lado.",
+    caution: "La D es liposoluble y se acumula. Por encima de 4 000 UI diarias conviene analítica de 25-OH-D.",
+    confirm: "¿Cuántas UI de D3 y cuántos µg de K2? Con eso puedo marcarla cubierta con número, no de palabra.",
+  },
+  {
+    id: "s-minoxidil-oral",
+    name: "Minoxidil oral",
+    kind: "medicación",
+    route: "oral",
+    dose: "2 mg al día",
+    why:
+      "Vasodilatador, hoy usado fuera de ficha técnica en dosis bajas para alopecia. A 2 mg está en el rango bajo habitual, donde la tolerancia suele ser buena.",
+    note:
+      "Es lo que más cambia la lectura de este tablero: retiene sodio y agua, así que puede sumarte 0,5–2 kg de báscula que no son grasa. Cuando el peso suba, mira primero el espejo y la cinta métrica, no el número.",
+    caution:
+      "Efectos conocidos: retención de líquido, taquicardia leve e hipertricosis (vello en cara y cuerpo). Debería ir con control médico de presión y frecuencia cardíaca — y con tu potasio al 19 % y el sodio alto, ese control importa más, no menos.",
+  },
+  {
+    id: "s-dutasteride",
+    name: "Dutasterida tópica 0,05 % + minoxidil",
+    kind: "medicación",
+    route: "tópico",
+    dose: "spray diario en cuero cabelludo (minoxidil ~1 mg)",
+    why:
+      "La dutasterida inhibe la 5-alfa-reductasa tipos 1 y 2 y baja la DHT, que es la que miniaturiza el folículo. Aplicada en la piel la absorción sistémica es mucho menor que por vía oral, aunque no es cero.",
+    note:
+      "Buena noticia para el gimnasio: bajar DHT no reduce la hipertrofia ni la fuerza — los ensayos con inhibidores de la 5-alfa-reductasa en hombres que entrenan no muestran pérdida de masa magra. La DHT manda en el folículo y la próstata, no en el músculo.",
+    caution:
+      "Suma minoxidil al que ya tomas por boca. Los efectos sistémicos reportados (libido, ánimo) son poco frecuentes por vía tópica, pero si aparecen no es casualidad: coméntalo con quien te lo recetó.",
+  },
+];
+
 /** Consejos accionables, revisados cada vez que llegan datos nuevos. */
 export const TIPS: {
   id: string;
@@ -27,6 +99,14 @@ export const TIPS: {
     title: "Mídete el % de grasa antes de sacar conclusiones",
     body:
       "El 13,0 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas —mismo día, en ayunas— convierte esa suposición en un dato.",
+  },
+  {
+    id: "t-08",
+    priority: "alta",
+    tag: "Báscula",
+    title: "El minoxidil oral te ensucia el peso",
+    body:
+      "A 2 mg diarios retiene sodio y agua: puede sostenerte 0,5–2 kg por encima de tu peso real, y ese efecto no desaparece mientras lo tomes. No significa que el tablero mienta, significa que la pendiente del peso vale más que cualquier lectura suelta. Pésate siempre igual —en ayunas, después del baño, mismo día de la semana— y juzga por la tendencia de 4 semanas, no por la mañana de hoy.",
   },
   {
     id: "t-02",
@@ -90,6 +170,8 @@ export const RESEARCH: {
   /** id in the DV table, when the nutrient is one the log can measure — lets
    *  the panel show live coverage next to the research instead of a flat list */
   micro?: string;
+  /** ya lo tomas — el % de comida deja de ser la historia completa */
+  supplemented?: string;
   what: string;
   dose: string;
   sources: string;
@@ -134,13 +216,14 @@ export const RESEARCH: {
     name: "Vitamina D3",
     evidence: "fuerte",
     micro: "vit_d",
+    supplemented: "D3 + K2 a diario",
     what:
       "Regula la absorción de calcio y sostiene hueso, función muscular e inmunidad. El déficit es sorprendentemente común incluso en países soleados, porque vivimos en interiores.",
     dose: "1 000–2 000 UI diarias de mantenimiento. Dosis mayores solo con analítica de 25-OH-D.",
     sources: "Sol directo sobre la piel, pescado graso y yema de huevo.",
     caution: "Es liposoluble y se acumula: no la subas a ciegas.",
     yours:
-      "Hoy cubriste 35 % vía sardinas. En Quito el índice UV es alto todo el año — 15–20 min de sol al mediodía te rinden más que cualquier cápsula.",
+      "35 % desde comida, más tu suplemento diario de D3 + K2, que además resuelve la K2 que te faltaba. Aun así, en Quito el índice UV es alto todo el año: 15–20 min de sol al mediodía te rinden gratis lo que la cápsula te cobra.",
   },
   {
     id: "r-cafeina",
@@ -168,11 +251,13 @@ export const RESEARCH: {
     name: "Magnesio",
     evidence: "moderada",
     micro: "magnesium",
+    supplemented: "Citrato de magnesio a diario",
     what:
       "Cofactor de más de 300 reacciones enzimáticas: contracción muscular, metabolismo energético y calidad del sueño. La ingesta media de la población suele quedar por debajo de la recomendación.",
     dose: "200–400 mg al día. El glicinato y el citrato se absorben bastante mejor que el óxido.",
     sources: "Almendra, espinaca, cacao puro, legumbre y aguacate.",
-    yours: "45 % del valor diario hoy — uno de tus dos huecos junto al potasio.",
+    yours:
+      "La comida registrada cubre 45 %; el citrato que tomas se suma encima, así que este ya no es un hueco. Dime los mg por toma y lo doy por cerrado con número.",
   },
   {
     id: "r-potasio",
@@ -183,7 +268,8 @@ export const RESEARCH: {
       "Contrapesa al sodio en la regulación de la presión arterial y participa en la contracción muscular. Casi nadie alcanza los 4 700 mg recomendados.",
     dose: "4 700 mg al día, idealmente desde comida.",
     sources: "Plátano, papa con cáscara, aguacate, fréjol y agua de coco — todo barato y local.",
-    yours: "19 % hoy: es tu mayor hueco, y encima el día vino cargado de sodio (2 450 mg).",
+    yours:
+      "19 % hoy: es tu mayor hueco, y encima el día vino cargado de sodio (2 450 mg). Con minoxidil oral de por medio —que retiene sodio y agua— este desequilibrio pesa más de lo normal en la presión arterial. Es el número que yo movería primero.",
   },
   {
     id: "r-betaalanina",
@@ -357,12 +443,14 @@ export const RESEARCH: {
     id: "r-k2",
     name: "Vitamina K2",
     evidence: "moderada",
+    supplemented: "Va dentro de tu D3 + K2",
     what:
       "La K1 de la hoja verde sirve para coagular; la K2 activa las proteínas que llevan el calcio al hueso y lo mantienen fuera de la pared arterial. Es la pieza que suele faltar cuando alguien suplementa calcio y vitamina D sin más.",
     dose: "90–120 µg al día entre K1 y K2.",
     sources: "Natto, quesos curados y fermentados, yema de huevo, mantequilla de pasto.",
     caution: "Si tomas anticoagulantes tipo warfarina, cualquier cambio en vitamina K se consulta con tu médico primero.",
-    yours: "Tu vitamina K registrada viene del kiwi, que es K1. La K2 sigue sin aparecer: el queso curado es la vía más simple.",
+    yours:
+      "Ya la cubres con el combinado de D3 + K2 — y es justo la razón por la que esa combinación se vende junta. Tu vitamina K registrada (50 %) viene del kiwi y es K1, otra cosa.",
   },
   {
     id: "r-nitratos",
