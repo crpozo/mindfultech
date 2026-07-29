@@ -98,7 +98,7 @@ export const TIPS: {
     tag: "Medición",
     title: "Mídete el % de grasa antes de sacar conclusiones",
     body:
-      "El 13,0 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas —mismo día, en ayunas— convierte esa suposición en un dato.",
+      "El 10,3 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas —mismo día, en ayunas— convierte esa suposición en un dato.",
   },
   {
     id: "t-08",
@@ -649,11 +649,35 @@ export const LOG: FitState = {
       id: "b-2026-07-28",
       at: "2026-07-28T07:00",
       weight_kg: 84,
+      notes: "Peso declarado, sin condiciones fijas.",
+      source: "manual",
+    },
+    {
+      id: "b-2026-07-29",
+      at: "2026-07-29T06:00",
+      weight_kg: 81.5,
+      notes: "Primera pesada de la mañana, en ayunas.",
       source: "manual",
     },
   ],
 
   insights: [
+    {
+      id: "i-2026-07-29-01",
+      at: "2026-07-29T06:30",
+      title: "81,5 kg: buen número, pero no lo compares con el de ayer",
+      body:
+        "2,5 kg en un día no es grasa — el cuerpo no quema 19 000 kcal mientras duermes. Los 84 kg de ayer eran un peso declarado sin condiciones fijas; estos 81,5 son la primera pesada en ayunas, que siempre es la más baja del día. A eso súmale el minoxidil oral, que retiene líquido en cantidad variable. La comparación que sí vale es contra enero: 86,8 → 81,5 kg, 5,3 kg en algo más de seis meses, unos 190 g por semana. Ese ritmo es exactamente el que conserva músculo.",
+      tags: ["peso"],
+    },
+    {
+      id: "i-2026-07-29-02",
+      at: "2026-07-29T06:30",
+      title: "El 10,3 % de grasa que ves es casi seguro demasiado bueno",
+      body:
+        "Sale de asumir que en seis meses de déficit no perdiste ni un gramo de masa magra, y eso casi nunca pasa: lo normal es que entre el 10 y el 25 % de lo bajado sea músculo. Con una pérdida realista de 1–1,5 kg de magra estarías más cerca del 11,5–12,5 %, que sigue siendo un sitio muy bueno. El número solo se arregla midiendo: bioimpedancia o plicómetro, mismo día, en ayunas.",
+      tags: ["composicion"],
+    },
     {
       id: "i-2026-07-28-01",
       at: "2026-07-28T22:00",
