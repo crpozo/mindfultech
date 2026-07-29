@@ -167,7 +167,20 @@ export const LOG: FitState = {
     },
   ],
 
-  workouts: [],
+  workouts: [
+    {
+      id: "w-2026-07-29-01",
+      at: "2026-07-29T18:30",
+      type: "strength",
+      name: "Pecho y tríceps",
+      // no cargas ni series todavía — duración y gasto estimados a partir de
+      // 7 ejercicios de fuerza para 84 kg (≈4,5 MET)
+      duration_min: 60,
+      kcal: 380,
+      notes: "4 ejercicios de pecho, 2 de tríceps y 1 de abdomen en máquina.",
+      source: "claude",
+    },
+  ],
 
   body: [
     {
@@ -206,9 +219,17 @@ export const LOG: FitState = {
     {
       id: "i-2026-07-29-03",
       at: "2026-07-29T22:00",
-      title: "Hoy no registraste entrenamiento",
+      title: "Pecho y tríceps: el día cierra en déficit",
       body:
-        "Con 2 313 kcal y sin gasto de ejercicio, el día queda cerca de mantenimiento. Si el objetivo es seguir bajando grasa, mete 3–4 sesiones de fuerza por semana y me las cuentas.",
+        "60 min de fuerza (~380 kcal) contra 2 313 comidas deja un neto de ~1 933 kcal, unas 470 por debajo de tu objetivo. Con 150 g de proteína encima, es justo el escenario donde se pierde grasa sin tocar músculo.",
+      tags: ["entrenamiento"],
+    },
+    {
+      id: "i-2026-07-29-04",
+      at: "2026-07-29T22:05",
+      title: "Falta el volumen para poder medir progreso",
+      body:
+        "Registré la sesión, pero sin cargas ni repeticiones no puedo seguir tu progresión. Pásame peso × reps × series de los ejercicios principales (banca, inclinado, fondos…) y empiezo a graficar el tonelaje semana a semana.",
       tags: ["entrenamiento"],
     },
   ],
