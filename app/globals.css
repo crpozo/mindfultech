@@ -913,3 +913,8 @@ a:hover {
 }
 .fit-err { color: #c0392b; font-size: 12.5px; margin-top: 10px; font-weight: 500; }
 .fit-fine { font-size: 11px; color: #74727d; margin: 16px 0 0; line-height: 1.5; }
+
+.fit-howto {
+  font-size: 13px; color: #6b6875; text-align: center;
+  margin: 4px 0 0; line-height: 1.6;
+}

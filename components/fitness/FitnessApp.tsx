@@ -9,22 +9,13 @@ import {
   type Insight,
   type Targets,
   type DayStats,
-  CLAUDE_PROMPT,
-  DEFAULT_TARGETS,
-  atDay,
-  batchCount,
-  dayKey,
-  emptyState,
   exportFit,
   lastNDays,
-  loadFit,
   microCoverage,
-  parseClaude,
-  parseFitBackup,
-  saveFit,
   statsByDay,
   streakDays,
 } from "@/lib/fitness/model";
+import { LOG, PROFILE } from "@/lib/fitness/data";
 import {
   hasPasscode,
   isUnlocked,
@@ -53,66 +44,20 @@ const fmt = (n: number, d = 0) =>
 export function FitnessApp() {
   const [ready, setReady] = React.useState(false);
   const [unlocked, setUnlockedS] = React.useState(false);
-  const [state, setState] = React.useState<FitState>(() => emptyState());
-  const loadedRef = React.useRef(false);
-  const stateRef = React.useRef(state);
-  stateRef.current = state;
-
   const [range, setRange] = React.useState(14);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [targetsOpen, setTargetsOpen] = React.useState(false);
-  const [promptOpen, setPromptOpen] = React.useState(false);
+
+  // the log ships with the site — nothing to load, nothing to sync
+  const state = LOG;
 
   React.useEffect(() => {
     setUnlockedS(isUnlocked());
     setReady(true);
   }, []);
 
-  React.useEffect(() => {
-    if (!unlocked || loadedRef.current) return;
-    setState(loadFit() ?? emptyState());
-    loadedRef.current = true;
-  }, [unlocked]);
-
-  React.useEffect(() => {
-    if (!loadedRef.current) return;
-    const t = setTimeout(() => saveFit(state), 250);
-    return () => clearTimeout(t);
-  }, [state]);
-
-  React.useEffect(() => {
-    const flush = () => {
-      if (loadedRef.current) saveFit(stateRef.current);
-    };
-    window.addEventListener("pagehide", flush);
-    document.addEventListener("visibilitychange", flush);
-    return () => {
-      window.removeEventListener("pagehide", flush);
-      document.removeEventListener("visibilitychange", flush);
-    };
-  }, []);
-
-  const addBatch = (text: string): number => {
-    const b = parseClaude(text);
-    const n = batchCount(b);
-    if (!n) return 0;
-    setState((s) => ({
-      ...s,
-      food: [...s.food, ...b.food],
-      workouts: [...s.workouts, ...b.workouts],
-      body: [...s.body, ...b.body],
-      insights: [...s.insights, ...b.insights],
-    }));
-    return n;
-  };
-
-  const del = (kind: "food" | "workouts" | "body" | "insights", id: string) =>
-    setState((s) => ({ ...s, [kind]: (s[kind] as { id: string }[]).filter((e) => e.id !== id) } as FitState));
-
   const lock = () => {
     setUnlocked(false);
     setUnlockedS(false);
-    loadedRef.current = false;
     setMenuOpen(false);
   };
 
@@ -125,8 +70,6 @@ export function FitnessApp() {
 
   if (!ready) return <div style={{ minHeight: "100vh", background: "#eef2f9" }} />;
   if (!unlocked) return <FitLock onUnlock={() => setUnlockedS(true)} />;
-
-  const hasData = state.food.length + state.workouts.length + state.body.length > 0;
 
   return (
     <div className="fit-app">
@@ -155,34 +98,7 @@ export function FitnessApp() {
               <>
                 <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 1 }} />
                 <div className="fit-menu">
-                  <button onClick={() => { setPromptOpen(true); setMenuOpen(false); }}>Prompt para Claude</button>
-                  <button onClick={() => { setTargetsOpen(true); setMenuOpen(false); }}>Objetivos</button>
-                  <button onClick={() => { exportFit(state); setMenuOpen(false); }}>Descargar respaldo</button>
-                  <label>
-                    Restaurar respaldo
-                    <input
-                      type="file"
-                      accept="application/json,.json"
-                      style={{ display: "none" }}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) {
-                          const r = new FileReader();
-                          r.onload = () => {
-                            const parsed = parseFitBackup(String(r.result || ""));
-                            if (!parsed) return alert("Archivo de respaldo inválido.");
-                            if (confirm("Esto reemplazará tus datos actuales. ¿Continuar?")) {
-                              setState(parsed);
-                              loadedRef.current = true;
-                            }
-                          };
-                          r.readAsText(f);
-                        }
-                        e.target.value = "";
-                        setMenuOpen(false);
-                      }}
-                    />
-                  </label>
+                  <button onClick={() => { exportFit(state); setMenuOpen(false); }}>Descargar datos</button>
                   <div className="sep" />
                   <button style={{ color: C_BAD }} onClick={lock}>Bloquear</button>
                 </div>
@@ -193,71 +109,122 @@ export function FitnessApp() {
       </header>
 
       <main className="fit-wrap" style={{ padding: "20px 20px 80px" }}>
-        <Importer onAdd={addBatch} onPrompt={() => setPromptOpen(true)} empty={!hasData} />
+        <Progress state={state} />
+        <TodayCard today={today} targets={state.targets} />
 
-        {hasData && (
-          <>
-            <TodayCard today={today} targets={state.targets} />
+        <div className="fit-grid2">
+          <Panel title="Calorías por día" sub={`Objetivo ${fmt(state.targets.kcal)} kcal`}>
+            <Bars
+              data={stats.map((d) => ({ key: d.day, value: d.kcal, label: shortDay(d.day) }))}
+              target={state.targets.kcal}
+              color={C_PROTEIN}
+              unit="kcal"
+            />
+          </Panel>
+          <Panel title="Proteína por día" sub={`Objetivo ${fmt(state.targets.protein_g)} g`}>
+            <Bars
+              data={stats.map((d) => ({ key: d.day, value: d.protein_g, label: shortDay(d.day) }))}
+              target={state.targets.protein_g}
+              color={C_CARBS}
+              unit="g"
+            />
+          </Panel>
+        </div>
 
-            <div className="fit-grid2">
-              <Panel title="Calorías por día" sub={`Objetivo ${fmt(state.targets.kcal)} kcal`}>
-                <Bars
-                  data={stats.map((d) => ({ key: d.day, value: d.kcal, label: shortDay(d.day) }))}
-                  target={state.targets.kcal}
-                  color={C_PROTEIN}
-                  unit="kcal"
-                />
-              </Panel>
-              <Panel title="Proteína por día" sub={`Objetivo ${fmt(state.targets.protein_g)} g`}>
-                <Bars
-                  data={stats.map((d) => ({ key: d.day, value: d.protein_g, label: shortDay(d.day) }))}
-                  target={state.targets.protein_g}
-                  color={C_CARBS}
-                  unit="g"
-                />
-              </Panel>
-            </div>
+        <div className="fit-grid2">
+          <Panel title="Peso" sub="kg">
+            <Line points={stats.filter((d) => d.weight_kg != null).map((d) => ({ key: d.day, value: d.weight_kg! }))} unit="kg" />
+          </Panel>
+          <Panel title="Entrenamiento" sub="minutos por día">
+            <Bars
+              data={stats.map((d) => ({ key: d.day, value: d.workoutMin, label: shortDay(d.day) }))}
+              color={C_FAT}
+              unit="min"
+            />
+          </Panel>
+        </div>
 
-            <div className="fit-grid2">
-              <Panel title="Peso" sub="kg">
-                <Line points={stats.filter((d) => d.weight_kg != null).map((d) => ({ key: d.day, value: d.weight_kg! }))} unit="kg" />
-              </Panel>
-              <Panel title="Entrenamiento" sub="minutos por día">
-                <Bars
-                  data={stats.map((d) => ({ key: d.day, value: d.workoutMin, label: shortDay(d.day) }))}
-                  color={C_FAT}
-                  unit="min"
-                />
-              </Panel>
-            </div>
-
-            {micros.length > 0 && (
-              <Panel title="Micronutrientes" sub={`Cobertura media diaria en ${range} días (% del valor diario)`}>
-                <Micros rows={micros} />
-              </Panel>
-            )}
-
-            <Insights state={state} stats={stats} onDelete={(id) => del("insights", id)} />
-            <Log state={state} onDelete={del} />
-          </>
+        {micros.length > 0 && (
+          <Panel title="Micronutrientes" sub={`Cobertura media diaria en ${range} días (% del valor diario)`}>
+            <Micros rows={micros} />
+          </Panel>
         )}
-      </main>
 
-      {targetsOpen && (
-        <Modal onClose={() => setTargetsOpen(false)} label="Objetivos">
-          <TargetsForm
-            targets={state.targets}
-            onChange={(t) => setState((s) => ({ ...s, targets: t }))}
-            onClose={() => setTargetsOpen(false)}
-          />
-        </Modal>
-      )}
-      {promptOpen && (
-        <Modal onClose={() => setPromptOpen(false)} label="Prompt para Claude">
-          <PromptPanel onClose={() => setPromptOpen(false)} />
-        </Modal>
-      )}
+        <Insights state={state} stats={stats} />
+        <Log state={state} />
+
+        <p className="fit-howto">
+          Para registrar algo nuevo, escríbeselo a Claude en el chat —
+          &ldquo;hoy comí…&rdquo;, &ldquo;entrené…&rdquo;, &ldquo;peso…&rdquo; — y aparece acá analizado.
+        </p>
+      </main>
     </div>
+  );
+}
+
+/* --------------------------------------------------------------- progress card */
+
+function Progress({ state }: { state: FitState }) {
+  const base = PROFILE.baseline;
+  const weights = [...state.body]
+    .filter((b) => b.weight_kg != null)
+    .sort((a, b) => a.at.localeCompare(b.at));
+  const latest = weights[weights.length - 1];
+  if (!latest?.weight_kg) return null;
+
+  const now = latest.weight_kg;
+  const dW = now - base.weight_kg;
+  const h = PROFILE.height_cm / 100;
+  const bmi = now / (h * h);
+
+  // January's composition is the only measured one; hold lean mass constant and
+  // the whole difference lands on fat — the optimistic end of the range, so it
+  // is labelled as an estimate rather than a reading.
+  const baseFat = (base.weight_kg * base.bodyfat_pct) / 100;
+  const lean = base.weight_kg - baseFat;
+  const fatNow = Math.max(0, now - lean);
+  const bfNow = (fatNow / now) * 100;
+  const fatLost = baseFat - fatNow;
+
+  const measured = latest.bodyfat_pct != null;
+
+  return (
+    <section className="fit-panel">
+      <div style={{ display: "flex", gap: 30, flexWrap: "wrap", alignItems: "flex-start" }}>
+        <div style={{ minWidth: 200 }}>
+          <div className="fit-eyebrow">PROGRESO DESDE ENERO</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginTop: 6 }}>
+            <span style={{ fontSize: 44, fontWeight: 500, letterSpacing: "-.03em", lineHeight: 1, color: INK }}>
+              {fmt(dW, 1)} kg
+            </span>
+            <span style={{ fontSize: 14, color: dW < 0 ? C_GOOD : MUTED, fontWeight: 500 }}>
+              {dW < 0 ? "↓" : dW > 0 ? "↑" : ""} {fmt(base.weight_kg, 1)} → {fmt(now, 1)} kg
+            </span>
+          </div>
+          <div style={{ fontSize: 12.5, color: MUTED, marginTop: 8, lineHeight: 1.5 }}>
+            {PROFILE.height_cm} cm · {PROFILE.age} años · IMC {fmt(bmi, 1)}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+          <Stat label="Grasa en enero" value={`${fmt(base.bodyfat_pct, 1)} %`} />
+          <Stat
+            label={measured ? "Grasa hoy" : "Grasa hoy (est.)"}
+            value={`${fmt(measured ? latest.bodyfat_pct! : bfNow, 1)} %`}
+          />
+          <Stat label="Grasa perdida (est.)" value={`${fmt(fatLost, 1)} kg`} />
+          <Stat label="Masa magra (enero)" value={`${fmt(lean, 1)} kg`} />
+        </div>
+      </div>
+
+      {!measured && (
+        <p style={{ fontSize: 12.5, color: MUTED, margin: "16px 0 0", lineHeight: 1.6 }}>
+          El % de grasa de hoy es una <strong>estimación</strong>: asume que conservaste la masa magra de enero
+          ({fmt(lean, 1)} kg), así que es el escenario optimista. Si perdiste algo de músculo estarás 1–2 puntos por
+          encima. Mídete con báscula de bioimpedancia o plicómetro y me pasas el número para fijarlo.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -363,64 +330,6 @@ function FitLock({ onUnlock }: { onUnlock: () => void }) {
         <p className="fit-fine">Tus datos se guardan solo en este navegador. No se envían a ningún servidor.</p>
       </form>
     </div>
-  );
-}
-
-/* -------------------------------------------------------------------- importer */
-
-function Importer({ onAdd, onPrompt, empty }: { onAdd: (t: string) => number; onPrompt: () => void; empty: boolean }) {
-  const [text, setText] = React.useState("");
-  const [msg, setMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
-
-  const submit = () => {
-    const n = onAdd(text);
-    if (n) {
-      setText("");
-      setMsg({ ok: true, text: `${n} ${n === 1 ? "registro añadido" : "registros añadidos"}.` });
-    } else {
-      setMsg({ ok: false, text: "No encontré datos válidos. Pega el bloque JSON que te devuelve Claude." });
-    }
-    setTimeout(() => setMsg(null), 5000);
-  };
-
-  return (
-    <section className="fit-panel" style={{ borderColor: empty ? "var(--accent)" : undefined }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>Pegar desde Claude</h2>
-          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: MUTED }}>
-            Manda la foto o la descripción a Claude, copia su respuesta y pégala aquí.
-          </p>
-        </div>
-        <button className="fit-ghost" style={{ marginLeft: "auto" }} onClick={onPrompt}>
-          Ver prompt
-        </button>
-      </div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder='Pega aquí la respuesta de Claude (el bloque JSON con "food", "workouts", "body"…)'
-        aria-label="Respuesta de Claude"
-        rows={empty ? 6 : 3}
-        className="fit-paste"
-      />
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
-        <button className="fit-primary" onClick={submit} disabled={!text.trim()}>
-          AÑADIR AL PANEL
-        </button>
-        {msg && (
-          <span role="status" style={{ fontSize: 13.5, fontWeight: 500, color: msg.ok ? C_GOOD : C_BAD }}>
-            {msg.text}
-          </span>
-        )}
-      </div>
-      {empty && (
-        <p style={{ fontSize: 13, color: MUTED, margin: "14px 0 0", lineHeight: 1.6 }}>
-          ¿Primera vez? Abre <strong>Ver prompt</strong>, cópialo y pégalo en Claude (o guárdalo como Proyecto).
-          Desde ahí solo mandas la foto de tu plato y te devuelve el JSON listo para pegar acá.
-        </p>
-      )}
-    </section>
   );
 }
 
@@ -624,15 +533,7 @@ function Micros({ rows }: { rows: { id: string; label: string; pct: number }[] }
 
 /* -------------------------------------------------------------------- insights */
 
-function Insights({
-  state,
-  stats,
-  onDelete,
-}: {
-  state: FitState;
-  stats: DayStats[];
-  onDelete: (id: string) => void;
-}) {
+function Insights({ state, stats }: { state: FitState; stats: DayStats[] }) {
   // a few observations computed locally, so the panel is useful even before
   // Claude writes any — clearly marked so they're never confused with its notes
   const auto = React.useMemo(() => {
@@ -687,7 +588,6 @@ function Insights({
             <div className="fit-eyebrow" style={{ color: "var(--accent-deep)" }}>CLAUDE · {i.at.slice(0, 10)}</div>
             <h3>{i.title}</h3>
             {i.body && <p>{i.body}</p>}
-            <button className="fit-x" onClick={() => onDelete(i.id)} aria-label="Eliminar insight">✕</button>
           </article>
         ))}
         {auto.map((i, n) => (
@@ -704,13 +604,7 @@ function Insights({
 
 /* ------------------------------------------------------------------------- log */
 
-function Log({
-  state,
-  onDelete,
-}: {
-  state: FitState;
-  onDelete: (kind: "food" | "workouts" | "body" | "insights", id: string) => void;
-}) {
+function Log({ state }: { state: FitState }) {
   const [tab, setTab] = React.useState<"food" | "workouts" | "body">("food");
   const food = [...state.food].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 40);
   const workouts = [...state.workouts].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 40);
@@ -742,7 +636,6 @@ function Log({
                 </div>
               </div>
               <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: "nowrap" }}>{fmt(f.kcal)} kcal</div>
-              <button className="fit-x" onClick={() => onDelete("food", f.id)} aria-label="Eliminar">✕</button>
             </div>
           ))}
         {tab === "workouts" &&
@@ -759,7 +652,6 @@ function Log({
               <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: "nowrap" }}>
                 {fmt(w.duration_min)} min{w.kcal ? ` · ${fmt(w.kcal)} kcal` : ""}
               </div>
-              <button className="fit-x" onClick={() => onDelete("workouts", w.id)} aria-label="Eliminar">✕</button>
             </div>
           ))}
         {tab === "body" &&
@@ -778,7 +670,6 @@ function Log({
                 </div>
                 <div className="fit-rowmeta">{b.at.replace("T", " ")}</div>
               </div>
-              <button className="fit-x" onClick={() => onDelete("body", b.id)} aria-label="Eliminar">✕</button>
             </div>
           ))}
         {((tab === "food" && !food.length) ||
@@ -821,87 +712,6 @@ function Modal({ children, onClose, label }: { children: React.ReactNode; onClos
         {children}
       </div>
     </div>
-  );
-}
-
-function TargetsForm({
-  targets,
-  onChange,
-  onClose,
-}: {
-  targets: Targets;
-  onChange: (t: Targets) => void;
-  onClose: () => void;
-}) {
-  const [t, setT] = React.useState<Targets>(targets);
-  const field = (k: keyof Targets, label: string, unit: string, step = 1) => (
-    <label className="fit-field" key={k}>
-      <span>{label}</span>
-      <div>
-        <input
-          type="number"
-          step={step}
-          value={t[k]}
-          onChange={(e) => setT({ ...t, [k]: parseFloat(e.target.value) || 0 })}
-          aria-label={label}
-        />
-        <em>{unit}</em>
-      </div>
-    </label>
-  );
-  return (
-    <>
-      <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 500 }}>Objetivos diarios</h2>
-      <p style={{ margin: "0 0 16px", fontSize: 13.5, color: MUTED }}>Se usan como referencia en el panel y los gráficos.</p>
-      <div style={{ display: "grid", gap: 10 }}>
-        {field("kcal", "Calorías", "kcal", 10)}
-        {field("protein_g", "Proteína", "g", 5)}
-        {field("carbs_g", "Carbohidratos", "g", 5)}
-        {field("fat_g", "Grasa", "g", 5)}
-        {field("steps", "Pasos", "pasos", 500)}
-        {field("sleep_h", "Sueño", "h", 0.5)}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 10 }}>
-        <button className="fit-link" onClick={() => setT({ ...DEFAULT_TARGETS })}>Restablecer</button>
-        <button
-          className="fit-primary"
-          onClick={() => {
-            onChange(t);
-            onClose();
-          }}
-        >
-          GUARDAR
-        </button>
-      </div>
-    </>
-  );
-}
-
-function PromptPanel({ onClose }: { onClose: () => void }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(CLAUDE_PROMPT);
-    } catch {
-      /* clipboard blocked — the text is selectable below */
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-  return (
-    <>
-      <h2 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 500 }}>Prompt para Claude</h2>
-      <p style={{ margin: "0 0 14px", fontSize: 13.5, color: MUTED, lineHeight: 1.55 }}>
-        Cópialo y pégalo en Claude (idealmente como <strong>Proyecto</strong>, así queda guardado). Después solo
-        le mandas la foto del plato o describes lo que comiste, y te responde con el JSON que pegas en el panel.
-      </p>
-      <textarea readOnly value={CLAUDE_PROMPT} rows={12} className="fit-paste" aria-label="Prompt para Claude" />
-      <div style={{ display: "flex", gap: 10, marginTop: 12, justifyContent: "flex-end", alignItems: "center" }}>
-        {copied && <span style={{ fontSize: 13, color: C_GOOD, marginRight: "auto" }}>Copiado ✓</span>}
-        <button className="fit-ghost" onClick={onClose}>Cerrar</button>
-        <button className="fit-primary" onClick={copy}>COPIAR PROMPT</button>
-      </div>
-    </>
   );
 }
 
