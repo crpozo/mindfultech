@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -131,6 +131,30 @@ export function categoriesFor(kind: Kind): readonly string[] {
 }
 
 // ---------------------------------------------------------------- semilla --
+
+/**
+ * El coworking se paga una vez al año ($876), pero el tablero razona en meses
+ * — runway, gasto mensual, presupuestos. Se registra prorrateado a $73/mes
+ * (876 ÷ 12 exacto) para que ningún mes mienta: ni el once que se verían
+ * baratos ni el uno que se vería carísimo. Vive en una constante porque
+ * también lo inyecta la migración a v2 en tableros ya guardados.
+ */
+const COWORKING_COMMITMENT: Commitment = {
+  id: "coworking",
+  name: "Coworking (anual)",
+  amount: 73,
+  category: "negocio",
+  note: "Se paga $876 una vez al año; acá va prorrateado a $73/mes para que el gasto mensual y el runway lo cuenten sin picos.",
+};
+
+/** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
+const GYM_COMMITMENT: Commitment = {
+  id: "gym",
+  name: "Gimnasio (cada 15 meses)",
+  amount: 73.33,
+  category: "salud",
+  note: "Se paga $1 100 por 15 meses de golpe; prorrateado sale a $73,33/mes.",
+};
 
 /**
  * Punto de partida con las cifras reales al 26 de julio de 2026. Solo se usa
@@ -182,6 +206,8 @@ export function seedState(): FinanceState {
         category: "salud",
         note: "Mensual. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
       },
+      COWORKING_COMMITMENT,
+      GYM_COMMITMENT,
     ],
     settings: {
       currency: "USD",
@@ -263,6 +289,17 @@ function str(v: unknown, fallback = ""): string {
 function normalize(s: Partial<FinanceState> | null): FinanceState {
   const base = seedState();
   if (!s || typeof s !== "object") return base;
+
+  // v1 → v2: el coworking y el gimnasio entran una sola vez en tableros ya
+  // guardados. Solo mira la versión, no el contenido: si después los borra o
+  // edita, el estado ya quedó estampado v2 y esta rama no vuelve a correr.
+  if ((num(s.version, 1) || 1) < 2 && Array.isArray(s.commitments)) {
+    const have = new Set(s.commitments.map((c) => c && c.id));
+    const missing = [COWORKING_COMMITMENT, GYM_COMMITMENT].filter((c) => !have.has(c.id));
+    if (missing.length) {
+      s = { ...s, commitments: [...s.commitments, ...missing.map((c) => ({ ...c }))] };
+    }
+  }
   const seen = new Set<string>();
   const freshId = (id: unknown): string => {
     let v = typeof id === "string" && id ? id : uid();
