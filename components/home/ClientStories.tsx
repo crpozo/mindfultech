@@ -89,12 +89,17 @@ export function ClientStories() {
   const trackRef = React.useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = React.useState(true);
   const [atEnd, setAtEnd] = React.useState(false);
+  const [idx, setIdx] = React.useState(0);
 
   const sync = React.useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     setAtStart(el.scrollLeft <= 2);
     setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+    // which card is under the left edge — drives the dots on phones
+    const card = el.querySelector<HTMLElement>(".pf-panel");
+    const w = card ? card.offsetWidth + GAP : el.clientWidth;
+    setIdx(Math.min(PROJECTS.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
   }, []);
 
   React.useEffect(() => {
@@ -114,6 +119,13 @@ export function ClientStories() {
     if (!el) return;
     const card = el.querySelector<HTMLElement>(".pf-panel");
     el.scrollBy({ left: dir * (card ? card.offsetWidth + GAP : el.clientWidth / 4), behavior: "smooth" });
+  };
+
+  const goTo = (i: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>(".pf-panel");
+    el.scrollTo({ left: i * ((card?.offsetWidth ?? el.clientWidth) + GAP), behavior: "smooth" });
   };
 
   return (
@@ -220,6 +232,19 @@ export function ClientStories() {
             <path d="M9 5l7 7-7 7" />
           </svg>
         </button>
+
+        {/* phone-only position indicator — CSS hides it on wider screens */}
+        <div className="pf-dots" role="tablist" aria-label={es ? "Proyecto" : "Project"}>
+          {PROJECTS.map((p, i) => (
+            <button
+              key={p.href}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-current={i === idx}
+              aria-label={p.brand}
+            />
+          ))}
+        </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 0" }}>

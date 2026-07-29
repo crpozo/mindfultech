@@ -159,6 +159,7 @@ export function PlatformStats() {
               </Link>
               {c.connector && (
                 <span
+                  className="stat-connector"
                   style={{
                     position: "absolute",
                     right: -19,
@@ -174,15 +175,10 @@ export function PlatformStats() {
           ))}
         </div>
 
-        <div
-          className="stack-4"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-            gap: 26,
-            marginTop: 96,
-          }}
-        >
+        {/* section rule — four segments on desktop; on a phone the grid
+            collapses to one column, so the segments would stack into four
+            stray lines. `.ps-rule` keeps it a single rule there. */}
+        <div className="ps-rule" style={{ marginTop: 96 }}>
           {[0, 1, 2, 3].map((i) => (
             <span key={i} style={{ borderTop: "1px solid rgba(14,13,18,.16)" }} />
           ))}

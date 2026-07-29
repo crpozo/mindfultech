@@ -15,18 +15,29 @@ type Site = {
   country: Bi;
   /** where the label sits relative to the pin, so none of them collide */
   label: "left" | "right" | "top" | "bottom";
+  region: "latam" | "us" | "eu";
+  /** home base — gets the badge in the list */
+  base?: boolean;
 };
+
+const REGIONS: { id: Site["region"]; label: Bi }[] = [
+  { id: "latam", label: { en: "Latin America", es: "Latinoamérica" } },
+  { id: "us", label: { en: "United States", es: "Estados Unidos" } },
+  { id: "eu", label: { en: "Europe", es: "Europa" } },
+];
 
 // Real coordinates — pin positions are computed from these, so the map stays
 // truthful even though the dotted basemap is a stylisation.
 const SITES: Site[] = [
   {
-    id: "quito",
+    id: "ecuador",
     lat: -0.18,
     lon: -78.47,
-    place: { en: "Quito", es: "Quito" },
+    place: { en: "Ecuador", es: "Ecuador" },
     country: { en: "Ecuador", es: "Ecuador" },
     label: "left",
+    region: "latam",
+    base: true,
   },
   {
     id: "california",
@@ -35,6 +46,7 @@ const SITES: Site[] = [
     place: { en: "California", es: "California" },
     country: { en: "United States", es: "Estados Unidos" },
     label: "right",
+    region: "us",
   },
   {
     id: "chicago",
@@ -43,6 +55,7 @@ const SITES: Site[] = [
     place: { en: "Chicago", es: "Chicago" },
     country: { en: "United States", es: "Estados Unidos" },
     label: "top",
+    region: "us",
   },
   {
     id: "florida",
@@ -51,6 +64,7 @@ const SITES: Site[] = [
     place: { en: "Southwest Florida", es: "Suroeste de Florida" },
     country: { en: "United States", es: "Estados Unidos" },
     label: "right",
+    region: "us",
   },
   {
     id: "netherlands",
@@ -59,6 +73,7 @@ const SITES: Site[] = [
     place: { en: "Netherlands", es: "Países Bajos" },
     country: { en: "Netherlands", es: "Países Bajos" },
     label: "top",
+    region: "eu",
   },
   {
     id: "germany",
@@ -67,6 +82,7 @@ const SITES: Site[] = [
     place: { en: "Germany", es: "Alemania" },
     country: { en: "Germany", es: "Alemania" },
     label: "bottom",
+    region: "eu",
   },
   {
     id: "spain",
@@ -75,6 +91,7 @@ const SITES: Site[] = [
     place: { en: "Spain", es: "España" },
     country: { en: "Spain", es: "España" },
     label: "left",
+    region: "eu",
   },
 ];
 
@@ -148,8 +165,8 @@ export function ClientMap() {
           </h2>
           <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "14px 0 0" }}>
             {es
-              ? "Desde Quito, para equipos en América y Europa."
-              : "From Quito, for teams across the Americas and Europe."}
+              ? "Desde Ecuador, para equipos en América y Europa."
+              : "From Ecuador, for teams across the Americas and Europe."}
           </p>
         </div>
 
@@ -231,46 +248,52 @@ export function ClientMap() {
             </svg>
           </div>
 
-          {/* the list doubles as the map legend and as the mobile view */}
-          <ul className="map-list">
-            {SITES.map((s) => {
-              const on = s.id === active;
-              const sameName = s.place.en === s.country.en;
+          {/* Legend and mobile view in one. Grouped by region so seven
+              near-identical rows read as three places instead of a list. */}
+          <div className="map-side">
+            <div className="map-side-top">
+              <span className="map-kpi">{SITES.length}</span>
+              <span>
+                {es ? "ubicaciones activas" : "active locations"}
+                <b>{es ? "en 5 países, 3 husos horarios" : "across 5 countries, 3 time zones"}</b>
+              </span>
+            </div>
+
+            {REGIONS.map((r) => {
+              const items = SITES.filter((s) => s.region === r.id);
+              if (!items.length) return null;
               return (
-                <li key={s.id}>
-                  <button
-                    type="button"
-                    className={`map-row${on ? " on" : ""}`}
-                    onMouseEnter={() => setActive(s.id)}
-                    onMouseLeave={() => setActive(null)}
-                    onFocus={() => setActive(s.id)}
-                    onBlur={() => setActive(null)}
-                    aria-pressed={on}
-                  >
-                    <span className="map-row-head">
-                      <span className="map-dot" aria-hidden />
-                      <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: "-.01em" }}>
-                        {s.place[lang]}
-                      </span>
-                      {!sameName && (
-                        <span
-                          style={{
-                            fontFamily: MONO,
-                            fontSize: 10.5,
-                            letterSpacing: ".12em",
-                            color: "#8b8896",
-                            marginLeft: "auto",
-                          }}
-                        >
-                          {s.country[lang].toUpperCase()}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                </li>
+                <div key={r.id} className="map-group">
+                  <div className="map-group-head">
+                    <span>{r.label[lang]}</span>
+                    <span className="map-count">{String(items.length).padStart(2, "0")}</span>
+                  </div>
+                  <ul className="map-list">
+                    {items.map((s) => {
+                      const on = s.id === active;
+                      return (
+                        <li key={s.id}>
+                          <button
+                            type="button"
+                            className={`map-row${on ? " on" : ""}`}
+                            onMouseEnter={() => setActive(s.id)}
+                            onMouseLeave={() => setActive(null)}
+                            onFocus={() => setActive(s.id)}
+                            onBlur={() => setActive(null)}
+                            aria-pressed={on}
+                          >
+                            <span className="map-dot" aria-hidden />
+                            <span className="map-place">{s.place[lang]}</span>
+                            {s.base && <span className="map-badge">{es ? "BASE" : "HQ"}</span>}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
       </div>
     </section>

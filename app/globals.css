@@ -656,24 +656,65 @@ a:hover {
   .pf-panel { flex-basis: calc((100% - 2 * 14px) / 3); }
 }
 
+.pf-dots { display: none; }
+
 @media (max-width: 900px) {
   .pf-head { padding-left: 24px; padding-right: 24px; }
-  .pf-carousel { padding: 0; }
-  .pf-nav { display: none; }
-  /* phones: a plain vertical stack, no scroller */
+  /* room under the strip for the arrows and dots */
+  .pf-carousel { padding: 0 0 68px; }
+  /* phones: one card per view, swiped left/right, with the next one peeking
+     past the edge so the strip reads as a slider before anything is touched */
   .pf-strip {
-    flex-direction: column;
     gap: 14px;
-    padding: 0 18px;
-    overflow-x: visible;
-    overflow-y: visible;
-    scroll-snap-type: none;
+    padding: 0 18px 4px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 18px;
   }
-  .pf-panel { flex: none; }
+  .pf-panel { flex: 0 0 88%; }
   .pf-strip .pf-panel:hover { transform: none; }
   .pf-panel .pf-img,
   .pf-panel:hover .pf-img { transform: none; }
   .pf-reveal { padding: 14px 24px 26px; }
+
+  /* arrows move out from over the artwork and sit under the strip, where they
+     flank the dots instead of covering the cover shot */
+  .pf-nav {
+    width: 42px;
+    height: 42px;
+    top: auto;
+    bottom: 0;
+    margin-top: 0;
+  }
+  .pf-prev { left: calc(50% - 96px); }
+  .pf-next { right: calc(50% - 96px); }
+  /* dimmed rather than hidden at the ends — the control should stay visible
+     so the slider still looks like a slider on the first card */
+  .pf-nav:disabled { opacity: 0.32; }
+
+  .pf-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+  }
+  .pf-dots button {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.26);
+    cursor: pointer;
+    transition: background 0.25s ease, width 0.25s ease;
+  }
+  .pf-dots button[aria-current="true"] {
+    width: 20px;
+    border-radius: 4px;
+    background: #fff;
+  }
 }
 
 /* client map — dotted basemap beside the location list */
@@ -689,48 +730,116 @@ a:hover {
 .map-pin {
   cursor: pointer;
 }
+/* One card, three region groups — seven identical pills read as a wall;
+   grouping gives the column a shape and says something the map can't. */
+.map-side {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(14, 13, 18, 0.07);
+  border-radius: 16px;
+  padding: 6px 20px 18px;
+  backdrop-filter: blur(6px);
+}
+.map-side-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0 16px;
+  border-bottom: 1px solid rgba(14, 13, 18, 0.08);
+  font-size: 13px;
+  color: #6b6875;
+  line-height: 1.35;
+}
+.map-side-top b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: #9b98a6;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.map-kpi {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--accent-deep);
+  flex: none;
+}
+.map-group + .map-group {
+  margin-top: 4px;
+}
+.map-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9b98a6;
+}
+.map-count {
+  color: #c3c0cc;
+}
 .map-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 .map-row {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 11px;
   width: 100%;
   text-align: left;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(14, 13, 18, 0.07);
-  border-radius: 12px;
-  padding: 13px 16px;
+  background: none;
+  border: 0;
+  /* the accent rail is the hover affordance — no box, no lift */
+  border-left: 2px solid transparent;
+  border-radius: 0 8px 8px 0;
+  padding: 9px 12px 9px 13px;
   color: var(--ink);
   font: inherit;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, padding-left 0.2s ease;
 }
 .map-row:hover,
 .map-row.on {
-  background: #fff;
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border-left-color: var(--accent-deep);
+  padding-left: 17px;
 }
-.map-row-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.map-place {
+  font-weight: 500;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+}
+.map-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--accent-deep);
+  background: var(--accent-tint);
+  padding: 3px 6px;
+  border-radius: 4px;
 }
 .map-dot {
-  width: 9px;
-  height: 9px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
   flex: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
-.map-row.on .map-dot {
+.map-row.on .map-dot,
+.map-row:hover .map-dot {
   background: var(--accent-deep);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 26%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 @media (max-width: 900px) {
   .map-grid {
@@ -1009,3 +1118,15 @@ a:hover {
   color: #2f6f56; background: rgba(79,174,135,.16); padding: 3px 7px; border-radius: 4px;
 }
 .fit-res-ask { background: rgba(42,120,214,.09); border-left-color: #2a78d6; color: #26405e; }
+
+/* home — the rule under the stat cards. Four segments on desktop, one clean
+   line on a phone (the collapsed grid would otherwise stack four of them). */
+.ps-rule { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+@media (max-width: 900px) {
+  .ps-rule { grid-template-columns: 1fr; gap: 0; margin-top: 56px !important; }
+  .ps-rule span:not(:first-child) { display: none; }
+  /* the nubs bridge card to card in a row — stacked, they're just specks */
+  .stat-connector { display: none; }
+  /* the full-stack lab diagrams need width to read — drop them on phones */
+  .lab-visual { display: none; }
+}

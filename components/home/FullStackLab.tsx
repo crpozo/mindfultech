@@ -362,7 +362,11 @@ export function FullStackLab() {
             ))}
           </div>
 
-          <LabVisual active={cur} />
+          {/* the per-tab diagram is decorative and needs width to read —
+              hidden on phones, where it only added sideways scroll */}
+          <div className="lab-visual">
+            <LabVisual active={cur} />
+          </div>
         </div>
       </div>
     </section>
