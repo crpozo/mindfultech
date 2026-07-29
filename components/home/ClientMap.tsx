@@ -20,10 +20,12 @@ type Site = {
   base?: boolean;
 };
 
+// These are the places our clients are, not offices — the copy says
+// "clients" everywhere so nobody reads seven rows as seven branches.
 const REGIONS: { id: Site["region"]; label: Bi }[] = [
-  { id: "latam", label: { en: "Latin America", es: "Latinoamérica" } },
-  { id: "us", label: { en: "United States", es: "Estados Unidos" } },
-  { id: "eu", label: { en: "Europe", es: "Europa" } },
+  { id: "latam", label: { en: "Home base", es: "Base de operaciones" } },
+  { id: "us", label: { en: "Clients · United States", es: "Clientes · Estados Unidos" } },
+  { id: "eu", label: { en: "Clients · Europe", es: "Clientes · Europa" } },
 ];
 
 // Real coordinates — pin positions are computed from these, so the map stays
@@ -90,6 +92,16 @@ const SITES: Site[] = [
     lon: -3.7,
     place: { en: "Spain", es: "España" },
     country: { en: "Spain", es: "España" },
+    label: "left",
+    region: "eu",
+  },
+  {
+    id: "greece",
+    lat: 37.98,
+    lon: 23.73,
+    place: { en: "Greece", es: "Grecia" },
+    country: { en: "Greece", es: "Grecia" },
+    // Athens sits ~15px from the map's right edge — only a left label fits
     label: "left",
     region: "eu",
   },
@@ -252,10 +264,11 @@ export function ClientMap() {
               near-identical rows read as three places instead of a list. */}
           <div className="map-side">
             <div className="map-side-top">
-              <span className="map-kpi">{SITES.length}</span>
+              {/* count clients, not sites — Ecuador is the base, not a client */}
+              <span className="map-kpi">{SITES.filter((s) => !s.base).length}</span>
               <span>
-                {es ? "ubicaciones activas" : "active locations"}
-                <b>{es ? "en 5 países, 3 husos horarios" : "across 5 countries, 3 time zones"}</b>
+                {es ? "lugares con clientes" : "places with clients"}
+                <b>{es ? "5 países · sin oficinas, un solo equipo" : "5 countries · no offices, one team"}</b>
               </span>
             </div>
 
