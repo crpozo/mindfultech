@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -147,6 +147,24 @@ const COWORKING_COMMITMENT: Commitment = {
   note: "Se paga $876 una vez al año; acá va prorrateado a $73/mes para que el gasto mensual y el runway lo cuenten sin picos.",
 };
 
+/**
+ * Cobros dictados por chat. La fecha lleva el desfase de Ecuador escrito
+ * (`-05:00`) a propósito: sin él, un cobro de la noche del 29 se guarda como
+ * 30 en UTC y cae en el mes equivocado cuando el mes cambia de página.
+ */
+const SEEDED_TXNS: Txn[] = [
+  {
+    id: "txn-2026-07-29-carcompra-500",
+    date: "2026-07-29T22:00:00-05:00",
+    amount: 500,
+    kind: "income",
+    category: "clientes",
+    merchant: "CarCompra — Alex",
+    notes: "Cobro recibido.",
+    excluded: false,
+  },
+];
+
 /** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
 const GYM_COMMITMENT: Commitment = {
   id: "gym",
@@ -163,7 +181,7 @@ const GYM_COMMITMENT: Commitment = {
 export function seedState(): FinanceState {
   return {
     version: STATE_VERSION,
-    transactions: [],
+    transactions: SEEDED_TXNS.map((t) => ({ ...t })),
     accounts: [
       { id: "paypal", name: "PayPal", kind: "bank", balance: 4500 },
       { id: "wise", name: "Wise", kind: "bank", balance: 3600 },
@@ -290,14 +308,27 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   const base = seedState();
   if (!s || typeof s !== "object") return base;
 
+  const from = num(s.version, 1) || 1;
+
   // v1 → v2: el coworking y el gimnasio entran una sola vez en tableros ya
   // guardados. Solo mira la versión, no el contenido: si después los borra o
   // edita, el estado ya quedó estampado v2 y esta rama no vuelve a correr.
-  if ((num(s.version, 1) || 1) < 2 && Array.isArray(s.commitments)) {
+  if (from < 2 && Array.isArray(s.commitments)) {
     const have = new Set(s.commitments.map((c) => c && c.id));
     const missing = [COWORKING_COMMITMENT, GYM_COMMITMENT].filter((c) => !have.has(c.id));
     if (missing.length) {
       s = { ...s, commitments: [...s.commitments, ...missing.map((c) => ({ ...c }))] };
+    }
+  }
+
+  // v2 → v3: los cobros dictados por chat. Se filtran por id, así que volver a
+  // abrir la página no los duplica ni resucita uno borrado a mano después.
+  if (from < 3) {
+    const txns = Array.isArray(s.transactions) ? s.transactions : [];
+    const have = new Set(txns.map((t) => t && t.id));
+    const missing = SEEDED_TXNS.filter((t) => !have.has(t.id));
+    if (missing.length) {
+      s = { ...s, transactions: [...txns, ...missing.map((t) => ({ ...t }))] };
     }
   }
   const seen = new Set<string>();
