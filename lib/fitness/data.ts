@@ -432,12 +432,13 @@ export const RESEARCH: {
     id: "r-colina",
     name: "Colina",
     evidence: "moderada",
+    micro: "choline",
     what:
       "Nutriente esencial reconocido apenas en 1998 y por eso poco conocido: forma las membranas celulares y la acetilcolina, el neurotransmisor de la contracción muscular y la memoria. Los estudios de población muestran que la enorme mayoría no llega a la recomendación.",
     dose: "550 mg al día para un hombre adulto.",
     sources: "Yema de huevo (dos yemas ≈ 300 mg), hígado, soya, quinua y salmón.",
     yours:
-      "No aparece en tu registro y probablemente sea tu hueco más silencioso. Dos huevos enteros al día resuelven más de la mitad.",
+      "Hoy la cubriste al 81 % con tres yemas — era tu hueco más silencioso y lo tapaste sin proponértelo. Con dos huevos enteros diarios se sostiene solo.",
   },
   {
     id: "r-k2",
@@ -481,6 +482,80 @@ export const LOG: FitState = {
   },
 
   food: [
+    {
+      id: "f-2026-07-31-01",
+      at: "2026-07-31T08:00",
+      meal: "breakfast",
+      name: "Huevos (3 enteros + 2 claras)",
+      kcal: 250,
+      protein_g: 26,
+      carbs_g: 1.5,
+      fat_g: 14,
+      micros: {
+        // 3 yemas ≈ 440 mg de colina: el hueco que el panel de research
+        // marcaba como el más silencioso, tapado de una sentada
+        Colina: { amount: 445, unit: "mg" },
+        "Vitamina A": { amount: 222, unit: "µg" },
+        "Vitamina D": { amount: 3, unit: "µg" },
+        "Vitamina B12": { amount: 1.6, unit: "µg" },
+        "Folato (B9)": { amount: 66, unit: "µg" },
+        Selenio: { amount: 35, unit: "µg" },
+        "Fósforo": { amount: 220, unit: "mg" },
+        Hierro: { amount: 1.8, unit: "mg" },
+        Zinc: { amount: 1.5, unit: "mg" },
+        Calcio: { amount: 60, unit: "mg" },
+        Potasio: { amount: 330, unit: "mg" },
+      },
+      confidence: 0.85,
+      source: "claude",
+    },
+    {
+      id: "f-2026-07-31-02",
+      at: "2026-07-31T08:10",
+      meal: "breakfast",
+      name: "2 kiwis",
+      kcal: 84,
+      protein_g: 1.6,
+      carbs_g: 20,
+      fat_g: 0.8,
+      fiber_g: 4,
+      micros: {
+        "Vitamina C": { amount: 128, unit: "mg" },
+        "Vitamina K": { amount: 56, unit: "µg" },
+        "Vitamina E": { amount: 2, unit: "mg" },
+        "Folato (B9)": { amount: 34, unit: "µg" },
+        Potasio: { amount: 430, unit: "mg" },
+      },
+      confidence: 0.85,
+      source: "claude",
+    },
+    {
+      id: "f-2026-07-31-03",
+      at: "2026-07-31T08:15",
+      meal: "breakfast",
+      name: "Chía (1 cucharada) con arándanos",
+      kcal: 104,
+      protein_g: 2.6,
+      carbs_g: 17,
+      fat_g: 4,
+      fiber_g: 6,
+      micros: {
+        // los 2 400 mg de la chía son ALA, no EPA/DHA — el cuerpo convierte
+        // apenas un 5–10 %, así que la barra de omega-3 se ve mejor de lo que
+        // realmente rinde
+        "Omega-3": { amount: 2400, unit: "mg" },
+        Calcio: { amount: 76, unit: "mg" },
+        Magnesio: { amount: 40, unit: "mg" },
+        "Fósforo": { amount: 95, unit: "mg" },
+        "Vitamina C": { amount: 8, unit: "mg" },
+        "Vitamina K": { amount: 15, unit: "µg" },
+        Potasio: { amount: 62, unit: "mg" },
+        Hierro: { amount: 0.9, unit: "mg" },
+      },
+      // porción de arándanos estimada en un puñado (~80 g)
+      confidence: 0.6,
+      source: "claude",
+    },
     {
       id: "f-2026-07-29-01",
       at: "2026-07-29T07:30",
@@ -736,6 +811,19 @@ export const LOG: FitState = {
 
   workouts: [
     {
+      id: "w-2026-07-31-01",
+      at: "2026-07-31T07:00",
+      type: "cardio",
+      name: "Caminata diaria",
+      // 10 000 pasos ≈ 7,5 km ≈ 100 min a paso moderado (3,5 MET para 81,5 kg).
+      // Si los "10k" eran kilómetros y no pasos, esto se queda corto ~100 kcal.
+      duration_min: 100,
+      kcal: 470,
+      distance_km: 7.5,
+      notes: "Hábito diario declarado. Registrada solo hoy: no confirmamos los días anteriores.",
+      source: "claude",
+    },
+    {
       id: "w-2026-07-28-01",
       at: "2026-07-28T18:30",
       type: "strength",
@@ -766,6 +854,13 @@ export const LOG: FitState = {
       source: "manual",
     },
     {
+      id: "b-2026-07-31",
+      at: "2026-07-31T07:00",
+      steps: 10000,
+      notes: "Caminata diaria.",
+      source: "manual",
+    },
+    {
       id: "b-2026-07-29",
       at: "2026-07-29T06:00",
       weight_kg: 81.5,
@@ -775,6 +870,22 @@ export const LOG: FitState = {
   ],
 
   insights: [
+    {
+      id: "i-2026-07-31-01",
+      at: "2026-07-31T09:30",
+      title: "Las dos yemas que botaste eran la mejor parte",
+      body:
+        "La clara es proteína y poco más; la yema lleva casi toda la colina, la vitamina A, la D, la B12 y el selenio del huevo. Tirar dos te ahorró unas 95 kcal y 10 g de grasa — pero tu objetivo son 75 g de grasa al día y llevas 19. El espacio lo tienes. Si fue por colesterol, la evidencia de las últimas dos décadas es clara: el colesterol de la dieta apenas mueve el de la sangre en la mayoría de la gente, y las guías de EE. UU. le quitaron el límite en 2015.",
+      tags: ["nutricion"],
+    },
+    {
+      id: "i-2026-07-31-02",
+      at: "2026-07-31T09:30",
+      title: "Colina al 81 % — el hueco silencioso, tapado",
+      body:
+        "Tres yemas dan ~440 mg de los 550 recomendados. Era el nutriente que el panel de research marcaba como tu mayor punto ciego, y lo cerraste sin proponértelo. Ojo con el omega-3 de la chía: sus 2 400 mg son ALA, y el cuerpo convierte apenas un 5–10 % a EPA/DHA. La barra se ve bien; el rendimiento real sigue viniendo de las sardinas.",
+      tags: ["micronutrientes"],
+    },
     {
       id: "i-2026-07-29-03",
       at: "2026-07-29T14:00",
