@@ -531,329 +531,331 @@ export function ServiceDetail({ slug }: { slug: string }) {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="services" megaMenus />
+      <main>
 
-      {/* HERO */}
-      <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "90px 0 70px", textAlign: "center" }}>
-        <div style={{ maxWidth: 980, margin: "0 auto", padding: "0 40px" }}>
-          <Pill>{s.tag}</Pill>
-          <h1
-            style={{
-              fontWeight: 500,
-              fontSize: "clamp(38px,4.4vw,68px)",
-              lineHeight: 1.04,
-              letterSpacing: "-.025em",
-              margin: "26px 0 0",
-              color: "var(--ink)",
-            }}
-          >
-            {s.title}
-          </h1>
-          <p style={{ fontSize: 19, lineHeight: 1.55, color: "#6b6875", maxWidth: 620, margin: "22px auto 0" }}>
-            {s.subtitle}
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 34, flexWrap: "wrap" }}>
-            <a
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                window.dispatchEvent(new CustomEvent("mt:open-form"));
+        {/* HERO */}
+        <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "90px 0 70px", textAlign: "center" }}>
+          <div style={{ maxWidth: 980, margin: "0 auto", padding: "0 40px" }}>
+            <Pill>{s.tag}</Pill>
+            <h1
+              style={{
+                fontWeight: 500,
+                fontSize: "clamp(38px,4.4vw,68px)",
+                lineHeight: 1.04,
+                letterSpacing: "-.025em",
+                margin: "26px 0 0",
+                color: "var(--ink)",
               }}
-              className="btn-dark"
-              style={btnDark}
             >
-              {es ? "INICIAR PROYECTO" : "START A PROJECT"}
-            </a>
-            <Link href="/services" className="btn-light" style={btnLight}>
-              {es ? "TODOS LOS SERVICIOS" : "ALL SERVICES"}
-            </Link>
-          </div>
-        </div>
-
-        {/* hero figure — full-width visual, together.ai product-page style */}
-        <div style={{ maxWidth: 1280, margin: "64px auto 0", padding: "0 40px" }}>
-          <div style={{ position: "relative", borderRadius: 18, overflow: "hidden", aspectRatio: "21/8", minHeight: 220 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/services/hero-${slug}.webp`}
-              alt=""
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* WHY */}
-      <section style={{ background: "#fff", padding: "100px 0 0" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <h2 style={h2Center}>{es ? `Por qué MindfulTech para ${s.name}` : `Why MindfulTech for ${s.name}`}</h2>
-          <p style={subCenter}>{es ? "Oficio de nivel industrial, hecho a la medida de tu producto." : "Industrial-grade craft, custom-built for your product."}</p>
-          <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 26 }}>
-            {s.why.map((w, i) => (
-              <div
-                key={w.title}
-                style={{
-                  position: "relative",
-                  background: WHY_COLORS[i][0],
-                  borderRadius: 8,
-                  padding: 24,
-                  minHeight: 210,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
+              {s.title}
+            </h1>
+            <p style={{ fontSize: 19, lineHeight: 1.55, color: "#6b6875", maxWidth: 620, margin: "22px auto 0" }}>
+              {s.subtitle}
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 34, flexWrap: "wrap" }}>
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent("mt:open-form"));
                 }}
+                className="btn-dark"
+                style={btnDark}
               >
-                <div style={{ fontWeight: 500, fontSize: 21, letterSpacing: "-.01em" }}>{w.title}</div>
-                <div style={{ fontSize: 13.5, lineHeight: 1.6, color: WHY_COLORS[i][1] }}>{w.desc}</div>
-                {i < 2 && (
-                  <span
+                {es ? "INICIAR PROYECTO" : "START A PROJECT"}
+              </a>
+              <Link href="/services" className="btn-light" style={btnLight}>
+                {es ? "TODOS LOS SERVICIOS" : "ALL SERVICES"}
+              </Link>
+            </div>
+          </div>
+
+          {/* hero figure — full-width visual, together.ai product-page style */}
+          <div style={{ maxWidth: 1280, margin: "64px auto 0", padding: "0 40px" }}>
+            <div style={{ position: "relative", borderRadius: 18, overflow: "hidden", aspectRatio: "21/8", minHeight: 220 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/services/hero-${slug}.webp`}
+                alt=""
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* WHY */}
+        <section style={{ background: "#fff", padding: "100px 0 0" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <h2 style={h2Center}>{es ? `Por qué MindfulTech para ${s.name}` : `Why MindfulTech for ${s.name}`}</h2>
+            <p style={subCenter}>{es ? "Oficio de nivel industrial, hecho a la medida de tu producto." : "Industrial-grade craft, custom-built for your product."}</p>
+            <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 26 }}>
+              {s.why.map((w, i) => (
+                <div
+                  key={w.title}
+                  style={{
+                    position: "relative",
+                    background: WHY_COLORS[i][0],
+                    borderRadius: 8,
+                    padding: 24,
+                    minHeight: 210,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div style={{ fontWeight: 500, fontSize: 21, letterSpacing: "-.01em" }}>{w.title}</div>
+                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: WHY_COLORS[i][1] }}>{w.desc}</div>
+                  {i < 2 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: -19,
+                        top: "50%",
+                        width: 12,
+                        height: 5,
+                        background: "var(--accent-light)",
+                        zIndex: 2,
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* HIGHLIGHT (dark stat band) */}
+        <section style={{ background: "#fff", padding: "90px 0 0" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <div
+              className="stack-2"
+              style={{
+                background: "#0d0a1f",
+                borderRadius: 16,
+                padding: "clamp(36px,4.6vw,64px)",
+                display: "grid",
+                gridTemplateColumns: "1.25fr 1fr",
+                gap: "clamp(28px,4vw,56px)",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".14em", color: "var(--accent)" }}>
+                  {es ? "PROBADO EN PRODUCCIÓN" : "PROVEN IN PRODUCTION"}
+                </span>
+                <h2 style={{ fontWeight: 500, fontSize: "clamp(26px,2.8vw,42px)", letterSpacing: "-.02em", lineHeight: 1.1, margin: "14px 0 12px", color: "#fff" }}>
+                  {s.highlight.title}
+                </h2>
+                <p style={{ fontSize: 16.5, lineHeight: 1.6, color: "#8f8ba4", margin: 0, maxWidth: 520 }}>{s.highlight.desc}</p>
+                {s.highlight.caseHref && (
+                  <Link
+                    href={s.highlight.caseHref}
+                    className="btn-white"
                     style={{
-                      position: "absolute",
-                      right: -19,
-                      top: "50%",
-                      width: 12,
-                      height: 5,
-                      background: "var(--accent-light)",
-                      zIndex: 2,
+                      display: "inline-block",
+                      textDecoration: "none",
+                      fontFamily: MONO,
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      letterSpacing: ".12em",
+                      background: "#fff",
+                      color: "#0d0a1f",
+                      padding: "13px 20px",
+                      borderRadius: 6,
+                      marginTop: 24,
                     }}
-                  />
+                  >
+                    {es ? "VER CASO DE ESTUDIO →" : "VIEW CASE STUDY →"}
+                  </Link>
                 )}
               </div>
-            ))}
+              <div
+                style={{
+                  background: "#16132b",
+                  border: "1px solid rgba(255,255,255,.08)",
+                  borderRadius: 12,
+                  padding: "clamp(26px,3vw,40px)",
+                }}
+              >
+                <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".14em", color: "#8f8ba4" }}>
+                  {s.highlight.label}
+                </div>
+                <div style={{ fontWeight: 500, fontSize: "clamp(56px,6vw,92px)", letterSpacing: "-.03em", lineHeight: 1, color: "#fff", margin: "14px 0 10px" }}>
+                  {s.highlight.stat}
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.08)", overflow: "hidden", marginTop: 18 }}>
+                  <div style={{ width: "82%", height: "100%", background: "linear-gradient(90deg,var(--accent-light),var(--accent))" }} />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* HIGHLIGHT (dark stat band) */}
-      <section style={{ background: "#fff", padding: "90px 0 0" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+        {/* HOW WE WORK */}
+        <section style={{ background: "#fff", padding: "100px 0 0" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <h2 style={h2Center}>{es ? "Cómo trabajamos" : "How we work"}</h2>
+            <p style={subCenter}>{es ? "Un camino claro de la primera conversación a producción." : "A clear path from first conversation to production."}</p>
+            <div className="stack-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 26 }}>
+              {s.steps.map((st, i) => (
+                <div key={st.title} style={{ borderTop: "2px solid rgba(14,13,18,.14)", paddingTop: 18 }}>
+                  <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".12em", color: "var(--accent-deep)" }}>
+                    {String(i + 1).padStart(2, "0")} / {String(s.steps.length).padStart(2, "0")}
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 19, letterSpacing: "-.01em", margin: "10px 0 8px" }}>{st.title}</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.55, color: "#6b6875" }}>{st.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ENGAGEMENT MODELS */}
+        <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f6fb 40%,#eef1f8)", padding: "100px 0 100px", marginTop: 90 }}>
           <div
             className="stack-2"
             style={{
-              background: "#0d0a1f",
-              borderRadius: 16,
-              padding: "clamp(36px,4.6vw,64px)",
+              maxWidth: 1280,
+              margin: "0 auto",
+              padding: "0 40px",
               display: "grid",
-              gridTemplateColumns: "1.25fr 1fr",
-              gap: "clamp(28px,4vw,56px)",
-              alignItems: "center",
+              gridTemplateColumns: "0.9fr 1.4fr",
+              gap: "clamp(28px,4vw,64px)",
+              alignItems: "start",
             }}
           >
             <div>
-              <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".14em", color: "var(--accent)" }}>
-                {es ? "PROBADO EN PRODUCCIÓN" : "PROVEN IN PRODUCTION"}
-              </span>
-              <h2 style={{ fontWeight: 500, fontSize: "clamp(26px,2.8vw,42px)", letterSpacing: "-.02em", lineHeight: 1.1, margin: "14px 0 12px", color: "#fff" }}>
-                {s.highlight.title}
+              <h2 style={{ fontWeight: 500, fontSize: "clamp(28px,3vw,44px)", letterSpacing: "-.02em", lineHeight: 1.08, margin: 0 }}>
+                {es ? "Dos formas de trabajar juntos" : "Two ways to work together"}
               </h2>
-              <p style={{ fontSize: 16.5, lineHeight: 1.6, color: "#8f8ba4", margin: 0, maxWidth: 520 }}>{s.highlight.desc}</p>
-              {s.highlight.caseHref && (
-                <Link
-                  href={s.highlight.caseHref}
-                  className="btn-white"
+              <p style={{ fontSize: 17, lineHeight: 1.6, color: "#6b6875", margin: "16px 0 0", maxWidth: 380 }}>
+                {es ? "Empieza pequeño o ve de inicio a fin — ambas vienen con gente senior y reportes honestos." : "Start small or go end to end — both come with senior people and honest reporting."}
+              </p>
+            </div>
+            <div className="stack-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              {s.engage.map((e) => (
+                <div
+                  key={e.title}
                   style={{
-                    display: "inline-block",
-                    textDecoration: "none",
-                    fontFamily: MONO,
-                    fontSize: 11.5,
-                    fontWeight: 500,
-                    letterSpacing: ".12em",
                     background: "#fff",
-                    color: "#0d0a1f",
-                    padding: "13px 20px",
-                    borderRadius: 6,
-                    marginTop: 24,
-                  }}
-                >
-                  {es ? "VER CASO DE ESTUDIO →" : "VIEW CASE STUDY →"}
-                </Link>
-              )}
-            </div>
-            <div
-              style={{
-                background: "#16132b",
-                border: "1px solid rgba(255,255,255,.08)",
-                borderRadius: 12,
-                padding: "clamp(26px,3vw,40px)",
-              }}
-            >
-              <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".14em", color: "#8f8ba4" }}>
-                {s.highlight.label}
-              </div>
-              <div style={{ fontWeight: 500, fontSize: "clamp(56px,6vw,92px)", letterSpacing: "-.03em", lineHeight: 1, color: "#fff", margin: "14px 0 10px" }}>
-                {s.highlight.stat}
-              </div>
-              <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.08)", overflow: "hidden", marginTop: 18 }}>
-                <div style={{ width: "82%", height: "100%", background: "linear-gradient(90deg,var(--accent-light),var(--accent))" }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW WE WORK */}
-      <section style={{ background: "#fff", padding: "100px 0 0" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <h2 style={h2Center}>{es ? "Cómo trabajamos" : "How we work"}</h2>
-          <p style={subCenter}>{es ? "Un camino claro de la primera conversación a producción." : "A clear path from first conversation to production."}</p>
-          <div className="stack-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 26 }}>
-            {s.steps.map((st, i) => (
-              <div key={st.title} style={{ borderTop: "2px solid rgba(14,13,18,.14)", paddingTop: 18 }}>
-                <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".12em", color: "var(--accent-deep)" }}>
-                  {String(i + 1).padStart(2, "0")} / {String(s.steps.length).padStart(2, "0")}
-                </div>
-                <div style={{ fontWeight: 600, fontSize: 19, letterSpacing: "-.01em", margin: "10px 0 8px" }}>{st.title}</div>
-                <div style={{ fontSize: 14, lineHeight: 1.55, color: "#6b6875" }}>{st.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ENGAGEMENT MODELS */}
-      <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f6fb 40%,#eef1f8)", padding: "100px 0 100px", marginTop: 90 }}>
-        <div
-          className="stack-2"
-          style={{
-            maxWidth: 1280,
-            margin: "0 auto",
-            padding: "0 40px",
-            display: "grid",
-            gridTemplateColumns: "0.9fr 1.4fr",
-            gap: "clamp(28px,4vw,64px)",
-            alignItems: "start",
-          }}
-        >
-          <div>
-            <h2 style={{ fontWeight: 500, fontSize: "clamp(28px,3vw,44px)", letterSpacing: "-.02em", lineHeight: 1.08, margin: 0 }}>
-              {es ? "Dos formas de trabajar juntos" : "Two ways to work together"}
-            </h2>
-            <p style={{ fontSize: 17, lineHeight: 1.6, color: "#6b6875", margin: "16px 0 0", maxWidth: 380 }}>
-              {es ? "Empieza pequeño o ve de inicio a fin — ambas vienen con gente senior y reportes honestos." : "Start small or go end to end — both come with senior people and honest reporting."}
-            </p>
-          </div>
-          <div className="stack-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-            {s.engage.map((e) => (
-              <div
-                key={e.title}
-                style={{
-                  background: "#fff",
-                  border: "1px solid rgba(14,13,18,.08)",
-                  borderRadius: 14,
-                  padding: 24,
-                  display: "flex",
-                  flexDirection: "column",
-                  boxShadow: "0 20px 50px -40px rgba(14,13,18,.4)",
-                }}
-              >
-                <div style={{ fontWeight: 600, fontSize: 20, letterSpacing: "-.01em" }}>{e.title}</div>
-                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: "#8b8896", margin: "8px 0 16px" }}>
-                  {e.forLabel}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 11, marginBottom: 22 }}>
-                  {e.bullets.map((b) => (
-                    <div key={b} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-deep)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", marginTop: 3 }}>
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                      <span style={{ fontSize: 13.5, lineHeight: 1.5, color: "#44424d" }}>{b}</span>
-                    </div>
-                  ))}
-                </div>
-                <a
-                  href="mailto:info@mindfultech.ec"
-                  className="btn-dark"
-                  style={{
-                    marginTop: "auto",
-                    textAlign: "center",
-                    textDecoration: "none",
-                    fontFamily: MONO,
-                    fontSize: 11.5,
-                    fontWeight: 500,
-                    letterSpacing: ".12em",
-                    background: "#0e0d12",
-                    color: "#fff",
-                    padding: "14px 18px",
-                    borderRadius: 6,
-                  }}
-                >
-                  {es ? "EMPEZAR" : "GET STARTED"}
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHAT'S INCLUDED */}
-      <section style={{ background: "#fff", padding: "100px 0 40px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <h2 style={h2Center}>{es ? "Qué incluye" : "What's included"}</h2>
-          <p style={subCenter}>{es ? "Todo se entrega con investigación, documentación y un equipo que responde." : "Everything ships with research, documentation, and a team that stays accountable."}</p>
-          <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-            {s.includes.map((it) => (
-              <div
-                key={it.title}
-                style={{
-                  border: "1px solid rgba(14,13,18,.1)",
-                  borderRadius: 12,
-                  padding: 22,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                }}
-              >
-                <span
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 9,
-                    background: "var(--accent-tint)",
+                    border: "1px solid rgba(14,13,18,.08)",
+                    borderRadius: 14,
+                    padding: 24,
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    flexDirection: "column",
+                    boxShadow: "0 20px 50px -40px rgba(14,13,18,.4)",
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-deep)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                </span>
-                <div style={{ fontWeight: 600, fontSize: 17.5, letterSpacing: "-.01em" }}>{it.title}</div>
-                <div style={{ fontSize: 14, lineHeight: 1.55, color: "#6b6875" }}>{it.desc}</div>
-              </div>
-            ))}
+                  <div style={{ fontWeight: 600, fontSize: 20, letterSpacing: "-.01em" }}>{e.title}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: "#8b8896", margin: "8px 0 16px" }}>
+                    {e.forLabel}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 11, marginBottom: 22 }}>
+                    {e.bullets.map((b) => (
+                      <div key={b} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-deep)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", marginTop: 3 }}>
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                        <span style={{ fontSize: 13.5, lineHeight: 1.5, color: "#44424d" }}>{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <a
+                    href="mailto:info@mindfultech.ec"
+                    className="btn-dark"
+                    style={{
+                      marginTop: "auto",
+                      textAlign: "center",
+                      textDecoration: "none",
+                      fontFamily: MONO,
+                      fontSize: 11.5,
+                      fontWeight: 500,
+                      letterSpacing: ".12em",
+                      background: "#0e0d12",
+                      color: "#fff",
+                      padding: "14px 18px",
+                      borderRadius: 6,
+                    }}
+                  >
+                    {es ? "EMPEZAR" : "GET STARTED"}
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
-          {/* tools */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap", marginTop: 56 }}>
-            <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".16em", color: "#8b8896", marginRight: 6 }}>
-              {es ? "CONSTRUIMOS CON" : "WE SHIP WITH"}
-            </span>
-            {s.tools.map((t) => (
-              <span
-                key={t}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  fontFamily: MONO,
-                  fontSize: 11,
-                  letterSpacing: ".08em",
-                  color: "#eceaf4",
-                  background: "#17151f",
-                  border: "1px solid rgba(255,255,255,.14)",
-                  borderRadius: 7,
-                  padding: "9px 13px",
-                }}
-              >
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)" }} />
-                {t}
+        {/* WHAT'S INCLUDED */}
+        <section style={{ background: "#fff", padding: "100px 0 40px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <h2 style={h2Center}>{es ? "Qué incluye" : "What's included"}</h2>
+            <p style={subCenter}>{es ? "Todo se entrega con investigación, documentación y un equipo que responde." : "Everything ships with research, documentation, and a team that stays accountable."}</p>
+            <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+              {s.includes.map((it) => (
+                <div
+                  key={it.title}
+                  style={{
+                    border: "1px solid rgba(14,13,18,.1)",
+                    borderRadius: 12,
+                    padding: 22,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 9,
+                      background: "var(--accent-tint)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-deep)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  </span>
+                  <div style={{ fontWeight: 600, fontSize: 17.5, letterSpacing: "-.01em" }}>{it.title}</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.55, color: "#6b6875" }}>{it.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* tools */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap", marginTop: 56 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".16em", color: "#8b8896", marginRight: 6 }}>
+                {es ? "CONSTRUIMOS CON" : "WE SHIP WITH"}
               </span>
-            ))}
+              {s.tools.map((t) => (
+                <span
+                  key={t}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontFamily: MONO,
+                    fontSize: 11,
+                    letterSpacing: ".08em",
+                    color: "#eceaf4",
+                    background: "#17151f",
+                    border: "1px solid rgba(255,255,255,.14)",
+                    borderRadius: 7,
+                    padding: "9px 13px",
+                  }}
+                >
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)" }} />
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA + footer */}
+        {/* CTA + footer */}
+      </main>
     </div>
   );
 }

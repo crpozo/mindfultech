@@ -153,7 +153,9 @@ export function ClientMap() {
               fontFamily: MONO,
               fontSize: 11,
               letterSpacing: ".16em",
-              color: "var(--accent-deep)",
+              /* deeper green than --accent-deep — that one is 3.2:1 on the
+                 tint, this reads 5.5:1 */
+              color: "#2e6e63",
               background: "var(--accent-tint)",
               padding: "7px 13px",
               borderRadius: 999,

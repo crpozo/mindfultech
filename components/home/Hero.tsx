@@ -12,14 +12,18 @@ function openForm(e: React.MouseEvent) {
 }
 
 // Every client logo renders at this exact height for a uniform logo wall.
+// `w` is the display width at that height (intrinsic aspect ratio) so the
+// browser can reserve space before the file arrives — Lighthouse unsized-images.
+// Raster logos point at -m variants resized to 2× display height: they render
+// as brightness(0) silhouettes, so the full-resolution art was wasted bytes.
 const LOGO_H = 30;
-const MARQUEE: { name: string; img?: string; h?: number }[] = [
-  { name: "USFQ", img: "/logo-usfq.svg", h: LOGO_H },
-  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo.webp", h: LOGO_H },
-  { name: "Helixona", img: "/helixona-logo.webp", h: LOGO_H },
-  { name: "Western Fence Supply", img: "/wfs-logo.svg", h: LOGO_H },
+const MARQUEE: { name: string; img?: string; h?: number; w?: number }[] = [
+  { name: "USFQ", img: "/logo-usfq.svg", h: LOGO_H, w: 92 },
+  { name: "ThemedMotion", img: "/portfolio/themedmotion-logo-m.webp", h: LOGO_H, w: 132 },
+  { name: "Helixona", img: "/helixona-logo-m.webp", h: LOGO_H, w: 135 },
+  { name: "Western Fence Supply", img: "/wfs-logo.svg", h: LOGO_H, w: 79 },
   { name: "CarCompraCorp" },
-  { name: "PARC Home Care", img: "/parc-logo.webp", h: LOGO_H },
+  { name: "PARC Home Care", img: "/parc-logo-m.webp", h: LOGO_H, w: 86 },
 ];
 
 // Discipline chips floating around the 3D brain (percent coords of the stage).
@@ -467,6 +471,12 @@ export function Hero() {
                     key={s + "-" + m.name}
                     src={m.img}
                     alt={m.name}
+                    width={m.w}
+                    height={m.h || 26}
+                    /* below the hero copy — don't let the logos race the
+                       headline font for bandwidth on a slow connection */
+                    loading="lazy"
+                    decoding="async"
                     style={{
                       height: m.h || 26,
                       width: "auto",

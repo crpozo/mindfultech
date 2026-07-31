@@ -7,11 +7,28 @@ import { POSTS } from "@/lib/blog/posts";
 
 const MONO = "var(--mono)";
 
+/* Right-sized card variants (Lighthouse: uses-responsive-images). Las tarjetas
+   se renderizan mucho más chicas que los originales, así que servimos copias a
+   2× el ancho de tarjeta. Los originales en /art y /portfolio quedan intactos —
+   las páginas del blog los siguen usando a tamaño completo. */
+const CARD_VARIANTS: Record<string, { src: string; width: number; height: number }> = {
+  "/art/ailab.webp": { src: "/news/ailab-card.webp", width: 1120, height: 700 },
+  "/portfolio/eventflow-banner.webp": { src: "/news/eventflow-card.webp", width: 728, height: 416 },
+  "/art/healthcare.webp": { src: "/news/healthcare-card.webp", width: 728, height: 410 },
+  "/art/research.webp": { src: "/news/research-card.webp", width: 728, height: 546 },
+};
+
+// covers not in the map (a new post) fall back to the original at its usual size
+function cardImg(cover: string) {
+  return CARD_VARIANTS[cover] ?? { src: cover, width: 1200, height: 750 };
+}
+
 export function NewsGrid() {
   const { lang } = useLang();
   const es = lang === "es";
   const featured = POSTS[0];
   const side = POSTS.slice(1);
+  const featuredImg = cardImg(featured.cover);
 
   return (
     <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
@@ -77,7 +94,16 @@ export function NewsGrid() {
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img decoding="async" src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              {/* below the fold — lazy, con dimensiones intrínsecas para evitar layout shift */}
+              <img
+                loading="lazy"
+                decoding="async"
+                src={featuredImg.src}
+                width={featuredImg.width}
+                height={featuredImg.height}
+                alt=""
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
             <span
               style={{
@@ -112,7 +138,9 @@ export function NewsGrid() {
 
           {/* side list */}
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {side.map((s, i) => (
+            {side.map((s, i) => {
+              const img = cardImg(s.cover);
+              return (
               <Link
                 key={s.slug}
                 href={`/blog/${s.slug}`}
@@ -129,7 +157,15 @@ export function NewsGrid() {
               >
                 <div className="news-thumb" style={{ background: s.bg }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img decoding="async" src={s.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    loading="lazy"
+                    decoding="async"
+                    src={img.src}
+                    width={img.width}
+                    height={img.height}
+                    alt=""
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 </div>
                 <div>
                   <span
@@ -160,7 +196,8 @@ export function NewsGrid() {
                   <p style={{ fontSize: 14, lineHeight: 1.5, color: "#6b6875", margin: 0 }}>{s.excerpt[lang]}</p>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

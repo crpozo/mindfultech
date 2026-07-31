@@ -169,12 +169,21 @@ export function ClientStories() {
                same /work payload once per card, mid-scroll */
             prefetch={false}
             className="pf-panel"
-            aria-label={`${p.brand} — ${p.title[lang]}`}
+            /* no aria-label — the visible content (brand, title, meta, CTA)
+               already names the link */
             style={{ "--pf": p.accent } as React.CSSProperties}
           >
             <span className="pf-media" aria-hidden>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img decoding="async" className="pf-img" src={p.img} alt="" />
+              <img
+                decoding="async"
+                loading="lazy"
+                width={760}
+                height={1351}
+                className="pf-img"
+                src={p.img}
+                alt=""
+              />
             </span>
             <div className="pf-reveal">
               <div className="pf-eyebrow">{p.brand}</div>
@@ -233,8 +242,10 @@ export function ClientStories() {
           </svg>
         </button>
 
-        {/* phone-only position indicator — CSS hides it on wider screens */}
-        <div className="pf-dots" role="tablist" aria-label={es ? "Proyecto" : "Project"}>
+        {/* phone-only position indicator — CSS hides it on wider screens.
+            role="group", not tablist: the buttons scroll a carousel, they
+            don't control tab panels */}
+        <div className="pf-dots" role="group" aria-label={es ? "Proyecto" : "Project"}>
           {PROJECTS.map((p, i) => (
             <button
               key={p.href}

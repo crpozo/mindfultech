@@ -419,7 +419,15 @@ export function ContactFooter() {
           >
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.webp" alt="MindfulTech" style={{ height: 34, width: "auto", display: "block" }} />
+              <img
+                src="/brand/logo.webp"
+                alt="MindfulTech"
+                width={105}
+                height={34}
+                loading="lazy"
+                decoding="async"
+                style={{ height: 34, width: "auto", display: "block" }}
+              />
             </div>
             {FOOTER_COLS.map((col) => {
               const colOpen = openCol === col.heading.en;
@@ -500,7 +508,8 @@ export function ContactFooter() {
               marginTop: 44,
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".12em", color: "#8b8896" }}>
+            {/* darker muted — #8b8896 was 3.5:1 on white, this is 5.3:1 */}
+            <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".12em", color: "#6d6a77" }}>
               © 2026 MINDFULTECH.
               <br />
               ALL RIGHTS RESERVED.

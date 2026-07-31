@@ -534,13 +534,21 @@ export function SiteHeader({
                 src="/brand/logo.webp"
                 alt="MindfulTech"
                 className="logo-full"
+                width={112}
+                height={36}
                 style={{ height: 36, width: "auto", display: "block" }}
               />
+              {/* the file is 220×220 (1:1), so 32×32 reserves the right box
+                  before it loads; CSS still owns the display size */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/logo-mark.webp"
+                /* 128px variant — the original 220px file spent 13KiB the
+                   32px slot never showed */
+                src="/brand/logo-mark-128.webp"
                 alt="MindfulTech"
                 className="logo-mark"
+                width={32}
+                height={32}
                 style={{ height: 32, width: "auto", display: "none" }}
               />
             </Link>

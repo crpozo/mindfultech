@@ -16,12 +16,36 @@ const mono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
   variable: "--font-mono",
   display: "swap",
+  // mono only paints small labels — don't let its preload race the headline
+  // font for bandwidth on a slow connection (the h1 swap is what sets LCP)
+  preload: false,
 });
 
+const SITE_TITLE = "MindfulTech — Building the future with AI software";
+const SITE_DESC =
+  "Full-stack software lab, powered by UX research and applied AI. Human-centered products, built in Quito, Ecuador.";
+
 export const metadata: Metadata = {
-  title: "MindfulTech — Building the future with AI software",
-  description:
-    "Full-stack software lab, powered by UX research and applied AI. Human-centered products, built in Quito, Ecuador.",
+  // absolute base for og:url / og:image on the static export
+  metadataBase: new URL("https://mindfultech.ec"),
+  title: SITE_TITLE,
+  description: SITE_DESC,
+  openGraph: {
+    siteName: "MindfulTech",
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESC,
+    // tarjeta social — el hero de producto que ya vive en /art
+    images: [{ url: "/art/product.webp", width: 1200, height: 1020, alt: "MindfulTech" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESC,
+    images: ["/art/product.webp"],
+  },
 };
 
 export default function RootLayout({

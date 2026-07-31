@@ -181,7 +181,7 @@ export function FullStackLab() {
             textAlign: "center",
             fontSize: 20,
             lineHeight: 1.5,
-            color: "#8b8896",
+            color: "#64616e",
             fontWeight: 400,
             maxWidth: 640,
             margin: "20px auto 56px",
@@ -301,6 +301,9 @@ export function FullStackLab() {
                 <Link
                   href="/services"
                   className="btn-dark"
+                  /* the panel title IS the link text — three bare "learn more"
+                     links to the same URL flunk the SEO link-text audit, which
+                     reads visible text and ignores aria-label */
                   style={{
                     textDecoration: "none",
                     display: "inline-block",
@@ -314,7 +317,7 @@ export function FullStackLab() {
                     borderRadius: 6,
                   }}
                 >
-                  {es ? "VER MÁS" : "LEARN MORE"}
+                  {es ? `VER ${p.title.es.toUpperCase()}` : `EXPLORE ${p.title.en.toUpperCase()}`}
                 </Link>
                 <div style={{ borderTop: "1px solid rgba(14,13,18,.08)", marginTop: 28 }}>
                   {p.rows.map((r, ri) => (
@@ -364,7 +367,10 @@ export function FullStackLab() {
 
           {/* the per-tab diagram is decorative and needs width to read —
               hidden on phones, where it only added sideways scroll */}
-          <div className="lab-visual">
+          {/* decorative mockups — every label here is illustration, duplicated
+              in real text on the left, so it's hidden from AT (which also
+              exempts its tiny gray captions from contrast checks) */}
+          <div className="lab-visual" aria-hidden="true">
             <LabVisual active={cur} />
           </div>
         </div>
@@ -405,7 +411,7 @@ const mlabel: React.CSSProperties = {
   fontFamily: MONO,
   fontSize: 10,
   letterSpacing: ".14em",
-  color: "#8b8896",
+  color: "#64616e",
 };
 
 /* ---- UX Design: a design-tool canvas (palette + components + tokens) ---- */
@@ -435,7 +441,7 @@ function UXVisual() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid rgba(14,13,18,.07)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Dots />
-            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#8b8896" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#64616e" }}>
               Design <span style={{ color: "#0e0d12" }}>· Prototype</span>
             </span>
           </div>
@@ -488,7 +494,7 @@ function UXVisual() {
               <span style={{ display: "block", width: "62%", height: 8, borderRadius: 4, background: "#e4e3ea" }} />
               <span style={{ display: "block", width: "40%", height: 7, borderRadius: 4, background: "#eeedf2", marginTop: 7 }} />
             </div>
-            <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "var(--accent)", background: "var(--accent-tint)", padding: "5px 8px", borderRadius: 4 }}>CARD</span>
+            <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "#2e6e63", background: "var(--accent-tint)", padding: "5px 8px", borderRadius: 4 }}>CARD</span>
           </div>
         </div>
 
@@ -507,7 +513,7 @@ function UXVisual() {
             <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 9 }}>
               <span style={{ width: 14, height: 14, borderRadius: 4, background: t.dot, boxShadow: "inset 0 0 0 1px rgba(14,13,18,.1)" }} />
               <span style={{ fontSize: 12, color: "#44424d", flex: 1 }}>{t.name}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#8b8896" }}>{t.val}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#64616e" }}>{t.val}</span>
             </div>
           ))}
         </div>
@@ -539,7 +545,7 @@ function EngVisual() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid rgba(14,13,18,.07)" }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".12em", color: "#8b8896" }}>CI · PIPELINE</span>
+          <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".12em", color: "#64616e" }}>CI · PIPELINE</span>
           <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".1em", color: "#0e0d12", background: "#6fd3b8", padding: "5px 9px", borderRadius: 4 }}>✓ PASSED</span>
         </div>
         <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -547,7 +553,7 @@ function EngVisual() {
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#e7f7ef", color: "#1f9d6b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>✓</span>
               <span style={{ fontSize: 13.5, fontWeight: 600, flex: 1 }}>{label}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#8b8896" }}>{meta}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, color: "#64616e" }}>{meta}</span>
             </div>
           ))}
           <div style={{ height: 6, borderRadius: 3, background: "#eef1f6", overflow: "hidden", marginTop: 2 }}>
@@ -616,13 +622,13 @@ function AIVisual() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid rgba(14,13,18,.07)", flex: "none" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Dots />
-            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#8b8896" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11.5, color: "#64616e" }}>
               ai-workflow <span style={{ color: "#0e0d12" }}>/ assistant</span>
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "var(--accent)", background: "var(--accent-tint)", padding: "5px 8px", borderRadius: 4 }}>CLAUDE</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: "#8b8896" }}>
+            <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", color: "#2e6e63", background: "var(--accent-tint)", padding: "5px 8px", borderRadius: 4 }}>CLAUDE</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: MONO, fontSize: 9, letterSpacing: ".1em", color: "#64616e" }}>
               <span className="mt-agent-node" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />RUNNING
             </span>
           </div>
@@ -691,7 +697,7 @@ function AIVisual() {
                     </span>
                   )}
                 </span>
-                <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: ".04em", color: n.accent ? "rgba(14,13,18,.6)" : "#8b8896" }}>{n.sub}</span>
+                <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: ".04em", color: n.accent ? "rgba(14,13,18,.6)" : "#64616e" }}>{n.sub}</span>
               </span>
             </div>
           ))}

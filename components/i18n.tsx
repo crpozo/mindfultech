@@ -71,7 +71,9 @@ export function LangToggle({ dark = false }: { dark?: boolean }) {
     padding: "7px 10px",
     borderRadius: 6,
     background: "transparent",
-    color: dark ? "#b9b6c6" : "#8b8896",
+    /* the light gray failed WCAG contrast on the pill (#f1f2f6) — this one
+       reads 5.3:1 and still looks inactive next to the solid-ink active tab */
+    color: dark ? "#b9b6c6" : "#64616e",
     transition: "background .15s,color .15s",
   };
   const active: React.CSSProperties = {

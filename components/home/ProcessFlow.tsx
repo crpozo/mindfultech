@@ -253,7 +253,8 @@ export function ProcessFlow() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 34, marginTop: 80, flexWrap: "wrap" }}>
-          <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".16em", color: "#6f6b86" }}>{t.workingWith}</span>
+          {/* same muted tone as the step copy — #6f6b86 was 3.8:1 on #0d0a1f, this is 5.9:1 */}
+          <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: ".16em", color: "#8f8ba4" }}>{t.workingWith}</span>
           {WORKING_WITH.map((n, i) => (
             <React.Fragment key={n}>
               <span style={{ fontWeight: 600, fontSize: 17, color: "#8f8ba4" }}>{n}</span>

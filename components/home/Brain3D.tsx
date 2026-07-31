@@ -36,10 +36,16 @@ export function Brain3D({ focus = null }: { focus?: string | null }) {
   React.useEffect(() => {
     const mount = ref.current;
     if (!mount) return;
+    // Phones never see this canvas — CSS hides .hero-stage below 900px — so
+    // bail before doing anything: no three import, no renderer, no ~98KiB of
+    // JS fighting the hero h1 for the main thread. We deliberately don't
+    // watch for later resizes across the breakpoint; a rotated tablet
+    // reloading the page is an acceptable trade for the simpler code.
+    if (window.matchMedia("(max-width: 900px)").matches) return;
     let disposed = false;
     let cleanup: (() => void) | null = null;
 
-    (async () => {
+    const init = async () => {
       try {
         const THREE = await import("three");
         const { OrbitControls } = await import(
@@ -547,10 +553,24 @@ export function Brain3D({ focus = null }: { focus?: string | null }) {
       } catch {
         if (!disposed) setFailed(true);
       }
-    })();
+    };
+
+    // Defer the heavy build off the LCP critical path: the hero copy paints
+    // first and the brain assembles during idle time, at most ~1.5s later.
+    // Safari has no requestIdleCallback, so a plain timeout stands in there.
+    let idleId: number | null = null;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(() => void init(), { timeout: 1500 });
+    } else {
+      timerId = setTimeout(() => void init(), 1500);
+    }
 
     return () => {
       disposed = true;
+      // unmounted before the deferred init fired → just cancel it
+      if (idleId !== null) window.cancelIdleCallback(idleId);
+      if (timerId !== null) clearTimeout(timerId);
       cleanup?.();
     };
   }, []);

@@ -76,7 +76,8 @@ export function PlatformStats() {
             textAlign: "center",
             fontSize: 19,
             lineHeight: 1.5,
-            color: "#8b8896",
+            /* darker muted — #8b8896 was 3.5:1 on white, this is 5.3:1 */
+            color: "#6d6a77",
             fontWeight: 400,
             maxWidth: 620,
             margin: "18px auto 54px",
@@ -142,6 +143,9 @@ export function PlatformStats() {
               <Link
                 href={c.href}
                 className="stat-more"
+                /* every card shares this CTA text — the label says which
+                   stat this link expands on */
+                aria-label={es ? `Ver cómo: ${c.caption.es}` : `Learn how: ${c.caption.en}`}
                 style={{
                   textDecoration: "none",
                   fontFamily: MONO,

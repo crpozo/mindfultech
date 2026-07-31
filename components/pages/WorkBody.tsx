@@ -226,249 +226,251 @@ export function WorkBody() {
   return (
     <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="work" megaMenus />
+      <main>
 
-      {/* page header — reference: bold title left, mono meta right */}
-      <section style={{ background: "#fff", padding: "84px 0 30px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div>
-            <h1
-              style={{
-                fontWeight: 700,
-                fontSize: "clamp(40px,4.6vw,64px)",
-                lineHeight: 1.02,
-                letterSpacing: "-.03em",
-                margin: 0,
-                color: "var(--ink)",
-              }}
-            >
-              {es ? "Entregado con clientes" : "Shipped with clients"}
-              <span style={{ color: BRAND_GREEN }}>.</span>
-            </h1>
+        {/* page header — reference: bold title left, mono meta right */}
+        <section style={{ background: "#fff", padding: "84px 0 30px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <div>
+              <h1
+                style={{
+                  fontWeight: 700,
+                  fontSize: "clamp(40px,4.6vw,64px)",
+                  lineHeight: 1.02,
+                  letterSpacing: "-.03em",
+                  margin: 0,
+                  color: "var(--ink)",
+                }}
+              >
+                {es ? "Entregado con clientes" : "Shipped with clients"}
+                <span style={{ color: BRAND_GREEN }}>.</span>
+              </h1>
+            </div>
+            <p style={{ fontSize: 17, lineHeight: 1.55, color: "#6b6875", maxWidth: 540, margin: "20px 0 0" }}>
+              {es
+                ? "Una década de productos en producción — de portales universitarios a comercio automatizado."
+                : "A decade of products in production — from university portals to automated commerce."}
+            </p>
           </div>
-          <p style={{ fontSize: 17, lineHeight: 1.55, color: "#6b6875", maxWidth: 540, margin: "20px 0 0" }}>
-            {es
-              ? "Una década de productos en producción — de portales universitarios a comercio automatizado."
-              : "A decade of products in production — from university portals to automated commerce."}
-          </p>
-        </div>
-      </section>
+        </section>
 
-      <section style={{ background: "#fff", padding: "40px 0 90px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          {CASES.map((c, i) => {
-            const num = String(i + 1).padStart(2, "0");
-            const kicker = `${num} — ${c.brand[lang].toUpperCase()} · ${c.tag[lang]}`;
+        <section style={{ background: "#fff", padding: "40px 0 90px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            {CASES.map((c, i) => {
+              const num = String(i + 1).padStart(2, "0");
+              const kicker = `${num} — ${c.brand[lang].toUpperCase()} · ${c.tag[lang]}`;
 
-            const text = (
-              <div className="case-text" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".14em", color: "var(--accent-deep)" }}>
-                  {kicker}
-                </span>
-                <h2
-                  style={{
-                    fontWeight: 700,
-                    fontSize: "clamp(28px,2.8vw,40px)",
-                    lineHeight: 1.1,
-                    letterSpacing: "-.025em",
-                    margin: "16px 0 14px",
-                    maxWidth: 520,
-                  }}
-                >
-                  {c.title[lang]}
-                </h2>
-                <p style={{ fontSize: 15.5, lineHeight: 1.6, color: "#55525e", margin: "0 0 26px", maxWidth: 500 }}>{c.body[lang]}</p>
+              const text = (
+                <div className="case-text" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".14em", color: "var(--accent-deep)" }}>
+                    {kicker}
+                  </span>
+                  <h2
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "clamp(28px,2.8vw,40px)",
+                      lineHeight: 1.1,
+                      letterSpacing: "-.025em",
+                      margin: "16px 0 14px",
+                      maxWidth: 520,
+                    }}
+                  >
+                    {c.title[lang]}
+                  </h2>
+                  <p style={{ fontSize: 15.5, lineHeight: 1.6, color: "#55525e", margin: "0 0 26px", maxWidth: 500 }}>{c.body[lang]}</p>
 
-                {/* stat strip with hairline dividers */}
-                <div style={{ overflow: "hidden" }}>
-                <div className="stat-strip" style={{ display: "flex", flexWrap: "wrap", rowGap: 16, marginLeft: -25 }}>
-                  {c.stats.map(([v, l]) => (
-                    <div
-                      key={l.en}
-                      className="stat-cell"
-                      style={{
-                        paddingRight: 24,
-                        paddingLeft: 24,
-                        borderLeft: "1px solid rgba(14,13,18,.12)",
-                      }}
-                    >
-                      <div style={{ fontWeight: 700, fontSize: "clamp(24px,2.2vw,32px)", letterSpacing: "-.02em", color: BRAND_GREEN }}>
-                        {typeof v === "string" ? v : v[lang]}
+                  {/* stat strip with hairline dividers */}
+                  <div style={{ overflow: "hidden" }}>
+                  <div className="stat-strip" style={{ display: "flex", flexWrap: "wrap", rowGap: 16, marginLeft: -25 }}>
+                    {c.stats.map(([v, l]) => (
+                      <div
+                        key={l.en}
+                        className="stat-cell"
+                        style={{
+                          paddingRight: 24,
+                          paddingLeft: 24,
+                          borderLeft: "1px solid rgba(14,13,18,.12)",
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, fontSize: "clamp(24px,2.2vw,32px)", letterSpacing: "-.02em", color: BRAND_GREEN }}>
+                          {typeof v === "string" ? v : v[lang]}
+                        </div>
+                        <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: "#8b8896", marginTop: 4 }}>
+                          {l[lang]}
+                        </div>
                       </div>
-                      <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: "#8b8896", marginTop: 4 }}>
-                        {l[lang]}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                </div>
+                    ))}
+                  </div>
+                  </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 30 }}>
-                  {c.live ? (
-                    <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 30 }}>
+                    {c.live ? (
+                      <>
+                        <a
+                          href={c.live.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-dark"
+                          style={{
+                            textDecoration: "none",
+                            fontSize: 14.5,
+                            fontWeight: 600,
+                            letterSpacing: "-.01em",
+                            background: "#0e0d12",
+                            color: "#fff",
+                            padding: "14px 24px",
+                            borderRadius: 999,
+                          }}
+                        >
+                          {es ? "Ver sitio en vivo →" : "Visit live site →"}
+                        </a>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 11.5, letterSpacing: ".08em", color: "#55525e" }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#3fbf7f" }} />
+                          {es ? "en vivo" : "live"}
+                        </span>
+                      </>
+                    ) : (
                       <a
-                        href={c.live.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-dark"
+                        href={`mailto:info@mindfultech.ec?subject=${encodeURIComponent(es ? `Caso de estudio ${c.brand}` : `Case study ${c.brand}`)}`}
+                        className="btn-soft"
                         style={{
                           textDecoration: "none",
                           fontSize: 14.5,
                           fontWeight: 600,
                           letterSpacing: "-.01em",
-                          background: "#0e0d12",
-                          color: "#fff",
-                          padding: "14px 24px",
+                          background: "#fff",
+                          color: "var(--ink)",
+                          padding: "13px 24px",
                           borderRadius: 999,
+                          border: "1px solid rgba(14,13,18,.18)",
                         }}
                       >
-                        {es ? "Ver sitio en vivo →" : "Visit live site →"}
+                        {es ? "Solicitar caso de estudio →" : "Request case study →"}
                       </a>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 11.5, letterSpacing: ".08em", color: "#55525e" }}>
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#3fbf7f" }} />
-                        {es ? "en vivo" : "live"}
-                      </span>
-                    </>
-                  ) : (
-                    <a
-                      href={`mailto:info@mindfultech.ec?subject=${encodeURIComponent(es ? `Caso de estudio ${c.brand}` : `Case study ${c.brand}`)}`}
-                      className="btn-soft"
-                      style={{
-                        textDecoration: "none",
-                        fontSize: 14.5,
-                        fontWeight: 600,
-                        letterSpacing: "-.01em",
-                        background: "#fff",
-                        color: "var(--ink)",
-                        padding: "13px 24px",
-                        borderRadius: 999,
-                        border: "1px solid rgba(14,13,18,.18)",
-                      }}
-                    >
-                      {es ? "Solicitar caso de estudio →" : "Request case study →"}
-                    </a>
-                  )}
-                </div>
-              </div>
-            );
-
-            const media = (
-              <div className="case-media" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0" }}>
-                <div
-                  className="polaroid"
-                  style={{
-                    width: "min(560px,100%)",
-                    background: "#fff",
-                    borderRadius: 18,
-                    padding: 14,
-                    border: "1px solid rgba(14,13,18,.07)",
-                    boxShadow: "0 34px 80px -34px rgba(14,13,18,.4), 0 8px 22px -12px rgba(14,13,18,.16)",
-                    transform: `rotate(${c.tilt}deg)`,
-                  }}
-                >
-                  {c.image ? (
-                    <div style={{ aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "#000", position: "relative" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={c.image}
-                        alt={es ? `Proyecto ${c.brand.es}` : `${c.brand.en} project`}
-                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    </div>
-                  ) : (
-                    <PolaroidWell brand={c.brand[lang]} es={es} />
-                  )}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "0 2px 2px" }}>
-                    <span style={{ fontWeight: 600, fontSize: 14, letterSpacing: "-.01em", color: "var(--ink)" }}>{c.brand[lang]}</span>
-                    <span
-                      style={{
-                        fontFamily: MONO,
-                        fontSize: 10,
-                        letterSpacing: ".1em",
-                        color: c.live ? "var(--accent-deep)" : "#8b8896",
-                      }}
-                    >
-                      {c.caption[lang]}
-                    </span>
+                    )}
                   </div>
                 </div>
-              </div>
-            );
+              );
 
-            return (
-              <React.Fragment key={c.id}>
-                {i > 0 && (
-                  <div style={{ position: "relative", height: 1, background: "rgba(14,13,18,.1)", margin: "64px 0" }}>
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: "50%",
-                        top: "50%",
-                        transform: "translate(-50%,-50%)",
-                        background: "#fff",
-                        padding: "0 14px",
-                        color: BRAND_GREEN,
-                        fontSize: 12,
-                        lineHeight: 1,
-                      }}
-                    >
-                      ✦
-                    </span>
-                  </div>
-                )}
-                <div id={c.id} style={{ scrollMarginTop: 130 }}>
+              const media = (
+                <div className="case-media" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0" }}>
                   <div
-                    className={`stack-2 case-grid${c.imageFirst ? " case-rev" : ""}`}
+                    className="polaroid"
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1.05fr",
-                      gap: "clamp(28px,4vw,64px)",
-                      alignItems: "center",
+                      width: "min(560px,100%)",
+                      background: "#fff",
+                      borderRadius: 18,
+                      padding: 14,
+                      border: "1px solid rgba(14,13,18,.07)",
+                      boxShadow: "0 34px 80px -34px rgba(14,13,18,.4), 0 8px 22px -12px rgba(14,13,18,.16)",
+                      transform: `rotate(${c.tilt}deg)`,
                     }}
                   >
-                    {text}
-                    {media}
+                    {c.image ? (
+                      <div style={{ aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "#000", position: "relative" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={c.image}
+                          alt={es ? `Proyecto ${c.brand.es}` : `${c.brand.en} project`}
+                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      </div>
+                    ) : (
+                      <PolaroidWell brand={c.brand[lang]} es={es} />
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "0 2px 2px" }}>
+                      <span style={{ fontWeight: 600, fontSize: 14, letterSpacing: "-.01em", color: "var(--ink)" }}>{c.brand[lang]}</span>
+                      <span
+                        style={{
+                          fontFamily: MONO,
+                          fontSize: 10,
+                          letterSpacing: ".1em",
+                          color: c.live ? "var(--accent-deep)" : "#8b8896",
+                        }}
+                      >
+                        {c.caption[lang]}
+                      </span>
+                    </div>
                   </div>
+                </div>
+              );
 
-                  {c.gallery && (
-                    <div
-                      className="stack-3"
-                      style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "clamp(16px,2vw,28px)", marginTop: 54 }}
-                    >
-                      {c.gallery.map((g, gi) => (
-                        <div
-                          key={g.src}
-                          className="polaroid"
-                          style={{
-                            background: "#fff",
-                            borderRadius: 14,
-                            padding: 10,
-                            border: "1px solid rgba(14,13,18,.07)",
-                            boxShadow: "0 22px 50px -26px rgba(14,13,18,.35)",
-                            transform: `rotate(${[-1.2, 1, -0.8][gi % 3]}deg)`,
-                          }}
-                        >
-                          <div style={{ aspectRatio: "16/9", borderRadius: 8, overflow: "hidden", background: "#000", position: "relative" }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={g.src}
-                              alt={g.label[lang]}
-                              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          </div>
-                          <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: "#8b8896", marginTop: 9, paddingLeft: 2 }}>
-                            {g.label[lang]}
-                          </div>
-                        </div>
-                      ))}
+              return (
+                <React.Fragment key={c.id}>
+                  {i > 0 && (
+                    <div style={{ position: "relative", height: 1, background: "rgba(14,13,18,.1)", margin: "64px 0" }}>
+                      <span
+                        style={{
+                          position: "absolute",
+                          left: "50%",
+                          top: "50%",
+                          transform: "translate(-50%,-50%)",
+                          background: "#fff",
+                          padding: "0 14px",
+                          color: BRAND_GREEN,
+                          fontSize: 12,
+                          lineHeight: 1,
+                        }}
+                      >
+                        ✦
+                      </span>
                     </div>
                   )}
-                </div>
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </section>
+                  <div id={c.id} style={{ scrollMarginTop: 130 }}>
+                    <div
+                      className={`stack-2 case-grid${c.imageFirst ? " case-rev" : ""}`}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1.05fr",
+                        gap: "clamp(28px,4vw,64px)",
+                        alignItems: "center",
+                      }}
+                    >
+                      {text}
+                      {media}
+                    </div>
 
+                    {c.gallery && (
+                      <div
+                        className="stack-3"
+                        style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "clamp(16px,2vw,28px)", marginTop: 54 }}
+                      >
+                        {c.gallery.map((g, gi) => (
+                          <div
+                            key={g.src}
+                            className="polaroid"
+                            style={{
+                              background: "#fff",
+                              borderRadius: 14,
+                              padding: 10,
+                              border: "1px solid rgba(14,13,18,.07)",
+                              boxShadow: "0 22px 50px -26px rgba(14,13,18,.35)",
+                              transform: `rotate(${[-1.2, 1, -0.8][gi % 3]}deg)`,
+                            }}
+                          >
+                            <div style={{ aspectRatio: "16/9", borderRadius: 8, overflow: "hidden", background: "#000", position: "relative" }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={g.src}
+                                alt={g.label[lang]}
+                                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            </div>
+                            <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".12em", color: "#8b8896", marginTop: 9, paddingLeft: 2 }}>
+                              {g.label[lang]}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 }

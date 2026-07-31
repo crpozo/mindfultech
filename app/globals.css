@@ -686,8 +686,10 @@ a:hover {
     bottom: 0;
     margin-top: 0;
   }
-  .pf-prev { left: calc(50% - 96px); }
-  .pf-next { right: calc(50% - 96px); }
+  /* far enough out that a 42px arrow never overlaps the 7×24px dot row
+     (168px wide, centered) — overlapping targets flunk WCAG target-size */
+  .pf-prev { left: calc(50% - 140px); }
+  .pf-next { right: calc(50% - 140px); }
   /* dimmed rather than hidden at the ends — the control should stay visible
      so the slider still looks like a slider on the first card */
   .pf-nav:disabled { opacity: 0.32; }
@@ -696,22 +698,37 @@ a:hover {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 15px;
+    /* was 15px with 7px dots — lowered so the bigger buttons keep the dots
+       visually in the same spot */
+    bottom: 7px;
     display: flex;
     justify-content: center;
-    gap: 7px;
+    gap: 0;
   }
+  /* each button is a 24×24 touch target (WCAG target-size); the visible
+     7px dot is drawn by the ::before, centered inside it */
   .pf-dots button {
-    width: 7px;
-    height: 7px;
+    position: relative;
+    width: 24px;
+    height: 24px;
     padding: 0;
     border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .pf-dots button::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.26);
-    cursor: pointer;
     transition: background 0.25s ease, width 0.25s ease;
   }
-  .pf-dots button[aria-current="true"] {
+  .pf-dots button[aria-current="true"]::before {
     width: 20px;
     border-radius: 4px;
     background: #fff;
@@ -824,7 +841,8 @@ a:hover {
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.12em;
-  color: var(--accent-deep);
+  /* deeper than --accent-deep: 5.5:1 on the tint instead of 3.2:1 */
+  color: #2e6e63;
   background: var(--accent-tint);
   padding: 3px 6px;
   border-radius: 4px;
