@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -148,13 +148,19 @@ const COWORKING_COMMITMENT: Commitment = {
 };
 
 /**
- * Cobros dictados por chat. La fecha lleva el desfase de Ecuador escrito
- * (`-05:00`) a propósito: sin él, un cobro de la noche del 29 se guarda como
- * 30 en UTC y cae en el mes equivocado cuando el mes cambia de página.
+ * Movimientos dictados por chat. Cada uno lleva `sinceVersion`: la migración
+ * inyecta solo los que superan la versión guardada del tablero, así que para
+ * añadir uno nuevo basta con ponerlo aquí y subir STATE_VERSION — no hace
+ * falta tocar la migración, y los que el dueño ya borró a mano no vuelven.
+ *
+ * La fecha lleva el desfase de Ecuador escrito (`-05:00`) a propósito: sin él,
+ * un movimiento de la noche se guarda como el día siguiente en UTC y cae en el
+ * mes equivocado cuando el mes cambia de página.
  */
-const SEEDED_TXNS: Txn[] = [
+const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
   {
     id: "txn-2026-07-29-carcompra-500",
+    sinceVersion: 3,
     date: "2026-07-29T22:00:00-05:00",
     amount: 500,
     kind: "income",
@@ -163,7 +169,21 @@ const SEEDED_TXNS: Txn[] = [
     notes: "Cobro recibido.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-01-audifonos",
+    sinceVersion: 4,
+    date: "2026-08-01T19:00:00-05:00",
+    amount: 300,
+    kind: "expense",
+    category: "salud",
+    merchant: "Audífonos deportivos",
+    notes: "Para nadar y trotar. Categoría salud por ser equipo de entrenamiento — cámbiala si prefieres otra.",
+    excluded: false,
+  },
 ];
+
+/** Sin `sinceVersion`, que no es parte del modelo guardado. */
+const seedTxn = ({ sinceVersion: _v, ...t }: Txn & { sinceVersion: number }): Txn => t;
 
 /** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
 const GYM_COMMITMENT: Commitment = {
@@ -181,7 +201,7 @@ const GYM_COMMITMENT: Commitment = {
 export function seedState(): FinanceState {
   return {
     version: STATE_VERSION,
-    transactions: SEEDED_TXNS.map((t) => ({ ...t })),
+    transactions: SEEDED_TXNS.map(seedTxn),
     accounts: [
       { id: "paypal", name: "PayPal", kind: "bank", balance: 4500 },
       { id: "wise", name: "Wise", kind: "bank", balance: 3600 },
@@ -321,14 +341,15 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     }
   }
 
-  // v2 → v3: los cobros dictados por chat. Se filtran por id, así que volver a
-  // abrir la página no los duplica ni resucita uno borrado a mano después.
-  if (from < 3) {
+  // Movimientos dictados por chat: entra solo lo publicado después de la
+  // versión que tiene guardada este tablero. Doble filtro por id, así que ni
+  // se duplican al recargar ni resucita uno borrado a mano.
+  {
     const txns = Array.isArray(s.transactions) ? s.transactions : [];
     const have = new Set(txns.map((t) => t && t.id));
-    const missing = SEEDED_TXNS.filter((t) => !have.has(t.id));
+    const missing = SEEDED_TXNS.filter((t) => t.sinceVersion > from && !have.has(t.id));
     if (missing.length) {
-      s = { ...s, transactions: [...txns, ...missing.map((t) => ({ ...t }))] };
+      s = { ...s, transactions: [...txns, ...missing.map(seedTxn)] };
     }
   }
   const seen = new Set<string>();
