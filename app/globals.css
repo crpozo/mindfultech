@@ -761,9 +761,6 @@ a:hover {
   margin-top: 4px;
 }
 .map-group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 15px 0 7px;
   font-family: var(--mono);
   font-size: 10.5px;
@@ -771,9 +768,6 @@ a:hover {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #9b98a6;
-}
-.map-count {
-  color: #c3c0cc;
 }
 .map-list {
   list-style: none;

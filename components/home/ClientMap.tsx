@@ -270,10 +270,7 @@ export function ClientMap() {
               if (!items.length) return null;
               return (
                 <div key={r.id} className="map-group">
-                  <div className="map-group-head">
-                    <span>{r.label[lang]}</span>
-                    <span className="map-count">{String(items.length).padStart(2, "0")}</span>
-                  </div>
+                  <div className="map-group-head">{r.label[lang]}</div>
                   <ul className="map-list">
                     {items.map((s) => {
                       const on = s.id === active;
