@@ -43,7 +43,7 @@ const CARDS: Card[] = [
     hover: "#f5bd90",
     tag: { en: "↑ IN PRODUCTION", es: "↑ EN PRODUCCIÓN" },
     value: "2",
-    caption: { en: "app stores carry PARC Connect — App Store and Google Play.", es: "tiendas tienen PARC Connect — App Store y Google Play." },
+    caption: { en: "app stores carry PARC Connect: App Store and Google Play.", es: "tiendas tienen PARC Connect: App Store y Google Play." },
     captionColor: "#4c3628",
     href: "/work#parc",
   },

@@ -411,7 +411,7 @@ export function Patrimonio({
             lineHeight: 1.6,
           }}
         >
-          {`Los ${m(nw.receivablesPending)} por cobrar no entran en esa cuenta: es dinero que ganaste pero que todavía tiene otro dueño. Si te pagaran todo hoy, tu patrimonio neto sería ${m(nw.netWorthWithReceivables)} — por eso cobrar mueve más la aguja que ahorrar.`}
+          {`Los ${m(nw.receivablesPending)} por cobrar no entran en esa cuenta: es dinero que ganaste pero que todavía tiene otro dueño. Si te pagaran todo hoy, tu patrimonio neto sería ${m(nw.netWorthWithReceivables)}: por eso cobrar mueve más la aguja que ahorrar.`}
         </p>
       </div>
 
@@ -430,7 +430,7 @@ export function Patrimonio({
           <strong>
             Runway: {nw.runwayMonths.toFixed(1)} {"meses"}
           </strong>{" "}
-          {`— lo que aguanta tu efectivo gastando ${m(baseline)} al mes, si no entrara un solo cobro nuevo.`}
+          {`Lo que aguanta tu efectivo gastando ${m(baseline)} al mes, si no entrara un solo cobro nuevo.`}
         </div>
       )}
 

@@ -813,18 +813,19 @@ a:hover {
   padding: 3px 6px;
   border-radius: 4px;
 }
-.map-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
+/* one line drawing per place, in the accent green; it darkens and grows a
+   soft halo on hover, the same feedback the dot used to give */
+.map-ico {
+  width: 18px;
+  height: 18px;
   flex: none;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
+  color: color-mix(in srgb, var(--accent-deep) 72%, transparent);
+  transition: color 0.2s ease, transform 0.2s ease;
 }
-.map-row.on .map-dot,
-.map-row:hover .map-dot {
-  background: var(--accent-deep);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+.map-row:hover .map-ico,
+.map-row.on .map-ico {
+  color: #2e6e63;
+  transform: scale(1.08);
 }
 @media (max-width: 900px) {
   .map-grid {

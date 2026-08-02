@@ -21,7 +21,7 @@ const mono = IBM_Plex_Mono({
   preload: false,
 });
 
-const SITE_TITLE = "MindfulTech — Building the future with AI software";
+const SITE_TITLE = "MindfulTech: Building the future with AI software";
 const SITE_DESC =
   "Full-stack software lab, powered by UX research and applied AI. Human-centered products, built in Quito, Ecuador.";
 

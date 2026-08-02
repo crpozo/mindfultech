@@ -52,8 +52,8 @@ const CHIPS: {
     x: 85,
     y: 24,
     note: {
-      en: "Agents that do real work in production — like the one running a US clinic's billing cycle end to end, with a human check where it counts.",
-      es: "Agentes que hacen trabajo real en producción — como el que corre el ciclo de facturación de una clínica en EE. UU. de inicio a fin, con revisión humana donde importa.",
+      en: "Agents that do real work in production, like the one running a US clinic's billing cycle end to end, with a human check where it counts.",
+      es: "Agentes que hacen trabajo real en producción, como el que corre el ciclo de facturación de una clínica en EE. UU. de inicio a fin, con revisión humana donde importa.",
     },
   },
   {
@@ -62,8 +62,8 @@ const CHIPS: {
     x: 88,
     y: 60,
     note: {
-      en: "Serverless on AWS: the infrastructure behind custom CRMs, transactional email and integrations — monitored and accounted for after launch.",
-      es: "Serverless sobre AWS: la infraestructura detrás de CRMs a medida, email transaccional e integraciones — monitoreada y con responsabilidad después del launch.",
+      en: "Serverless on AWS: the infrastructure behind custom CRMs, transactional email and integrations, monitored and accounted for after launch.",
+      es: "Serverless sobre AWS: la infraestructura detrás de CRMs a medida, email transaccional e integraciones, monitoreada y con responsabilidad después del launch.",
     },
   },
   {

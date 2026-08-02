@@ -13,13 +13,13 @@ export function CompanyBody() {
 
   const values: [string, string, string, string][] = es
     ? [
-        ["#bdd9f0", "#2c3a4a", "Las personas primero", "Cada proyecto empieza con los humanos que usarán el producto — no con el stack tecnológico."],
-        ["#f2cfe3", "#4a3040", "Oficio sobre volumen", "Un equipo senior pequeño que entrega menos cosas, mejor hechas — y responde después del launch."],
+        ["#bdd9f0", "#2c3a4a", "Las personas primero", "Cada proyecto empieza con los humanos que usarán el producto, no con el stack tecnológico."],
+        ["#f2cfe3", "#4a3040", "Oficio sobre volumen", "Un equipo senior pequeño que entrega menos cosas, mejor hechas, y responde después del launch."],
         ["#f8d9c3", "#4c3628", "IA con criterio", "Automatizamos lo repetitivo y dejamos a humanos todo lo que requiere cuidado."],
       ]
     : [
-        ["#bdd9f0", "#2c3a4a", "People first", "Every engagement starts with the humans who will use the product — not the tech stack."],
-        ["#f2cfe3", "#4a3040", "Craft over volume", "A small senior team that ships fewer, better things — and stays accountable after launch."],
+        ["#bdd9f0", "#2c3a4a", "People first", "Every engagement starts with the humans who will use the product, not the tech stack."],
+        ["#f2cfe3", "#4a3040", "Craft over volume", "A small senior team that ships fewer, better things, and stays accountable after launch."],
         ["#f8d9c3", "#4c3628", "AI with judgment", "We automate the repetitive and keep humans on everything that requires care."],
       ];
 
@@ -45,8 +45,8 @@ export function CompanyBody() {
             </h1>
             <p style={{ fontSize: 19, lineHeight: 1.55, color: "#6b6875", maxWidth: 640, margin: "22px auto 0" }}>
               {es
-                ? "Desde 2016 diseñamos y construimos productos digitales desde Quito para equipos de Ecuador y más allá — con investigación, oficio y ahora IA aplicada en el centro."
-                : "Since 2016 we've designed and engineered digital products from Quito for teams across Ecuador and beyond — with research, craft, and now applied AI at the core."}
+                ? "Desde 2016 diseñamos y construimos productos digitales desde Quito para equipos de Ecuador y más allá, con investigación, oficio y ahora IA aplicada en el centro."
+                : "Since 2016 we've designed and engineered digital products from Quito for teams across Ecuador and beyond, with research, craft, and now applied AI at the core."}
             </p>
           </div>
         </section>
@@ -95,8 +95,8 @@ export function CompanyBody() {
               </h2>
               <p style={{ fontSize: 16.5, lineHeight: 1.6, color: "#55525e", margin: "0 0 22px", maxWidth: 460 }}>
                 {es
-                  ? "Contratamos diseñadores e ingenieros que se preocupan por las personas. No hay vacantes abiertas ahora — pero siempre leemos portafolios de gente que construye con intención."
-                  : "We hire designers and engineers who care about people. No open reqs right now — but we always read portfolios from folks who build with intention."}
+                  ? "Contratamos diseñadores e ingenieros que se preocupan por las personas. No hay vacantes abiertas ahora, pero siempre leemos portafolios de gente que construye con intención."
+                  : "We hire designers and engineers who care about people. No open reqs right now, but we always read portfolios from folks who build with intention."}
               </p>
               <a href="mailto:info@mindfultech.ec?subject=Portfolio" className="btn-dark" style={darkBtn}>
                 {es ? "ENVÍA TU PORTAFOLIO" : "SEND YOUR PORTFOLIO"}
@@ -141,8 +141,8 @@ export function CompanyBody() {
                 </h2>
                 <p style={{ fontSize: 16, color: "#8f8ba4", margin: 0, maxWidth: 460 }}>
                   {es
-                    ? "Para entrevistas, charlas o material de marca, escribe a nuestro estudio — respondemos en un día hábil."
-                    : "For interviews, speaking, or brand assets, write to our studio — we answer within one business day."}
+                    ? "Para entrevistas, charlas o material de marca, escribe a nuestro estudio: respondemos en un día hábil."
+                    : "For interviews, speaking, or brand assets, write to our studio. We answer within one business day."}
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

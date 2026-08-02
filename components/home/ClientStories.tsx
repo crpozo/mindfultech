@@ -154,8 +154,8 @@ export function ClientStories() {
           }}
         >
           {es
-            ? "Siete productos en producción — explóralos uno a uno."
-            : "Seven products in production — explore them one by one."}
+            ? "Siete productos en producción: explóralos uno a uno."
+            : "Seven products in production: explore them one by one."}
         </p>
       </div>
 

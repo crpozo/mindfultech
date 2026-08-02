@@ -1710,7 +1710,7 @@ function Ajustes({
                     : ""
                 }
                 inputMode="decimal"
-                placeholder="—"
+                placeholder=""
                 onBlur={(e) => {
                   const v = num(e.target.value);
                   update((s) => {

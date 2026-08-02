@@ -99,7 +99,7 @@ export function ServicesBody() {
               {es ? "Software guiado por UX para humanos y empresas" : "UX-driven software for humans and enterprises"}
             </h1>
             <p style={{ fontSize: 19, lineHeight: 1.55, color: "#6b6875", maxWidth: 640, margin: "22px auto 0" }}>
-              {es ? "Diseña, construye y automatiza con un solo lab — alcance flexible, confiabilidad de producción e investigación incluida." : "Design, engineer, and automate with one lab — flexible scope, production reliability, and research built in."}
+              {es ? "Diseña, construye y automatiza con un solo lab: alcance flexible, confiabilidad de producción e investigación incluida." : "Design, engineer, and automate with one lab: flexible scope, production reliability, and research built in."}
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 34, flexWrap: "wrap" }}>
               <a href="#ux" className="btn-dark" style={heroBtnDark}>
@@ -228,13 +228,13 @@ export function ServicesBody() {
           <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
             <h2 style={centerH2}>{es ? "¿Por qué MindfulTech?" : "Why MindfulTech?"}</h2>
             <p style={centerSub}>
-              {es ? "Diseño guiado por investigación, ingeniería de producción y confiabilidad enterprise — a cualquier escala." : "Research-led design, production-grade engineering, and enterprise reliability — at any scale."}
+              {es ? "Diseño guiado por investigación, ingeniería de producción y confiabilidad enterprise: a cualquier escala." : "Research-led design, production-grade engineering, and enterprise reliability: at any scale."}
             </p>
             <div className="stack-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 26 }}>
               {[
-                ["#bdd9f0", "#2c3a4a", es ? "Entrega e iteración más rápidas" : "Faster delivery & iteration", es ? "Design systems reutilizables e ingeniería asistida por IA acortan el tiempo de construcción — sin recortar calidad." : "Reusable design systems and AI-assisted engineering cut build time — without cutting corners on quality."],
+                ["#bdd9f0", "#2c3a4a", es ? "Entrega e iteración más rápidas" : "Faster delivery & iteration", es ? "Design systems reutilizables e ingeniería asistida por IA acortan el tiempo de construcción, sin recortar calidad." : "Reusable design systems and AI-assisted engineering cut build time, without cutting corners on quality."],
                 ["#f2cfe3", "#4a3040", es ? "Alcance y presupuesto predecibles" : "Predictable scope & budget", es ? "Investigar antes de construir significa menos sorpresas. Hitos fijos, reportes transparentes, sin desvíos." : "Research before build means fewer surprises. Fixed milestones, transparent reporting, no scope drift."],
-                ["#f8d9c3", "#4c3628", es ? "Confiabilidad y seguridad de producción" : "Production reliability & security", es ? "Arquitecturas AWS con observabilidad, respaldos y cifrado en tránsito y reposo — desde el día uno." : "AWS architectures with observability, backups, and encryption in transit and at rest — from day one."],
+                ["#f8d9c3", "#4c3628", es ? "Confiabilidad y seguridad de producción" : "Production reliability & security", es ? "Arquitecturas AWS con observabilidad, respaldos y cifrado en tránsito y reposo, desde el día uno." : "AWS architectures with observability, backups, and encryption in transit and at rest, from day one."],
               ].map(([bg, tc, title, body]) => (
                 <div
                   key={title}
@@ -360,7 +360,7 @@ export function ServicesBody() {
                 ))}
               </div>
               <p style={{ fontSize: 16, lineHeight: 1.6, color: "#55525e", margin: "18px 0 22px", maxWidth: 460 }}>
-                {es ? "Lanza cargas de producción sin armar un equipo primero. Diseño, ingeniería, QA y operaciones cloud llegan pre-configurados — tú mantienes la propiedad de cada repo y cuenta." : "Ship production workloads without building a team first. Design, engineering, QA, and cloud operations arrive pre-configured — you keep ownership of every repo and account."}
+                {es ? "Lanza cargas de producción sin armar un equipo primero. Diseño, ingeniería, QA y operaciones cloud llegan pre-configurados: tú mantienes la propiedad de cada repo y cuenta." : "Ship production workloads without building a team first. Design, engineering, QA, and cloud operations arrive pre-configured, you keep ownership of every repo and account."}
               </p>
               <a href="mailto:info@mindfultech.ec" className="btn-dark" style={{ ...cardBtn, marginTop: 0 }}>
                 {es ? "HABLA CON EL EQUIPO" : "TALK TO THE TEAM"}

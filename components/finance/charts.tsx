@@ -17,9 +17,9 @@ import type { Lang } from "@/components/i18n";
 import type { MonthSummary } from "@/lib/finance/analysis";
 
 export const SERIES = {
-  income: "#1baf7a", // slot 3 — aqua
-  expense: "#eb6834", // slot 2 — naranja
-  net: "#2a78d6", // slot 1 — azul
+  income: "#1baf7a", // slot 3: aqua
+  expense: "#eb6834", // slot 2: naranja
+  net: "#2a78d6", // slot 1: azul
 } as const;
 
 const INK = "#0b0b0b";
@@ -545,7 +545,7 @@ export function HealthGauge({
         width={size}
         height={size}
         role="img"
-        aria-label={`${score} / 100 — ${text}`}
+        aria-label={`${score} / 100: ${text}`}
       >
         <circle
           cx={size / 2}

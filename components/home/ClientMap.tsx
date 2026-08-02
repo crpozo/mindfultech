@@ -24,8 +24,8 @@ type Site = {
 // "clients" everywhere so nobody reads seven rows as seven branches.
 const REGIONS: { id: Site["region"]; label: Bi }[] = [
   { id: "latam", label: { en: "Home base", es: "Base de operaciones" } },
-  { id: "us", label: { en: "Clients · United States", es: "Clientes · Estados Unidos" } },
-  { id: "eu", label: { en: "Clients · Europe", es: "Clientes · Europa" } },
+  { id: "us", label: { en: "United States", es: "Estados Unidos" } },
+  { id: "eu", label: { en: "Europe", es: "Europa" } },
 ];
 
 // Real coordinates — pin positions are computed from these, so the map stays
@@ -106,6 +106,84 @@ const SITES: Site[] = [
     region: "eu",
   },
 ];
+
+/**
+ * One line drawing per place, instead of eight identical dots. Kept in this
+ * file rather than a module of its own: a new client component imported by an
+ * existing one trips the React Client Manifest bug this repo has hit before.
+ *
+ * Drawn for a 24×24 box in the site's usual stroke style, and read at ~17px —
+ * so each is a silhouette, not a portrait. Landmarks beat flags here: the
+ * strip is monochrome, and a flag without its colours says nothing.
+ */
+const PLACE_ICONS: Record<string, React.ReactNode> = {
+  // the equator itself — the country is named after it
+  ecuador: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17" />
+      <path d="M12 3.5c2.6 2.4 4 5.3 4 8.5s-1.4 6.1-4 8.5c-2.6-2.4-4-5.3-4-8.5s1.4-6.1 4-8.5z" />
+    </>
+  ),
+  // palm
+  california: (
+    <>
+      <path d="M12 21V10" />
+      <path d="M12 10c-2.4-2.3-5-2.6-7 0M12 10c2.4-2.3 5-2.6 7 0M12 10c-1-3 .3-5.6 3-6.6M12 10c-1.6-2.7-4.2-3.6-6.8-2.3" />
+    </>
+  ),
+  // skyline with the antenna
+  chicago: (
+    <>
+      <path d="M3 21h18" />
+      <path d="M5 21V13h4v8M11 21V7h4v14M17 21v-6h3v6" />
+      <path d="M13 7V3.5" />
+    </>
+  ),
+  // sun over water
+  florida: (
+    <>
+      <circle cx="12" cy="9" r="3.5" />
+      <path d="M12 2v1.6M12 14.4V16M5 9H3.4M20.6 9H19M7 4l1.2 1.2M15.8 12.8L17 14M17 4l-1.2 1.2M8.2 12.8L7 14" />
+      <path d="M3 19c2-1.4 4-1.4 6 0s4 1.4 6 0 4-1.4 6 0" />
+    </>
+  ),
+  // windmill
+  netherlands: (
+    <>
+      <path d="M9 21h6l-1.2-9h-3.6L9 21z" />
+      <path d="M12 12L5.6 5.6M12 12l6.4-6.4M12 12l-6.4 6.4M12 12l6.4 6.4" />
+      <circle cx="12" cy="12" r="1.4" />
+    </>
+  ),
+  // Brandenburg gate
+  germany: (
+    <>
+      <path d="M2.5 20.5h19" />
+      <path d="M4 20.5V9M8.5 20.5V9M13 20.5V9M17.5 20.5V9" />
+      <path d="M2 9h19.5V6.5H2z" />
+      <path d="M9.5 6.5V4.5h5v2" />
+    </>
+  ),
+  // Sagrada Família spires
+  spain: (
+    <>
+      <path d="M2.5 21h19" />
+      <path d="M7 21V11c0-2.6.7-4.6 1.6-6 .9 1.4 1.6 3.4 1.6 6v10" />
+      <path d="M13.5 21V8.5c0-3 .8-5.2 1.8-6.8 1 1.6 1.8 3.8 1.8 6.8V21" />
+      <path d="M2.8 21v-6c0-1.7.5-3 1.1-4 .6 1 1.1 2.3 1.1 4v6" />
+    </>
+  ),
+  // Doric column
+  greece: (
+    <>
+      <path d="M4 21h16" />
+      <path d="M6.5 21v-2h11v2" />
+      <path d="M8 19V7M12 19V7M16 19V7" />
+      <path d="M5.5 7h13V4.5h-13z" />
+    </>
+  ),
+};
 
 const project = (lat: number, lon: number) => ({
   x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w,
@@ -285,7 +363,18 @@ export function ClientMap() {
                             onBlur={() => setActive(null)}
                             aria-pressed={on}
                           >
-                            <span className="map-dot" aria-hidden />
+                            <svg
+                              className="map-ico"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden
+                            >
+                              {PLACE_ICONS[s.id]}
+                            </svg>
                             <span className="map-place">{s.place[lang]}</span>
                             {s.base && <span className="map-badge">{es ? "BASE" : "HQ"}</span>}
                           </button>

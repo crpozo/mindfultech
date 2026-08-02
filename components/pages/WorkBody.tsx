@@ -151,8 +151,8 @@ const CASES: Case[] = [
       es: "Un CRM a medida que vende autos con IA y pautas de Meta",
     },
     body: {
-      en: "CarCompra, an Ecuadorian car dealership, wanted to automate sales with AI working alongside its sellers. We built a custom CRM platform for the sales team — integrated with Meta and its ad campaigns, running on AWS — so every campaign lead lands in a pipeline the team can actually close.",
-      es: "CarCompra, un patio de autos en Ecuador, quería automatizar sus ventas con IA trabajando junto a sus vendedores. Construimos una plataforma CRM a medida para el equipo de ventas — integrada con Meta y sus pautas publicitarias, sobre AWS — para que cada lead de campaña caiga en un pipeline que el equipo sí puede cerrar.",
+      en: "CarCompra, an Ecuadorian car dealership, wanted to automate sales with AI working alongside its sellers. We built a custom CRM platform for the sales team (integrated with Meta and its ad campaigns, running on AWS) so every campaign lead lands in a pipeline the team can actually close.",
+      es: "CarCompra, un patio de autos en Ecuador, quería automatizar sus ventas con IA trabajando junto a sus vendedores. Construimos una plataforma CRM a medida para el equipo de ventas (integrada con Meta y sus pautas publicitarias, sobre AWS) para que cada lead de campaña caiga en un pipeline que el equipo sí puede cerrar.",
     },
     stats: [
       [{ en: "Meta Ads", es: "Pautas Meta" }, { en: "CAMPAIGN INTEGRATION", es: "INTEGRACIÓN DE PAUTAS" }],
@@ -173,8 +173,8 @@ const CASES: Case[] = [
       es: "PARC Connect, en las dos tiendas de apps",
     },
     body: {
-      en: "A client-portal mobile app for a US home-care agency, published on the App Store and Google Play, alongside the corporate website — including transactional email setup and fixing Google indexing issues.",
-      es: "Una app móvil de portal para una agencia de cuidado en el hogar en EE. UU., publicada en App Store y Google Play, junto con el sitio web corporativo — incluyendo la configuración de email transaccional y la resolución de problemas de indexación en Google.",
+      en: "A client-portal mobile app for a US home-care agency, published on the App Store and Google Play, alongside the corporate website, including transactional email setup and fixing Google indexing issues.",
+      es: "Una app móvil de portal para una agencia de cuidado en el hogar en EE. UU., publicada en App Store y Google Play, junto con el sitio web corporativo, incluyendo la configuración de email transaccional y la resolución de problemas de indexación en Google.",
     },
     stats: [
       ["2", { en: "APP STORES", es: "TIENDAS DE APPS" }],
@@ -248,8 +248,8 @@ export function WorkBody() {
             </div>
             <p style={{ fontSize: 17, lineHeight: 1.55, color: "#6b6875", maxWidth: 540, margin: "20px 0 0" }}>
               {es
-                ? "Una década de productos en producción — de portales universitarios a comercio automatizado."
-                : "A decade of products in production — from university portals to automated commerce."}
+                ? "Una década de productos en producción, de portales universitarios a comercio automatizado."
+                : "A decade of products in production, from university portals to automated commerce."}
             </p>
           </div>
         </section>
@@ -258,7 +258,7 @@ export function WorkBody() {
           <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
             {CASES.map((c, i) => {
               const num = String(i + 1).padStart(2, "0");
-              const kicker = `${num} — ${c.brand[lang].toUpperCase()} · ${c.tag[lang]}`;
+              const kicker = `${num}: ${c.brand[lang].toUpperCase()} · ${c.tag[lang]}`;
 
               const text = (
                 <div className="case-text" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>

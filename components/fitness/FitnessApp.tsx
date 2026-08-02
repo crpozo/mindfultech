@@ -186,8 +186,8 @@ export function FitnessApp() {
         <Log state={state} />
 
         <p className="fit-howto">
-          Para registrar algo nuevo, escríbeselo a Claude en el chat —
-          &ldquo;hoy comí…&rdquo;, &ldquo;entrené…&rdquo;, &ldquo;peso…&rdquo; — y aparece acá analizado.
+          Para registrar algo nuevo, escríbeselo a Claude en el chat:
+          &ldquo;hoy comí…&rdquo;, &ldquo;entrené…&rdquo;, &ldquo;peso…&rdquo;, y aparece acá analizado.
         </p>
       </main>
     </div>
@@ -421,10 +421,10 @@ function TodayCard({
         </div>
 
         <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
-          <Stat label="Peso" value={today.weight_kg != null ? `${fmt(today.weight_kg, 1)} kg` : "—"} />
-          <Stat label="Pasos" value={today.steps != null ? fmt(today.steps) : "—"} />
-          <Stat label="Sueño" value={today.sleep_h != null ? `${fmt(today.sleep_h, 1)} h` : "—"} />
-          <Stat label="Ejercicio" value={today.workoutMin ? `${fmt(today.workoutMin)} min` : "—"} />
+          <Stat label="Peso" value={today.weight_kg != null ? `${fmt(today.weight_kg, 1)} kg` : "Sin dato"} />
+          <Stat label="Pasos" value={today.steps != null ? fmt(today.steps) : "Sin dato"} />
+          <Stat label="Sueño" value={today.sleep_h != null ? `${fmt(today.sleep_h, 1)} h` : "Sin dato"} />
+          <Stat label="Ejercicio" value={today.workoutMin ? `${fmt(today.workoutMin)} min` : "Sin dato"} />
         </div>
       </div>
 
@@ -467,7 +467,7 @@ function Breakdown({ k, foods }: { k: MacroKey; foods: FoodEntry[] }) {
             <span className="fit-breakname">
               {r.name}
               {r.confidence != null && r.confidence < 0.7 && (
-                <em title="Estimación con menos certeza — confírmame la porción"> · est.</em>
+                <em title="Estimación con menos certeza: confírmame la porción"> · est.</em>
               )}
             </span>
             <span className="fit-breakbar">
@@ -606,7 +606,7 @@ function Bars({
 function Line({ points, unit }: { points: { key: string; value: number }[]; unit: string }) {
   const [hover, setHover] = React.useState<number | null>(null);
   if (points.length === 0)
-    return <div className="fit-empty">Sin datos en este rango — pídele a Claude que incluya &quot;body&quot;.</div>;
+    return <div className="fit-empty">Sin datos en este rango: pídele a Claude que incluya &quot;body&quot;.</div>;
   if (points.length === 1)
     return (
       <div className="fit-chart" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 172 }}>
@@ -861,7 +861,7 @@ function Research({ micros, range }: { micros: { id: string; pct: number }[]; ra
 
   const GROUPS: { key: Bucket; title: string; sub: string }[] = [
     { key: "gap", title: "Te falta", sub: "por debajo del 70 % del valor diario, o sin aparecer en el registro" },
-    { key: "blind", title: "Sin medir", sub: "el registro no los captura todavía — vale la pena tenerlos en el radar" },
+    { key: "blind", title: "Sin medir", sub: "el registro no los captura todavía: vale la pena tenerlos en el radar" },
     { key: "ok", title: "Ya lo llevas bien", sub: "cubiertos por la comida o por tu stack; aquí el trabajo es sostener, no añadir" },
   ];
   const visible = all ? GROUPS : GROUPS.filter((g) => g.key !== "ok");

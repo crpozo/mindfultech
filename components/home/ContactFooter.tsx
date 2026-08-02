@@ -162,7 +162,7 @@ export function ContactFooter() {
             margin: "16px auto 0",
           }}
         >
-          {es ? "De la primera sesión de investigación a la IA en producción — un solo lab, de inicio a fin." : "From the first research session to production AI — one lab, end to end."}
+          {es ? "De la primera sesión de investigación a la IA en producción: un solo lab, de inicio a fin." : "From the first research session to production AI: one lab, end to end."}
         </p>
         <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
           <a

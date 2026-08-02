@@ -386,7 +386,7 @@ export function diagnose(
     if (!aportando) {
       actions.push({
         title: "Afiliarte al IESS y registrar la aportación mensual",
-        why: "El BIESS pide 2-3 años de aportaciones continuas para un crédito hipotecario. Cada mes sin aportar corre la fecha en que puedes comprar departamento — el monto importa menos que arrancar el reloj.",
+        why: "El BIESS pide 2-3 años de aportaciones continuas para un crédito hipotecario. Cada mes sin aportar corre la fecha en que puedes comprar departamento, el monto importa menos que arrancar el reloj.",
       });
       findings.push({
         tone: "warn",
@@ -497,7 +497,7 @@ export function capitalPlan(
       steps.push({
         title: `Abonar ${m(pay)} al capital de la deuda`,
         detail:
-          "Ya tienes el colchón completo, así que este excedente sí puede ir a la deuda. Pide que el abono se aplique a capital y que reduzca el plazo o la cuota — dilo explícitamente, porque por defecto muchos bancos lo aplican a cuotas futuras y no cambia nada.",
+          "Ya tienes el colchón completo, así que este excedente sí puede ir a la deuda. Pide que el abono se aplique a capital y que reduzca el plazo o la cuota, dilo explícitamente, porque por defecto muchos bancos lo aplican a cuotas futuras y no cambia nada.",
         amount: pay,
         when: "ahora",
       });

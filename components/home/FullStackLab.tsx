@@ -33,7 +33,7 @@ const PANELS: Panel[] = [
       </>
     ),
     title: { en: "Product Discovery", es: "Descubrimiento de Producto" },
-    body: { en: "Field research, journey mapping, and prototypes tested with real users — before a single line of production code.", es: "Investigación de campo, journey mapping y prototipos probados con usuarios reales — antes de una sola línea de código." },
+    body: { en: "Field research, journey mapping, and prototypes tested with real users, before a single line of production code.", es: "Investigación de campo, journey mapping y prototipos probados con usuarios reales, antes de una sola línea de código." },
     rows: [
       {
         icon: (
@@ -102,7 +102,7 @@ const PANELS: Panel[] = [
       </>
     ),
     title: { en: "AI Integration", es: "Integración de IA" },
-    body: { en: "LLM-powered features designed responsibly — assistants, copilots, and intelligent search your users can trust.", es: "Funciones con LLMs diseñadas con responsabilidad — asistentes, copilotos y búsqueda inteligente en la que tus usuarios confían." },
+    body: { en: "LLM-powered features designed responsibly: assistants, copilots, and intelligent search your users can trust.", es: "Funciones con LLMs diseñadas con responsabilidad: asistentes, copilotos y búsqueda inteligente en la que tus usuarios confían." },
     rows: [
       {
         icon: <path d="M4 17V7l8 10V7M16 12h6M19 9v6" />,
@@ -187,7 +187,7 @@ export function FullStackLab() {
             margin: "20px auto 56px",
           }}
         >
-          {es ? "Impulsamos cada paso del viaje del producto — de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey — from first research session to production AI."}
+          {es ? "Impulsamos cada paso del viaje del producto, de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey, from first research session to production AI."}
         </p>
 
         {/* tabs */}

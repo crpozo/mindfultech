@@ -165,7 +165,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     amount: 500,
     kind: "income",
     category: "clientes",
-    merchant: "CarCompra — Alex",
+    merchant: "CarCompra: Alex",
     notes: "Cobro recibido.",
     excluded: false,
   },
@@ -177,7 +177,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     kind: "expense",
     category: "salud",
     merchant: "Audífonos deportivos",
-    notes: "Para nadar y trotar. Categoría salud por ser equipo de entrenamiento — cámbiala si prefieres otra.",
+    notes: "Para nadar y trotar. Categoría salud por ser equipo de entrenamiento, cámbiala si prefieres otra.",
     excluded: false,
   },
   {
@@ -251,7 +251,7 @@ export function seedState(): FinanceState {
     commitments: [
       {
         id: "iess",
-        name: "IESS — aporte voluntario",
+        name: "IESS: aporte voluntario",
         amount: 176,
         category: "salud",
         note: "Mensual. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
@@ -273,7 +273,7 @@ export function seedState(): FinanceState {
   };
 }
 
-export const DEFAULT_PROFILE = `Carlos Pozo — Quito, Ecuador. Dueño de MindfulTech.
+export const DEFAULT_PROFILE = `Carlos Pozo: Quito, Ecuador. Dueño de MindfulTech.
 
 Ingreso: freelance por proyectos de software, en dólares y en escalada. No hay sueldo fijo, así que los meses son irregulares por naturaleza. Helixona es el cliente más recurrente, con un promedio cercano a 3.000 USD al mes, pero no está garantizado. Sigo buscando proyectos nuevos.
 
@@ -381,7 +381,7 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
         amount: num(t.amount),
         kind: (t.kind === "income" ? "income" : "expense") as Kind,
         category: str(t.category, "otros"),
-        merchant: str(t.merchant, "—"),
+        merchant: str(t.merchant, "Sin nombre"),
         notes: str(t.notes),
         excluded: Boolean(t.excluded),
         card: str(t.card) || undefined,

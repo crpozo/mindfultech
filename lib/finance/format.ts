@@ -73,7 +73,7 @@ export function fmtDate(iso: string, lang: Lang = "es"): string {
 
 export function fmtDateTime(iso: string, lang: Lang = "es"): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "Sin fecha";
   return new Intl.DateTimeFormat(lang === "es" ? "es-EC" : "en-US", {
     day: "2-digit",
     month: "short",

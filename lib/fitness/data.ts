@@ -36,7 +36,7 @@ export const STACK: {
     name: "Citrato de magnesio",
     kind: "suplemento",
     route: "oral",
-    dose: "diario — dosis por confirmar",
+    dose: "diario: dosis por confirmar",
     why:
       "Cofactor de más de 300 reacciones: contracción muscular, metabolismo energético y sueño. El citrato es de las sales que mejor se absorben, bastante por encima del óxido, que es el barato de farmacia.",
     note:
@@ -48,7 +48,7 @@ export const STACK: {
     name: "Vitamina D3 + K2",
     kind: "suplemento",
     route: "oral",
-    dose: "diario — dosis por confirmar",
+    dose: "diario: dosis por confirmar",
     why:
       "La combinación tiene lógica fisiológica: la D3 sube la absorción intestinal de calcio y la K2 activa las proteínas que lo depositan en el hueso en vez de en la pared arterial. Tomadas juntas se cubren la espalda.",
     note:
@@ -67,7 +67,7 @@ export const STACK: {
     note:
       "Es lo que más cambia la lectura de este tablero: retiene sodio y agua, así que puede sumarte 0,5–2 kg de báscula que no son grasa. Cuando el peso suba, mira primero el espejo y la cinta métrica, no el número.",
     caution:
-      "Efectos conocidos: retención de líquido, taquicardia leve e hipertricosis (vello en cara y cuerpo). Debería ir con control médico de presión y frecuencia cardíaca — y con tu potasio al 19 % y el sodio alto, ese control importa más, no menos.",
+      "Efectos conocidos: retención de líquido, taquicardia leve e hipertricosis (vello en cara y cuerpo). Debería ir con control médico de presión y frecuencia cardíaca, y con tu potasio al 19 % y el sodio alto, ese control importa más, no menos.",
   },
   {
     id: "s-dutasteride",
@@ -78,7 +78,7 @@ export const STACK: {
     why:
       "La dutasterida inhibe la 5-alfa-reductasa tipos 1 y 2 y baja la DHT, que es la que miniaturiza el folículo. Aplicada en la piel la absorción sistémica es mucho menor que por vía oral, aunque no es cero.",
     note:
-      "Buena noticia para el gimnasio: bajar DHT no reduce la hipertrofia ni la fuerza — los ensayos con inhibidores de la 5-alfa-reductasa en hombres que entrenan no muestran pérdida de masa magra. La DHT manda en el folículo y la próstata, no en el músculo.",
+      "Buena noticia para el gimnasio: bajar DHT no reduce la hipertrofia ni la fuerza, los ensayos con inhibidores de la 5-alfa-reductasa en hombres que entrenan no muestran pérdida de masa magra. La DHT manda en el folículo y la próstata, no en el músculo.",
     caution:
       "Suma minoxidil al que ya tomas por boca. Los efectos sistémicos reportados (libido, ánimo) son poco frecuentes por vía tópica, pero si aparecen no es casualidad: coméntalo con quien te lo recetó.",
   },
@@ -98,7 +98,7 @@ export const TIPS: {
     tag: "Medición",
     title: "Mídete el % de grasa antes de sacar conclusiones",
     body:
-      "El 10,3 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas —mismo día, en ayunas— convierte esa suposición en un dato.",
+      "El 10,3 % que ves es una estimación que asume que conservaste tus 73,1 kg de masa magra. Si perdiste músculo, bajaste menos grasa de la que crees. Una bioimpedancia o un plicómetro cada 4 semanas (mismo día, en ayunas) convierte esa suposición en un dato.",
   },
   {
     id: "t-08",
@@ -106,7 +106,7 @@ export const TIPS: {
     tag: "Báscula",
     title: "El minoxidil oral te ensucia el peso",
     body:
-      "A 2 mg diarios retiene sodio y agua: puede sostenerte 0,5–2 kg por encima de tu peso real, y ese efecto no desaparece mientras lo tomes. No significa que el tablero mienta, significa que la pendiente del peso vale más que cualquier lectura suelta. Pésate siempre igual —en ayunas, después del baño, mismo día de la semana— y juzga por la tendencia de 4 semanas, no por la mañana de hoy.",
+      "A 2 mg diarios retiene sodio y agua: puede sostenerte 0,5–2 kg por encima de tu peso real, y ese efecto no desaparece mientras lo tomes. No significa que el tablero mienta, significa que la pendiente del peso vale más que cualquier lectura suelta. Pésate siempre igual (en ayunas, después del baño, mismo día de la semana) y juzga por la tendencia de 4 semanas, no por la mañana de hoy.",
   },
   {
     id: "t-02",
@@ -120,9 +120,9 @@ export const TIPS: {
     id: "t-03",
     priority: "alta",
     tag: "Micronutrientes",
-    title: "Sube hierro y potasio — son tus dos huecos",
+    title: "Sube hierro y potasio, son tus dos huecos",
     body:
-      "Hoy quedaste en 44 % de hierro y 19 % de potasio. Lenteja, espinaca y carne roja magra 1–2 veces por semana cubren el hierro (acompáñalo con tu kiwi o mandarina: la vitamina C multiplica la absorción). Para potasio: plátano, papa con cáscara, aguacate y agua de coco — baratos y de aquí.",
+      "Hoy quedaste en 44 % de hierro y 19 % de potasio. Lenteja, espinaca y carne roja magra 1–2 veces por semana cubren el hierro (acompáñalo con tu kiwi o mandarina: la vitamina C multiplica la absorción). Para potasio: plátano, papa con cáscara, aguacate y agua de coco: baratos y de aquí.",
   },
   {
     id: "t-04",
@@ -146,7 +146,7 @@ export const TIPS: {
     tag: "Nutrición",
     title: "El sodio del día vino casi todo de un plato",
     body:
-      "2 450 mg en total y 1 800 salieron de la pizza. No es dañino de forma aislada, pero explica la retención de líquido del día siguiente — y por eso la báscula miente si te pesas justo después. Usa el promedio semanal, nunca el dato de un día.",
+      "2 450 mg en total y 1 800 salieron de la pizza. No es dañino de forma aislada, pero explica la retención de líquido del día siguiente, y por eso la báscula miente si te pesas justo después. Usa el promedio semanal, nunca el dato de un día.",
   },
   {
     id: "t-07",
@@ -188,7 +188,7 @@ export const RESEARCH: {
     sources: "Carne roja y pescado dan ~1–2 g al día; el suplemento es la vía práctica.",
     caution:
       "Retiene algo de agua dentro del músculo: puede subirte ~1 kg en la báscula las primeras semanas. No es grasa.",
-    yours: "Ya la tomas — sostenla también los días que no entrenas: funciona por saturación, no por el estímulo del día.",
+    yours: "Ya la tomas, sostenla también los días que no entrenas: funciona por saturación, no por el estímulo del día.",
   },
   {
     id: "r-proteina",
@@ -267,16 +267,16 @@ export const RESEARCH: {
     what:
       "Contrapesa al sodio en la regulación de la presión arterial y participa en la contracción muscular. Casi nadie alcanza los 4 700 mg recomendados.",
     dose: "4 700 mg al día, idealmente desde comida.",
-    sources: "Plátano, papa con cáscara, aguacate, fréjol y agua de coco — todo barato y local.",
+    sources: "Plátano, papa con cáscara, aguacate, fréjol y agua de coco, todo barato y local.",
     yours:
-      "19 % hoy: es tu mayor hueco, y encima el día vino cargado de sodio (2 450 mg). Con minoxidil oral de por medio —que retiene sodio y agua— este desequilibrio pesa más de lo normal en la presión arterial. Es el número que yo movería primero.",
+      "19 % hoy: es tu mayor hueco, y encima el día vino cargado de sodio (2 450 mg). Con minoxidil oral de por medio (que retiene sodio y agua) este desequilibrio pesa más de lo normal en la presión arterial. Es el número que yo movería primero.",
   },
   {
     id: "r-betaalanina",
     name: "Beta-alanina",
     evidence: "moderada",
     what:
-      "Eleva la carnosina muscular, que tampona la acidez. El beneficio es real pero acotado: esfuerzos de 1 a 4 minutos — series largas, intervalos, fallo muscular.",
+      "Eleva la carnosina muscular, que tampona la acidez. El beneficio es real pero acotado: esfuerzos de 1 a 4 minutos: series largas, intervalos, fallo muscular.",
     dose: "3–6 g diarios repartidos; el efecto aparece tras semanas de acumulación.",
     sources: "Carne y pescado en cantidades pequeñas; el efecto requiere suplemento.",
     caution: "Puede dar hormigueo pasajero en cara y manos. Es inofensivo.",
@@ -310,7 +310,7 @@ export const RESEARCH: {
     evidence: "condicional",
     micro: "zinc",
     what:
-      "Interviene en inmunidad, cicatrización, síntesis proteica y producción de testosterona — pero corrige solo si partías de un déficit. En gente con niveles normales no sube nada.",
+      "Interviene en inmunidad, cicatrización, síntesis proteica y producción de testosterona, pero corrige solo si partías de un déficit. En gente con niveles normales no sube nada.",
     dose: "8–11 mg al día desde la dieta. Suplementos por debajo de 25 mg y no de forma crónica.",
     sources: "Ostras, carne, semilla de calabaza y garbanzo.",
     caution: "El exceso sostenido desplaza al cobre y puede provocar su déficit.",
@@ -336,11 +336,11 @@ export const RESEARCH: {
     evidence: "fuerte",
     micro: "calcium",
     what:
-      "Estructura del hueso y contracción muscular. En hombres que entrenan fuerza importa por la carga sobre el esqueleto: la densidad ósea responde al estímulo solo si hay material con qué construirla. No trabaja solo — necesita vitamina D para absorberse y K2 para depositarse donde toca.",
+      "Estructura del hueso y contracción muscular. En hombres que entrenan fuerza importa por la carga sobre el esqueleto: la densidad ósea responde al estímulo solo si hay material con qué construirla. No trabaja solo: necesita vitamina D para absorberse y K2 para depositarse donde toca.",
     dose: "1 000–1 300 mg al día, repartidos: el intestino absorbe mal más de ~500 mg de golpe.",
     sources: "Lácteos y kéfir, sardina con espina (la tuya ya cuenta), almendra, brócoli, tofu.",
     yours:
-      "131 % del valor diario — no es un hueco tuyo. Lo cubren las sardinas con espina, el kéfir y los batidos. El detalle a vigilar es que sin vitamina D y K2 suficientes, ese calcio se aprovecha peor.",
+      "131 % del valor diario, no es un hueco tuyo. Lo cubren las sardinas con espina, el kéfir y los batidos. El detalle a vigilar es que sin vitamina D y K2 suficientes, ese calcio se aprovecha peor.",
   },
   {
     id: "r-vita",
@@ -375,7 +375,7 @@ export const RESEARCH: {
     evidence: "moderada",
     micro: "b6",
     what:
-      "Son las coenzimas que convierten la comida en energía utilizable. No dan energía por sí mismas — esa es la promesa de marketing —, pero un déficit sí frena el metabolismo y aparece como fatiga.",
+      "Son las coenzimas que convierten la comida en energía utilizable. No dan energía por sí mismas, esa es la promesa de marketing, pero un déficit sí frena el metabolismo y aparece como fatiga.",
     dose: "B1 1,2 mg · B2 1,3 mg · B3 16 mg · B6 1,7 mg al día. Una dieta variada las cubre sin esfuerzo.",
     sources: "Cereal integral, legumbre, huevo, carne, lácteo, frutos secos y plátano.",
     caution: "La B6 en dosis altas y sostenidas (>100 mg/día) puede causar neuropatía. Es la única del grupo que preocupa.",
@@ -388,7 +388,7 @@ export const RESEARCH: {
     evidence: "fuerte",
     micro: "b9",
     what:
-      "Síntesis de ADN y división celular — todo tejido que se renueva depende de él, incluido el músculo. Junto con B12 mantiene bajos los niveles de homocisteína.",
+      "Síntesis de ADN y división celular, todo tejido que se renueva depende de él, incluido el músculo. Junto con B12 mantiene bajos los niveles de homocisteína.",
     dose: "400 µg al día.",
     sources: "Legumbre, espinaca, espárrago, aguacate, brócoli y cítricos.",
     yours: "15 % hoy. Una taza de lenteja o de espinaca al día lo endereza.",
@@ -424,7 +424,7 @@ export const RESEARCH: {
       "Materia prima de la hormona tiroidea, que fija tu tasa metabólica basal. Sin yodo suficiente, la tiroides baja el ritmo y con ella el gasto energético diario.",
     dose: "150 µg al día.",
     sources: "Sal yodada, pescado de mar, lácteo y algas.",
-    caution: "El exceso también altera la tiroides — las algas en cantidad pueden pasarse fácil de 1 000 µg.",
+    caution: "El exceso también altera la tiroides, las algas en cantidad pueden pasarse fácil de 1 000 µg.",
     yours:
       "No lo estás midiendo. En Ecuador la sal está yodada por ley desde los 90, así que lo más probable es que estés cubierto; solo tenlo presente si algún día bajas mucho la sal.",
   },
@@ -438,7 +438,7 @@ export const RESEARCH: {
     dose: "550 mg al día para un hombre adulto.",
     sources: "Yema de huevo (dos yemas ≈ 300 mg), hígado, soya, quinua y salmón.",
     yours:
-      "Hoy la cubriste al 81 % con tres yemas — era tu hueco más silencioso y lo tapaste sin proponértelo. Con dos huevos enteros diarios se sostiene solo.",
+      "Hoy la cubriste al 81 % con tres yemas, era tu hueco más silencioso y lo tapaste sin proponértelo. Con dos huevos enteros diarios se sostiene solo.",
   },
   {
     id: "r-k2",
@@ -451,7 +451,7 @@ export const RESEARCH: {
     sources: "Natto, quesos curados y fermentados, yema de huevo, mantequilla de pasto.",
     caution: "Si tomas anticoagulantes tipo warfarina, cualquier cambio en vitamina K se consulta con tu médico primero.",
     yours:
-      "Ya la cubres con el combinado de D3 + K2 — y es justo la razón por la que esa combinación se vende junta. Tu vitamina K registrada (50 %) viene del kiwi y es K1, otra cosa.",
+      "Ya la cubres con el combinado de D3 + K2, y es justo la razón por la que esa combinación se vende junta. Tu vitamina K registrada (50 %) viene del kiwi y es K1, otra cosa.",
   },
   {
     id: "r-nitratos",
@@ -753,7 +753,7 @@ export const LOG: FitState = {
       id: "f-2026-07-28-05",
       at: "2026-07-28T20:00",
       meal: "dinner",
-      name: "Pizza capricciosa — Via Partenope",
+      name: "Pizza capricciosa: Via Partenope",
       kcal: 950,
       protein_g: 40,
       carbs_g: 100,
@@ -803,7 +803,7 @@ export const LOG: FitState = {
         Calcio: { amount: 300, unit: "mg" },
         Magnesio: { amount: 30, unit: "mg" },
       },
-      notes: "Estimado como envase pequeño completo — dime la marca y lo afino.",
+      notes: "Estimado como envase pequeño completo, dime la marca y lo afino.",
       confidence: 0.55,
       source: "claude",
     },
@@ -875,13 +875,13 @@ export const LOG: FitState = {
       at: "2026-07-31T09:30",
       title: "Las dos yemas que botaste eran la mejor parte",
       body:
-        "La clara es proteína y poco más; la yema lleva casi toda la colina, la vitamina A, la D, la B12 y el selenio del huevo. Tirar dos te ahorró unas 95 kcal y 10 g de grasa — pero tu objetivo son 75 g de grasa al día y llevas 19. El espacio lo tienes. Si fue por colesterol, la evidencia de las últimas dos décadas es clara: el colesterol de la dieta apenas mueve el de la sangre en la mayoría de la gente, y las guías de EE. UU. le quitaron el límite en 2015.",
+        "La clara es proteína y poco más; la yema lleva casi toda la colina, la vitamina A, la D, la B12 y el selenio del huevo. Tirar dos te ahorró unas 95 kcal y 10 g de grasa, pero tu objetivo son 75 g de grasa al día y llevas 19. El espacio lo tienes. Si fue por colesterol, la evidencia de las últimas dos décadas es clara: el colesterol de la dieta apenas mueve el de la sangre en la mayoría de la gente, y las guías de EE. UU. le quitaron el límite en 2015.",
       tags: ["nutricion"],
     },
     {
       id: "i-2026-07-31-02",
       at: "2026-07-31T09:30",
-      title: "Colina al 81 % — el hueco silencioso, tapado",
+      title: "Colina al 81 %, el hueco silencioso, tapado",
       body:
         "Tres yemas dan ~440 mg de los 550 recomendados. Era el nutriente que el panel de research marcaba como tu mayor punto ciego, y lo cerraste sin proponértelo. Ojo con el omega-3 de la chía: sus 2 400 mg son ALA, y el cuerpo convierte apenas un 5–10 % a EPA/DHA. La barra se ve bien; el rendimiento real sigue viniendo de las sardinas.",
       tags: ["micronutrientes"],
@@ -891,7 +891,7 @@ export const LOG: FitState = {
       at: "2026-07-29T14:00",
       title: "El almuerzo estuvo bien; el pastel se llevó la mitad del día",
       body:
-        "Las dos porciones suman ~660 kcal, más que el pollo, la ensalada y los mellocos juntos (400). Con 1 230 kcal acumuladas te quedan ~1 170 para la cena, así que el día todavía cierra en objetivo — pero vas en 72 g de proteína y necesitas ~100 más. Una cena con pescado o carne magra la endereza sin drama.",
+        "Las dos porciones suman ~660 kcal, más que el pollo, la ensalada y los mellocos juntos (400). Con 1 230 kcal acumuladas te quedan ~1 170 para la cena, así que el día todavía cierra en objetivo, pero vas en 72 g de proteína y necesitas ~100 más. Una cena con pescado o carne magra la endereza sin drama.",
       tags: ["nutricion"],
     },
     {
@@ -899,7 +899,7 @@ export const LOG: FitState = {
       at: "2026-07-29T14:00",
       title: "La ensalada destapó tres micros que nunca habían aparecido",
       body:
-        "El pollo trajo niacina, B6 y zinc — tres nutrientes que hasta hoy figuraban como «sin registro» en el panel de research. Y la zanahoria subió la vitamina A, que venía en 20 %. Los brotes de brócoli no salen en la tabla de valores diarios porque su gracia es el sulforafano, un compuesto con investigación seria en detoxificación hepática y respuesta antioxidante; no tiene valor diario oficial, pero es de las cosas más inteligentes que puedes poner en un plato.",
+        "El pollo trajo niacina, B6 y zinc, tres nutrientes que hasta hoy figuraban como «sin registro» en el panel de research. Y la zanahoria subió la vitamina A, que venía en 20 %. Los brotes de brócoli no salen en la tabla de valores diarios porque su gracia es el sulforafano, un compuesto con investigación seria en detoxificación hepática y respuesta antioxidante; no tiene valor diario oficial, pero es de las cosas más inteligentes que puedes poner en un plato.",
       tags: ["micronutrientes"],
     },
     {
@@ -907,7 +907,7 @@ export const LOG: FitState = {
       at: "2026-07-29T06:30",
       title: "81,5 kg: buen número, pero no lo compares con el de ayer",
       body:
-        "2,5 kg en un día no es grasa — el cuerpo no quema 19 000 kcal mientras duermes. Los 84 kg de ayer eran un peso declarado sin condiciones fijas; estos 81,5 son la primera pesada en ayunas, que siempre es la más baja del día. A eso súmale el minoxidil oral, que retiene líquido en cantidad variable. La comparación que sí vale es contra enero: 86,8 → 81,5 kg, 5,3 kg en algo más de seis meses, unos 190 g por semana. Ese ritmo es exactamente el que conserva músculo.",
+        "2,5 kg en un día no es grasa, el cuerpo no quema 19 000 kcal mientras duermes. Los 84 kg de ayer eran un peso declarado sin condiciones fijas; estos 81,5 son la primera pesada en ayunas, que siempre es la más baja del día. A eso súmale el minoxidil oral, que retiene líquido en cantidad variable. La comparación que sí vale es contra enero: 86,8 → 81,5 kg, 5,3 kg en algo más de seis meses, unos 190 g por semana. Ese ritmo es exactamente el que conserva músculo.",
       tags: ["peso"],
     },
     {

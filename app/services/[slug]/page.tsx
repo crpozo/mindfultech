@@ -19,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const m = META[slug];
-  return { title: `${m?.name ?? "Services"} — MindfulTech`, description: m?.desc };
+  return { title: `${m?.name ?? "Services"}, MindfulTech`, description: m?.desc };
 }
 
 export default async function ServicePage({

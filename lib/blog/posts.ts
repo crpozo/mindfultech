@@ -35,8 +35,8 @@ export const POSTS: Post[] = [
       es: "MindfulTech ahora es un laboratorio de software AI-first",
     },
     excerpt: {
-      en: "Ten years of human-centered software, now with applied AI in every engagement. Here's what changes — and what never will.",
-      es: "Diez años de software centrado en personas, ahora con IA aplicada en cada proyecto. Esto es lo que cambia — y lo que nunca cambiará.",
+      en: "Ten years of human-centered software, now with applied AI in every engagement. Here's what changes, and what never will.",
+      es: "Diez años de software centrado en personas, ahora con IA aplicada en cada proyecto. Esto es lo que cambia, y lo que nunca cambiará.",
     },
     cover: "/art/ailab.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 18%,#e8e4f4),#efeaf6 55%,color-mix(in srgb,var(--accent) 30%,#fff))",
@@ -47,8 +47,8 @@ export const POSTS: Post[] = [
     body: [
       {
         t: "p",
-        en: "For a decade we've built products the same way: start with the people who'll use them, ship something real, and improve it with evidence. Today we're changing how we build — not why.",
-        es: "Durante una década construimos productos de la misma forma: empezar por las personas que los van a usar, lanzar algo real y mejorarlo con evidencia. Hoy cambiamos cómo construimos — no por qué.",
+        en: "For a decade we've built products the same way: start with the people who'll use them, ship something real, and improve it with evidence. Today we're changing how we build, not why.",
+        es: "Durante una década construimos productos de la misma forma: empezar por las personas que los van a usar, lanzar algo real y mejorarlo con evidencia. Hoy cambiamos cómo construimos, no por qué.",
       },
       {
         t: "h2",
@@ -57,13 +57,13 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "AI-first doesn't mean AI-only. It means every engagement now starts by asking where a model can remove real work — drafting, extracting, classifying, routing — and where a human still has to stay in the loop. The interesting products live on that boundary.",
-        es: "AI-first no significa solo IA. Significa que cada proyecto empieza preguntando dónde un modelo puede quitar trabajo real — redactar, extraer, clasificar, enrutar — y dónde una persona todavía tiene que quedarse en el circuito. Los productos interesantes viven en ese límite.",
+        en: "AI-first doesn't mean AI-only. It means every engagement now starts by asking where a model can remove real work (drafting, extracting, classifying, routing) and where a human still has to stay in the loop. The interesting products live on that boundary.",
+        es: "AI-first no significa solo IA. Significa que cada proyecto empieza preguntando dónde un modelo puede quitar trabajo real (redactar, extraer, clasificar, enrutar) y dónde una persona todavía tiene que quedarse en el circuito. Los productos interesantes viven en ese límite.",
       },
       {
         t: "p",
-        en: "You can see the pattern across our recent work: an agent that runs a US clinic's medical billing end to end, an iOS events platform with an AI survey module, a seller CRM that reads Meta leads and drafts replies. Different industries, same idea — automate the busywork, keep the judgment human.",
-        es: "El patrón se ve en nuestro trabajo reciente: un agente que factura de punta a punta para una clínica en EE.UU., una plataforma de eventos en iOS con un módulo de encuestas con IA, un CRM de vendedores que lee leads de Meta y redacta respuestas. Distintas industrias, la misma idea — automatizar lo repetitivo y dejar el criterio en manos humanas.",
+        en: "You can see the pattern across our recent work: an agent that runs a US clinic's medical billing end to end, an iOS events platform with an AI survey module, a seller CRM that reads Meta leads and drafts replies. Different industries, same idea: automate the busywork, keep the judgment human.",
+        es: "El patrón se ve en nuestro trabajo reciente: un agente que factura de punta a punta para una clínica en EE.UU., una plataforma de eventos en iOS con un módulo de encuestas con IA, un CRM de vendedores que lee leads de Meta y redacta respuestas. Distintas industrias, la misma idea: automatizar lo repetitivo y dejar el criterio en manos humanas.",
       },
       {
         t: "h2",
@@ -73,16 +73,16 @@ export const POSTS: Post[] = [
       {
         t: "ul",
         en: [
-          "Research before code — we still start with the people who'll use it.",
-          "Ship to production — a demo isn't a product.",
-          "Human review where it matters — especially in healthcare and money.",
-          "Own the whole stack — design, build, deploy, and stay.",
+          "Research before code: we still start with the people who'll use it.",
+          "Ship to production: a demo isn't a product.",
+          "Human review where it matters: especially in healthcare and money.",
+          "Own the whole stack: design, build, deploy, and stay.",
         ],
         es: [
-          "Investigación antes que código — seguimos empezando por quienes lo van a usar.",
-          "Llegar a producción — un demo no es un producto.",
-          "Revisión humana donde importa — sobre todo en salud y en dinero.",
-          "Dueños de todo el stack — diseñar, construir, desplegar y quedarnos.",
+          "Investigación antes que código: seguimos empezando por quienes lo van a usar.",
+          "Llegar a producción, un demo no es un producto.",
+          "Revisión humana donde importa: sobre todo en salud y en dinero.",
+          "Dueños de todo el stack: diseñar, construir, desplegar y quedarnos.",
         ],
       },
       {
@@ -92,8 +92,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "The models finally crossed the line from \"impressive demo\" to \"dependable teammate\" for a narrow, well-defined job. The hard part was never the model — it's the plumbing around it: grounding it in real data, giving it tools, and designing the moments where a person checks its work. That's the work we've spent ten years getting good at.",
-        es: "Los modelos por fin cruzaron la línea de \"demo impresionante\" a \"colega confiable\" para una tarea acotada y bien definida. La parte difícil nunca fue el modelo — es la fontanería alrededor: anclarlo en datos reales, darle herramientas y diseñar los momentos en que una persona revisa su trabajo. En eso llevamos diez años volviéndonos buenos.",
+        en: "The models finally crossed the line from \"impressive demo\" to \"dependable teammate\" for a narrow, well-defined job. The hard part was never the model, it's the plumbing around it: grounding it in real data, giving it tools, and designing the moments where a person checks its work. That's the work we've spent ten years getting good at.",
+        es: "Los modelos por fin cruzaron la línea de \"demo impresionante\" a \"colega confiable\" para una tarea acotada y bien definida. La parte difícil nunca fue el modelo, es la fontanería alrededor: anclarlo en datos reales, darle herramientas y diseñar los momentos en que una persona revisa su trabajo. En eso llevamos diez años volviéndonos buenos.",
       },
       {
         t: "quote",
@@ -127,8 +127,8 @@ export const POSTS: Post[] = [
     body: [
       {
         t: "p",
-        en: "USFQ runs hundreds of campus events a year — talks, fairs, ceremonies, workshops. The people organizing them were living in spreadsheets, WhatsApp threads, and paper check-in lists. EventFlow replaced all of it with one iOS app.",
-        es: "La USFQ organiza cientos de eventos al año — charlas, ferias, ceremonias, talleres. Quienes los coordinaban vivían entre hojas de cálculo, chats de WhatsApp y listas de asistencia en papel. EventFlow reemplazó todo eso con una sola app en iOS.",
+        en: "USFQ runs hundreds of campus events a year: talks, fairs, ceremonies, workshops. The people organizing them were living in spreadsheets, WhatsApp threads, and paper check-in lists. EventFlow replaced all of it with one iOS app.",
+        es: "La USFQ organiza cientos de eventos al año: charlas, ferias, ceremonias, talleres. Quienes los coordinaban vivían entre hojas de cálculo, chats de WhatsApp y listas de asistencia en papel. EventFlow reemplazó todo eso con una sola app en iOS.",
       },
       {
         t: "h2",
@@ -137,8 +137,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "Every event repeated the same manual loop: build a registration form, publish it somewhere, collect responses, print a list, check people in at the door by hand, and — if anyone remembered — send a survey afterward. Nothing connected to anything else.",
-        es: "Cada evento repetía el mismo ciclo manual: armar un formulario de registro, publicarlo en algún lado, recibir respuestas, imprimir una lista, hacer el check-in a mano en la puerta y — si alguien se acordaba — enviar una encuesta después. Nada estaba conectado.",
+        en: "Every event repeated the same manual loop: build a registration form, publish it somewhere, collect responses, print a list, check people in at the door by hand, and (if anyone remembered) send a survey afterward. Nothing connected to anything else.",
+        es: "Cada evento repetía el mismo ciclo manual: armar un formulario de registro, publicarlo en algún lado, recibir respuestas, imprimir una lista, hacer el check-in a mano en la puerta y (si alguien se acordaba) enviar una encuesta después. Nada estaba conectado.",
       },
       {
         t: "h2",
@@ -164,8 +164,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "The survey module is the part organizers didn't expect to love. Instead of reading hundreds of free-text answers, they get the recurring themes surfaced automatically — with the raw responses one tap away when they want the detail.",
-        es: "El módulo de encuestas es lo que los organizadores no esperaban querer tanto. En vez de leer cientos de respuestas de texto libre, reciben los temas recurrentes de forma automática — con las respuestas originales a un toque de distancia cuando quieren el detalle.",
+        en: "The survey module is the part organizers didn't expect to love. Instead of reading hundreds of free-text answers, they get the recurring themes surfaced automatically, with the raw responses one tap away when they want the detail.",
+        es: "El módulo de encuestas es lo que los organizadores no esperaban querer tanto. En vez de leer cientos de respuestas de texto libre, reciben los temas recurrentes de forma automática, con las respuestas originales a un toque de distancia cuando quieren el detalle.",
       },
       {
         t: "h2",
@@ -174,8 +174,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "We started with the organizers, not the feature list — shadowing a real event day to see where the time actually went. Then we built, tested on live events, and published to the App Store.",
-        es: "Empezamos por los organizadores, no por la lista de funciones — acompañando un día de evento real para ver a dónde se iba el tiempo. Luego construimos, probamos en eventos reales y publicamos en el App Store.",
+        en: "We started with the organizers, not the feature list: shadowing a real event day to see where the time actually went. Then we built, tested on live events, and published to the App Store.",
+        es: "Empezamos por los organizadores, no por la lista de funciones: acompañando un día de evento real para ver a dónde se iba el tiempo. Luego construimos, probamos en eventos reales y publicamos en el App Store.",
       },
       {
         t: "quote",
@@ -192,8 +192,8 @@ export const POSTS: Post[] = [
       es: "Así opera el agente de IA que factura para Helixona",
     },
     excerpt: {
-      en: "Reading the practice's records, preparing claims, and handling payer submissions — end to end, with a human check where it counts.",
-      es: "Leyendo los registros de la clínica, preparando reclamos y gestionando envíos a las aseguradoras — de punta a punta, con revisión humana donde importa.",
+      en: "Reading the practice's records, preparing claims, and handling payer submissions: end to end, with a human check where it counts.",
+      es: "Leyendo los registros de la clínica, preparando reclamos y gestionando envíos a las aseguradoras, de punta a punta, con revisión humana donde importa.",
     },
     cover: "/art/healthcare.webp",
     bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
@@ -204,8 +204,8 @@ export const POSTS: Post[] = [
     body: [
       {
         t: "p",
-        en: "Medical billing is where a lot of a US clinic's revenue quietly leaks. It's repetitive, rules-heavy, and unforgiving of small mistakes. For Helixona we built an AI agent that handles the repetitive parts end to end — and knows exactly when to stop and ask a human.",
-        es: "La facturación médica es donde se fuga en silencio buena parte de los ingresos de una clínica en EE.UU. Es repetitiva, llena de reglas e implacable con los errores pequeños. Para Helixona construimos un agente de IA que se encarga de las partes repetitivas de punta a punta — y sabe exactamente cuándo detenerse y preguntarle a una persona.",
+        en: "Medical billing is where a lot of a US clinic's revenue quietly leaks. It's repetitive, rules-heavy, and unforgiving of small mistakes. For Helixona we built an AI agent that handles the repetitive parts end to end, and knows exactly when to stop and ask a human.",
+        es: "La facturación médica es donde se fuga en silencio buena parte de los ingresos de una clínica en EE.UU. Es repetitiva, llena de reglas e implacable con los errores pequeños. Para Helixona construimos un agente de IA que se encarga de las partes repetitivas de punta a punta, y sabe exactamente cuándo detenerse y preguntarle a una persona.",
       },
       {
         t: "h2",
@@ -239,8 +239,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "The design principle is boring on purpose: the agent should be confidently right or clearly unsure — never confidently wrong. Every action is grounded in real records, and the moments that touch money or care get reviewed.",
-        es: "El principio de diseño es aburrido a propósito: el agente debe estar seguro y en lo correcto, o claramente en duda — nunca seguro y equivocado. Cada acción está anclada en registros reales, y los momentos que tocan dinero o atención se revisan.",
+        en: "The design principle is boring on purpose: the agent should be confidently right or clearly unsure, never confidently wrong. Every action is grounded in real records, and the moments that touch money or care get reviewed.",
+        es: "El principio de diseño es aburrido a propósito: el agente debe estar seguro y en lo correcto, o claramente en duda, nunca seguro y equivocado. Cada acción está anclada en registros reales, y los momentos que tocan dinero o atención se revisan.",
       },
       {
         t: "h2",
@@ -294,8 +294,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "A feature that answers from the model's memory will eventually make something up. One that answers from your data, with a link back to the source, won't. Retrieval isn't a nice-to-have — it's the difference between a toy and a tool.",
-        es: "Una función que responde desde la memoria del modelo tarde o temprano inventará algo. Una que responde desde tus datos, con un enlace a la fuente, no. El retrieval no es un lujo — es la diferencia entre un juguete y una herramienta.",
+        en: "A feature that answers from the model's memory will eventually make something up. One that answers from your data, with a link back to the source, won't. Retrieval isn't a nice-to-have, it's the difference between a toy and a tool.",
+        es: "Una función que responde desde la memoria del modelo tarde o temprano inventará algo. Una que responde desde tus datos, con un enlace a la fuente, no. El retrieval no es un lujo, es la diferencia entre un juguete y una herramienta.",
       },
       {
         t: "h2",
@@ -304,8 +304,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "Users trust what they can inspect. Every AI output should carry its evidence one tap away — the record it came from, its confidence, its reasoning. Transparency turns \"magic\" into \"I can check this.\"",
-        es: "La gente confía en lo que puede inspeccionar. Cada salida de IA debe llevar su evidencia a un toque de distancia — el registro del que vino, su confianza, su razonamiento. La transparencia convierte la \"magia\" en \"esto lo puedo verificar\".",
+        en: "Users trust what they can inspect. Every AI output should carry its evidence one tap away: the record it came from, its confidence, its reasoning. Transparency turns \"magic\" into \"I can check this.\"",
+        es: "La gente confía en lo que puede inspeccionar. Cada salida de IA debe llevar su evidencia a un toque de distancia, el registro del que vino, su confianza, su razonamiento. La transparencia convierte la \"magia\" en \"esto lo puedo verificar\".",
       },
       {
         t: "h2",
@@ -314,8 +314,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "The question isn't \"human or AI?\" It's where the human belongs. We map every flow for the moments that touch money, health, or reputation, and put a person there — with the context already assembled so the review takes seconds, not minutes.",
-        es: "La pregunta no es \"¿humano o IA?\". Es dónde va la persona. Mapeamos cada flujo buscando los momentos que tocan dinero, salud o reputación, y ponemos ahí a una persona — con el contexto ya armado para que la revisión tome segundos, no minutos.",
+        en: "The question isn't \"human or AI?\" It's where the human belongs. We map every flow for the moments that touch money, health, or reputation, and put a person there, with the context already assembled so the review takes seconds, not minutes.",
+        es: "La pregunta no es \"¿humano o IA?\". Es dónde va la persona. Mapeamos cada flujo buscando los momentos que tocan dinero, salud o reputación, y ponemos ahí a una persona, con el contexto ya armado para que la revisión tome segundos, no minutos.",
       },
       {
         t: "h2",
@@ -342,8 +342,8 @@ export const POSTS: Post[] = [
       },
       {
         t: "p",
-        en: "That's the bar we build to — and the conversation we're always happy to have.",
-        es: "Ese es el estándar con el que construimos — y la conversación que siempre nos alegra tener.",
+        en: "That's the bar we build to, and the conversation we're always happy to have.",
+        es: "Ese es el estándar con el que construimos, y la conversación que siempre nos alegra tener.",
       },
     ],
   },
