@@ -265,15 +265,6 @@ export function ClientMap() {
           {/* Legend and mobile view in one. Grouped by region so seven
               near-identical rows read as three places instead of a list. */}
           <div className="map-side">
-            <div className="map-side-top">
-              {/* count clients, not sites — Ecuador is the base, not a client */}
-              <span className="map-kpi">{SITES.filter((s) => !s.base).length}</span>
-              <span>
-                {es ? "lugares con clientes" : "places with clients"}
-                <b>{es ? "5 países · sin oficinas, un solo equipo" : "5 countries · no offices, one team"}</b>
-              </span>
-            </div>
-
             {REGIONS.map((r) => {
               const items = SITES.filter((s) => s.region === r.id);
               if (!items.length) return null;
