@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 4;
+export const STATE_VERSION = 5;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -178,6 +178,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "salud",
     merchant: "Audífonos deportivos",
     notes: "Para nadar y trotar. Categoría salud por ser equipo de entrenamiento — cámbiala si prefieres otra.",
+    excluded: false,
+  },
+  {
+    id: "txn-2026-08-01-cremas",
+    sinceVersion: 5,
+    // $310 la compra completa menos los $300 de los audífonos
+    date: "2026-08-01T19:00:00-05:00",
+    amount: 10,
+    kind: "expense",
+    category: "salud",
+    merchant: "Cremas hidratantes faciales (2)",
+    notes: "Misma compra que los audífonos.",
     excluded: false,
   },
 ];
