@@ -771,11 +771,11 @@ a:hover {
 /* client map — dotted basemap beside the location list */
 .map-grid {
   display: grid;
-  /* the world frame is 2.7:1, so the map wants more of the row than the
-     old Americas-and-Europe crop did */
-  grid-template-columns: 2.15fr 1fr;
-  gap: clamp(24px, 3vw, 54px);
-  align-items: center;
+  /* The world frame is 2.7:1. Beside a column it rendered ~830px wide and
+     300px tall, which read as a postage stamp; stacked, it gets the section's
+     full width and the pins grow with it (everything is in viewBox units). */
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 3vw, 44px);
 }
 .map-canvas {
   min-width: 0;
@@ -786,6 +786,11 @@ a:hover {
 /* One card, three region groups — seven identical pills read as a wall;
    grouping gives the column a shape and says something the map can't. */
 .map-side {
+  /* three groups side by side under the map, instead of a tall column */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 clamp(20px, 3vw, 48px);
+  align-items: start;
   /* was rgba(255,255,255,.72) + backdrop-filter: blur(6px) — but the section
      behind is a flat #f4f7fc→#eef2f9 gradient, so the frosted glass resolved
      to this same near-white anyway, and backdrop-filter re-blurs on every
@@ -796,7 +801,7 @@ a:hover {
   padding: 4px 20px 18px;
 }
 .map-group + .map-group {
-  margin-top: 4px;
+  margin-top: 0;
 }
 .map-group-head {
   padding: 15px 0 7px;
@@ -865,9 +870,18 @@ a:hover {
   color: #2e6e63;
   transform: scale(1.08);
 }
-@media (max-width: 900px) {
-  .map-grid {
+@media (max-width: 760px) {
+  /* A 2.7:1 world map on a phone is ~340px wide, so a pin sized in viewBox
+     units lands at 2px on screen. CSS beats SVG presentation attributes, so
+     these override the inline radii — phone only, where the hover-grow the
+     inline values carry is moot anyway. */
+  .map-pin-halo { r: 15px; }
+  .map-pin-dot { r: 9px; stroke-width: 4px; }
+  .map-side {
     grid-template-columns: 1fr;
+  }
+  .map-group + .map-group {
+    margin-top: 6px;
   }
 }
 

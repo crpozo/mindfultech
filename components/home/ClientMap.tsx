@@ -222,7 +222,7 @@ export function ClientMap() {
         padding: "100px 0 96px",
       }}
     >
-      <div className="pad-x" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 48px" }}>
+      <div className="pad-x" style={{ maxWidth: 1460, margin: "0 auto", padding: "0 48px" }}>
         <div style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 46px" }}>
           <span
             style={{
@@ -294,11 +294,12 @@ export function ClientMap() {
                     onMouseLeave={() => setActive(null)}
                   >
                     {on && <circle cx={x} cy={y} r={20} fill="var(--accent)" opacity={0.3} />}
-                    <circle cx={x} cy={y} r={on ? 11 : 8} fill="var(--accent)" opacity={0.28} />
+                    <circle className="map-pin-halo" cx={x} cy={y} r={on ? 12 : 9} fill="var(--accent)" opacity={0.28} />
                     <circle
+                      className="map-pin-dot"
                       cx={x}
                       cy={y}
-                      r={on ? 6.5 : 5}
+                      r={on ? 7 : 5.6}
                       fill={on ? "#1c6459" : "#2f7d71"}
                       stroke="#fff"
                       strokeWidth={3}
