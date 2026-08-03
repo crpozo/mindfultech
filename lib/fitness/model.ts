@@ -691,3 +691,149 @@ Reglas:
 - Los micronutrientes van en mg o µg. Incluye los que puedas estimar (vitaminas y minerales).
 - Después del JSON, dame 2–3 líneas en español con tu lectura: qué estuvo bien, qué ajustar.
 - No inventes precisión: usa "confidence" entre 0 y 1.`;
+
+/* ------------------------------------------------------------ qué mejorar --
+ * Un solo recuadro, calculado del registro. Sustituye a la pila de insights
+ * escritos a mano: aquí cada línea nace de un número, así que envejece sola
+ * cuando el número cambia, en vez de quedarse contando algo de la semana
+ * pasada. Cada punto cita su cifra para que se pueda discutir.
+ */
+export interface Improvement {
+  id: string;
+  /** cuánto mueve la aguja, no cuán grave suena */
+  priority: "alta" | "media" | "baja";
+  tag: string;
+  title: string;
+  body: string;
+  /** la cifra que lo disparó, para el chip de la derecha */
+  metric?: string;
+}
+
+const PRIO_RANK = { alta: 0, media: 1, baja: 2 };
+
+export function improvements(
+  s: FitState,
+  stats: DayStats[],
+  micros: { id: string; label: string; pct: number }[],
+  /** ids del DV que ya cubre un suplemento: no son huecos aunque la comida lo parezca */
+  supplemented: Set<string> = new Set()
+): Improvement[] {
+  const out: Improvement[] = [];
+  // Today is still being eaten, so it drags every average down. Averages are
+  // taken over completed logged days only; the panel's footnote owns the
+  // other half of the caveat (a day logged halfway looks like a deficit).
+  const today = dayKey(new Date());
+  const logged = stats.filter((d) => d.meals > 0 && d.day !== today);
+  const n = logged.length;
+  const avg = (f: (d: DayStats) => number) =>
+    n ? logged.reduce((a, d) => a + f(d), 0) / n : 0;
+
+  // ---- proteína: la variable que decide si lo que se pierde es grasa o músculo
+  if (n >= 1) {
+    const p = avg((d) => d.protein_g);
+    const target = s.targets.protein_g;
+    if (target > 0 && p < target * 0.85) {
+      out.push({
+        id: "protein",
+        priority: "alta",
+        tag: "Proteína",
+        title: `Te faltan ~${Math.round(target - p)} g de proteína al día`,
+        body: `Promedias ${Math.round(p)} g contra un objetivo de ${target} en ${n} ${n === 1 ? "día completo" : "días completos"}. En déficit, la proteína es lo que decide si lo que baja es grasa o músculo. Una lata de atún o un shake extra cierra la diferencia.`,
+        metric: `${Math.round(p)}/${target} g`,
+      });
+    }
+  }
+
+  // ---- micronutrientes: los dos más bajos que no cubra ya un suplemento
+  const gaps = micros
+    .filter((m) => !supplemented.has(m.id) && m.pct < 55)
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 2);
+  if (gaps.length) {
+    const names = gaps.map((g) => `${g.label} (${Math.round(g.pct)} %)`).join(" y ");
+    out.push({
+      id: "micros",
+      priority: "alta",
+      tag: "Micronutrientes",
+      title: `Tus dos huecos ahora: ${gaps.map((g) => g.label).join(" y ")}`,
+      body: `${names} del valor diario en el promedio del rango. Es lo más barato de arreglar: una porción diaria del alimento correcto sube cualquiera de los dos sin tocar tus calorías.`,
+      metric: `${Math.round(gaps[0].pct)} %`,
+    });
+  }
+
+  // ---- frecuencia de fuerza
+  const week = stats.slice(-7);
+  const sessions = week.filter((d) => d.workoutMin > 0).length;
+  const strengthDays = new Set(
+    s.workouts.filter((w) => w.type === "strength").map((w) => atDay(w.at))
+  );
+  const strengthWeek = week.filter((d) => strengthDays.has(d.day)).length;
+  if (strengthWeek < 3) {
+    out.push({
+      id: "training",
+      priority: strengthWeek === 0 ? "alta" : "media",
+      tag: "Entrenamiento",
+      title:
+        strengthWeek === 0
+          ? "No hay fuerza registrada esta semana"
+          : `Solo ${strengthWeek} ${strengthWeek === 1 ? "sesión" : "sesiones"} de fuerza en 7 días`,
+      body: `Con recomposición como objetivo, 3–4 sesiones semanales son las que sostienen la masa magra mientras baja el peso. ${sessions > strengthWeek ? "El cardio suma gasto, pero no protege músculo igual." : "Pierna y espalda son las que más rinden por sesión."}`,
+      metric: `${strengthWeek}/3 sem.`,
+    });
+  }
+
+  // ---- sin cargas no hay progresión que graficar
+  const recent = s.workouts.filter((w) => w.type === "strength").slice(0, 6);
+  if (recent.length && !recent.some((w) => w.sets?.length)) {
+    out.push({
+      id: "loads",
+      priority: "media",
+      tag: "Datos",
+      title: "Ninguna sesión trae peso × reps × series",
+      body: "Sin cargas no puedo graficar tu progresión: podrías pasar meses sin subir un kilo en banca y este tablero no lo notaría. Pásame los números de los ejercicios principales.",
+    });
+  }
+
+  // ---- composición medida vs estimada
+  const measured = [...s.body].some((b) => b.bodyfat_pct != null && b.at.slice(0, 10) > "2026-01-15");
+  if (!measured) {
+    out.push({
+      id: "bodyfat",
+      priority: "media",
+      tag: "Medición",
+      title: "El % de grasa sigue siendo una estimación",
+      body: "El número del tablero asume que conservaste toda la masa magra de enero, que es el escenario optimista. Una bioimpedancia o un plicómetro cada 4 semanas, mismo día y en ayunas, lo convierte en dato.",
+    });
+  }
+
+  // ---- sodio contra potasio: importa más con minoxidil de por medio
+  const na = micros.find((m) => m.id === "sodium");
+  const k = micros.find((m) => m.id === "potassium");
+  if (na && k && na.pct > k.pct * 1.3) {
+    out.push({
+      id: "sodio",
+      priority: "baja",
+      tag: "Presión",
+      title: "El sodio va por delante del potasio",
+      body: `Sodio ${Math.round(na.pct)} % contra potasio ${Math.round(k.pct)} %. Los dos se contrapesan en la regulación de la presión, y el desequilibrio pesa más con un vasodilatador de por medio. Plátano, papa con cáscara y aguacate son la vía corta.`,
+      metric: `Na ${Math.round(na.pct)} % · K ${Math.round(k.pct)} %`,
+    });
+  }
+
+  // ---- calorías muy por debajo del objetivo de forma sostenida
+  if (n >= 3) {
+    const kcal = avg((d) => d.kcal);
+    if (s.targets.kcal > 0 && kcal < s.targets.kcal * 0.7) {
+      out.push({
+        id: "kcal",
+        priority: "media",
+        tag: "Calorías",
+        title: "Estás comiendo bastante por debajo del objetivo",
+        body: `Promedias ${Math.round(kcal)} kcal contra ${s.targets.kcal}. Un déficit muy agresivo acelera la báscula pero se lleva músculo por delante, y es lo que suele romper la adherencia. Si el registro está incompleto, dímelo y lo corrijo.`,
+        metric: `${Math.round(kcal)} kcal`,
+      });
+    }
+  }
+
+  return out.sort((a, b) => PRIO_RANK[a.priority] - PRIO_RANK[b.priority]);
+}

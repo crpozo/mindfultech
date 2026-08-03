@@ -101,8 +101,7 @@ const SITES: Site[] = [
     lon: 23.73,
     place: { en: "Greece", es: "Grecia" },
     country: { en: "Greece", es: "Grecia" },
-    // Athens sits ~15px from the map's right edge — only a left label fits
-    label: "left",
+    label: "right",
     region: "eu",
   },
 ];
@@ -279,7 +278,7 @@ export function ClientMap() {
               <path
                 d={LAND_PATH}
                 stroke="#b7c2d4"
-                strokeWidth={6.4}
+                strokeWidth={4.6}
                 strokeLinecap="round"
                 fill="none"
               />
@@ -294,17 +293,23 @@ export function ClientMap() {
                     onMouseEnter={() => setActive(s.id)}
                     onMouseLeave={() => setActive(null)}
                   >
-                    {on && <circle cx={x} cy={y} r={26} fill="var(--accent)" opacity={0.3} />}
-                    <circle cx={x} cy={y} r={on ? 14 : 11} fill="var(--accent)" opacity={0.28} />
+                    {on && <circle cx={x} cy={y} r={20} fill="var(--accent)" opacity={0.3} />}
+                    <circle cx={x} cy={y} r={on ? 11 : 8} fill="var(--accent)" opacity={0.28} />
                     <circle
                       cx={x}
                       cy={y}
-                      r={on ? 8 : 6.5}
+                      r={on ? 6.5 : 5}
                       fill={on ? "#1c6459" : "#2f7d71"}
                       stroke="#fff"
                       strokeWidth={3}
                     />
-                    {(() => {
+                    {/* Only the active pin is named. On a whole-world frame
+                        the Netherlands and Germany pins land 14px apart and
+                        their plates are ~130px wide, so eight permanent
+                        labels would be an unreadable pile; the list beside
+                        the map is the always-on index. */}
+                    {on &&
+                    (() => {
                       const text = s.place[lang].toUpperCase();
                       const plate = labelPlate(text, x + l.dx, l.anchor);
                       return (
@@ -316,7 +321,7 @@ export function ClientMap() {
                             height={FONT + 8}
                             rx={6}
                             fill="#fff"
-                            opacity={on ? 1 : 0.88}
+                            opacity={1}
                           />
                           <text
                             x={x + l.dx}
@@ -326,7 +331,7 @@ export function ClientMap() {
                             fontSize={FONT}
                             letterSpacing="1.4"
                             fontWeight={500}
-                            fill={on ? "#16233a" : "#4d5b75"}
+                            fill="#16233a"
                             style={{ transition: "fill .2s ease" }}
                           >
                             {text}

@@ -6,7 +6,6 @@ import {
   type FoodEntry,
   type WorkoutEntry,
   type BodyEntry,
-  type Insight,
   type Targets,
   type DayStats,
   atDay,
@@ -16,10 +15,11 @@ import {
   exportFit,
   lastNDays,
   microCoverage,
+  improvements,
   statsByDay,
   streakDays,
 } from "@/lib/fitness/model";
-import { LOG, PROFILE, RESEARCH, STACK, TIPS } from "@/lib/fitness/data";
+import { LOG, PROFILE, RESEARCH, STACK } from "@/lib/fitness/data";
 import {
   hasPasscode,
   isUnlocked,
@@ -179,10 +179,9 @@ export function FitnessApp() {
           </Panel>
         )}
 
-        <Tips />
+        <ToImprove state={state} stats={stats} micros={micros} />
         <Stack />
         <Research micros={micros} range={range} />
-        <Insights state={state} stats={stats} />
         <Log state={state} />
 
         <p className="fit-howto">
@@ -730,28 +729,64 @@ function Micros({ rows }: { rows: { id: string; label: string; pct: number }[] }
 
 /* ----------------------------------------------------------------------- tips */
 
-function Tips() {
-  const tone: Record<string, string> = { alta: C_BAD, media: C_WARN, baja: C_GOOD };
+/**
+ * One box instead of two stacked walls of cards. Every line is computed from
+ * the log by `improvements()`, so it goes away on its own when the number that
+ * raised it moves — the old hand-written tips and insights kept telling last
+ * week's story.
+ */
+function ToImprove({
+  state,
+  stats,
+  micros,
+}: {
+  state: FitState;
+  stats: DayStats[];
+  micros: { id: string; label: string; pct: number }[];
+}) {
+  const supplemented = React.useMemo(
+    () => new Set(RESEARCH.filter((r) => r.supplemented && r.micro).map((r) => r.micro!)),
+    []
+  );
+  const items = React.useMemo(
+    () => improvements(state, stats, micros, supplemented),
+    [state, stats, micros, supplemented]
+  );
+  const tone: Record<string, string> = { alta: C_BAD, media: C_WARN, baja: MUTED };
+
   return (
     <section className="fit-panel">
-      <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Consejos para mejorar</h2>
-      <p style={{ margin: "0 0 16px", fontSize: 13.5, color: MUTED }}>
-        Ordenados por lo que más mueve la aguja con tus datos de hoy.
+      <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>Qué mejorar</h2>
+      <p style={{ margin: "0 0 4px", fontSize: 13.5, color: MUTED }}>
+        Salido de tus datos, ordenado por lo que más mueve la aguja.
       </p>
-      <div className="fit-tips">
-        {TIPS.map((t) => (
-          <article key={t.id} className="fit-tip-card">
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span className="fit-prio" style={{ background: tone[t.priority] }}>
-                {t.priority.toUpperCase()}
-              </span>
-              <span className="fit-eyebrow">{t.tag}</span>
-            </div>
-            <h3>{t.title}</h3>
-            <p>{t.body}</p>
-          </article>
-        ))}
-      </div>
+      {items.length === 0 ? (
+        <p style={{ margin: "16px 0 0", fontSize: 14, color: C_GOOD }}>
+          Nada que corregir con los datos de este rango. Sostenlo.
+        </p>
+      ) : (
+        <ul className="fit-improve">
+          {items.map((it) => (
+            <li key={it.id}>
+              <span className="fit-improve-bar" style={{ background: tone[it.priority] }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                  <span className="fit-eyebrow">{it.tag}</span>
+                  {it.metric && <span className="fit-improve-metric">{it.metric}</span>}
+                </div>
+                <h3>{it.title}</h3>
+                <p>{it.body}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p style={{ fontSize: 11.5, color: MUTED, margin: "16px 0 0", lineHeight: 1.6 }}>
+        Todo sale de lo que está registrado, y el tablero no distingue
+        &ldquo;no lo comí&rdquo; de &ldquo;no lo anoté&rdquo;: un día apuntado a
+        medias aparece aquí como un déficit. El día en curso no entra en los
+        promedios.
+      </p>
     </section>
   );
 }
@@ -953,77 +988,6 @@ function Research({ micros, range }: { micros: { id: string; pct: number }[]; ra
         suplementar hierro, zinc o vitamina D, una analítica cuesta poco y evita corregir algo que
         no estaba roto.
       </p>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------- insights */
-
-function Insights({ state, stats }: { state: FitState; stats: DayStats[] }) {
-  // a few observations computed locally, so the panel is useful even before
-  // Claude writes any — clearly marked so they're never confused with its notes
-  const auto = React.useMemo(() => {
-    const out: { title: string; body: string }[] = [];
-    const logged = stats.filter((d) => d.meals > 0);
-    if (logged.length >= 3) {
-      const avgP = logged.reduce((a, d) => a + d.protein_g, 0) / logged.length;
-      const gap = state.targets.protein_g - avgP;
-      if (gap > 15)
-        out.push({
-          title: "Proteína por debajo del objetivo",
-          body: `Promedias ${fmt(avgP)} g en los días registrados, ${fmt(gap)} g menos que tu objetivo de ${fmt(state.targets.protein_g)} g.`,
-        });
-      const avgK = logged.reduce((a, d) => a + d.kcal, 0) / logged.length;
-      if (avgK > state.targets.kcal * 1.1)
-        out.push({
-          title: "Vas por encima en calorías",
-          body: `Promedias ${fmt(avgK)} kcal frente a un objetivo de ${fmt(state.targets.kcal)}.`,
-        });
-      else if (avgK < state.targets.kcal * 0.8)
-        out.push({
-          title: "Estás comiendo poco",
-          body: `Promedias ${fmt(avgK)} kcal, bastante por debajo de ${fmt(state.targets.kcal)}. Revisa si es intencional.`,
-        });
-    }
-    const trained = stats.filter((d) => d.workoutMin > 0).length;
-    if (stats.length >= 7)
-      out.push({
-        title: `${trained} de ${stats.length} días con entrenamiento`,
-        body: `Suman ${fmt(stats.reduce((a, d) => a + d.workoutMin, 0))} minutos en el rango.`,
-      });
-    const weights = stats.filter((d) => d.weight_kg != null);
-    if (weights.length >= 2) {
-      const diff = weights[weights.length - 1].weight_kg! - weights[0].weight_kg!;
-      out.push({
-        title: diff === 0 ? "Peso estable" : diff < 0 ? `Bajaste ${fmt(Math.abs(diff), 1)} kg` : `Subiste ${fmt(diff, 1)} kg`,
-        body: `Entre ${shortDay(weights[0].day)} y ${shortDay(weights[weights.length - 1].day)}.`,
-      });
-    }
-    return out;
-  }, [stats, state.targets]);
-
-  const fromClaude = [...state.insights].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8);
-  if (!auto.length && !fromClaude.length) return null;
-
-  return (
-    <section className="fit-panel">
-      <h2 style={{ margin: "0 0 14px", fontSize: 17, fontWeight: 600 }}>Insights</h2>
-      <div className="fit-insights">
-        {fromClaude.map((i: Insight) => (
-          <article key={i.id} className="fit-insight">
-            <div className="fit-eyebrow" style={{ color: "var(--accent-deep)" }}>CLAUDE · {i.at.slice(0, 10)}</div>
-            <h3>{i.title}</h3>
-            {i.body && <p>{i.body}</p>}
-          </article>
-        ))}
-        {auto.map((i, n) => (
-          <article key={"a" + n} className="fit-insight">
-            <div className="fit-eyebrow">CALCULADO</div>
-            <h3>{i.title}</h3>
-            <p>{i.body}</p>
-          </article>
-        ))}
-      </div>
     </section>
   );
 }

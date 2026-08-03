@@ -12,8 +12,13 @@ const { feature } = require('topojson-client');
 const topo = JSON.parse(readFileSync(new URL('../node_modules/world-atlas/land-50m.json', import.meta.url), 'utf8'));
 const land = feature(topo, topo.objects.land);
 
-const WIN = { lon0: -128, lon1: 26, lat0: -16, lat1: 66 };
-const STEP = 1.4;
+// Whole world. Antarctica is cut (nothing to show there and it would cost a
+// third of the height); the north stops at 78° so Greenland reads without
+// dragging the frame up to the pole.
+const WIN = { lon0: -180, lon1: 180, lat0: -56, lat1: 78 };
+// Step is in degrees, so it sets dot spacing in px via W: at 360° across a
+// 1000-wide viewBox one degree is 2.78px, and 2.4° lands dots ~6.7px apart.
+const STEP = 2.4;
 const W = 1000;
 const H = Math.round((W * (WIN.lat1 - WIN.lat0)) / (WIN.lon1 - WIN.lon0));
 

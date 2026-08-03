@@ -771,7 +771,9 @@ a:hover {
 /* client map — dotted basemap beside the location list */
 .map-grid {
   display: grid;
-  grid-template-columns: 1.75fr 1fr;
+  /* the world frame is 2.7:1, so the map wants more of the row than the
+     old Americas-and-Europe crop did */
+  grid-template-columns: 2.15fr 1fr;
   gap: clamp(24px, 3vw, 54px);
   align-items: center;
 }
@@ -1206,4 +1208,27 @@ a:hover {
 }
 @media (max-width: 560px) {
   .fit-acc-dose { display: none; }
+}
+
+/* /fitness — the single "qué mejorar" box. A list, not cards: the point is to
+   read it top to bottom in ten seconds, and the priority rail carries the
+   ranking that a grid of equal boxes throws away. */
+.fit-improve { list-style: none; margin: 14px 0 0; padding: 0; }
+.fit-improve li {
+  display: flex;
+  gap: 14px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(14, 13, 18, 0.08);
+}
+.fit-improve li:first-child { border-top: 0; }
+.fit-improve-bar { width: 3px; border-radius: 2px; flex: none; }
+.fit-improve h3 { margin: 5px 0 0; font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+.fit-improve p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.6; color: #4c4a55; }
+.fit-improve-metric {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #6b6875;
+  background: #f2f3f7;
+  padding: 2px 7px;
+  border-radius: 4px;
 }
