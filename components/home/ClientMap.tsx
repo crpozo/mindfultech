@@ -294,12 +294,12 @@ export function ClientMap() {
                     onMouseLeave={() => setActive(null)}
                   >
                     {on && <circle cx={x} cy={y} r={20} fill="var(--accent)" opacity={0.3} />}
-                    <circle className="map-pin-halo" cx={x} cy={y} r={on ? 12 : 9} fill="var(--accent)" opacity={0.28} />
+                    <circle className="map-pin-halo" cx={x} cy={y} r={on ? 13 : 10.5} fill="var(--accent)" opacity={0.28} />
                     <circle
                       className="map-pin-dot"
                       cx={x}
                       cy={y}
-                      r={on ? 7 : 5.6}
+                      r={on ? 7.5 : 6.2}
                       fill={on ? "#1c6459" : "#2f7d71"}
                       stroke="#fff"
                       strokeWidth={3}
