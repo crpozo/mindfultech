@@ -155,9 +155,16 @@ a:hover {
 }
 
 /* Agent-flow "working" animations */
+/* The packet used to animate `left: 14% → 86%`, which invalidates layout on
+   every frame; translateX composites instead. translateX percentages are of
+   the element's own width, so the class now owns the geometry: the element
+   is an invisible rail spanning the whole trip (left 14%, width 72% of the
+   diagram), the visible dot is drawn at its left edge, and translateX(100%)
+   — one rail-width — lands the dot on the old 86% mark. Currently unused
+   (the flow diagram that rode it is gone), kept for the next one. */
 @keyframes mt-packet {
   0% {
-    left: 14%;
+    transform: translateX(0);
     opacity: 0;
   }
   12% {
@@ -167,11 +174,14 @@ a:hover {
     opacity: 1;
   }
   100% {
-    left: 86%;
+    transform: translateX(100%);
     opacity: 0;
   }
 }
 .mt-packet {
+  position: absolute;
+  left: 14%;
+  width: 72%;
   animation: mt-packet 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
@@ -234,6 +244,29 @@ a:hover {
 }
 .mt-typing span:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+/* full-stack lab — the active tab's 5s progress fill. Pure CSS: the JS only
+   flips tabs on a 5s timeout, so nothing re-renders while the bar sweeps
+   (the old version pushed setState from a rAF at 60fps). The span is keyed
+   in React, so remounting restarts the sweep from zero. */
+@keyframes lab-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.lab-progress {
+  animation: lab-fill 5s linear forwards;
+}
+/* section off-screen (.lab-off set by an IntersectionObserver): freeze the
+   fill and every infinite mockup animation instead of burning frames the
+   viewer can't see */
+.lab-off .lab-progress,
+.lab-off .lab-visual * {
+  animation-play-state: paused !important;
 }
 
 /* Page-transition loader */
@@ -751,11 +784,14 @@ a:hover {
 /* One card, three region groups — seven identical pills read as a wall;
    grouping gives the column a shape and says something the map can't. */
 .map-side {
-  background: rgba(255, 255, 255, 0.72);
+  /* was rgba(255,255,255,.72) + backdrop-filter: blur(6px) — but the section
+     behind is a flat #f4f7fc→#eef2f9 gradient, so the frosted glass resolved
+     to this same near-white anyway, and backdrop-filter re-blurs on every
+     scrolled frame. Solid color, same look, zero per-frame cost. */
+  background: #fbfcfe;
   border: 1px solid rgba(14, 13, 18, 0.07);
   border-radius: 16px;
   padding: 4px 20px 18px;
-  backdrop-filter: blur(6px);
 }
 .map-group + .map-group {
   margin-top: 4px;
@@ -845,6 +881,9 @@ a:hover {
   top: 0;
   z-index: 40;
   background: rgba(238, 242, 250, 0.88);
+  /* real glass: panels and charts scroll under this sticky bar, so the blur
+     is doing visible work (unlike .map-side, which sat on a flat gradient).
+     /fitness only — it never touches home-page scroll. */
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(14, 13, 18, 0.07);
 }

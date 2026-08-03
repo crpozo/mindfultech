@@ -124,38 +124,47 @@ export function FullStackLab() {
   const { lang } = useLang();
   const es = lang === "es";
   const [cur, setCur] = React.useState(0);
-  const [prog, setProg] = React.useState(0);
-  const curRef = React.useRef(0);
-  curRef.current = cur;
+  /* generation keys the fill span: bumping it remounts the span, which
+     restarts the CSS fill from zero — on manual select (even of the tab
+     that's already active) and when the section scrolls back into view */
+  const [generation, setGeneration] = React.useState(0);
+  const [off, setOff] = React.useState(false);
+  const secRef = React.useRef<HTMLElement>(null);
 
+  /* auto-advance: one chained 5s timeout per tab. The fill itself is pure
+     CSS (.lab-progress in globals.css), so between switches nothing renders —
+     the old version drove setProg from a rAF, re-rendering the whole section
+     (three tabs + the SVG mockups) at 60fps, even off-screen */
   React.useEffect(() => {
-    const DUR = 5000;
-    let last = performance.now();
-    let raf = 0;
-    let p = 0;
-    const step = (n: number) => {
-      const dt = Math.min(120, n - last);
-      last = n;
-      p += dt / DUR;
-      if (p >= 1) {
-        p = 0;
-        setCur((c) => (c + 1) % 3);
-      }
-      setProg(p);
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    if (off) return;
+    const t = setTimeout(() => setCur((c) => (c + 1) % 3), 5000);
+    return () => clearTimeout(t);
+  }, [cur, generation, off]);
+
+  /* off-screen: drop the timer and let .lab-off (globals.css) pause the fill
+     plus the mockups' infinite animations. Back on-screen the active tab just
+     restarts its 5s — partial progress isn't worth carrying across */
+  React.useEffect(() => {
+    const el = secRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => {
+      setOff(!entry.isIntersecting);
+      if (entry.isIntersecting) setGeneration((g) => g + 1);
+    });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   const select = (i: number) => {
     setCur(i);
-    setProg(0);
+    setGeneration((g) => g + 1);
   };
 
   return (
     <section
       id="stack"
+      ref={secRef}
+      className={off ? "lab-off" : undefined}
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f4f6fb 30%,#eef1f8)",
@@ -228,16 +237,19 @@ export function FullStackLab() {
                   transition: "opacity .25s",
                 }}
               />
-              <span
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: j === cur ? `${(prog * 100).toFixed(2)}%` : "0%",
-                  background: TAB_COLORS[j].fill,
-                }}
-              />
+              {j === cur && (
+                <span
+                  key={cur + "-" + generation}
+                  className="lab-progress"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    background: TAB_COLORS[j].fill,
+                  }}
+                />
+              )}
               <span style={{ position: "relative" }}>{label}</span>
             </button>
           ))}

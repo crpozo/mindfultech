@@ -461,8 +461,15 @@ export function Brain3D({ focus = null }: { focus?: string | null }) {
         let running = false;
         let intro = 0; // 0 → 1 over the first ~1.4s
 
+        // The brain's motion is slow (breathing, gentle orbit), so 30fps is
+        // visually identical to 60 — and half the per-frame cost competing
+        // with page scroll. The intro and chip fly-tos keep full rate, where
+        // the camera actually moves fast.
+        let skip = false;
         const frame = () => {
           raf = requestAnimationFrame(frame);
+          const calm = intro >= 1 && !flying && !dragging;
+          if (calm && (skip = !skip)) return; // dt accumulates in the clock
           const dt = Math.min(clock.getDelta(), 0.05);
           const t = clock.elapsedTime;
           if (intro < 1) {

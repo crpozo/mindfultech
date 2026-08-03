@@ -100,28 +100,56 @@ export function Hero() {
     // one-set period and it never runs out of logos on wide screens.
     const marq = marqRef.current;
     if (!marq) return;
+    // A drifting logo strip is decoration: under reduced motion it just
+    // stands still, so we never start the loop at all.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const SET = MARQUEE.length; // logos per repeat
     let marqX = 0;
     let last = performance.now();
     let raf = 0;
+    // exact width of one repeat (incl. gaps) so the seam is invisible.
+    // Measured OUTSIDE the frame loop: offsetLeft/scrollWidth inside a rAF
+    // force a synchronous reflow 60×/s (Lighthouse: "forced reflow"). The
+    // ResizeObserver below re-measures when the strip's size changes — the
+    // lazy -m logo variants and late webfonts both move offsetLeft.
+    let period = 0;
+    const measure = () => {
+      const kids = marq.children;
+      period =
+        kids.length > SET
+          ? (kids[SET] as HTMLElement).offsetLeft -
+            (kids[0] as HTMLElement).offsetLeft
+          : marq.scrollWidth / 2;
+    };
+    measure();
     const frame = () => {
       const now = performance.now();
       const dtMs = Math.min(120, now - last);
       last = now;
       marqX -= 42 * (dtMs / 1000);
-      const kids = marq.children;
-      // exact width of one repeat (incl. gaps) so the seam is invisible
-      const period =
-        kids.length > SET
-          ? (kids[SET] as HTMLElement).offsetLeft -
-            (kids[0] as HTMLElement).offsetLeft
-          : marq.scrollWidth / 2;
       if (period > 0 && marqX <= -period) marqX += period;
       marq.style.transform = "translate3d(" + marqX.toFixed(1) + "px,0,0)";
       raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
+    const ro = new ResizeObserver(measure);
+    ro.observe(marq);
+    // Only spend frames while the strip can be seen — cancel when it leaves
+    // the viewport, restart when it returns. The observer also fires once on
+    // observe(), so it owns the initial start too. `last` resets on every
+    // restart: otherwise the first dt spans the whole hidden stretch.
+    const io = new IntersectionObserver(([entry]) => {
+      cancelAnimationFrame(raf); // never let two loops stack
+      if (entry.isIntersecting) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
+    });
+    io.observe(marq);
+    return () => {
+      io.disconnect();
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
