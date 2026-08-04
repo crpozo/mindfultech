@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 5;
+export const STATE_VERSION = 6;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -194,8 +194,25 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
   },
 ];
 
+/**
+ * Cuentas por cobrar dictadas por chat. Mismo mecanismo que los movimientos:
+ * un proyecto cerrado todavía no es dinero en la cuenta, así que entra aquí y
+ * no como ingreso — el runway no debe contar con lo que aún no llegó.
+ */
+const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
+  {
+    id: "usfq-familias",
+    sinceVersion: 6,
+    client: "USFQ · Familias",
+    amount: 5150,
+    status: "pending",
+    note: "Proyecto cerrado el 4 ago 2026. $5 150 es el valor neto.",
+  },
+];
+
 /** Sin `sinceVersion`, que no es parte del modelo guardado. */
 const seedTxn = ({ sinceVersion: _v, ...t }: Txn & { sinceVersion: number }): Txn => t;
+const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number }): Receivable => r;
 
 /** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
 const GYM_COMMITMENT: Commitment = {
@@ -247,6 +264,7 @@ export function seedState(): FinanceState {
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       { id: "andrew", client: "Andrew", amount: 500, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
+      ...SEEDED_RECEIVABLES.map(seedRcv),
     ],
     commitments: [
       {
@@ -362,6 +380,16 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     const missing = SEEDED_TXNS.filter((t) => t.sinceVersion > from && !have.has(t.id));
     if (missing.length) {
       s = { ...s, transactions: [...txns, ...missing.map(seedTxn)] };
+    }
+  }
+
+  // Lo mismo para las cuentas por cobrar.
+  {
+    const rcv = Array.isArray(s.receivables) ? s.receivables : [];
+    const have = new Set(rcv.map((r) => r && r.id));
+    const missing = SEEDED_RECEIVABLES.filter((r) => r.sinceVersion > from && !have.has(r.id));
+    if (missing.length) {
+      s = { ...s, receivables: [...rcv, ...missing.map(seedRcv)] };
     }
   }
   const seen = new Set<string>();
