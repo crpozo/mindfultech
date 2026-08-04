@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 8;
+export const STATE_VERSION = 10;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -230,6 +230,14 @@ const GYM_COMMITMENT: Commitment & { sinceVersion: number } = {
   note: "Se paga $1 100 por 15 meses de golpe; prorrateado sale a $73,33/mes.",
 };
 
+/** Saldos dictados por chat. Mismo upsert: solo se reescribe la cuenta cuyo
+    `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
+    cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
+const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
+  { id: "wise", sinceVersion: 10, name: "Wise", kind: "bank", balance: 4118.54 },
+];
+const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
+
 /** Mismo upsert que las cuentas por cobrar: subir el `sinceVersion` de una
     fila existente reescribe sus campos en un tablero ya guardado. */
 const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
@@ -240,6 +248,14 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     amount: 180,
     category: "salud",
     note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
+  },
+  {
+    id: "arriendo",
+    sinceVersion: 9,
+    name: "Arriendo",
+    amount: 550,
+    category: "hogar",
+    note: "Fijo mensual. Sale del estimado general y pasa a nombrarse aquí; el gasto total no cambia.",
   },
   COWORKING_COMMITMENT,
   GYM_COMMITMENT,
@@ -256,7 +272,7 @@ export function seedState(): FinanceState {
     transactions: SEEDED_TXNS.map(seedTxn),
     accounts: [
       { id: "paypal", name: "PayPal", kind: "bank", balance: 4500 },
-      { id: "wise", name: "Wise", kind: "bank", balance: 3600 },
+      ...SEEDED_ACCOUNTS.map(seedAcc),
       { id: "procredit", name: "ProCredit", kind: "bank", balance: 3000 },
       { id: "pichincha", name: "Pichincha", kind: "bank", balance: 2500 },
       {
@@ -297,7 +313,7 @@ export function seedState(): FinanceState {
       // Seis meses de gasto: el colchón estándar, y más necesario todavía
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
-      monthlyExpenseEstimate: 3000,
+      monthlyExpenseEstimate: 2450,
       budgets: { hogar: 550, suscripciones: 200, financiero: 700 },
       profile: DEFAULT_PROFILE,
     },
@@ -372,6 +388,31 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   if (!s || typeof s !== "object") return base;
 
   const from = num(s.version, 1) || 1;
+
+  // Saldos de cuentas dictados por chat.
+  {
+    const acc = Array.isArray(s.accounts) ? s.accounts : [];
+    const fresh = SEEDED_ACCOUNTS.filter((a) => a.sinceVersion > from);
+    if (fresh.length) {
+      const byId = new Map(fresh.map((a) => [a.id, seedAcc(a)]));
+      const merged = acc.map((a) => {
+        const patch = a && byId.get(a.id);
+        if (!patch) return a;
+        byId.delete(a.id);
+        return { ...a, ...patch };
+      });
+      s = { ...s, accounts: [...merged, ...byId.values()] };
+    }
+  }
+
+  // El arriendo pasó a ser un compromiso con nombre propio, y el burn se
+  // calcula como estimado + compromisos: dejar el estimado en 3 000 lo
+  // contaría dos veces. Se baja en los mismos $550, así que el total no se
+  // mueve. Solo si sigue en el valor que sembré yo: un número que él haya
+  // ajustado a mano es suyo y no se toca.
+  if (from < 9 && s.settings && num(s.settings.monthlyExpenseEstimate) === 3000) {
+    s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 2450 } };
+  }
 
   // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
   // Así una cuota que cambia (el IESS pasó de 176 a 180 al afiliarse) llega a
