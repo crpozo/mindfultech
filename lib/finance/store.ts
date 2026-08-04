@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 6;
+export const STATE_VERSION = 7;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -195,18 +195,23 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
 ];
 
 /**
- * Cuentas por cobrar dictadas por chat. Mismo mecanismo que los movimientos:
- * un proyecto cerrado todavía no es dinero en la cuenta, así que entra aquí y
- * no como ingreso — el runway no debe contar con lo que aún no llegó.
+ * Cuentas por cobrar dictadas por chat. Un proyecto cerrado todavía no es
+ * dinero en la cuenta, así que entra aquí y no como ingreso: el runway no debe
+ * contar con lo que aún no llegó.
+ *
+ * A diferencia de los movimientos, aquí la migración hace upsert: subir el
+ * `sinceVersion` de una fila que ya existe reescribe sus campos. Es la única
+ * forma de corregir un dato publicado antes (un monto mal entendido, una fecha
+ * que llegó después), y solo ocurre cuando publico una versión nueva.
  */
 const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
   {
     id: "usfq-familias",
-    sinceVersion: 6,
+    sinceVersion: 7,
     client: "USFQ · Familias",
     amount: 5150,
     status: "pending",
-    note: "Proyecto cerrado el 4 ago 2026. $5 150 es el valor neto.",
+    note: "Valor neto del proyecto, cerrado el 4 ago 2026. Cobro en dos tramos: el 15 de septiembre y las horas en diciembre (reparto por confirmar). Pagador institucional, riesgo de impago bajo.",
   },
 ];
 
@@ -383,13 +388,22 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     }
   }
 
-  // Lo mismo para las cuentas por cobrar.
+  // Cuentas por cobrar: upsert, no solo insert. Lo publicado después de la
+  // versión guardada entra si falta y reescribe la fila si ya estaba, que es
+  // como llega una corrección. Una fila borrada a mano no vuelve mientras no
+  // suba su `sinceVersion`.
   {
     const rcv = Array.isArray(s.receivables) ? s.receivables : [];
-    const have = new Set(rcv.map((r) => r && r.id));
-    const missing = SEEDED_RECEIVABLES.filter((r) => r.sinceVersion > from && !have.has(r.id));
-    if (missing.length) {
-      s = { ...s, receivables: [...rcv, ...missing.map(seedRcv)] };
+    const fresh = SEEDED_RECEIVABLES.filter((r) => r.sinceVersion > from);
+    if (fresh.length) {
+      const byId = new Map(fresh.map((r) => [r.id, seedRcv(r)]));
+      const merged = rcv.map((r) => {
+        const patch = r && byId.get(r.id);
+        if (!patch) return r;
+        byId.delete(r.id);
+        return { ...r, ...patch };
+      });
+      s = { ...s, receivables: [...merged, ...byId.values()] };
     }
   }
   const seen = new Set<string>();
