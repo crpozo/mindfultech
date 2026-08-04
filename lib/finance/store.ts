@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 7;
+export const STATE_VERSION = 8;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -139,8 +139,9 @@ export function categoriesFor(kind: Kind): readonly string[] {
  * baratos ni el uno que se vería carísimo. Vive en una constante porque
  * también lo inyecta la migración a v2 en tableros ya guardados.
  */
-const COWORKING_COMMITMENT: Commitment = {
+const COWORKING_COMMITMENT: Commitment & { sinceVersion: number } = {
   id: "coworking",
+  sinceVersion: 2,
   name: "Coworking (anual)",
   amount: 73,
   category: "negocio",
@@ -220,13 +221,30 @@ const seedTxn = ({ sinceVersion: _v, ...t }: Txn & { sinceVersion: number }): Tx
 const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number }): Receivable => r;
 
 /** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
-const GYM_COMMITMENT: Commitment = {
+const GYM_COMMITMENT: Commitment & { sinceVersion: number } = {
   id: "gym",
+  sinceVersion: 2,
   name: "Gimnasio (cada 15 meses)",
   amount: 73.33,
   category: "salud",
   note: "Se paga $1 100 por 15 meses de golpe; prorrateado sale a $73,33/mes.",
 };
+
+/** Mismo upsert que las cuentas por cobrar: subir el `sinceVersion` de una
+    fila existente reescribe sus campos en un tablero ya guardado. */
+const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
+  {
+    id: "iess",
+    sinceVersion: 8,
+    name: "IESS: afiliación",
+    amount: 180,
+    category: "salud",
+    note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
+  },
+  COWORKING_COMMITMENT,
+  GYM_COMMITMENT,
+];
+const seedCmt = ({ sinceVersion: _v, ...c }: Commitment & { sinceVersion: number }): Commitment => c;
 
 /**
  * Punto de partida con las cifras reales al 26 de julio de 2026. Solo se usa
@@ -271,17 +289,7 @@ export function seedState(): FinanceState {
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
     ],
-    commitments: [
-      {
-        id: "iess",
-        name: "IESS: aporte voluntario",
-        amount: 176,
-        category: "salud",
-        note: "Mensual. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
-      },
-      COWORKING_COMMITMENT,
-      GYM_COMMITMENT,
-    ],
+    commitments: SEEDED_COMMITMENTS.map(seedCmt),
     settings: {
       currency: "USD",
       monthlyIncomeGoal: 5000,
@@ -304,7 +312,7 @@ Gastos: alrededor de 3.000 al mes en total, incluidos arriendo (550) y cuota del
 
 Metas:
 1. Aumentar patrimonio y tener estabilidad, no solo rotar dinero.
-2. Afiliarme al IESS y aportar el mínimo de forma continua. Es requisito de entrada: el BIESS pide entre dos y tres años de aportaciones para dar un crédito hipotecario decente, así que cada mes sin aportar corre la fecha en que puedo comprar departamento.
+2. Sostener la afiliación al IESS sin cortes (afiliado desde agosto de 2026, $180 al mes). Es requisito de entrada: el BIESS pide entre dos y tres años de aportaciones para dar un crédito hipotecario decente, así que cada mes sin aportar corre la fecha en que puedo comprar departamento.
 3. Comprar departamento cuando el historial de aportaciones lo permita.
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
@@ -365,14 +373,21 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
 
   const from = num(s.version, 1) || 1;
 
-  // v1 → v2: el coworking y el gimnasio entran una sola vez en tableros ya
-  // guardados. Solo mira la versión, no el contenido: si después los borra o
-  // edita, el estado ya quedó estampado v2 y esta rama no vuelve a correr.
-  if (from < 2 && Array.isArray(s.commitments)) {
-    const have = new Set(s.commitments.map((c) => c && c.id));
-    const missing = [COWORKING_COMMITMENT, GYM_COMMITMENT].filter((c) => !have.has(c.id));
-    if (missing.length) {
-      s = { ...s, commitments: [...s.commitments, ...missing.map((c) => ({ ...c }))] };
+  // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
+  // Así una cuota que cambia (el IESS pasó de 176 a 180 al afiliarse) llega a
+  // un tablero ya guardado en vez de quedarse solo en el código.
+  {
+    const cmt = Array.isArray(s.commitments) ? s.commitments : [];
+    const fresh = SEEDED_COMMITMENTS.filter((c) => c.sinceVersion > from);
+    if (fresh.length) {
+      const byId = new Map(fresh.map((c) => [c.id, seedCmt(c)]));
+      const merged = cmt.map((c) => {
+        const patch = c && byId.get(c.id);
+        if (!patch) return c;
+        byId.delete(c.id);
+        return { ...c, ...patch };
+      });
+      s = { ...s, commitments: [...merged, ...byId.values()] };
     }
   }
 
