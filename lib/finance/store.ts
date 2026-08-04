@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 10;
+export const STATE_VERSION = 11;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -388,6 +388,23 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   if (!s || typeof s !== "object") return base;
 
   const from = num(s.version, 1) || 1;
+
+  // El perfil viaja con los datos cuando se analizan, así que una meta ya
+  // cumplida ahí adentro sigue sesgando el análisis. Esta es la única frase
+  // que reescribo, y solo si sigue literal: el resto del texto es suyo, y si
+  // la editó no la toco.
+  if (from < 11 && typeof s.settings?.profile === "string") {
+    const stale =
+      "2. Afiliarme al IESS y aportar el mínimo de forma continua. Es requisito de entrada:";
+    const fresh =
+      "2. Sostener la afiliación al IESS sin cortes (afiliado desde agosto de 2026, $180 al mes). Es requisito de entrada:";
+    if (s.settings.profile.includes(stale)) {
+      s = {
+        ...s,
+        settings: { ...s.settings, profile: s.settings.profile.replace(stale, fresh) },
+      };
+    }
+  }
 
   // Saldos de cuentas dictados por chat.
   {
