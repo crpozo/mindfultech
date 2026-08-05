@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 11;
+export const STATE_VERSION = 12;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -293,7 +293,6 @@ export function seedState(): FinanceState {
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "wfs-1", client: "WFS", amount: 1500, status: "pending" },
-      { id: "wfs-2", client: "WFS", amount: 3200, status: "pending" },
       {
         id: "theme-motion",
         client: "Theme Motion",
@@ -388,6 +387,21 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   if (!s || typeof s !== "object") return base;
 
   const from = num(s.version, 1) || 1;
+
+  // Bajas dictadas por chat: cuentas por cobrar que resultaron incobrables.
+  // Un id por versión — se quita una sola vez; si el dueño la había editado
+  // o ya la había borrado él mismo, esto no hace nada.
+  const WRITTEN_OFF: { id: string; sinceVersion: number }[] = [
+    { id: "wfs-2", sinceVersion: 12 }, // $3 200 de WFS: no se van a cobrar
+  ];
+  if (Array.isArray(s.receivables)) {
+    const drop = new Set(
+      WRITTEN_OFF.filter((w) => w.sinceVersion > from).map((w) => w.id)
+    );
+    if (drop.size) {
+      s = { ...s, receivables: s.receivables.filter((r) => !r || !drop.has(r.id)) };
+    }
+  }
 
   // El perfil viaja con los datos cuando se analizan, así que una meta ya
   // cumplida ahí adentro sigue sesgando el análisis. Esta es la única frase
