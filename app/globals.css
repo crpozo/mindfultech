@@ -784,6 +784,42 @@ a:hover {
 .map-pin {
   cursor: pointer;
 }
+/* Arcs from home base to each client. Very faint at rest, so they read as
+   texture rather than clutter; the one under the cursor lifts out. No infinite
+   animation here on purpose — this section is on the scroll path. */
+.map-reach {
+  stroke: var(--accent-deep);
+  stroke-width: 1.1;
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+  opacity: 0.22;
+  transition: opacity 0.25s ease, stroke-width 0.25s ease;
+}
+.map-reach.on {
+  opacity: 0.8;
+  stroke-width: 1.7;
+}
+.map-pin-dot,
+.map-pin-halo {
+  transition: r 0.2s ease, fill 0.2s ease, opacity 0.2s ease;
+}
+/* the callout rises into place instead of blinking on */
+.map-callout {
+  animation: map-callout 0.18s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+  filter: drop-shadow(0 6px 14px rgba(22, 35, 58, 0.16));
+  pointer-events: none;
+}
+@keyframes map-callout {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-callout {
+    animation: none;
+  }
+}
 /* One card, three region groups — seven identical pills read as a wall;
    grouping gives the column a shape and says something the map can't. */
 .map-side {
@@ -879,6 +915,10 @@ a:hover {
      inline values carry is moot anyway. */
   .map-pin-halo { r: 15px; }
   .map-pin-dot { r: 9px; stroke-width: 4px; }
+  /* The callout is sized in viewBox units, which land at ~5px of text on a
+     342px-wide map. The row you just tapped already names the place, so the
+     phone gets the highlight without the unreadable plate. */
+  .map-callout { display: none; }
 }
 
 /* ---------------------------------------------------------------- /fitness */

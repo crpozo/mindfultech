@@ -13,8 +13,6 @@ type Site = {
   lon: number;
   place: Bi;
   country: Bi;
-  /** where the label sits relative to the pin, so none of them collide */
-  label: "left" | "right" | "top" | "bottom";
   region: "latam" | "us" | "eu";
   /** home base — gets the badge in the list */
   base?: boolean;
@@ -37,7 +35,6 @@ const SITES: Site[] = [
     lon: -78.47,
     place: { en: "Ecuador", es: "Ecuador" },
     country: { en: "Ecuador", es: "Ecuador" },
-    label: "left",
     region: "latam",
     base: true,
   },
@@ -47,7 +44,6 @@ const SITES: Site[] = [
     lon: -119.4,
     place: { en: "California", es: "California" },
     country: { en: "United States", es: "Estados Unidos" },
-    label: "right",
     region: "us",
   },
   {
@@ -56,7 +52,6 @@ const SITES: Site[] = [
     lon: -87.63,
     place: { en: "Chicago", es: "Chicago" },
     country: { en: "United States", es: "Estados Unidos" },
-    label: "top",
     region: "us",
   },
   {
@@ -65,7 +60,6 @@ const SITES: Site[] = [
     lon: -81.87,
     place: { en: "Southwest Florida", es: "Suroeste de Florida" },
     country: { en: "United States", es: "Estados Unidos" },
-    label: "right",
     region: "us",
   },
   {
@@ -74,7 +68,6 @@ const SITES: Site[] = [
     lon: 5.3,
     place: { en: "Netherlands", es: "Países Bajos" },
     country: { en: "Netherlands", es: "Países Bajos" },
-    label: "top",
     region: "eu",
   },
   {
@@ -83,7 +76,6 @@ const SITES: Site[] = [
     lon: 10.45,
     place: { en: "Germany", es: "Alemania" },
     country: { en: "Germany", es: "Alemania" },
-    label: "bottom",
     region: "eu",
   },
   {
@@ -92,7 +84,6 @@ const SITES: Site[] = [
     lon: -3.7,
     place: { en: "Spain", es: "España" },
     country: { en: "Spain", es: "España" },
-    label: "left",
     region: "eu",
   },
   {
@@ -101,7 +92,6 @@ const SITES: Site[] = [
     lon: 23.73,
     place: { en: "Greece", es: "Grecia" },
     country: { en: "Greece", es: "Grecia" },
-    label: "right",
     region: "eu",
   },
 ];
@@ -189,29 +179,60 @@ const project = (lat: number, lon: number) => ({
   y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h,
 });
 
-/** Label offset + anchor for each placement. */
-const LABEL = {
-  left: { dx: -18, dy: 5, anchor: "end" as const },
-  right: { dx: 18, dy: 5, anchor: "start" as const },
-  top: { dx: 0, dy: -20, anchor: "middle" as const },
-  bottom: { dx: 0, dy: 30, anchor: "middle" as const },
-};
-
 const FONT = 15;
 const CHAR = FONT * 0.6 + 1.4; // monospace advance + letter-spacing
-const PAD = 9;
+const PAD = 11;
+const PLATE_H = FONT + 12;
+/** gap between the pin and the callout's notch tip */
+const NOTCH = 15;
 
-/** Plate behind a label, so it stays legible over the dot grid. */
-function labelPlate(text: string, x: number, anchor: "start" | "middle" | "end") {
+/**
+ * The callout always sits directly above its pin. Four placements used to be
+ * needed to keep eight permanent labels apart; now only the active one shows,
+ * so one consistent position beats four — and in this frame every pin has room
+ * above it (the highest, the Netherlands, still clears the top edge by 70px).
+ */
+function callout(text: string, x: number, y: number) {
   const w = text.length * CHAR + PAD * 2;
-  const left = anchor === "start" ? x - PAD : anchor === "end" ? x - w + PAD : x - w / 2;
-  return { x: left, w };
+  const top = y - NOTCH - PLATE_H;
+  return { x: x - w / 2, y: top, w, h: PLATE_H, baseline: top + PLATE_H - 7 };
+}
+
+/**
+ * A bowed line from home base to a client. It carries the section's own claim
+ * — work leaves Ecuador and lands in eight places — which a field of unrelated
+ * dots never says out loud. Curvature scales with distance so short hops stay
+ * shallow instead of looping.
+ */
+function reach(ax: number, ay: number, bx: number, by: number) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const dist = Math.hypot(dx, dy);
+  // perpendicular to the chord, always bowing toward the top of the frame
+  const nx = -dy / (dist || 1);
+  const ny = dx / (dist || 1);
+  const lift = dist * 0.17 * (ny > 0 ? -1 : 1);
+  return `M${ax.toFixed(1)} ${ay.toFixed(1)}Q${(ax + dx / 2 + nx * lift).toFixed(1)} ${(ay + dy / 2 + ny * lift).toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)}`;
 }
 
 export function ClientMap() {
   const { lang } = useLang();
   const es = lang === "es";
   const [active, setActive] = React.useState<string | null>(null);
+
+  /**
+   * Hover, but only for pointers that really hover. A tap makes Chrome
+   * synthesise mouseenter → click → mouseleave, and that trailing leave was
+   * switching the pin straight back off; touch is handled by the click alone.
+   */
+  const hover = (id: string) => ({
+    onPointerEnter: (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") setActive(id);
+    },
+    onPointerLeave: (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") setActive(null);
+    },
+  });
 
   return (
     <section
@@ -282,24 +303,43 @@ export function ClientMap() {
                 strokeLinecap="round"
                 fill="none"
               />
+              {/* reach arcs, drawn under every pin so no line crosses a marker */}
+              {(() => {
+                const home = SITES.find((v) => v.base);
+                if (!home) return null;
+                const h = project(home.lat, home.lon);
+                return SITES.filter((v) => !v.base).map((v) => {
+                  const p = project(v.lat, v.lon);
+                  return (
+                    <path
+                      key={"reach-" + v.id}
+                      className={`map-reach${v.id === active ? " on" : ""}`}
+                      d={reach(h.x, h.y, p.x, p.y)}
+                      fill="none"
+                    />
+                  );
+                });
+              })()}
               {SITES.map((s) => {
                 const { x, y } = project(s.lat, s.lon);
                 const on = s.id === active;
-                const l = LABEL[s.label];
                 return (
                   <g
                     key={s.id}
                     className="map-pin"
-                    onMouseEnter={() => setActive(s.id)}
-                    onMouseLeave={() => setActive(null)}
+                    {...hover(s.id)}
+                    onClick={() => setActive(s.id)}
                   >
-                    {on && <circle cx={x} cy={y} r={20} fill="var(--accent)" opacity={0.3} />}
-                    <circle className="map-pin-halo" cx={x} cy={y} r={on ? 13 : 10.5} fill="var(--accent)" opacity={0.28} />
+                    <circle className="map-pin-halo" cx={x} cy={y} r={on ? 15 : 10.5} fill="var(--accent)" opacity={on ? 0.34 : 0.24} />
+                    {/* home base wears a second ring, the map's echo of the HQ badge */}
+                    {s.base && (
+                      <circle cx={x} cy={y} r={on ? 10.5 : 9} fill="none" stroke="#2f7d71" strokeWidth={1.3} opacity={0.55} />
+                    )}
                     <circle
                       className="map-pin-dot"
                       cx={x}
                       cy={y}
-                      r={on ? 7.5 : 6.2}
+                      r={on ? 7 : 6.2}
                       fill={on ? "#1c6459" : "#2f7d71"}
                       stroke="#fff"
                       strokeWidth={3}
@@ -312,32 +352,26 @@ export function ClientMap() {
                     {on &&
                     (() => {
                       const text = s.place[lang].toUpperCase();
-                      const plate = labelPlate(text, x + l.dx, l.anchor);
+                      const c = callout(text, x, y);
                       return (
-                        <>
-                          <rect
-                            x={plate.x}
-                            y={y + l.dy - FONT + 3}
-                            width={plate.w}
-                            height={FONT + 8}
-                            rx={6}
-                            fill="#fff"
-                            opacity={1}
-                          />
+                        <g className="map-callout" style={{ transformOrigin: `${x}px ${y}px` }}>
+                          <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={7} fill="#fff" />
+                          {/* notch: ties the plate to its pin instead of
+                              leaving it floating over the dot grid */}
+                          <path d={`M${x - 6} ${c.y + c.h}L${x} ${c.y + c.h + 7}L${x + 6} ${c.y + c.h}Z`} fill="#fff" />
                           <text
-                            x={x + l.dx}
-                            y={y + l.dy}
-                            textAnchor={l.anchor}
+                            x={x}
+                            y={c.baseline}
+                            textAnchor="middle"
                             fontFamily="var(--mono)"
                             fontSize={FONT}
                             letterSpacing="1.4"
                             fontWeight={500}
                             fill="#16233a"
-                            style={{ transition: "fill .2s ease" }}
                           >
                             {text}
                           </text>
-                        </>
+                        </g>
                       );
                     })()}
                   </g>
@@ -363,10 +397,15 @@ export function ClientMap() {
                           <button
                             type="button"
                             className={`map-row${on ? " on" : ""}`}
-                            onMouseEnter={() => setActive(s.id)}
-                            onMouseLeave={() => setActive(null)}
+                            {...hover(s.id)}
                             onFocus={() => setActive(s.id)}
                             onBlur={() => setActive(null)}
+                            /* Touch has no hover, so a tap is the only way to
+                               light a pin on a phone. Not a toggle: the
+                               synthetic mouseenter a tap fires would already
+                               have set it, and toggling would switch it back
+                               off in the same gesture. */
+                            onClick={() => setActive(s.id)}
                             aria-pressed={on}
                           >
                             <svg
