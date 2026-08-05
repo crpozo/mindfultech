@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 12;
+export const STATE_VERSION = 14;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -193,6 +193,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     notes: "Misma compra que los audífonos.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-05-titanium",
+    sinceVersion: 13,
+    date: "2026-08-05T15:00:00-05:00",
+    amount: 2118.67,
+    kind: "expense",
+    category: "otros",
+    merchant: "Tarjeta Titanium: consumo del mes",
+    notes:
+      "Estado de cuenta agregado, no un solo consumo: entra en 'otros' porque cubre varios rubros a la vez. El promedio declarado es ~$3 000; este mes cerró más bajo. Se paga con los $2 000 de PayPal y $118,67 de Pichincha.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -235,6 +247,10 @@ const GYM_COMMITMENT: Commitment & { sinceVersion: number } = {
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   { id: "wise", sinceVersion: 10, name: "Wise", kind: "bank", balance: 4118.54 },
+  // El pago de la tarjeta todavía no sale de aquí: "voy a pagar" es futuro, y
+  // descontarlo antes de tiempo dejaría dos cuentas mintiendo. Cuando confirme
+  // el pago, PayPal baja a 0 y Pichincha a 2 381,33.
+  { id: "paypal", sinceVersion: 14, name: "PayPal", kind: "bank", balance: 2000 },
 ];
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
 
