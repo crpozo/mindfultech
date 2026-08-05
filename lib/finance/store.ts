@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 14;
+export const STATE_VERSION = 15;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -202,7 +202,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "otros",
     merchant: "Tarjeta Titanium: consumo del mes",
     notes:
-      "Estado de cuenta agregado, no un solo consumo: entra en 'otros' porque cubre varios rubros a la vez. El promedio declarado es ~$3 000; este mes cerró más bajo. Se paga con los $2 000 de PayPal y $118,67 de Pichincha.",
+      "Estado de cuenta agregado, no un solo consumo: entra en 'otros' porque cubre varios rubros a la vez. El promedio declarado es ~$3 000; este mes cerró más bajo. Pagado con $2 000 movidos desde PayPal y $118,67 de Pichincha.",
     excluded: false,
   },
 ];
@@ -247,10 +247,12 @@ const GYM_COMMITMENT: Commitment & { sinceVersion: number } = {
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   { id: "wise", sinceVersion: 10, name: "Wise", kind: "bank", balance: 4118.54 },
-  // El pago de la tarjeta todavía no sale de aquí: "voy a pagar" es futuro, y
-  // descontarlo antes de tiempo dejaría dos cuentas mintiendo. Cuando confirme
-  // el pago, PayPal baja a 0 y Pichincha a 2 381,33.
-  { id: "paypal", sinceVersion: 14, name: "PayPal", kind: "bank", balance: 2000 },
+  // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
+  // 4 500 - 2 000. El saldo de partida viene del corte del 26 de julio, así que
+  // la resta es correcta solo si nada más se movió desde entonces.
+  { id: "paypal", sinceVersion: 15, name: "PayPal", kind: "bank", balance: 2500 },
+  // el resto del estado de cuenta: 2 118,67 - 2 000
+  { id: "pichincha", sinceVersion: 15, name: "Pichincha", kind: "bank", balance: 2381.33 },
 ];
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
 
