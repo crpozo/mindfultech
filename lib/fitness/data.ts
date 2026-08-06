@@ -1132,6 +1132,19 @@ export const LOG: FitState = {
 
   workouts: [
     {
+      id: "w-2026-08-05-01",
+      at: "2026-08-05T18:30",
+      type: "strength",
+      name: "Espalda y bíceps",
+      // 8 ejercicios, mismo criterio que la sesión del 28 jul: ~4,5 MET para
+      // 81,5 kg. Sin cargas todavía, así que la duración y el gasto son
+      // estimados a partir del número de ejercicios, no medidos.
+      duration_min: 65,
+      kcal: 400,
+      notes: "4 ejercicios de espalda y 4 de bíceps.",
+      source: "claude",
+    },
+    {
       id: "w-2026-07-31-01",
       at: "2026-07-31T07:00",
       type: "cardio",
