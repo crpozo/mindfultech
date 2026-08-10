@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 17;
+export const STATE_VERSION = 18;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -232,16 +232,6 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
 const seedTxn = ({ sinceVersion: _v, ...t }: Txn & { sinceVersion: number }): Txn => t;
 const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number }): Receivable => r;
 
-/** Mismo criterio que el coworking: $1 100 cada 15 meses → 73,33/mes. */
-const GYM_COMMITMENT: Commitment & { sinceVersion: number } = {
-  id: "gym",
-  sinceVersion: 2,
-  name: "Gimnasio (cada 15 meses)",
-  amount: 73.33,
-  category: "salud",
-  note: "Se paga $1 100 por 15 meses de golpe; prorrateado sale a $73,33/mes.",
-};
-
 /** Saldos dictados por chat. Mismo upsert: solo se reescribe la cuenta cuyo
     `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
@@ -292,7 +282,19 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     note: "Fijo mensual. Sale del estimado general y pasa a nombrarse aquí; el gasto total no cambia.",
   },
   COWORKING_COMMITMENT,
-  GYM_COMMITMENT,
+];
+
+/**
+ * Compromisos que dejaron de existir. Igual que las bajas de cartera: un id por
+ * versión, se quita una sola vez, y si él ya lo había borrado a mano esto no
+ * hace nada.
+ */
+const RETIRED_COMMITMENTS: { id: string; sinceVersion: number }[] = [
+  // El gimnasio no era "$1 100 cada 15 meses": el estado de cuenta lo muestra
+  // como diferido de PHISIQUE WELLNESS CLUB en 12 cuotas de $90,16 — junio
+  // salió "(11/12)" y julio "(FINAL)". El plan terminó, así que no hay cuota
+  // futura que prorratear.
+  { id: "gym", sinceVersion: 18 },
 ];
 const seedCmt = ({ sinceVersion: _v, ...c }: Commitment & { sinceVersion: number }): Commitment => c;
 
@@ -346,7 +348,7 @@ export function seedState(): FinanceState {
       // Seis meses de gasto: el colchón estándar, y más necesario todavía
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
-      monthlyExpenseEstimate: 1930,
+      monthlyExpenseEstimate: 2030,
       budgets: { hogar: 550, suscripciones: 200, financiero: 700 },
       profile: DEFAULT_PROFILE,
     },
@@ -357,7 +359,7 @@ export const DEFAULT_PROFILE = `Carlos Pozo: Quito, Ecuador. Dueño de MindfulTe
 
 Ingreso: freelance por proyectos de software, en dólares y en escalada. No hay sueldo fijo, así que los meses son irregulares por naturaleza. Helixona es el cliente más recurrente, con un promedio cercano a 3.000 USD al mes, pero no está garantizado. Sigo buscando proyectos nuevos.
 
-Gastos: alrededor de 3.000 al mes en total, incluidos arriendo (550) y cuota del vehículo (520). Seguros y afines suman unos 700. Claude: 200.
+Gastos: la tarjeta Titanium mueve el grueso del gasto variable, unos 2.100 al mes medidos en el estado de cuenta de julio de 2026 (junio cerró en 4.319 por el viaje a Orlando, no es base). Esa tarjeta no lleva arriendo ni cuota del vehículo: van por fuera. Arriendo 550. Auto, celular y seguros, 700 en paquete. IESS 180. Claude/Anthropic ronda los 230-270 al mes con impuestos y va dentro del consumo de la tarjeta.
 
 Metas:
 1. Aumentar patrimonio y tener estabilidad, no solo rotar dinero.
@@ -454,6 +456,22 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     }
   }
 
+  // Misma regla que arriba: una sola frase, y solo si sigue literal. La de
+  // gastos era la declarada de memoria; los estados de cuenta de junio y julio
+  // la reemplazan por lo medido.
+  if (from < 18 && typeof s.settings?.profile === "string") {
+    const stale =
+      "Gastos: alrededor de 3.000 al mes en total, incluidos arriendo (550) y cuota del vehículo (520). Seguros y afines suman unos 700. Claude: 200.";
+    const fresh =
+      "Gastos: la tarjeta Titanium mueve el grueso del gasto variable, unos 2.100 al mes medidos en el estado de cuenta de julio de 2026 (junio cerró en 4.319 por el viaje a Orlando, no es base). Esa tarjeta no lleva arriendo ni cuota del vehículo: van por fuera. Arriendo 550. Auto, celular y seguros, 700 en paquete. IESS 180. Claude/Anthropic ronda los 230-270 al mes con impuestos y va dentro del consumo de la tarjeta.";
+    if (s.settings.profile.includes(stale)) {
+      s = {
+        ...s,
+        settings: { ...s.settings, profile: s.settings.profile.replace(stale, fresh) },
+      };
+    }
+  }
+
   // Saldos de cuentas dictados por chat.
   {
     const acc = Array.isArray(s.accounts) ? s.accounts : [];
@@ -485,6 +503,26 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   // la cuente dos veces; si él ya ajustó la cifra a mano, es suya.
   if (from < 17 && s.settings && num(s.settings.monthlyExpenseEstimate) === 2450) {
     s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 1930 } };
+  }
+
+  // Los $1 930 eran un estimado heredado del "unos 3 000 al mes" declarado.
+  // El estado de cuenta de julio pone una cifra medida en su lugar: $2 118,67
+  // de consumo, sin arriendo ni cuota del auto adentro (van por fuera, ya
+  // nombrados como compromisos), menos los $90,16 de la última cuota del
+  // gimnasio, que no se repite. Junio no sirve de base: $4 318,99 con ~$1 950
+  // del viaje a Orlando.
+  if (from < 18 && s.settings && num(s.settings.monthlyExpenseEstimate) === 1930) {
+    s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 2030 } };
+  }
+
+  // Compromisos dados de baja.
+  if (Array.isArray(s.commitments)) {
+    const drop = new Set(
+      RETIRED_COMMITMENTS.filter((c) => c.sinceVersion > from).map((c) => c.id)
+    );
+    if (drop.size) {
+      s = { ...s, commitments: s.commitments.filter((c) => !c || !drop.has(c.id)) };
+    }
   }
 
   // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
