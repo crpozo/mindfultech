@@ -278,8 +278,12 @@ export function Patrimonio({
           },
           {
             label: "Fijo al mes",
-            value: nw.monthlyDebtPayment + nw.monthlyCommitments,
-            hint: `deuda + compromisos`,
+            // Los compromisos ya absorben la cuota del vehículo (viaja dentro
+            // del paquete de auto, celular y seguros), así que sumarle otra
+            // vez monthlyDebtPayment la contaba doble. La cuota sigue en
+            // Deudas para calcular el plazo de pago, no para el gasto fijo.
+            value: nw.monthlyCommitments,
+            hint: `compromisos fijos`,
           },
           {
             label: "Por cobrar",
