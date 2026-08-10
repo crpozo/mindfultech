@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 16;
+export const STATE_VERSION = 17;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -268,6 +268,14 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
   },
   {
+    id: "auto-seguros",
+    sinceVersion: 17,
+    name: "Auto, celular y seguros",
+    amount: 700,
+    category: "financiero",
+    note: "Paquete fijo: cuota del vehículo, plan celular, seguro del auto y seguro de salud. Los $520 de la cuota también viven en Deudas, donde sirven para calcular el plazo de pago; el gasto mensual los cuenta aquí, no allá.",
+  },
+  {
     id: "hbomax",
     sinceVersion: 16,
     name: "HBO Max",
@@ -338,7 +346,7 @@ export function seedState(): FinanceState {
       // Seis meses de gasto: el colchón estándar, y más necesario todavía
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
-      monthlyExpenseEstimate: 2450,
+      monthlyExpenseEstimate: 1930,
       budgets: { hogar: 550, suscripciones: 200, financiero: 700 },
       profile: DEFAULT_PROFILE,
     },
@@ -469,6 +477,14 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   // ajustado a mano es suyo y no se toca.
   if (from < 9 && s.settings && num(s.settings.monthlyExpenseEstimate) === 3000) {
     s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 2450 } };
+  }
+
+  // Misma corrección que el arriendo, ahora con la cuota del vehículo: los
+  // $3 000 declarados la incluían explícitamente, y el paquete de $700 la
+  // vuelve a traer. Se descuentan sus $520 del estimado para que el total no
+  // la cuente dos veces; si él ya ajustó la cifra a mano, es suya.
+  if (from < 17 && s.settings && num(s.settings.monthlyExpenseEstimate) === 2450) {
+    s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 1930 } };
   }
 
   // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
