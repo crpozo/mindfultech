@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 15;
+export const STATE_VERSION = 16;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -266,6 +266,14 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     amount: 180,
     category: "salud",
     note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
+  },
+  {
+    id: "hbomax",
+    sinceVersion: 16,
+    name: "HBO Max",
+    amount: 3.29,
+    category: "suscripciones",
+    note: "Mensual.",
   },
   {
     id: "arriendo",
