@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 20;
+export const STATE_VERSION = 21;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -217,6 +217,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Depósito recibido en Wise el viernes 7 de agosto. La cuenta por cobrar decía $500: la diferencia de $1,70 es comisión de la transferencia.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-12-reembolso-500",
+    sinceVersion: 21,
+    date: "2026-08-12T12:00:00-05:00",
+    amount: 500,
+    kind: "income",
+    category: "reembolso",
+    merchant: "Devolución: trabajo no ejecutado",
+    notes:
+      "Plata que salió y volvió, no trabajo cobrado. Queda excluida de los totales porque el pago original nunca se registró acá: contarla como ingreso inflaría el mes en $500 sin que haya un gasto que compense. El saldo de PayPal sí la refleja.",
+    excluded: true,
+  },
 ];
 
 /**
@@ -272,11 +284,14 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // — sube este número recién cuando aparezca en la cuenta.
   { id: "wise", sinceVersion: 20, name: "Wise", kind: "bank", balance: 4616.84 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
-  // 4 500 - 2 000. El saldo de partida viene del corte del 26 de julio, así que
-  // la resta es correcta solo si nada más se movió desde entonces.
-  { id: "paypal", sinceVersion: 15, name: "PayPal", kind: "bank", balance: 2500 },
-  // el resto del estado de cuenta: 2 118,67 - 2 000
-  { id: "pichincha", sinceVersion: 15, name: "Pichincha", kind: "bank", balance: 2381.33 },
+  // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
+  // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
+  { id: "paypal", sinceVersion: 21, name: "PayPal", kind: "bank", balance: 3000 },
+  // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
+  // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
+  // hubo gasto corriente que no está anotado movimiento por movimiento.
+  { id: "pichincha", sinceVersion: 21, name: "Pichincha", kind: "bank", balance: 1750 },
+  { id: "procredit", sinceVersion: 21, name: "ProCredit", kind: "bank", balance: 3714 },
 ];
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
 
@@ -341,10 +356,10 @@ export function seedState(): FinanceState {
     version: STATE_VERSION,
     transactions: SEEDED_TXNS.map(seedTxn),
     accounts: [
-      { id: "paypal", name: "PayPal", kind: "bank", balance: 4500 },
+      // Solo lo que no esté ya en SEEDED_ACCOUNTS: PayPal, Pichincha y
+      // ProCredit viven allá, y repetirlos acá creaba dos filas con el mismo
+      // id en un tablero recién creado (seedState no pasa por normalize).
       ...SEEDED_ACCOUNTS.map(seedAcc),
-      { id: "procredit", name: "ProCredit", kind: "bank", balance: 3000 },
-      { id: "pichincha", name: "Pichincha", kind: "bank", balance: 2500 },
       {
         id: "ibkr",
         name: "Interactive Brokers",
