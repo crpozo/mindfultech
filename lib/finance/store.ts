@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 19;
+export const STATE_VERSION = 20;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -214,7 +214,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "clientes",
     merchant: "Andrew Sam Binno",
     notes:
-      "Depósito recibido el viernes 7 de agosto. La cuenta por cobrar decía $500: la diferencia de $1,70 es comisión de la transferencia.",
+      "Depósito recibido en Wise el viernes 7 de agosto. La cuenta por cobrar decía $500: la diferencia de $1,70 es comisión de la transferencia.",
     excluded: false,
   },
 ];
@@ -255,7 +255,7 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     client: "Andrew Sam Binno (2.º pago)",
     amount: 498,
     status: "pending",
-    note: "Se deposita el viernes 14 ago 2026. Él lo da por confirmado al 100% y el dinero ya salió. Pasa a ingreso cuando aparezca en la cuenta.",
+    note: "Se deposita en Wise el viernes 14 ago 2026, igual que el primero. Él lo da por confirmado al 100% y el dinero ya salió. Pasa a ingreso, y sube el saldo de Wise, cuando aparezca en la cuenta.",
   },
 ];
 
@@ -267,7 +267,10 @@ const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number
     `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
-  { id: "wise", sinceVersion: 10, name: "Wise", kind: "bank", balance: 4118.54 },
+  // 4 118,54 era el saldo antes del 7 de agosto; el depósito de Andrew cayó
+  // aquí, así que se suma: 4 118,54 + 498,30. El segundo pago no está incluido
+  // — sube este número recién cuando aparezca en la cuenta.
+  { id: "wise", sinceVersion: 20, name: "Wise", kind: "bank", balance: 4616.84 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000. El saldo de partida viene del corte del 26 de julio, así que
   // la resta es correcta solo si nada más se movió desde entonces.
