@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 18;
+export const STATE_VERSION = 19;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -205,6 +205,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Estado de cuenta agregado, no un solo consumo: entra en 'otros' porque cubre varios rubros a la vez. El promedio declarado es ~$3 000; este mes cerró más bajo. Pagado con $2 000 movidos desde PayPal y $118,67 de Pichincha.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-07-andrew",
+    sinceVersion: 19,
+    date: "2026-08-07T12:00:00-05:00",
+    amount: 498.3,
+    kind: "income",
+    category: "clientes",
+    merchant: "Andrew Sam Binno",
+    notes:
+      "Depósito recibido el viernes 7 de agosto. La cuenta por cobrar decía $500: la diferencia de $1,70 es comisión de la transferencia.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -225,6 +237,25 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     amount: 5150,
     status: "pending",
     note: "Valor neto del proyecto, cerrado el 4 ago 2026. Cobro en dos tramos: el 15 de septiembre y las horas en diciembre (reparto por confirmar). Pagador institucional, riesgo de impago bajo.",
+  },
+  {
+    id: "andrew",
+    sinceVersion: 19,
+    client: "Andrew Sam Binno",
+    amount: 498.3,
+    status: "paid",
+    note: "Cobrado el 7 ago 2026. Estaba anotado en $500; llegaron $498,30 y la diferencia es comisión de transferencia, así que se cierra por lo que entró de verdad.",
+  },
+  {
+    // Confirmado por él y con fecha, pero todavía no está en la cuenta: va
+    // como cuenta por cobrar, no como ingreso. El runway no debe contar plata
+    // que aún no llegó, por segura que sea — mismo criterio que la USFQ.
+    id: "andrew-2",
+    sinceVersion: 19,
+    client: "Andrew Sam Binno (2.º pago)",
+    amount: 498,
+    status: "pending",
+    note: "Se deposita el viernes 14 ago 2026. Él lo da por confirmado al 100% y el dinero ya salió. Pasa a ingreso cuando aparezca en la cuenta.",
   },
 ];
 
@@ -336,7 +367,6 @@ export function seedState(): FinanceState {
         status: "pending",
       },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
-      { id: "andrew", client: "Andrew", amount: 500, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
     ],
