@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 25;
+export const STATE_VERSION = 26;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -255,6 +255,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Tratamiento médico, no estético, y recurrente: cada 7 meses. Queda fuera de los totales a propósito, porque el gasto ya se cuenta prorrateado en el compromiso «Botox hiperhidrosis»; contarlo también acá lo cobraría dos veces en agosto. El movimiento se queda para dejar constancia de la fecha y del monto real.",
     excluded: true,
   },
+  {
+    id: "txn-2026-08-13-theme-motion",
+    sinceVersion: 26,
+    date: "2026-08-13T10:00:00-05:00",
+    amount: 1000,
+    kind: "income",
+    category: "clientes",
+    merchant: "Theme Motion · Taletech B.V.",
+    notes:
+      "Animatronics de Jorge. Acreditado el 13 ago 2026 por Wise (#2308181693): el remitente envió 878,47 EUR a 1,1541 y pagó los 11,96 EUR de comisión, así que llegaron los $1 000,00 completos. Cierra la cuenta por cobrar del mismo monto.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -300,11 +312,11 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     // *creada* por el remitente ("cómo pagar tu transferencia"), no el
     // acreditado. Un EUR→USD tarda uno o dos días en caer.
     id: "theme-motion",
-    sinceVersion: 23,
+    sinceVersion: 26,
     client: "Theme Motion · Taletech B.V. (animatronics de Jorge)",
     amount: 1000,
-    status: "pending",
-    note: "En tránsito. Transferencia Wise #2308181693 creada el 13 ago 2026: Taletech B.V. (Rotterdam) envía 878,47 EUR a 1,1541 y el destinatario recibe 1 000,00 USD exactos. La comisión de 11,96 EUR la paga el remitente, así que llega completo. Pasa a ingreso, y sube el saldo de Wise, cuando esté acreditada.",
+    status: "paid",
+    note: "Cobrado el 13 ago 2026. Transferencia Wise #2308181693: Taletech B.V. (Rotterdam) envió 878,47 EUR a 1,1541 y pagó los 11,96 EUR de comisión, así que llegaron $1 000,00 exactos. Registrado también como ingreso y sumado al saldo de Wise.",
   },
 ];
 
@@ -316,10 +328,10 @@ const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number
     `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
-  // 4 118,54 era el saldo antes del 7 de agosto; el depósito de Andrew cayó
-  // aquí, así que se suma: 4 118,54 + 498,30. El segundo pago no está incluido
-  // — sube este número recién cuando aparezca en la cuenta.
-  { id: "wise", sinceVersion: 20, name: "Wise", kind: "bank", balance: 4616.84 },
+  // 4 118,54 antes del 7 de agosto, + 498,30 de Andrew, + 1 000 de Taletech
+  // acreditados el 13. Falta el segundo pago de Andrew: este número sube
+  // recién cuando aparezca en la cuenta, no cuando esté prometido.
+  { id: "wise", sinceVersion: 26, name: "Wise", kind: "bank", balance: 5616.84 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
