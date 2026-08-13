@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 24;
+export const STATE_VERSION = 25;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -252,8 +252,8 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "salud",
     merchant: "Toxina botulínica: hiperhidrosis",
     notes:
-      "Tratamiento médico, no estético. Se repite cada cuatro a seis meses, así que en el año pesa unos $650–980: si se vuelve fijo, conviene sacarlo del gasto variable y ponerlo como compromiso prorrateado, igual que el coworking. Mismo aviso que la ropa: si fue con la Titanium, hay que restarlo del estado de cuenta de agosto.",
-    excluded: false,
+      "Tratamiento médico, no estético, y recurrente: cada 7 meses. Queda fuera de los totales a propósito, porque el gasto ya se cuenta prorrateado en el compromiso «Botox hiperhidrosis»; contarlo también acá lo cobraría dos veces en agosto. El movimiento se queda para dejar constancia de la fecha y del monto real.",
+    excluded: true,
   },
 ];
 
@@ -366,6 +366,17 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     amount: 550,
     category: "hogar",
     note: "Fijo mensual. Sale del estimado general y pasa a nombrarse aquí; el gasto total no cambia.",
+  },
+  {
+    // Mismo criterio que el coworking: un cobro grande y espaciado se
+    // prorratea para que el mes en que toca no se vea carísimo ni los otros
+    // seis baratos. 326 ÷ 7 = 46,57.
+    id: "botox",
+    sinceVersion: 25,
+    name: "Botox hiperhidrosis (cada 7 meses)",
+    amount: 46.57,
+    category: "salud",
+    note: "Son $326 por sesión y se repite cada 7 meses; acá va prorrateado a $46,57/mes. El pago del 13 ago 2026 queda registrado como movimiento excluido para no contarlo dos veces. Anual: $559.",
   },
   COWORKING_COMMITMENT,
 ];
@@ -643,6 +654,18 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
         }),
       };
     }
+  }
+
+  // El botox se publicó como gasto normal antes de saber que se repite cada
+  // 7 meses. Ahora vive prorrateado como compromiso, así que el movimiento
+  // pasa a excluido: si no, agosto lo paga dos veces.
+  if (from < 25 && Array.isArray(s.transactions)) {
+    s = {
+      ...s,
+      transactions: s.transactions.map((t) =>
+        t && t.id === "txn-2026-08-13-botox" && !t.excluded ? { ...t, excluded: true } : t
+      ),
+    };
   }
 
   // Movimientos dictados por chat: entra solo lo publicado después de la

@@ -87,9 +87,9 @@ export const STACK: {
     name: "Toxina botulínica para hiperhidrosis",
     kind: "medicación",
     route: "inyectable",
-    dose: "sesión periódica: zona y unidades por confirmar",
+    dose: "una sesión cada 7 meses (zona y unidades por confirmar)",
     why:
-      "Bloquea la liberación de acetilcolina en la unión con la glándula sudorípara, así que la glándula deja de recibir la orden de sudar. Es de los tratamientos con mejor evidencia en hiperhidrosis focal: el efecto suele durar entre cuatro y seis meses y después hay que repetir.",
+      "Bloquea la liberación de acetilcolina en la unión con la glándula sudorípara, así que la glándula deja de recibir la orden de sudar. Es de los tratamientos con mejor evidencia en hiperhidrosis focal. La duración típica descrita es de cuatro a seis meses; a ti te rinde siete, que es por encima del promedio.",
     note:
       "No toca nada de lo que mide este tablero: ni metabolismo, ni fuerza, ni composición corporal. Sudar menos en una zona focal no cambia tus calorías ni tu peso, y la pérdida de sodio por sudor casi no se mueve porque el área tratada es pequeña.",
     caution:
