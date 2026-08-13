@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 26;
+export const STATE_VERSION = 27;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -341,7 +341,26 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // hubo gasto corriente que no está anotado movimiento por movimiento.
   { id: "pichincha", sinceVersion: 21, name: "Pichincha", kind: "bank", balance: 1750 },
   { id: "procredit", sinceVersion: 21, name: "ProCredit", kind: "bank", balance: 3714 },
+  { id: "cooperativa", sinceVersion: 27, name: "Cooperativa", kind: "bank", balance: 632 },
 ];
+
+/**
+ * Deudas con saldo que amortizar. Mismo upsert que las cuentas: la del auto
+ * arrancó con cifras de memoria ($12 800 y $520) y el estado del crédito las
+ * corrigió, así que tiene que poder reescribirse en un tablero ya guardado.
+ */
+const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [
+  {
+    id: "auto",
+    sinceVersion: 27,
+    name: "Préstamo quirografario #17159 (auto)",
+    // Del estado del crédito al 13 ago 2026: $20 000 originales del 24 oct
+    // 2024, 21 de 50 cuotas pagadas, al día, 13,8 % anual.
+    balance: 13024.42,
+    monthlyPayment: 538.64,
+  },
+];
+const seedDebt = ({ sinceVersion: _v, ...d }: Debt & { sinceVersion: number }): Debt => d;
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
 
 /** Mismo upsert que las cuentas por cobrar: subir el `sinceVersion` de una
@@ -357,11 +376,11 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   },
   {
     id: "auto-seguros",
-    sinceVersion: 17,
+    sinceVersion: 27,
     name: "Auto, celular y seguros",
     amount: 700,
     category: "financiero",
-    note: "Paquete fijo: cuota del vehículo, plan celular, seguro del auto y seguro de salud. Los $520 de la cuota también viven en Deudas, donde sirven para calcular el plazo de pago; el gasto mensual los cuenta aquí, no allá.",
+    note: "Paquete fijo: cuota del quirografario ($538,64 según el estado del crédito, no los $520 que estaban de memoria), plan celular, seguro del auto y seguro de salud. Esos $538,64 también viven en Deudas, donde sirven para calcular el plazo; el gasto mensual los cuenta aquí, no allá. Si se liquida el préstamo, este compromiso baja a unos $161.",
   },
   {
     id: "hbomax",
@@ -427,14 +446,7 @@ export function seedState(): FinanceState {
         balance: 2000,
       },
     ],
-    debts: [
-      {
-        id: "auto",
-        name: "Préstamo vehículo",
-        balance: 12800,
-        monthlyPayment: 520,
-      },
-    ],
+    debts: SEEDED_DEBTS.map(seedDebt),
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "wfs-1", client: "WFS", amount: 1500, status: "pending" },
@@ -467,6 +479,8 @@ Metas:
 1. Aumentar patrimonio y tener estabilidad, no solo rotar dinero.
 2. Sostener la afiliación al IESS sin cortes (afiliado desde agosto de 2026, $180 al mes). Es requisito de entrada: el BIESS pide entre dos y tres años de aportaciones para dar un crédito hipotecario decente, así que cada mes sin aportar corre la fecha en que puedo comprar departamento.
 3. Comprar departamento cuando el historial de aportaciones lo permita.
+
+Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto.
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
 
@@ -624,6 +638,22 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     );
     if (drop.size) {
       s = { ...s, commitments: s.commitments.filter((c) => !c || !drop.has(c.id)) };
+    }
+  }
+
+  // Deudas: mismo upsert que las cuentas.
+  {
+    const dbt = Array.isArray(s.debts) ? s.debts : [];
+    const fresh = SEEDED_DEBTS.filter((d) => d.sinceVersion > from);
+    if (fresh.length) {
+      const byId = new Map(fresh.map((d) => [d.id, seedDebt(d)]));
+      const merged = dbt.map((d) => {
+        const patch = d && byId.get(d.id);
+        if (!patch) return d;
+        byId.delete(d.id);
+        return { ...d, ...patch };
+      });
+      s = { ...s, debts: [...merged, ...byId.values()] };
     }
   }
 
