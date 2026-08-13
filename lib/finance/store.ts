@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 22;
+export const STATE_VERSION = 23;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -220,7 +220,9 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
   {
     id: "txn-2026-08-12-reembolso-500",
     sinceVersion: 21,
-    date: "2026-08-12T12:00:00-05:00",
+    // El id dice 12 por la fecha con que se publicó; la buena es el 13. No lo
+    // renombro para no insertar una fila gemela en un tablero ya guardado.
+    date: "2026-08-13T09:00:00-05:00",
     amount: 500,
     kind: "income",
     category: "reembolso",
@@ -232,7 +234,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
   {
     id: "txn-2026-08-12-ropa",
     sinceVersion: 22,
-    date: "2026-08-12T12:00:00-05:00",
+    date: "2026-08-13T09:00:00-05:00",
     amount: 190,
     kind: "expense",
     category: "ropa",
@@ -280,6 +282,17 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     amount: 498,
     status: "pending",
     note: "Se deposita en Wise el viernes 14 ago 2026, igual que el primero. Él lo da por confirmado al 100% y el dinero ya salió. Pasa a ingreso, y sube el saldo de Wise, cuando aparezca en la cuenta.",
+  },
+  {
+    // Sigue pendiente, no cobrada: el comprobante de Wise es la transferencia
+    // *creada* por el remitente ("cómo pagar tu transferencia"), no el
+    // acreditado. Un EUR→USD tarda uno o dos días en caer.
+    id: "theme-motion",
+    sinceVersion: 23,
+    client: "Theme Motion · Taletech B.V. (animatronics de Jorge)",
+    amount: 1000,
+    status: "pending",
+    note: "En tránsito. Transferencia Wise #2308181693 creada el 13 ago 2026: Taletech B.V. (Rotterdam) envía 878,47 EUR a 1,1541 y el destinatario recibe 1 000,00 USD exactos. La comisión de 11,96 EUR la paga el remitente, así que llega completo. Pasa a ingreso, y sube el saldo de Wise, cuando esté acreditada.",
   },
 ];
 
@@ -390,12 +403,6 @@ export function seedState(): FinanceState {
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "wfs-1", client: "WFS", amount: 1500, status: "pending" },
-      {
-        id: "theme-motion",
-        client: "Theme Motion",
-        amount: 1000,
-        status: "pending",
-      },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
@@ -600,6 +607,29 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
         return { ...c, ...patch };
       });
       s = { ...s, commitments: [...merged, ...byId.values()] };
+    }
+  }
+
+  // Fechas mal puestas al publicar. Los movimientos se insertan una sola vez
+  // por id, así que corregir la fecha en SEEDED_TXNS no alcanza para un
+  // tablero que ya los tiene: hay que reescribirlas acá. Solo si siguen en el
+  // valor equivocado, para no pisar una fecha que él ya haya ajustado.
+  {
+    const FIXES: { id: string; wrong: string; right: string }[] = [
+      // Publicados como 12 de agosto; en Ecuador todavía era el 13 por la
+      // mañana cuando los dictó. El reloj del entorno corre en UTC.
+      { id: "txn-2026-08-12-reembolso-500", wrong: "2026-08-12T12:00:00-05:00", right: "2026-08-13T09:00:00-05:00" },
+      { id: "txn-2026-08-12-ropa", wrong: "2026-08-12T12:00:00-05:00", right: "2026-08-13T09:00:00-05:00" },
+    ];
+    if (from < 23 && Array.isArray(s.transactions)) {
+      const by = new Map(FIXES.map((f) => [f.id, f]));
+      s = {
+        ...s,
+        transactions: s.transactions.map((t) => {
+          const f = t && by.get(t.id);
+          return f && t.date === f.wrong ? { ...t, date: f.right } : t;
+        }),
+      };
     }
   }
 
