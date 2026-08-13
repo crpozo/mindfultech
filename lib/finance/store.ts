@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 23;
+export const STATE_VERSION = 24;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -241,6 +241,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     merchant: "Ropa",
     notes:
       "Si fue con la Titanium, ya está contada acá: cuando llegue el estado de cuenta de agosto hay que restarla del total agregado para no cobrarla dos veces.",
+    excluded: false,
+  },
+  {
+    id: "txn-2026-08-13-botox",
+    sinceVersion: 24,
+    date: "2026-08-13T09:00:00-05:00",
+    amount: 326,
+    kind: "expense",
+    category: "salud",
+    merchant: "Toxina botulínica: hiperhidrosis",
+    notes:
+      "Tratamiento médico, no estético. Se repite cada cuatro a seis meses, así que en el año pesa unos $650–980: si se vuelve fijo, conviene sacarlo del gasto variable y ponerlo como compromiso prorrateado, igual que el coworking. Mismo aviso que la ropa: si fue con la Titanium, hay que restarlo del estado de cuenta de agosto.",
     excluded: false,
   },
 ];

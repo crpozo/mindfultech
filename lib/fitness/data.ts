@@ -22,7 +22,7 @@ export const STACK: {
   id: string;
   name: string;
   kind: "suplemento" | "medicación";
-  route: "oral" | "tópico";
+  route: "oral" | "tópico" | "inyectable";
   dose: string;
   why: string;
   /** qué implica para los números de este tablero */
@@ -81,6 +81,20 @@ export const STACK: {
       "Buena noticia para el gimnasio: bajar DHT no reduce la hipertrofia ni la fuerza, los ensayos con inhibidores de la 5-alfa-reductasa en hombres que entrenan no muestran pérdida de masa magra. La DHT manda en el folículo y la próstata, no en el músculo.",
     caution:
       "Suma minoxidil al que ya tomas por boca. Los efectos sistémicos reportados (libido, ánimo) son poco frecuentes por vía tópica, pero si aparecen no es casualidad: coméntalo con quien te lo recetó.",
+  },
+  {
+    id: "s-botox-hiperhidrosis",
+    name: "Toxina botulínica para hiperhidrosis",
+    kind: "medicación",
+    route: "inyectable",
+    dose: "sesión periódica: zona y unidades por confirmar",
+    why:
+      "Bloquea la liberación de acetilcolina en la unión con la glándula sudorípara, así que la glándula deja de recibir la orden de sudar. Es de los tratamientos con mejor evidencia en hiperhidrosis focal: el efecto suele durar entre cuatro y seis meses y después hay que repetir.",
+    note:
+      "No toca nada de lo que mide este tablero: ni metabolismo, ni fuerza, ni composición corporal. Sudar menos en una zona focal no cambia tus calorías ni tu peso, y la pérdida de sodio por sudor casi no se mueve porque el área tratada es pequeña.",
+    caution:
+      "Si es axilar, lo habitual es sudar algo más en otras zonas para compensar. En manos, la queja frecuente es debilidad pasajera de agarre por difusión a los músculos de la mano: si te la aplicaron ahí y notas que se te resbala la barra o falla el agarre en jalones y remo, es esperable y pasa, no es que hayas perdido fuerza.",
+    confirm: "¿En qué zona te las pusieron (axilas, manos, pies) y cuántas unidades? Con eso puedo decirte si toca algo de tu entrenamiento o no.",
   },
 ];
 
