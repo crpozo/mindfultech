@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 21;
+export const STATE_VERSION = 22;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -228,6 +228,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     notes:
       "Plata que salió y volvió, no trabajo cobrado. Queda excluida de los totales porque el pago original nunca se registró acá: contarla como ingreso inflaría el mes en $500 sin que haya un gasto que compense. El saldo de PayPal sí la refleja.",
     excluded: true,
+  },
+  {
+    id: "txn-2026-08-12-ropa",
+    sinceVersion: 22,
+    date: "2026-08-12T12:00:00-05:00",
+    amount: 190,
+    kind: "expense",
+    category: "ropa",
+    merchant: "Ropa",
+    notes:
+      "Si fue con la Titanium, ya está contada acá: cuando llegue el estado de cuenta de agosto hay que restarla del total agregado para no cobrarla dos veces.",
+    excluded: false,
   },
 ];
 
