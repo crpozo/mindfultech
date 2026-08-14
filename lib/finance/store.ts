@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 28;
+export const STATE_VERSION = 29;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -329,6 +329,14 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     amount: 1000,
     status: "paid",
     note: "Cobrado el 13 ago 2026. Transferencia Wise #2308181693: Taletech B.V. (Rotterdam) envió 878,47 EUR a 1,1541 y pagó los 11,96 EUR de comisión, así que llegaron $1 000,00 exactos. Registrado también como ingreso y sumado al saldo de Wise.",
+  },
+  {
+    id: "estudio-fama",
+    sinceVersion: 29,
+    client: "Estudio Fama",
+    amount: 575,
+    status: "pending",
+    note: "Facturado el 14 ago 2026. Con factura emitida ya corre el plazo de pago; si al 14 de septiembre sigue abierta, toca cobrar.",
   },
 ];
 
