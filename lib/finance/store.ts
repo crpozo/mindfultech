@@ -349,9 +349,10 @@ const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Saldo leído por él en la app el 14 de agosto. Mi cifra deducida daba
-  // 6 114,84 (4 118,54 + 498,30 + 498 + 1 000) y la real es 1 000,55 menos:
-  // el saldo dictado manda, y la diferencia queda anotada como pregunta
-  // abierta en vez de disimulada con un ajuste.
+  // 6 114,84 (4 118,54 + 498,30 + 498 + 1 000) y la real es 1 000,55 menos.
+  // Los tres ingresos sí entraron, él lo confirmó: la diferencia es gasto que
+  // salió de acá y no está anotado movimiento por movimiento. Por eso el
+  // saldo dictado siempre le gana al deducido.
   { id: "wise", sinceVersion: 30, name: "Wise", kind: "bank", balance: 5114.29 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
