@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 27;
+export const STATE_VERSION = 28;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -267,6 +267,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Animatronics de Jorge. Acreditado el 13 ago 2026 por Wise (#2308181693): el remitente envió 878,47 EUR a 1,1541 y pagó los 11,96 EUR de comisión, así que llegaron los $1 000,00 completos. Cierra la cuenta por cobrar del mismo monto.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-14-andrew-2",
+    sinceVersion: 28,
+    date: "2026-08-14T09:00:00-05:00",
+    amount: 498,
+    kind: "income",
+    category: "clientes",
+    merchant: "Andrew Sam Binno (2.º pago)",
+    notes:
+      "Segundo y último pago, recibido el viernes 14 ago 2026 como estaba anunciado. Monto anotado por el valor prometido: el primero llegó con $1,70 de comisión descontada, así que si este cayó igual, el neto real son $496,30.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -301,11 +313,11 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     // como cuenta por cobrar, no como ingreso. El runway no debe contar plata
     // que aún no llegó, por segura que sea — mismo criterio que la USFQ.
     id: "andrew-2",
-    sinceVersion: 19,
+    sinceVersion: 28,
     client: "Andrew Sam Binno (2.º pago)",
     amount: 498,
-    status: "pending",
-    note: "Se deposita en Wise el viernes 14 ago 2026, igual que el primero. Él lo da por confirmado al 100% y el dinero ya salió. Pasa a ingreso, y sube el saldo de Wise, cuando aparezca en la cuenta.",
+    status: "paid",
+    note: "Cobrado en Wise el viernes 14 ago 2026, el día prometido. Con esto Andrew queda saldado por completo: $498,30 el 7 de agosto y $498 hoy. Registrado también como ingreso y sumado al saldo de Wise.",
   },
   {
     // Sigue pendiente, no cobrada: el comprobante de Wise es la transferencia
@@ -328,10 +340,9 @@ const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number
     `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
-  // 4 118,54 antes del 7 de agosto, + 498,30 de Andrew, + 1 000 de Taletech
-  // acreditados el 13. Falta el segundo pago de Andrew: este número sube
-  // recién cuando aparezca en la cuenta, no cuando esté prometido.
-  { id: "wise", sinceVersion: 26, name: "Wise", kind: "bank", balance: 5616.84 },
+  // 4 118,54 antes del 7 de agosto, + 498,30 y + 498 de Andrew, + 1 000 de
+  // Taletech. Todo acreditado: acá ya no queda nada prometido.
+  { id: "wise", sinceVersion: 28, name: "Wise", kind: "bank", balance: 6114.84 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
