@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 31;
+export const STATE_VERSION = 33;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -279,6 +279,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Segundo y último pago, recibido el viernes 14 ago 2026 como estaba anunciado. Monto anotado por el valor prometido: el primero llegó con $1,70 de comisión descontada, así que si este cayó igual, el neto real son $496,30.",
     excluded: false,
   },
+  {
+    id: "txn-2026-08-19-antonello",
+    sinceVersion: 32,
+    date: "2026-08-19T09:00:00-05:00",
+    amount: 1750,
+    kind: "income",
+    category: "clientes",
+    merchant: "Antonello",
+    notes:
+      "Cobrado. No cierra ninguna cuenta por cobrar: Antonello no estaba en la cartera y el monto no calza con ninguna fila abierta, así que entra como cobro nuevo. Si en realidad era el pago de una de las pendientes, hay que marcarla y así deja de contarse dos veces. Falta saber a qué cuenta entró para que suba el saldo.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -414,11 +426,11 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   },
   {
     id: "arriendo",
-    sinceVersion: 9,
+    sinceVersion: 33,
     name: "Arriendo",
-    amount: 550,
+    amount: 571.5,
     category: "hogar",
-    note: "Fijo mensual. Sale del estimado general y pasa a nombrarse aquí; el gasto total no cambia.",
+    note: "Fijo mensual. Subió de $550 a $571,50 en agosto de 2026: $21,50 más al mes, $258 al año.",
   },
   {
     // Mismo criterio que el coworking: un cobro grande y espaciado se
@@ -485,7 +497,7 @@ export function seedState(): FinanceState {
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
       monthlyExpenseEstimate: 2030,
-      budgets: { hogar: 550, suscripciones: 200, financiero: 700 },
+      budgets: { hogar: 571.5, suscripciones: 200, financiero: 700 },
       profile: DEFAULT_PROFILE,
     },
   };
@@ -677,6 +689,16 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
       });
       s = { ...s, debts: [...merged, ...byId.values()] };
     }
+  }
+
+  // El presupuesto de hogar existía solo para cubrir el arriendo, así que
+  // sube con él. Solo si sigue en la cifra vieja: si él lo ajustó a mano, es
+  // suyo.
+  if (from < 33 && s.settings?.budgets && num(s.settings.budgets.hogar) === 550) {
+    s = {
+      ...s,
+      settings: { ...s.settings, budgets: { ...s.settings.budgets, hogar: 571.5 } },
+    };
   }
 
   // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
