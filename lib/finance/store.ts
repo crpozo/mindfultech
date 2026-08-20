@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 34;
+export const STATE_VERSION = 36;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -374,7 +374,10 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
   { id: "pichincha", sinceVersion: 21, name: "Pichincha", kind: "bank", balance: 1750 },
-  { id: "procredit", sinceVersion: 21, name: "ProCredit", kind: "bank", balance: 3714 },
+  // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
+  // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
+  // una mensualidad ($571,50).
+  { id: "procredit", sinceVersion: 36, name: "ProCredit", kind: "bank", balance: 5884 },
   { id: "cooperativa", sinceVersion: 27, name: "Cooperativa", kind: "bank", balance: 632 },
 ];
 
@@ -513,6 +516,8 @@ Metas:
 2. Sostener la afiliación al IESS sin cortes (afiliado desde agosto de 2026, $180 al mes). Es requisito de entrada: el BIESS pide entre dos y tres años de aportaciones para dar un crédito hipotecario decente, así que cada mes sin aportar corre la fecha en que puedo comprar departamento.
 3. Comprar departamento cuando el historial de aportaciones lo permita.
 
+Cuentas: el arriendo sale de ProCredit todos los meses, así que esa cuenta nunca debe bajar de una mensualidad. Wise y PayPal son las cuentas donde cobra al exterior y tardan uno o dos días hábiles en llegar a Ecuador; Pichincha es la operativa local y de ahí sale el pago de la tarjeta Titanium.
+
 Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto.
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
@@ -620,6 +625,21 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
       s = {
         ...s,
         settings: { ...s.settings, profile: s.settings.profile.replace(stale, fresh) },
+      };
+    }
+  }
+
+  // Detalle operativo que el perfil no tenía y que cambia decisiones: de qué
+  // cuenta sale cada gasto fijo. Se inserta antes del párrafo de deuda, y solo
+  // si ese párrafo sigue literal.
+  if (from < 35 && typeof s.settings?.profile === "string") {
+    const at = "Deuda: un solo préstamo, quirografario #17159";
+    const add =
+      "Cuentas: el arriendo sale de ProCredit todos los meses, así que esa cuenta nunca debe bajar de una mensualidad. Wise y PayPal son las cuentas donde cobra al exterior y tardan uno o dos días hábiles en llegar a Ecuador; Pichincha es la operativa local y de ahí sale el pago de la tarjeta Titanium.\n\n";
+    if (s.settings.profile.includes(at) && !s.settings.profile.includes("Cuentas: el arriendo sale de ProCredit")) {
+      s = {
+        ...s,
+        settings: { ...s.settings, profile: s.settings.profile.replace(at, add + at) },
       };
     }
   }
