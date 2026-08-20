@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 33;
+export const STATE_VERSION = 34;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -483,7 +483,6 @@ export function seedState(): FinanceState {
     debts: SEEDED_DEBTS.map(seedDebt),
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
-      { id: "wfs-1", client: "WFS", amount: 1500, status: "pending" },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       { id: "scott", client: "Scott", amount: 525, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
@@ -579,6 +578,9 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
   // o ya la había borrado él mismo, esto no hace nada.
   const WRITTEN_OFF: { id: string; sinceVersion: number }[] = [
     { id: "wfs-2", sinceVersion: 12 }, // $3 200 de WFS: no se van a cobrar
+    // Con esto WFS sale del tablero entero: $4 700 facturados que nunca
+    // llegaron a cobrarse.
+    { id: "wfs-1", sinceVersion: 34 },
   ];
   if (Array.isArray(s.receivables)) {
     const drop = new Set(
