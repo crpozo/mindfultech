@@ -101,102 +101,13 @@ export function uid(): string {
   return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
 }
 
-export const STATE_VERSION = 4;
-
-/**
- * Tareas dictadas por chat. Mismo criterio que el tablero de finanzas: cada
- * fila lleva `sinceVersion` y solo entra si el tablero guardado es más viejo,
- * con doble filtro por id. Así una tarea que él ya borró no resucita cuando
- * publique la siguiente, y añadir una nueva es ponerla acá y subir
- * STATE_VERSION.
- *
- * `createdAt` va fijo, no Date.now(): si se recalculara en cada carga, el
- * orden de las tarjetas bailaría solo.
- */
-const SEEDED_TASKS: (Omit<Task, "projectId"> & { sinceVersion: number })[] = [
-  {
-    id: "loan-01-fondear-cuota",
-    sinceVersion: 4,
-    title: "26 ago · Dejar $400 en la cooperativa para la cuota del 27",
-    notes:
-      "La cuota de $538,64 se debita sola el 27 y en la cooperativa solo hay $156,30. Transferencia local desde Pichincha, llega el mismo día.\n\nOjo: la captura del crédito decía \"próxima cuota 31/ago\" y tú dices 27. Ten el dinero desde el 26 y quedas cubierto en las dos versiones.",
-    status: "todo",
-    createdAt: 1755610000000,
-    order: 101,
-  },
-  {
-    id: "loan-02-verificar-debito",
-    sinceVersion: 4,
-    title: "27 ago · Verificar que se debitó la cuota de $538,64",
-    notes:
-      "Si no se debitó, no sigas con el resto del plan hasta entender por qué: una cuota rebotada te saca del estado AL DIA y puede complicar la precancelación.",
-    status: "todo",
-    createdAt: 1755610001000,
-    order: 102,
-  },
-  {
-    id: "loan-03-mover-internacional",
-    sinceVersion: 4,
-    title: "27-28 ago · Iniciar transferencias de Wise y PayPal",
-    notes:
-      "Tardan de uno a dos días hábiles en llegar a Ecuador, por eso se mueven primero.\n\nWise: $5.100 (quedan $14).\nPayPal: $1.020 (quedan $1.980, que son la reserva de la Titanium).\n\nSi Wise no envía directo a la cooperativa, manda a Pichincha y de ahí haces la transferencia local.",
-    status: "todo",
-    createdAt: 1755610002000,
-    order: 103,
-  },
-  {
-    id: "loan-04-mover-local",
-    sinceVersion: 4,
-    title: "29-31 ago · Transferir ProCredit y Pichincha a la cooperativa",
-    notes:
-      "Son locales, llegan el mismo día.\n\nProCredit: $5.280. Deben quedar ~$604, porque el 1 de septiembre sale de ahí el arriendo de $571,50.\nPichincha: $1.000 (quedan $350).\n\nMeta: ~$12.400 acreditados en la cooperativa antes del 1 de septiembre.",
-    status: "todo",
-    createdAt: 1755610003000,
-    order: 104,
-  },
-  {
-    id: "loan-05-precancelar",
-    sinceVersion: 4,
-    title: "1 sep · Enviar el correo de precancelación del préstamo",
-    notes:
-      "Única ventana: del 1 al 5. Manda el correo solo cuando veas la plata acreditada en la cooperativa, no antes.\n\nSaldo tras la cuota del 27: ~$12.256. Con intereses al 1 de septiembre, presupuesta $12.300-12.400.\n\nPregunta en el mismo correo:\n1. Valor exacto de precancelación al 1 de septiembre.\n2. ¿Hay penalidad por prepago?\n3. Los $156,30 de la cuenta, ¿son míos o son encaje del crédito?",
-    status: "todo",
-    createdAt: 1755610004000,
-    order: 105,
-  },
-  {
-    id: "loan-06-titanium",
-    sinceVersion: 4,
-    title: "Mediados de sep · Pagar la Titanium (~$2.200) desde PayPal",
-    notes:
-      "Corte el 4 de septiembre. Es el golpe que llega justo cuando el colchón está más flaco, por eso PayPal queda con $1.980 sin tocar.\n\nEntre hoy y el 4 de septiembre, cada dólar que pases por esa tarjeta lo pagas en el peor momento posible.",
-    status: "todo",
-    createdAt: 1755610005000,
-    order: 106,
-  },
-  {
-    id: "loan-07-redirigir-cuota",
-    sinceVersion: 4,
-    title: "Tras liquidar · Mandar los $538,64 al fondo de emergencia",
-    notes:
-      "La cuota liberada desaparece sola si no le pones nombre. Débito automático mensual el día 27, que es cuando tu cuerpo ya espera que salga.\n\nMeta del fondo: $18.000.",
-    status: "todo",
-    createdAt: 1755610006000,
-    order: 107,
-  },
-];
-
-/** Sin `sinceVersion`, que no es parte del estado guardado. */
-const seedTask = ({ sinceVersion: _v, ...t }: Omit<Task, "projectId"> & { sinceVersion: number }): Task => ({
-  ...t,
-  projectId: null,
-});
+export const STATE_VERSION = 3;
 
 export function seedState(): TasksState {
   return {
     version: STATE_VERSION,
     projects: SEED_PROJECTS.map((p) => ({ ...p, id: uid() })),
-    tasks: SEEDED_TASKS.map(seedTask),
+    tasks: [],
   };
 }
 
@@ -226,16 +137,6 @@ function migrate(s: TasksState): TasksState {
     // stamp them now so the first sweep doesn't take them by surprise
     const now = Date.now();
     tasks = tasks.map((t) => (t.status === "done" && t.completedAt == null ? { ...t, completedAt: now } : t));
-  }
-
-  // Tareas dictadas por chat: solo lo publicado después de la versión que
-  // tiene guardada este tablero, y solo si el id no está ya. Doble filtro, así
-  // que ni se duplican al recargar ni vuelve una que él borró.
-  {
-    const from = s.version ?? 1;
-    const have = new Set(tasks.map((t) => t && t.id));
-    const missing = SEEDED_TASKS.filter((t) => t.sinceVersion > from && !have.has(t.id));
-    if (missing.length) tasks = [...tasks, ...missing.map(seedTask)];
   }
 
   return { ...s, version: STATE_VERSION, projects, tasks };
