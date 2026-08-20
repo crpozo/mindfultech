@@ -1064,18 +1064,33 @@ function Modal({
   const panelRef = React.useRef<HTMLDivElement>(null);
   const openerRef = React.useRef<Element | null>(null);
 
-  React.useEffect(() => {
-    openerRef.current = document.activeElement;
-    // move focus into the dialog, and keep Tab from escaping it
-    const focusables = () =>
+  const focusables = React.useCallback(
+    () =>
       Array.from(
         panelRef.current?.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         ) ?? []
-      ).filter((el) => !el.hasAttribute("disabled"));
-    const first = focusables()[0];
-    (first ?? panelRef.current)?.focus();
+      ).filter((el) => !el.hasAttribute("disabled")),
+    []
+  );
 
+  /* Enfocar el diálogo es cosa de una sola vez, al abrirlo. Iba junto al
+     listener de teclado en un efecto con `onClose` en las dependencias, y como
+     quien nos usa suele pasar una arrow nueva en cada render, el efecto se
+     rearmaba con cada tecla: escribir en Notas devolvía el cursor al título a
+     la primera letra. Sin dependencias, esto corre al montar y nada más. */
+  React.useEffect(() => {
+    openerRef.current = document.activeElement;
+    (focusables()[0] ?? panelRef.current)?.focus();
+    return () => {
+      // devolver el foco a lo que abrió el diálogo
+      (openerRef.current as HTMLElement | null)?.focus?.();
+    };
+  }, [focusables]);
+
+  /* El listener sí necesita el `onClose` de ahora, y volver a suscribirlo es
+     inofensivo: no mueve el foco. */
+  React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -1086,7 +1101,7 @@ function Modal({
         if (f.length === 0) return;
         const active = document.activeElement as HTMLElement;
         const idx = f.indexOf(active);
-        if (e.shiftKey && (idx <= 0)) {
+        if (e.shiftKey && idx <= 0) {
           e.preventDefault();
           f[f.length - 1].focus();
         } else if (!e.shiftKey && idx === f.length - 1) {
@@ -1096,12 +1111,8 @@ function Modal({
       }
     };
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      // restore focus to whatever opened the dialog
-      (openerRef.current as HTMLElement | null)?.focus?.();
-    };
-  }, [onClose]);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose, focusables]);
 
   return (
     <div
