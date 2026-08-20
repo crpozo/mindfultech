@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 39;
+export const STATE_VERSION = 40;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -521,7 +521,7 @@ Metas:
 
 Cuentas: el arriendo sale de ProCredit todos los meses, así que esa cuenta nunca debe bajar de una mensualidad. Wise y PayPal son las cuentas donde cobra al exterior y tardan uno o dos días hábiles en llegar a Ecuador; Pichincha es la operativa local y de ahí sale el pago de la tarjeta Titanium.
 
-Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto. Dos fechas mandan sobre cualquier plan: la cuota se debita el 27 de cada mes, y la cooperativa solo acepta precancelaciones entre el 1 y el 5. O sea que liquidar siempre implica pagar antes una cuota más.
+Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto. Dos fechas mandan sobre cualquier plan: la cuota se debita el 27 de cada mes, y la cooperativa solo acepta precancelaciones entre el 1 y el 5. O sea que liquidar siempre implica pagar antes una cuota más. Decisión tomada el 20 de agosto de 2026: liquidar el total en la ventana del 1 al 5 de septiembre, en cuanto entre el pago de Helixona. Se evaluó abonar solo una parte para conservar liquidez y se descartó: el dueño prefiere cerrar la deuda de una vez y quedarse con menos colchón. Con eso el gasto mensual baja de unos 3.600 a unos 3.050 y se liberan 538,64 al mes.
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
 
