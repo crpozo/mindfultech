@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 38;
+export const STATE_VERSION = 39;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -416,11 +416,11 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   },
   {
     id: "auto-seguros",
-    sinceVersion: 27,
+    sinceVersion: 39,
     name: "Auto, celular y seguros",
     amount: 700,
     category: "financiero",
-    note: "Paquete fijo: cuota del quirografario ($538,64 según el estado del crédito, no los $520 que estaban de memoria), plan celular, seguro del auto y seguro de salud. Esos $538,64 también viven en Deudas, donde sirven para calcular el plazo; el gasto mensual los cuenta aquí, no allá. Si se liquida el préstamo, este compromiso baja a unos $161.",
+    note: "Paquete fijo: cuota del quirografario ($538,64, que se debita el 27 de cada mes), plan celular, seguro del auto y seguro de salud. Esos $538,64 también viven en Deudas, donde sirven para calcular el plazo; el gasto mensual los cuenta aquí, no allá. Si se liquida el préstamo, este compromiso baja a unos $161.",
   },
   {
     id: "hbomax",
@@ -521,7 +521,7 @@ Metas:
 
 Cuentas: el arriendo sale de ProCredit todos los meses, así que esa cuenta nunca debe bajar de una mensualidad. Wise y PayPal son las cuentas donde cobra al exterior y tardan uno o dos días hábiles en llegar a Ecuador; Pichincha es la operativa local y de ahí sale el pago de la tarjeta Titanium.
 
-Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto.
+Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto. Dos fechas mandan sobre cualquier plan: la cuota se debita el 27 de cada mes, y la cooperativa solo acepta precancelaciones entre el 1 y el 5. O sea que liquidar siempre implica pagar antes una cuota más.
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
 
