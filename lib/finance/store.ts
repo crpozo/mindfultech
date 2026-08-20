@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 37;
+export const STATE_VERSION = 38;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -377,7 +377,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
   { id: "procredit", sinceVersion: 36, name: "ProCredit", kind: "bank", balance: 5884 },
-  { id: "cooperativa", sinceVersion: 27, name: "Cooperativa", kind: "bank", balance: 632 },
+  { id: "cooperativa", sinceVersion: 38, name: "Cooperativa", kind: "bank", balance: 156.3 },
 ];
 
 /**
@@ -390,9 +390,13 @@ const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [
     id: "auto",
     sinceVersion: 27,
     name: "Préstamo quirografario #17159 (auto)",
-    // Del estado del crédito al 13 ago 2026: $20 000 originales del 24 oct
-    // 2024, 21 de 50 cuotas pagadas, al día, 13,8 % anual.
-    balance: 13024.42,
+    // $20 000 originales del 24 oct 2024, 50 cuotas, 13,8 % anual, al día.
+    // Saldo dictado por él el 19 ago 2026. La captura del 13 mostraba
+    // 13 024,42: la diferencia de $376,10 es casi exacta a la parte de capital
+    // de una cuota, así que entremedio se amortizó una. El interés sigue
+    // corriendo diario sobre este saldo ($4,85/día), y el valor exacto de
+    // precancelación solo lo da la cooperativa el día del pago.
+    balance: 12648.32,
     monthlyPayment: 538.64,
   },
 ];
