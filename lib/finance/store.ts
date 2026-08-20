@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 36;
+export const STATE_VERSION = 37;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -360,12 +360,11 @@ const seedRcv = ({ sinceVersion: _v, ...r }: Receivable & { sinceVersion: number
     `sinceVersion` supera al del tablero, o sea cuando él acaba de darme la
     cifra. Un saldo que ajuste a mano después es suyo hasta la próxima. */
 const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
-  // 4 118,54 antes del 7 de agosto, + 498,30 y + 498 de Andrew, + 1 000 de
-  // Taletech = 6 114,84, confirmado contra la app el 14 de agosto. Pasó por
-  // un 5 114,29 que resultó ser lectura equivocada; se deja constancia porque
-  // el saldo dictado normalmente manda sobre el deducido, y esta fue la
-  // excepción: la suma de movimientos conocidos era la que estaba bien.
-  { id: "wise", sinceVersion: 31, name: "Wise", kind: "bank", balance: 6114.84 },
+  // 5 114,29, leído en la app el 19 de agosto. Pasó por 6 114,84, que era mi
+  // suma de movimientos conocidos (4 118,54 + 498,30 + 498 + 1 000) y él dio
+  // por buena; la lectura de la app dice otra cosa y la lectura gana. La
+  // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
+  { id: "wise", sinceVersion: 37, name: "Wise", kind: "bank", balance: 5114.29 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
