@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 40;
+export const STATE_VERSION = 41;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -280,6 +280,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     excluded: false,
   },
   {
+    id: "txn-2026-08-21-andrew-3",
+    sinceVersion: 41,
+    date: "2026-08-21T09:00:00-05:00",
+    amount: 498,
+    kind: "income",
+    category: "clientes",
+    merchant: "Andrew Sam Binno (3.er pago)",
+    notes:
+      "Acreditado en Wise el viernes 21 ago 2026. No cierra ninguna cuenta por cobrar: la de Andrew quedó saldada con los dos pagos de agosto, así que este entra como cobro nuevo. Tercer pago puntual seguido.",
+    excluded: false,
+  },
+  {
     id: "txn-2026-08-19-antonello",
     sinceVersion: 32,
     date: "2026-08-19T09:00:00-05:00",
@@ -364,7 +376,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // suma de movimientos conocidos (4 118,54 + 498,30 + 498 + 1 000) y él dio
   // por buena; la lectura de la app dice otra cosa y la lectura gana. La
   // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
-  { id: "wise", sinceVersion: 37, name: "Wise", kind: "bank", balance: 5114.29 },
+  { id: "wise", sinceVersion: 41, name: "Wise", kind: "bank", balance: 5612.29 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
