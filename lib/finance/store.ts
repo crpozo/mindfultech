@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 41;
+export const STATE_VERSION = 42;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -292,6 +292,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     excluded: false,
   },
   {
+    id: "txn-2026-08-25-scott",
+    sinceVersion: 42,
+    date: "2026-08-25T09:00:00-05:00",
+    amount: 500,
+    kind: "income",
+    category: "clientes",
+    merchant: "Scott",
+    notes:
+      "Acreditado en PayPal el 25 ago 2026. Cierra su cuenta por cobrar, que estaba en $525: los $25 de diferencia cuadran con la comisión de PayPal para cobros del exterior (~4,4 % + fijo sobre $525 da ~$23). Si en realidad fue un pago parcial y todavía te debe, dímelo y reabro la fila.",
+    excluded: false,
+  },
+  {
     id: "txn-2026-08-19-antonello",
     sinceVersion: 32,
     date: "2026-08-19T09:00:00-05:00",
@@ -362,6 +374,14 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     status: "pending",
     note: "Facturado el 14 ago 2026. Con factura emitida ya corre el plazo de pago; si al 14 de septiembre sigue abierta, toca cobrar.",
   },
+  {
+    id: "scott",
+    sinceVersion: 42,
+    client: "Scott",
+    amount: 500,
+    status: "paid",
+    note: "Cobrado en PayPal el 25 ago 2026. Estaba anotada en $525 y llegaron $500; la diferencia cuadra con la comisión de PayPal, así que se cierra por lo que entró de verdad.",
+  },
 ];
 
 /** Sin `sinceVersion`, que no es parte del modelo guardado. */
@@ -380,7 +400,8 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
-  { id: "paypal", sinceVersion: 21, name: "PayPal", kind: "bank", balance: 3000 },
+  // 3 000 + los 500 de Scott acreditados el 25 de agosto
+  { id: "paypal", sinceVersion: 42, name: "PayPal", kind: "bank", balance: 3500 },
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
@@ -502,7 +523,6 @@ export function seedState(): FinanceState {
     receivables: [
       { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
-      { id: "scott", client: "Scott", amount: 525, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
     ],
     commitments: SEEDED_COMMITMENTS.map(seedCmt),
