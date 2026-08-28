@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 48;
+export const STATE_VERSION = 49;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -240,7 +240,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "ropa",
     merchant: "Ropa",
     notes:
-      "Si fue con la Titanium, ya está contada acá: cuando llegue el estado de cuenta de agosto hay que restarla del total agregado para no cobrarla dos veces.",
+      "Confirmado: pagada con la Titanium. Cuando se registre el estado de cuenta de agosto (corte del 4 sep, ~$2 600) hay que restar estos $190 del total agregado, o el mes los cobra dos veces.",
     excluded: false,
   },
   {
@@ -252,7 +252,7 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     category: "salud",
     merchant: "Toxina botulínica: hiperhidrosis",
     notes:
-      "Tratamiento médico, no estético, y recurrente: cada 7 meses. Queda fuera de los totales a propósito, porque el gasto ya se cuenta prorrateado en el compromiso «Botox hiperhidrosis»; contarlo también acá lo cobraría dos veces en agosto. El movimiento se queda para dejar constancia de la fecha y del monto real.",
+      "Tratamiento médico, no estético, y recurrente: cada 7 meses. Queda fuera de los totales a propósito, porque el gasto ya se cuenta prorrateado en el compromiso «Botox hiperhidrosis». Confirmado que se pagó con la Titanium: al registrar el estado de cuenta de agosto hay que restar también estos $326, porque el prorrateo ya los cuenta. Entre la ropa y esto, el ajuste es de $516: un corte de ~$2 600 entra al tablero como ~$2 084.",
     excluded: true,
   },
   {
