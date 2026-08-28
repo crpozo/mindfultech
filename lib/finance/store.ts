@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 42;
+export const STATE_VERSION = 43;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -304,6 +304,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     excluded: false,
   },
   {
+    id: "txn-2026-08-25-andrew-4",
+    sinceVersion: 43,
+    date: "2026-08-25T15:00:00-05:00",
+    amount: 494.38,
+    kind: "income",
+    category: "clientes",
+    merchant: "Andrew Sam Binno (4.º pago)",
+    notes:
+      "Monto deducido del saldo de Wise, no dictado: pasó de $5 612,29 a $6 106,67. Cuarto pago suyo en menos de tres semanas, todos puntuales. Ya no es un cobro suelto: conviene tratarlo como cliente recurrente y ponerle un acuerdo mensual.",
+    excluded: false,
+  },
+  {
     id: "txn-2026-08-19-antonello",
     sinceVersion: 32,
     date: "2026-08-19T09:00:00-05:00",
@@ -382,6 +394,14 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     status: "paid",
     note: "Cobrado en PayPal el 25 ago 2026. Estaba anotada en $525 y llegaron $500; la diferencia cuadra con la comisión de PayPal, así que se cierra por lo que entró de verdad.",
   },
+  {
+    id: "helixona",
+    sinceVersion: 43,
+    client: "Helixona",
+    amount: 3955,
+    status: "pending",
+    note: "Pago comprometido para el 31 de agosto de 2026. El monto sube de $3 800 a $3 955 según la cifra que él maneja. Es el cobro del que depende la precancelación del préstamo: la ventana de la cooperativa es del 1 al 5 de septiembre, así que cae justo un día antes de que abra. Antes de mandar el correo hay que verlo acreditado, no solo anunciado.",
+  },
 ];
 
 /** Sin `sinceVersion`, que no es parte del modelo guardado. */
@@ -396,7 +416,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // suma de movimientos conocidos (4 118,54 + 498,30 + 498 + 1 000) y él dio
   // por buena; la lectura de la app dice otra cosa y la lectura gana. La
   // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
-  { id: "wise", sinceVersion: 41, name: "Wise", kind: "bank", balance: 5612.29 },
+  { id: "wise", sinceVersion: 43, name: "Wise", kind: "bank", balance: 6106.67 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
@@ -521,7 +541,6 @@ export function seedState(): FinanceState {
     ],
     debts: SEEDED_DEBTS.map(seedDebt),
     receivables: [
-      { id: "helixona", client: "Helixona", amount: 3800, status: "pending" },
       { id: "betan", client: "Betan", amount: 400, status: "pending" },
       ...SEEDED_RECEIVABLES.map(seedRcv),
     ],
