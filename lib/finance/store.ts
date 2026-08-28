@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 45;
+export const STATE_VERSION = 46;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -416,20 +416,22 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // suma de movimientos conocidos (4 118,54 + 498,30 + 498 + 1 000) y él dio
   // por buena; la lectura de la app dice otra cosa y la lectura gana. La
   // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
-  { id: "wise", sinceVersion: 43, name: "Wise", kind: "bank", balance: 6106.67 },
+  // 6 000 movidos a ProCredit el 25 de agosto, rumbo a la cooperativa
+  { id: "wise", sinceVersion: 46, name: "Wise", kind: "bank", balance: 106.67 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
   // 3 000 + los 500 de Scott acreditados el 25 de agosto
-  { id: "paypal", sinceVersion: 42, name: "PayPal", kind: "bank", balance: 3500 },
+  // vaciada: los 3 500 pasaron a Pichincha, rumbo a la cooperativa
+  { id: "paypal", sinceVersion: 46, name: "PayPal", kind: "bank", balance: 0 },
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
-  { id: "pichincha", sinceVersion: 21, name: "Pichincha", kind: "bank", balance: 1750 },
+  { id: "pichincha", sinceVersion: 46, name: "Pichincha", kind: "bank", balance: 5250 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
-  { id: "procredit", sinceVersion: 45, name: "ProCredit", kind: "bank", balance: 1884 },
+  { id: "procredit", sinceVersion: 46, name: "ProCredit", kind: "bank", balance: 7884 },
   // 156,30 + los 4 000 que movió desde ProCredit el 25 de agosto. Traslado
   // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
   // De acá sale la cuota del 27 y, si todo va, la precancelación.
