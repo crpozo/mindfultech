@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 47;
+export const STATE_VERSION = 48;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -402,6 +402,18 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     status: "pending",
     note: "Pago comprometido para el 31 de agosto de 2026. El monto sube de $3 800 a $3 955 según la cifra que él maneja. Es el cobro del que depende la precancelación del préstamo: la ventana de la cooperativa es del 1 al 5 de septiembre, así que cae justo un día antes de que abra. Antes de mandar el correo hay que verlo acreditado, no solo anunciado.",
   },
+  {
+    // Todavía sin facturar al 28 de agosto: es trabajo entregado, no una
+    // factura emitida. Se anota igual porque el dinero es real y omitirlo
+    // subestima el mes, pero la nota deja claro el estado — y que mandar la
+    // factura es lo único que separa esto de un cobro a fin de septiembre.
+    id: "helixona-ago",
+    sinceVersion: 48,
+    client: "Helixona · agosto",
+    amount: 3800,
+    status: "pending",
+    note: "Segundo mes seguido, misma dosis (~$3 800). FALTA EMITIR LA FACTURA al 28 ago 2026. Si el patrón se repite, se cobra a fin de septiembre; cada día que la factura se retrasa corre el cobro. Con este mes, Helixona queda confirmado como ingreso recurrente mensual, no como proyecto suelto.",
+  },
 ];
 
 /** Sin `sinceVersion`, que no es parte del modelo guardado. */
@@ -566,7 +578,7 @@ export function seedState(): FinanceState {
 
 export const DEFAULT_PROFILE = `Carlos Pozo: Quito, Ecuador. Dueño de MindfulTech.
 
-Ingreso: freelance por proyectos de software, en dólares y en escalada. No hay sueldo fijo, así que los meses son irregulares por naturaleza. Helixona es el cliente más recurrente, con un promedio cercano a 3.000 USD al mes, pero no está garantizado. Sigo buscando proyectos nuevos.
+Ingreso: freelance por proyectos de software, en dólares y en escalada. No hay sueldo fijo, así que los meses son irregulares por naturaleza. Helixona es ingreso recurrente mensual confirmado: julio y agosto de 2026 facturados a ~3.800-3.955 cada uno, con pago a fin del mes siguiente. Por sí solo cubre casi todo el gasto mensual una vez liquidado el préstamo (~3.185). Andrew Sam Binno se comporta igual sin tener acuerdo: cuatro pagos de ~$498 en dieciocho días de agosto, casi $2.000, todos puntuales. Sigo buscando proyectos nuevos.
 
 Gastos: la tarjeta Titanium mueve el grueso del gasto variable, unos 2.100 al mes medidos en el estado de cuenta de julio de 2026 (junio cerró en 4.319 por el viaje a Orlando, no es base). Esa tarjeta no lleva arriendo ni cuota del vehículo: van por fuera. Arriendo 550. Auto, celular y seguros, 700 en paquete. IESS 180. Claude/Anthropic ronda los 230-270 al mes con impuestos y va dentro del consumo de la tarjeta.
 
