@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 46;
+export const STATE_VERSION = 47;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -557,7 +557,7 @@ export function seedState(): FinanceState {
       // Seis meses de gasto: el colchón estándar, y más necesario todavía
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
-      monthlyExpenseEstimate: 2030,
+      monthlyExpenseEstimate: 2150,
       budgets: { hogar: 571.5, suscripciones: 200, financiero: 700 },
       profile: DEFAULT_PROFILE,
     },
@@ -780,6 +780,16 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
       ...s,
       settings: { ...s.settings, budgets: { ...s.settings.budgets, hogar: 571.5 } },
     };
+  }
+
+  // Segundo ciclo de tarjeta con dato real: el corte del 4 de septiembre va en
+  // $2 400 y él calcula que cierra cerca de $2 600. Julio cerró en $2 118,67.
+  // Quitando de cada uno lo que ya se cuenta aparte (la última cuota del
+  // gimnasio en julio, el botox prorrateado en agosto) quedan ~$2 029 y
+  // ~$2 274: el estimado sube de 2 030 al punto medio, 2 150. Solo si sigue en
+  // la cifra que sembré yo.
+  if (from < 47 && s.settings && num(s.settings.monthlyExpenseEstimate) === 2030) {
+    s = { ...s, settings: { ...s.settings, monthlyExpenseEstimate: 2150 } };
   }
 
   // Compromisos fijos: upsert por versión, igual que las cuentas por cobrar.
