@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 49;
+export const STATE_VERSION = 50;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -316,6 +316,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     excluded: false,
   },
   {
+    id: "txn-2026-08-28-estudio-fama",
+    sinceVersion: 50,
+    date: "2026-08-28T12:00:00-05:00",
+    amount: 575,
+    kind: "income",
+    category: "clientes",
+    merchant: "Estudio Fama",
+    notes:
+      "Atribuido a Estudio Fama porque el monto calza exacto con su factura del 14 de agosto y ninguna otra fila abierta vale $575. Si en realidad fue otro cliente, hay que cambiarlo y reabrir la de Estudio Fama. Tampoco está confirmado a qué cuenta entró: no se sumó a ningún saldo, porque el de Pichincha viene leído de la app y ya lo incluiría.",
+    excluded: false,
+  },
+  {
     id: "txn-2026-08-19-antonello",
     sinceVersion: 32,
     date: "2026-08-19T09:00:00-05:00",
@@ -380,11 +392,11 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
   },
   {
     id: "estudio-fama",
-    sinceVersion: 29,
+    sinceVersion: 50,
     client: "Estudio Fama",
     amount: 575,
-    status: "pending",
-    note: "Facturado el 14 ago 2026. Con factura emitida ya corre el plazo de pago; si al 14 de septiembre sigue abierta, toca cobrar.",
+    status: "paid",
+    note: "Cobrado el 28 ago 2026, catorce días después de facturar. Buen pagador.",
   },
   {
     id: "scott",
@@ -439,7 +451,9 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
-  { id: "pichincha", sinceVersion: 46, name: "Pichincha", kind: "bank", balance: 5250 },
+  // Saldo leído el 28 de agosto. Bajó desde 5 250 sin que los movimientos
+  // expliquen la diferencia: falta saber cuánto se movió a la cooperativa.
+  { id: "pichincha", sinceVersion: 50, name: "Pichincha", kind: "bank", balance: 2361 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
