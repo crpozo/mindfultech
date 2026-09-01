@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 57;
+export const STATE_VERSION = 58;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -465,7 +465,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // hubo gasto corriente que no está anotado movimiento por movimiento.
   // Leído el 31 de agosto, ya con los 3 500 de PayPal acreditados. De acá
   // sale el pago de la Titanium, que este mes va por unos 3 000.
-  { id: "pichincha", sinceVersion: 54, name: "Pichincha", kind: "bank", balance: 5600 },
+  { id: "pichincha", sinceVersion: 58, name: "Pichincha", kind: "bank", balance: 3000 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
@@ -476,7 +476,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Ahorros a la Vista #2002084, leído el 1 de septiembre. Traslado
   // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
   // De acá sale la cuota del 27 y, si todo va, la precancelación.
-  { id: "cooperativa", sinceVersion: 56, name: "Cooperativa", kind: "bank", balance: 10925.59 },
+  { id: "cooperativa", sinceVersion: 58, name: "Cooperativa", kind: "bank", balance: 13525.59 },
 ];
 
 /**
