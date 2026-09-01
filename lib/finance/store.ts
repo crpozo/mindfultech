@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 55;
+export const STATE_VERSION = 56;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -469,11 +469,16 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
-  { id: "procredit", sinceVersion: 54, name: "ProCredit", kind: "bank", balance: 7866 },
+  // SUPUESTO: los 7 000 que movió a la cooperativa el 1 de septiembre salieron
+  // de acá, por ser la única cuenta que sola los cubría. Si en realidad los
+  // partió con Pichincha o Wise, hay que repartir la resta entre las dos. Se
+  // descuenta igual: dejar el saldo intacto y subir la cooperativa inventaría
+  // 7 000 de patrimonio.
+  { id: "procredit", sinceVersion: 56, name: "ProCredit", kind: "bank", balance: 866 },
   // Ahorros a la Vista #2002084, leído el 1 de septiembre. Traslado
   // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
   // De acá sale la cuota del 27 y, si todo va, la precancelación.
-  { id: "cooperativa", sinceVersion: 55, name: "Cooperativa", kind: "bank", balance: 3925.59 },
+  { id: "cooperativa", sinceVersion: 56, name: "Cooperativa", kind: "bank", balance: 10925.59 },
 ];
 
 /**
