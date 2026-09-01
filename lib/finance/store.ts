@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 54;
+export const STATE_VERSION = 55;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -470,10 +470,10 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
   { id: "procredit", sinceVersion: 54, name: "ProCredit", kind: "bank", balance: 7866 },
-  // 156,30 + los 4 000 que movió desde ProCredit el 25 de agosto. Traslado
+  // Ahorros a la Vista #2002084, leído el 1 de septiembre. Traslado
   // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
   // De acá sale la cuota del 27 y, si todo va, la precancelación.
-  { id: "cooperativa", sinceVersion: 45, name: "Cooperativa", kind: "bank", balance: 4156.3 },
+  { id: "cooperativa", sinceVersion: 55, name: "Cooperativa", kind: "bank", balance: 3925.59 },
 ];
 
 /**
