@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 52;
+export const STATE_VERSION = 53;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -452,8 +452,8 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // suma de movimientos conocidos (4 118,54 + 498,30 + 498 + 1 000) y él dio
   // por buena; la lectura de la app dice otra cosa y la lectura gana. La
   // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
-  // 6 000 movidos a ProCredit el 25 de agosto, rumbo a la cooperativa
-  { id: "wise", sinceVersion: 46, name: "Wise", kind: "bank", balance: 106.67 },
+  // 106,67 + los 3 948,29 de Helixona acreditados el 31 de agosto
+  { id: "wise", sinceVersion: 53, name: "Wise", kind: "bank", balance: 4054.96 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
