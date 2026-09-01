@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 51;
+export const STATE_VERSION = 52;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -328,6 +328,18 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
     excluded: false,
   },
   {
+    id: "txn-2026-08-31-helixona-jul",
+    sinceVersion: 52,
+    date: "2026-08-31T10:00:00-05:00",
+    amount: 3948.29,
+    kind: "income",
+    category: "clientes",
+    merchant: "Helixona",
+    notes:
+      "Depositado el lunes 31 de agosto, el día exacto comprometido. Se esperaban $3 955 y llegaron $3 948,29: los $6,71 de diferencia son comisión de transferencia, así que la cuenta por cobrar se cierra por lo que entró. Falta confirmar a qué cuenta cayó para subir ese saldo.",
+    excluded: false,
+  },
+  {
     id: "txn-2026-08-19-antonello",
     sinceVersion: 32,
     date: "2026-08-19T09:00:00-05:00",
@@ -408,11 +420,11 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
   },
   {
     id: "helixona",
-    sinceVersion: 43,
+    sinceVersion: 52,
     client: "Helixona",
-    amount: 3955,
-    status: "pending",
-    note: "Pago comprometido para el 31 de agosto de 2026. El monto sube de $3 800 a $3 955 según la cifra que él maneja. Es el cobro del que depende la precancelación del préstamo: la ventana de la cooperativa es del 1 al 5 de septiembre, así que cae justo un día antes de que abra. Antes de mandar el correo hay que verlo acreditado, no solo anunciado.",
+    amount: 3948.29,
+    status: "paid",
+    note: "Cobrado el 31 de agosto de 2026, el día exacto comprometido. Se facturaron $3 955 y llegaron $3 948,29; los $6,71 son comisión. Pagador puntual y recurrente.",
   },
   {
     // Todavía sin facturar al 28 de agosto: es trabajo entregado, no una
