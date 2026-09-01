@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 53;
+export const STATE_VERSION = 54;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -463,15 +463,13 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
-  // 2 361 leídos en la app el 28 de agosto, más los 3 500 que salieron de
-  // PayPal ese mismo día y todavía viajan. Se cuentan acá aunque el banco
-  // no los muestre: son suyos, solo están en el aire. Al confirmarse la
-  // acreditación este número deja de ser mitad leído y mitad deducido.
-  { id: "pichincha", sinceVersion: 51, name: "Pichincha", kind: "bank", balance: 5861 },
+  // Leído el 31 de agosto, ya con los 3 500 de PayPal acreditados. De acá
+  // sale el pago de la Titanium, que este mes va por unos 3 000.
+  { id: "pichincha", sinceVersion: 54, name: "Pichincha", kind: "bank", balance: 5600 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
-  { id: "procredit", sinceVersion: 46, name: "ProCredit", kind: "bank", balance: 7884 },
+  { id: "procredit", sinceVersion: 54, name: "ProCredit", kind: "bank", balance: 7866 },
   // 156,30 + los 4 000 que movió desde ProCredit el 25 de agosto. Traslado
   // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
   // De acá sale la cuota del 27 y, si todo va, la precancelación.
