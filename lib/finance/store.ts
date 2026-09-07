@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 62;
+export const STATE_VERSION = 63;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -402,6 +402,23 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Comisión de enviar 4 000 de Wise a ProCredit el 7 de septiembre de 2026 (llegan 3 991,54). Wise avisa que en las transferencias globales en USD la comisión es más alta para cubrir bancos intermediarios; si el banco descuenta algo más al acreditar, la diferencia se corrige en el saldo de ProCredit, no acá.",
     excluded: false,
   },
+  {
+    // Segundo estado de cuenta con dato real. Mismo criterio que el de julio:
+    // un solo movimiento agregado con la fecha del corte, para que el mes en
+    // que se paga lo cargue entero. Y el ajuste que las notas de la ropa y el
+    // botox dejaron anunciado: 2 709 − 190 − 326 = 2 193, porque esos 516 ya
+    // están en el tablero por su cuenta.
+    id: "txn-2026-09-04-titanium",
+    sinceVersion: 63,
+    date: "2026-09-04T15:00:00-05:00",
+    amount: 2193,
+    kind: "expense",
+    category: "otros",
+    merchant: "Tarjeta Titanium: consumo del mes",
+    notes:
+      "Corte del 4 de septiembre de 2026: 2 709 en total, pagados desde Pichincha (confirmado el 7). Entra como 2 193 porque 516 ya viven aparte en el tablero: la ropa (190, movimiento propio) y el botox (326, prorrateado en su compromiso). Contra el corte de julio (2 118,67) son 590 más; contra lo que se estimó al cierre (~2 600) quedó 109 arriba. El estimado de gasto variable sigue en 2 150: el promedio ajustado de los dos cortes reales (2 029 y 2 193) da 2 111.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -520,7 +537,12 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // hubo gasto corriente que no está anotado movimiento por movimiento.
   // Leído el 31 de agosto, ya con los 3 500 de PayPal acreditados. De acá
   // sale el pago de la Titanium, que este mes va por unos 3 000.
-  { id: "pichincha", sinceVersion: 58, name: "Pichincha", kind: "bank", balance: 3000 },
+  // Leído el 7 de septiembre, ya pagado el corte de la Titanium (2 709).
+  // 3 000 − 2 709 daría 291; los ~72 de diferencia son gasto corriente sin
+  // anotar. Plan dictado: en cuanto acredite lo de Wise en ProCredit, pasar
+  // 2 000 acá y pagar desde acá la aportación del IESS. Ninguna de las dos
+  // cosas está anotada todavía: se anotan cuando ocurran.
+  { id: "pichincha", sinceVersion: 63, name: "Pichincha", kind: "bank", balance: 218.43 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
