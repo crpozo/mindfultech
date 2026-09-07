@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 60;
+export const STATE_VERSION = 61;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -520,12 +520,13 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Mazda CX-30 2025, ya pagado: el quirografario #17159 era su crédito y se
   // precanceló en septiembre de 2026. Entra como bien, no como cuenta: suma al
   // patrimonio pero no al runway. Va a valor de reventa, que es lo que vale
-  // hoy, no a lo que costó. La cifra es un estimado mío, no dictado: él dijo
-  // que lo tiene, no cuánto vale. Un CX-30 2025 salió en Ecuador entre ~32 y
-  // ~39 mil según versión y con un año encima ronda los 30 mil de reventa.
-  // Se reemplaza en cuanto dé la cifra (lo que pagó o un avalúo), o la ajusta
-  // él a mano y queda suya. Se deprecia: refrescarla al menos una vez al año.
-  { id: "mazda-cx30", sinceVersion: 60, name: "Mazda CX-30 2025 (valor estimado)", kind: "asset", balance: 30000 },
+  // hoy, no a lo que costó. Arrancó en 30 000 estimados de memoria; el 7 de
+  // septiembre mandó la captura de Patiotuerca: cuatro CX-30 2025 con 23 000
+  // a 32 000 km pedían 27 900-28 000. El suyo tiene 19 000 km, menos que
+  // todos, así que va en el techo de ese rango: 28 000. Es precio pedido, no
+  // de cierre (un cierre real suele quedar algo abajo), y el menor kilometraje
+  // compensa parte de eso. Se deprecia: refrescarla al menos una vez al año.
+  { id: "mazda-cx30", sinceVersion: 61, name: "Mazda CX-30 2025", kind: "asset", balance: 28000 },
 ];
 
 /**
