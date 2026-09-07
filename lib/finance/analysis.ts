@@ -24,6 +24,8 @@ export interface MonthSummary {
 export interface NetWorth {
   liquid: number;
   invested: number;
+  /** Bienes de uso (el auto): patrimonio, no liquidez ni inversión. Se deprecian. */
+  goods: number;
   assets: number;
   debt: number;
   monthlyDebtPayment: number;
@@ -172,11 +174,16 @@ export function baselineExpense(
 }
 
 export function netWorth(state: FinanceState, baseline: number): NetWorth {
+  // Líquido es solo efectivo y banco: ni las inversiones ni los bienes (el
+  // auto) pagan el arriendo mañana, así que no entran al runway.
   const liquid = state.accounts
-    .filter((a) => a.kind !== "investment")
+    .filter((a) => a.kind !== "investment" && a.kind !== "asset")
     .reduce((s, a) => s + a.balance, 0);
   const invested = state.accounts
     .filter((a) => a.kind === "investment")
+    .reduce((s, a) => s + a.balance, 0);
+  const goods = state.accounts
+    .filter((a) => a.kind === "asset")
     .reduce((s, a) => s + a.balance, 0);
   const debt = state.debts.reduce((s, d) => s + d.balance, 0);
   const monthlyDebtPayment = state.debts.reduce(
@@ -190,10 +197,11 @@ export function netWorth(state: FinanceState, baseline: number): NetWorth {
   const pending = state.receivables
     .filter((r) => r.status !== "paid")
     .reduce((s, r) => s + r.amount, 0);
-  const assets = liquid + invested;
+  const assets = liquid + invested + goods;
   return {
     liquid: round2(liquid),
     invested: round2(invested),
+    goods: round2(goods),
     assets: round2(assets),
     debt: round2(debt),
     monthlyDebtPayment: round2(monthlyDebtPayment),
@@ -587,6 +595,7 @@ export function claudePrompt(
 Contexto que importa:
 - Mi ingreso es freelance por proyectos: irregular por naturaleza. No leas un mes flojo como deterioro ni uno bueno como tendencia.
 - Lo que está en "porCobrar" es dinero facturado y no cobrado: no cuenta como patrimonio hasta que entra.
+- En "cuentas", kind "asset" es un bien de uso (el auto, ya pagado): suma al patrimonio a un valor de reventa estimado, no es líquido ni inversión y se deprecia. No lo cuentes como colchón ni propongas venderlo.
 - El runway (meses que aguanta el efectivo sin cobros nuevos) me importa más que la foto de un mes.
 - "compromisosFijosMensuales" son obligaciones que se pagan cada mes y no negocio: el aporte al IESS entra ahí porque cortarlo reinicia el historial de aportaciones que el BIESS pide para el crédito hipotecario. No lo propongas como recorte.
 - No busco recomendaciones de instrumentos de inversión. Háblame de gasto, ahorro, flujo de caja, deuda y hábitos.

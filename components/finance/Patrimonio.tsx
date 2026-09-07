@@ -269,7 +269,7 @@ export function Patrimonio({
           {
             label: "Disponible",
             value: nw.liquid,
-            hint: "sin contar inversiones",
+            hint: "sin inversiones ni bienes",
           },
           {
             label: "Deuda",
@@ -388,6 +388,16 @@ export function Patrimonio({
               gap: 12,
             }}
           >
+            <span>+ {"Bienes (auto, a valor de reventa)"}</span>
+            <span style={{ color: INK }}>{m(nw.goods)}</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
             <span>− {"Deuda pendiente"}</span>
             <span style={{ color: INK }}>{m(nw.debt)}</span>
           </div>
@@ -440,7 +450,7 @@ export function Patrimonio({
 
       <Panel
         title={"Cuentas"}
-        subtitle={"Saldos actuales. Las inversiones no cuentan para el runway."}
+        subtitle={"Saldos actuales. Inversiones y bienes (el auto) no cuentan para el runway."}
         total={m(nw.assets)}
       >
         <div style={{ display: "grid", gap: 10 }}>
@@ -479,6 +489,7 @@ export function Patrimonio({
                 <option value="bank">{"Banco"}</option>
                 <option value="cash">{"Efectivo"}</option>
                 <option value="investment">{"Inversión"}</option>
+                <option value="asset">{"Bien (auto, inmueble)"}</option>
               </select>
               <input
                 defaultValue={String(a.balance)}

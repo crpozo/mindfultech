@@ -32,8 +32,13 @@ export interface Txn {
 export interface Account {
   id: string;
   name: string;
-  /** `investment` no cuenta para el runway: no es dinero disponible mañana. */
-  kind: "cash" | "bank" | "investment";
+  /**
+   * `investment` no cuenta para el runway: no es dinero disponible mañana.
+   * `asset` es un bien de uso (el auto, un inmueble): suma al patrimonio a
+   * su valor de reventa, pero no es líquido ni inversión, y se deprecia, así
+   * que su cifra hay que refrescarla de vez en cuando.
+   */
+  kind: "cash" | "bank" | "investment" | "asset";
   balance: number;
 }
 
@@ -94,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 59;
+export const STATE_VERSION = 60;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -351,6 +356,37 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Cobrado. No cierra ninguna cuenta por cobrar: Antonello no estaba en la cartera y el monto no calza con ninguna fila abierta, así que entra como cobro nuevo. Si en realidad era el pago de una de las pendientes, hay que marcarla y así deja de contarse dos veces. Falta saber a qué cuenta entró para que suba el saldo.",
     excluded: false,
   },
+  {
+    // El 7 de septiembre dictó "ya me afilié y he pagado dos veces", sin
+    // fechas ni montos. Afiliado desde agosto, la lectura natural es una
+    // aportación por mes: esta cae en agosto y la segunda en septiembre. Al
+    // tablero le importa el mes, no el día; el día es aproximado y el monto
+    // es el del compromiso. Entran en los totales, no excluidas: el promedio
+    // medido de gasto se arma con movimientos, y el compromiso «IESS» solo se
+    // suma al estimado declarado cuando no hay meses medidos.
+    id: "txn-2026-08-iess-1",
+    sinceVersion: 60,
+    date: "2026-08-15T12:00:00-05:00",
+    amount: 180,
+    kind: "expense",
+    category: "salud",
+    merchant: "IESS: aportación (1.ª)",
+    notes:
+      "Primera aportación como afiliado voluntario. Monto tomado del compromiso ($180) y día aproximado dentro de agosto: lo dictado el 7 de septiembre fue «dos aportaciones pagadas», sin fechas. Cada aportación se registra como movimiento para que el conteo de meses continuos que pide el BIESS quede a la vista. Si se pagó con la Titanium, hay que restarla del estado de cuenta agregado del mes, como la ropa y el botox.",
+    excluded: false,
+  },
+  {
+    id: "txn-2026-09-iess-2",
+    sinceVersion: 60,
+    date: "2026-09-07T09:00:00-05:00",
+    amount: 180,
+    kind: "expense",
+    category: "salud",
+    merchant: "IESS: aportación (2.ª)",
+    notes:
+      "Segunda aportación, dictada el 7 de septiembre de 2026 como ya pagada; la fecha es la del dictado y la real puede ser algo antes dentro de septiembre. Dos meses seguidos: el reloj del BIESS corre desde agosto de 2026. Misma advertencia que la primera si salió por la Titanium.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -481,6 +517,15 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // patrimonio de bolsillo, no lo gasta, y el interés y las comisiones de la
   // liquidación no se conocen por separado como para anotarlos aparte.
   { id: "cooperativa", sinceVersion: 59, name: "Cooperativa", kind: "bank", balance: 800 },
+  // Mazda CX-30 2025, ya pagado: el quirografario #17159 era su crédito y se
+  // precanceló en septiembre de 2026. Entra como bien, no como cuenta: suma al
+  // patrimonio pero no al runway. Va a valor de reventa, que es lo que vale
+  // hoy, no a lo que costó. La cifra es un estimado mío, no dictado: él dijo
+  // que lo tiene, no cuánto vale. Un CX-30 2025 salió en Ecuador entre ~32 y
+  // ~39 mil según versión y con un año encima ronda los 30 mil de reventa.
+  // Se reemplaza en cuanto dé la cifra (lo que pagó o un avalúo), o la ajusta
+  // él a mano y queda suya. Se deprecia: refrescarla al menos una vez al año.
+  { id: "mazda-cx30", sinceVersion: 60, name: "Mazda CX-30 2025 (valor estimado)", kind: "asset", balance: 30000 },
 ];
 
 /**
@@ -517,11 +562,11 @@ const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number })
 const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   {
     id: "iess",
-    sinceVersion: 8,
+    sinceVersion: 60,
     name: "IESS: afiliación",
     amount: 180,
     category: "salud",
-    note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario.",
+    note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario. Cada aportación pagada se registra como movimiento «IESS: aportación» para que el conteo de meses continuos quede a la vista: al 7 de septiembre de 2026 van dos, agosto y septiembre, confirmadas por él.",
   },
   {
     id: "auto-seguros",
@@ -1022,7 +1067,10 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
       .map((a) => ({
         id: freshId(a.id),
         name: a.name,
-        kind: a.kind === "cash" || a.kind === "investment" ? a.kind : "bank",
+        kind:
+          a.kind === "cash" || a.kind === "investment" || a.kind === "asset"
+            ? a.kind
+            : "bank",
         balance: num(a.balance),
       })),
     debts: (Array.isArray(s.debts) ? s.debts : base.debts)
