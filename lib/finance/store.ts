@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 61;
+export const STATE_VERSION = 62;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -387,6 +387,21 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Segunda aportación, dictada el 7 de septiembre de 2026 como ya pagada; la fecha es la del dictado y la real puede ser algo antes dentro de septiembre. Dos meses seguidos: el reloj del BIESS corre desde agosto de 2026. Misma advertencia que la primera si salió por la Titanium.",
     excluded: false,
   },
+  {
+    // El traslado Wise → ProCredit no es gasto: 4 000 cambian de bolsillo y
+    // viven en los saldos. La comisión sí sale del patrimonio, y por eso es
+    // el único pedazo que entra como movimiento.
+    id: "txn-2026-09-07-wise-comision",
+    sinceVersion: 62,
+    date: "2026-09-07T12:00:00-05:00",
+    amount: 8.46,
+    kind: "expense",
+    category: "financiero",
+    merchant: "Wise: comisión de transferencia",
+    notes:
+      "Comisión de enviar 4 000 de Wise a ProCredit el 7 de septiembre de 2026 (llegan 3 991,54). Wise avisa que en las transferencias globales en USD la comisión es más alta para cubrir bancos intermediarios; si el banco descuenta algo más al acreditar, la diferencia se corrige en el saldo de ProCredit, no acá.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -489,7 +504,11 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // por buena; la lectura de la app dice otra cosa y la lectura gana. La
   // diferencia de ~1 000 es gasto que salió de acá sin anotarse.
   // 106,67 + los 3 948,29 de Helixona acreditados el 31 de agosto
-  { id: "wise", sinceVersion: 53, name: "Wise", kind: "bank", balance: 4054.96 },
+  // 4 054,96 − 4 000 enviados a ProCredit el 7 de septiembre (captura de Wise
+  // en la pantalla previa a confirmar: 4 000 pagados, 8,46 de comisión,
+  // 3 991,54 al destino). Deducido, no leído: si algo más se movió en Wise
+  // desde el 31 de agosto, hay que releer el saldo.
+  { id: "wise", sinceVersion: 62, name: "Wise", kind: "bank", balance: 54.96 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
@@ -508,7 +527,11 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // Confirmado: de acá salieron los 7 000 que movió a la cooperativa el 1 de
   // septiembre. Queda por debajo del piso de una mensualidad de arriendo, que
   // es justo lo que esta cuenta paga: hay que reponerla antes del 1 de octubre.
-  { id: "procredit", sinceVersion: 57, name: "ProCredit", kind: "bank", balance: 866 },
+  // 866 + 3 991,54 que llegan desde Wise (4 000 menos 8,46 de comisión),
+  // previstos antes del martes 8 de septiembre. Anotado por adelantado, como
+  // los 7 000 de la cooperativa: FALTA CONFIRMAR que acreditó. Con esto vuelve
+  // sobre el piso del arriendo y deja unos 4 300 de margen para octubre.
+  { id: "procredit", sinceVersion: 62, name: "ProCredit", kind: "bank", balance: 4857.54 },
   // Ahorros a la Vista #2002084. El 1 de septiembre llegó a 13 525,59 con los
   // traslados desde ProCredit y Pichincha, y de ahí salió la precancelación
   // del quirografario en la primera semana de septiembre. Quedaron "como
