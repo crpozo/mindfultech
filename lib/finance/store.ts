@@ -94,7 +94,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 58;
+export const STATE_VERSION = 59;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -473,31 +473,41 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // septiembre. Queda por debajo del piso de una mensualidad de arriendo, que
   // es justo lo que esta cuenta paga: hay que reponerla antes del 1 de octubre.
   { id: "procredit", sinceVersion: 57, name: "ProCredit", kind: "bank", balance: 866 },
-  // Ahorros a la Vista #2002084, leído el 1 de septiembre. Traslado
-  // entre cuentas propias: no es ingreso ni gasto, solo cambia de bolsillo.
-  // De acá sale la cuota del 27 y, si todo va, la precancelación.
-  { id: "cooperativa", sinceVersion: 58, name: "Cooperativa", kind: "bank", balance: 13525.59 },
+  // Ahorros a la Vista #2002084. El 1 de septiembre llegó a 13 525,59 con los
+  // traslados desde ProCredit y Pichincha, y de ahí salió la precancelación
+  // del quirografario en la primera semana de septiembre. Quedaron "como
+  // 800", dictado el 7 de septiembre: cifra redonda, no leída de la app. Los
+  // ~12 700 que salieron no se anotan como gasto: pagar capital mueve
+  // patrimonio de bolsillo, no lo gasta, y el interés y las comisiones de la
+  // liquidación no se conocen por separado como para anotarlos aparte.
+  { id: "cooperativa", sinceVersion: 59, name: "Cooperativa", kind: "bank", balance: 800 },
 ];
 
 /**
  * Deudas con saldo que amortizar. Mismo upsert que las cuentas: la del auto
  * arrancó con cifras de memoria ($12 800 y $520) y el estado del crédito las
  * corrigió, así que tiene que poder reescribirse en un tablero ya guardado.
+ *
+ * Hoy está vacía. El único préstamo, el quirografario #17159 del auto
+ * ($20 000 del 24 oct 2024, 50 cuotas, 13,8 % anual, saldo de 12 648,32 al
+ * 19 ago 2026 y cuota de 538,64), se precanceló en la primera semana de
+ * septiembre de 2026. Sale de la semilla para que un tablero nuevo no
+ * arranque con una deuda que ya no existe; de los guardados lo quita
+ * RETIRED_DEBTS.
  */
-const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [
-  {
-    id: "auto",
-    sinceVersion: 27,
-    name: "Préstamo quirografario #17159 (auto)",
-    // $20 000 originales del 24 oct 2024, 50 cuotas, 13,8 % anual, al día.
-    // Saldo dictado por él el 19 ago 2026. La captura del 13 mostraba
-    // 13 024,42: la diferencia de $376,10 es casi exacta a la parte de capital
-    // de una cuota, así que entremedio se amortizó una. El interés sigue
-    // corriendo diario sobre este saldo ($4,85/día), y el valor exacto de
-    // precancelación solo lo da la cooperativa el día del pago.
-    balance: 12648.32,
-    monthlyPayment: 538.64,
-  },
+const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [];
+
+/**
+ * Deudas liquidadas. Mismo criterio que los compromisos retirados: un id por
+ * versión, se quita una sola vez, y si él ya la había borrado a mano esto no
+ * hace nada. Se borra la fila en vez de dejarla en $0 porque una deuda en cero
+ * con cuota de 538,64 seguiría contando como carga de deuda en el análisis.
+ */
+const RETIRED_DEBTS: { id: string; sinceVersion: number }[] = [
+  // Quirografario #17159 precancelado en la primera semana de septiembre de
+  // 2026, en la ventana del 1 al 5 que da la cooperativa y tal como se decidió
+  // el 20 de agosto. Dictado el 7 de septiembre.
+  { id: "auto", sinceVersion: 59 },
 ];
 const seedDebt = ({ sinceVersion: _v, ...d }: Debt & { sinceVersion: number }): Debt => d;
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
@@ -515,11 +525,15 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   },
   {
     id: "auto-seguros",
-    sinceVersion: 39,
+    sinceVersion: 59,
     name: "Auto, celular y seguros",
-    amount: 700,
+    // 700 − 538,64: el paquete menos la cuota del quirografario, que dejó de
+    // existir al precancelarlo. Es aritmética sobre el paquete declarado, no
+    // una lectura de los débitos reales: si celular y seguros suman otra
+    // cosa, la cifra se ajusta a mano y queda suya.
+    amount: 161.36,
     category: "financiero",
-    note: "Paquete fijo: cuota del quirografario ($538,64, que se debita el 27 de cada mes), plan celular, seguro del auto y seguro de salud. Esos $538,64 también viven en Deudas, donde sirven para calcular el plazo; el gasto mensual los cuenta aquí, no allá. Si se liquida el préstamo, este compromiso baja a unos $161.",
+    note: "Paquete fijo: plan celular, seguro del auto y seguro de salud. Hasta agosto de 2026 incluía la cuota del quirografario ($538,64, debitada el 27 de cada mes) y sumaba $700; el préstamo se precanceló en la primera semana de septiembre de 2026 y el paquete bajó a $161,36 (700 − 538,64, cifra derivada: ajústala si el débito real es otro).",
   },
   {
     id: "hbomax",
@@ -599,17 +613,43 @@ export function seedState(): FinanceState {
       // cuando el ingreso llega por proyecto.
       emergencyFundGoal: 18000,
       monthlyExpenseEstimate: 2150,
-      budgets: { hogar: 571.5, suscripciones: 200, financiero: 700 },
+      // financiero sigue al paquete de celular y seguros: bajó de 700 a
+      // 161,36 con la precancelación del quirografario.
+      budgets: { hogar: 571.5, suscripciones: 200, financiero: 161.36 },
       profile: DEFAULT_PROFILE,
     },
   };
 }
 
+/**
+ * Frases del perfil que la precancelación del quirografario dejó viejas. Las
+ * redacciones anteriores se conservan solo para que la migración a v59 las
+ * reconozca literales en un tablero ya guardado: el párrafo de deuda pasó por
+ * tres versiones, cada una extendiendo la anterior, y el tablero de él puede
+ * tener cualquiera. Si editó el texto a mano, es suyo y no se toca.
+ */
+const PROFILE_BUNDLE_BEFORE_PAYOFF = "Auto, celular y seguros, 700 en paquete.";
+const PROFILE_BUNDLE_SETTLED =
+  "Auto, celular y seguros, unos 161 en paquete desde septiembre de 2026, ya sin la cuota del préstamo.";
+
+const PROFILE_DEBT_V1 =
+  "Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto.";
+const PROFILE_DEBT_V2 =
+  PROFILE_DEBT_V1 +
+  " Dos fechas mandan sobre cualquier plan: la cuota se debita el 27 de cada mes, y la cooperativa solo acepta precancelaciones entre el 1 y el 5. O sea que liquidar siempre implica pagar antes una cuota más.";
+const PROFILE_DEBT_V3 =
+  PROFILE_DEBT_V2 +
+  " Decisión tomada el 20 de agosto de 2026: liquidar el total en la ventana del 1 al 5 de septiembre, en cuanto entre el pago de Helixona. Se evaluó abonar solo una parte para conservar liquidez y se descartó: el dueño prefiere cerrar la deuda de una vez y quedarse con menos colchón. Con eso el gasto mensual baja de unos 3.600 a unos 3.050 y se liberan 538,64 al mes.";
+/** De la más larga a la más corta: cada una contiene a la anterior. */
+const PROFILE_DEBT_BEFORE_PAYOFF = [PROFILE_DEBT_V3, PROFILE_DEBT_V2, PROFILE_DEBT_V1];
+const PROFILE_DEBT_SETTLED =
+  "Deuda: ninguna desde septiembre de 2026. El único préstamo era el quirografario #17159 en cooperativa: $20.000 desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual, cuota de $538,64 debitada el 27 de cada mes. Se precanceló en la primera semana de septiembre de 2026, en la ventana del 1 al 5 que da la cooperativa y tal como se decidió el 20 de agosto: con el pago de Helixona y los traslados desde ProCredit y Pichincha se juntaron $13.525,59 en la cooperativa, se liquidó el saldo y quedaron unos $800. Con eso se ahorran los $2.400 a $2.600 de interés que faltaban y se liberan $538,64 al mes: el gasto fijo baja de unos 3.600 a unos 3.050. El precio fue liquidez: el colchón quedó bajo y la prioridad ahora es reconstruirlo, empezando por reponer ProCredit antes del arriendo del 1 de octubre.";
+
 export const DEFAULT_PROFILE = `Carlos Pozo: Quito, Ecuador. Dueño de MindfulTech.
 
 Ingreso: freelance por proyectos de software, en dólares y en escalada. No hay sueldo fijo, así que los meses son irregulares por naturaleza. Helixona es ingreso recurrente mensual confirmado: julio y agosto de 2026 facturados a ~3.800-3.955 cada uno, con pago a fin del mes siguiente. Por sí solo cubre casi todo el gasto mensual una vez liquidado el préstamo (~3.185). Andrew Sam Binno se comporta igual sin tener acuerdo: cuatro pagos de ~$498 en dieciocho días de agosto, casi $2.000, todos puntuales. Sigo buscando proyectos nuevos.
 
-Gastos: la tarjeta Titanium mueve el grueso del gasto variable, unos 2.100 al mes medidos en el estado de cuenta de julio de 2026 (junio cerró en 4.319 por el viaje a Orlando, no es base). Esa tarjeta no lleva arriendo ni cuota del vehículo: van por fuera. Arriendo 550. Auto, celular y seguros, 700 en paquete. IESS 180. Claude/Anthropic ronda los 230-270 al mes con impuestos y va dentro del consumo de la tarjeta.
+Gastos: la tarjeta Titanium mueve el grueso del gasto variable, unos 2.100 al mes medidos en el estado de cuenta de julio de 2026 (junio cerró en 4.319 por el viaje a Orlando, no es base). Esa tarjeta no lleva arriendo ni cuota del vehículo: van por fuera. Arriendo 550. ${PROFILE_BUNDLE_SETTLED} IESS 180. Claude/Anthropic ronda los 230-270 al mes con impuestos y va dentro del consumo de la tarjeta.
 
 Metas:
 1. Aumentar patrimonio y tener estabilidad, no solo rotar dinero.
@@ -618,7 +658,7 @@ Metas:
 
 Cuentas: el arriendo sale de ProCredit todos los meses, así que esa cuenta nunca debe bajar de una mensualidad. Wise y PayPal son las cuentas donde cobra al exterior y tardan uno o dos días hábiles en llegar a Ecuador; Pichincha es la operativa local y de ahí sale el pago de la tarjeta Titanium.
 
-Deuda: un solo préstamo, quirografario #17159 en cooperativa. $20.000 originales desembolsados el 24 de octubre de 2024 a 50 cuotas y 13,8% anual. Al 13 de agosto de 2026 van 21 cuotas pagadas, al día y sin mora, con saldo de $13.024,42 y cuota de $538,64. Quedan 29 cuotas, o sea unos $2.400 a $2.600 de interés si se paga hasta el final. Liquidarlo antes es un retorno seguro de 13,8%, pero se paga con liquidez, que es justo lo escaso cuando el ingreso llega por proyecto. Dos fechas mandan sobre cualquier plan: la cuota se debita el 27 de cada mes, y la cooperativa solo acepta precancelaciones entre el 1 y el 5. O sea que liquidar siempre implica pagar antes una cuota más. Decisión tomada el 20 de agosto de 2026: liquidar el total en la ventana del 1 al 5 de septiembre, en cuanto entre el pago de Helixona. Se evaluó abonar solo una parte para conservar liquidez y se descartó: el dueño prefiere cerrar la deuda de una vez y quedarse con menos colchón. Con eso el gasto mensual baja de unos 3.600 a unos 3.050 y se liberan 538,64 al mes.
+${PROFILE_DEBT_SETTLED}
 
 Riesgos a vigilar: concentración de ingreso en pocos clientes, cartera por cobrar creciendo más rápido de lo que se cobra, y meses sin proyecto nuevo.`;
 
@@ -744,6 +784,24 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     }
   }
 
+  // El quirografario se precanceló en la primera semana de septiembre de
+  // 2026, y el perfil viaja con los datos al analizarlos: dejarlo describiendo
+  // una deuda viva y un paquete de $700 sesgaría cada análisis. Dos
+  // reemplazos, y solo si el texto sigue literal en alguna de sus
+  // redacciones; lo que él haya editado a mano es suyo.
+  if (from < 59 && typeof s.settings?.profile === "string") {
+    const before = s.settings.profile;
+    let profile = before;
+    const stale = PROFILE_DEBT_BEFORE_PAYOFF.find((v) => before.includes(v));
+    if (stale) profile = profile.replace(stale, PROFILE_DEBT_SETTLED);
+    if (profile.includes(PROFILE_BUNDLE_BEFORE_PAYOFF)) {
+      profile = profile.replace(PROFILE_BUNDLE_BEFORE_PAYOFF, PROFILE_BUNDLE_SETTLED);
+    }
+    if (profile !== before) {
+      s = { ...s, settings: { ...s.settings, profile } };
+    }
+  }
+
   // Saldos de cuentas dictados por chat.
   {
     const acc = Array.isArray(s.accounts) ? s.accounts : [];
@@ -797,6 +855,16 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     }
   }
 
+  // Deudas liquidadas.
+  if (Array.isArray(s.debts)) {
+    const drop = new Set(
+      RETIRED_DEBTS.filter((d) => d.sinceVersion > from).map((d) => d.id)
+    );
+    if (drop.size) {
+      s = { ...s, debts: s.debts.filter((d) => !d || !drop.has(d.id)) };
+    }
+  }
+
   // Deudas: mismo upsert que las cuentas.
   {
     const dbt = Array.isArray(s.debts) ? s.debts : [];
@@ -820,6 +888,16 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     s = {
       ...s,
       settings: { ...s.settings, budgets: { ...s.settings.budgets, hogar: 571.5 } },
+    };
+  }
+
+  // El presupuesto de financiero existía para cubrir el paquete de auto,
+  // celular y seguros, así que baja con él al precancelar el quirografario.
+  // Solo si sigue en la cifra que sembré yo.
+  if (from < 59 && s.settings?.budgets && num(s.settings.budgets.financiero) === 700) {
+    s = {
+      ...s,
+      settings: { ...s.settings, budgets: { ...s.settings.budgets, financiero: 161.36 } },
     };
   }
 
