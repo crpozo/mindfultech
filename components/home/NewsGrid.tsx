@@ -31,12 +31,7 @@ export function NewsGrid() {
   const featuredImg = cardImg(featured.cover);
 
   return (
-    <section
-      id="news"
-      /* vertical rhythm in vh clamps: the section fits a 900px-tall window
-         without shrinking the copy */
-      style={{ position: "relative", background: "#fff", padding: "clamp(64px,9vh,110px) 0 clamp(48px,7vh,90px)" }}
-    >
+    <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
       <div className="pad-x" style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <div
           style={{
@@ -45,7 +40,7 @@ export function NewsGrid() {
             justifyContent: "space-between",
             gap: 24,
             flexWrap: "wrap",
-            marginBottom: "clamp(28px,4.5vh,52px)",
+            marginBottom: 52,
           }}
         >
           <h2
@@ -94,10 +89,6 @@ export function NewsGrid() {
                 borderRadius: 12,
                 overflow: "hidden",
                 aspectRatio: "16/10",
-                /* on a wide, short window the 16:10 cover alone would eat half
-                   the height: cap it and let object-fit crop */
-                maxHeight: "42vh",
-                minHeight: 220,
                 position: "relative",
                 background: featured.bg,
               }}

@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
 
+const MONO = "var(--mono)";
+
 type Bi = { en: string; es: string };
 type Project = {
   brand: string;
@@ -88,8 +90,6 @@ export function ClientStories() {
   const [atStart, setAtStart] = React.useState(true);
   const [atEnd, setAtEnd] = React.useState(false);
   const [idx, setIdx] = React.useState(0);
-  // how much of the strip is in view and where — drives the progress bar
-  const [prog, setProg] = React.useState({ start: 0, size: 1 });
 
   const sync = React.useCallback(() => {
     const el = trackRef.current;
@@ -100,7 +100,6 @@ export function ClientStories() {
     const card = el.querySelector<HTMLElement>(".pf-panel");
     const w = card ? card.offsetWidth + GAP : el.clientWidth;
     setIdx(Math.min(PROJECTS.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
-    setProg({ start: el.scrollLeft / el.scrollWidth, size: el.clientWidth / el.scrollWidth });
   }, []);
 
   React.useEffect(() => {
@@ -131,109 +130,133 @@ export function ClientStories() {
 
   return (
     <section id="stories" className="pf-section">
-      <div className="pf-inner">
-        <div className="pf-copy">
-          <span className="pf-kicker">{es ? "PROYECTOS" : "WORK"}</span>
-          <h2 className="pf-title">
-            {es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
-          </h2>
-          <p className="pf-sub">
-            {es
-              ? "Siete productos en producción: explóralos uno a uno."
-              : "Seven products in production: explore them one by one."}
-          </p>
-        </div>
+      <div className="pf-head">
+        <h2
+          style={{
+            fontWeight: 500,
+            fontSize: "clamp(32px,3.4vw,52px)",
+            letterSpacing: "-.02em",
+            lineHeight: 1.05,
+            margin: 0,
+            color: "#fff",
+          }}
+        >
+          {es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
+        </h2>
+        <p
+          style={{
+            fontSize: 18,
+            lineHeight: 1.5,
+            color: "#8f8ba4",
+            fontWeight: 400,
+            maxWidth: 620,
+            margin: "14px auto 0",
+          }}
+        >
+          {es
+            ? "Siete productos en producción: explóralos uno a uno."
+            : "Seven products in production: explore them one by one."}
+        </p>
+      </div>
 
-        {/* controls live in the header on desktop and drop under the strip on
-            phones (CSS order), so there is one set of arrows, not two */}
-        <div className="pf-tools">
-          <div className="pf-progress" aria-hidden>
-            <span style={{ left: `${prog.start * 100}%`, width: `${prog.size * 100}%` }} />
-          </div>
-          <div className="pf-arrows">
-            <button
-              type="button"
-              className="pf-nav"
-              onClick={() => step(-1)}
-              disabled={atStart}
-              aria-label={es ? "Proyectos anteriores" : "Previous projects"}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 5l-7 7 7 7" />
-              </svg>
-            </button>
-            {/* phone-only position indicator — CSS hides it on wider screens.
-                role="group", not tablist: the buttons scroll a carousel, they
-                don't control tab panels */}
-            <div className="pf-dots" role="group" aria-label={es ? "Proyecto" : "Project"}>
-              {PROJECTS.map((p, i) => (
-                <button
-                  key={p.href}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-current={i === idx}
-                  aria-label={p.brand}
-                />
-              ))}
+      <div className="pf-carousel">
+        <div className="pf-strip" ref={trackRef}>
+        {PROJECTS.map((p, i) => (
+          <Link
+            key={p.href}
+            href={p.href}
+            /* seven cards, one destination: without this Next prefetches the
+               same /work payload once per card, mid-scroll */
+            prefetch={false}
+            className="pf-panel"
+            /* no aria-label — the visible content (brand, title, meta, CTA)
+               already names the link */
+            style={{ "--pf": p.accent } as React.CSSProperties}
+          >
+            <span className="pf-media" aria-hidden>
+              <span className="pf-index">{String(i + 1).padStart(2, "0")}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                decoding="async"
+                loading="lazy"
+                width={760}
+                height={1351}
+                className="pf-img"
+                src={p.img}
+                alt=""
+              />
+            </span>
+            <div className="pf-reveal">
+              <div className="pf-eyebrow">{p.brand}</div>
+              <div className="pf-card-title">{p.title[lang]}</div>
+              <div className="pf-meta">{p.meta[lang]}</div>
+              {/* not an <a> — the whole card is already the link */}
+              <span className="pf-cta">
+                {es ? "VER EL CASO" : "VIEW CASE STUDY"}
+                <span className="pf-cta-arrow" aria-hidden>→</span>
+              </span>
             </div>
-            <button
-              type="button"
-              className="pf-nav"
-              onClick={() => step(1)}
-              disabled={atEnd}
-              aria-label={es ? "Siguientes proyectos" : "Next projects"}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-          <Link href="/work" className="pf-all btn-white">
-            {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
           </Link>
+        ))}
         </div>
 
-        <div className="pf-carousel">
-          <div className="pf-strip" ref={trackRef}>
-            {PROJECTS.map((p, i) => (
-              <Link
-                key={p.href}
-                href={p.href}
-                /* seven cards, one destination: without this Next prefetches the
-                   same /work payload once per card, mid-scroll */
-                prefetch={false}
-                className="pf-panel"
-                /* no aria-label — the visible content (brand, title, meta, CTA)
-                   already names the link */
-                style={{ "--pf": p.accent } as React.CSSProperties}
-              >
-                <span className="pf-media" aria-hidden>
-                  <span className="pf-index">{String(i + 1).padStart(2, "0")}</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    decoding="async"
-                    loading="lazy"
-                    width={760}
-                    height={1351}
-                    className="pf-img"
-                    src={p.img}
-                    alt=""
-                  />
-                </span>
-                <div className="pf-reveal">
-                  <div className="pf-eyebrow">{p.brand}</div>
-                  <div className="pf-card-title">{p.title[lang]}</div>
-                  <div className="pf-meta">{p.meta[lang]}</div>
-                  {/* not an <a> — the whole card is already the link */}
-                  <span className="pf-cta">
-                    {es ? "VER EL CASO" : "VIEW CASE STUDY"}
-                    <span className="pf-cta-arrow" aria-hidden>→</span>
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+        <button
+          type="button"
+          className="pf-nav pf-prev"
+          onClick={() => step(-1)}
+          disabled={atStart}
+          aria-label={es ? "Proyectos anteriores" : "Previous projects"}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="pf-nav pf-next"
+          onClick={() => step(1)}
+          disabled={atEnd}
+          aria-label={es ? "Siguientes proyectos" : "Next projects"}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* phone-only position indicator — CSS hides it on wider screens.
+            role="group", not tablist: the buttons scroll a carousel, they
+            don't control tab panels */}
+        <div className="pf-dots" role="group" aria-label={es ? "Proyecto" : "Project"}>
+          {PROJECTS.map((p, i) => (
+            <button
+              key={p.href}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-current={i === idx}
+              aria-label={p.brand}
+            />
+          ))}
         </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 0" }}>
+        <Link
+          href="/work"
+          className="btn-white"
+          style={{
+            textDecoration: "none",
+            fontFamily: MONO,
+            fontSize: 12,
+            fontWeight: 500,
+            letterSpacing: ".12em",
+            background: "#fff",
+            color: "#0d0a1f",
+            padding: "15px 24px",
+            borderRadius: 6,
+          }}
+        >
+          {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
+        </Link>
       </div>
     </section>
   );

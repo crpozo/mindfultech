@@ -240,15 +240,11 @@ export function ClientMap() {
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f4f7fc 40%,#eef2f9)",
-        /* vh clamps so the map, its legend and the header fit one 900px screen */
-        padding: "clamp(60px,8vh,100px) 0 clamp(48px,7vh,96px)",
+        padding: "100px 0 96px",
       }}
     >
       <div className="pad-x" style={{ maxWidth: 1460, margin: "0 auto", padding: "0 48px" }}>
-        {/* wide enough for the title to sit on one line past ~1200px: two
-            lines of 52px display type were the difference between the
-            legend fitting the screen or not */}
-        <div style={{ textAlign: "center", maxWidth: 960, margin: "0 auto clamp(26px,4vh,46px)" }}>
+        <div style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 46px" }}>
           <span
             style={{
               display: "inline-block",
@@ -271,7 +267,7 @@ export function ClientMap() {
               fontSize: "clamp(32px,3.4vw,52px)",
               letterSpacing: "-.02em",
               lineHeight: 1.06,
-              margin: "18px 0 0",
+              margin: "20px 0 0",
               color: "var(--ink)",
             }}
           >
@@ -279,7 +275,7 @@ export function ClientMap() {
               ? "MindfulTech ayuda a empresas de todo el mundo"
               : "MindfulTech helps companies worldwide"}
           </h2>
-          <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "12px 0 0" }}>
+          <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "14px 0 0" }}>
             {es
               ? "Desde Ecuador, para equipos en América y Europa."
               : "From Ecuador, for teams across the Americas and Europe."}
