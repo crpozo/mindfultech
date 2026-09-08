@@ -112,7 +112,7 @@ export function ProcessFlow() {
     onMouseLeave: () => setHot(null),
   });
   return (
-    <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "110px 0 90px" }}>
+    <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "var(--section-y) 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <h2
           style={{

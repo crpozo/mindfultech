@@ -31,7 +31,7 @@ export function NewsGrid() {
   const featuredImg = cardImg(featured.cover);
 
   return (
-    <section id="news" style={{ position: "relative", background: "#fff", padding: "110px 0 90px" }}>
+    <section id="news" style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0" }}>
       <div className="pad-x" style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <div
           style={{

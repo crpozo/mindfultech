@@ -168,7 +168,7 @@ export function FullStackLab() {
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f4f6fb 30%,#eef1f8)",
-        padding: "110px 0 120px",
+        padding: "var(--section-y) 0",
       }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>

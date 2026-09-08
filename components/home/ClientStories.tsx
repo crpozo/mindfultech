@@ -161,7 +161,7 @@ export function ClientStories() {
 
       <div className="pf-carousel">
         <div className="pf-strip" ref={trackRef}>
-        {PROJECTS.map((p, i) => (
+        {PROJECTS.map((p) => (
           <Link
             key={p.href}
             href={p.href}
@@ -174,7 +174,6 @@ export function ClientStories() {
             style={{ "--pf": p.accent } as React.CSSProperties}
           >
             <span className="pf-media" aria-hidden>
-              <span className="pf-index">{String(i + 1).padStart(2, "0")}</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 decoding="async"

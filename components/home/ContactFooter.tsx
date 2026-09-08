@@ -130,7 +130,7 @@ export function ContactFooter() {
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f2f5fa 30%,#e9edf5)",
-        padding: "120px 0 60px",
+        padding: "var(--section-y) 0 60px",
         overflow: "hidden",
       }}
     >

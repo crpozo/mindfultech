@@ -240,7 +240,7 @@ export function ClientMap() {
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f4f7fc 40%,#eef2f9)",
-        padding: "100px 0 96px",
+        padding: "var(--section-y) 0",
       }}
     >
       <div className="pad-x" style={{ maxWidth: 1460, margin: "0 auto", padding: "0 48px" }}>

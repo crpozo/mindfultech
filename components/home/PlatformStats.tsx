@@ -55,7 +55,7 @@ export function PlatformStats() {
   return (
     <section
       id="platform"
-      style={{ position: "relative", background: "#fff", padding: "110px 0 0" }}
+      style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0 0" }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <h2
