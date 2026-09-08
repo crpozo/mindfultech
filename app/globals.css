@@ -534,45 +534,85 @@ a:hover {
   border-radius: 6px;
 }
 
-/* homepage portfolio — a snap carousel of rounded cards, four per view. Each
-   card carries its cover's hue in --pf (set inline per project), driving the
-   tint, the ring on hover, the eyebrow and the CTA. */
+/* homepage portfolio — a snap carousel of rounded cards, four per view, boxed
+   to the same 1560px column as the rest of the page so the cards keep a sane
+   size on wide monitors. Copy sits left, the controls (progress, arrows, the
+   "all work" link) sit right, and the vertical rhythm is in vh clamps so the
+   whole section fits a 900px-tall window. Each card carries its cover's hue
+   in --pf (set inline per project), driving the tint, the ring on hover, the
+   eyebrow and the CTA. */
 .pf-section {
   position: relative;
   background: #0d0a1f;
-  padding: 84px 0 90px;
+  padding: clamp(56px, 7vh, 84px) 0 clamp(44px, 6.5vh, 80px);
 }
-.pf-head {
+.pf-inner {
   max-width: 1560px;
-  margin: 0 auto 40px;
+  margin: 0 auto;
   padding: 0 48px;
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 40px;
+  row-gap: clamp(22px, 3.5vh, 36px);
 }
-.pf-carousel {
-  position: relative;
-  padding: 0 22px;
+.pf-kicker {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--accent-light);
+  background: rgba(105, 199, 185, 0.12);
+  padding: 7px 13px;
+  border-radius: 999px;
 }
-.pf-strip {
+.pf-title {
+  font-weight: 500;
+  font-size: clamp(30px, 3vw, 46px);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 18px 0 0;
+  color: #fff;
+}
+.pf-sub {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #8f8ba4;
+  max-width: 560px;
+  margin: 12px 0 0;
+}
+.pf-tools {
   display: flex;
-  gap: 14px;
-  width: 100%;
-  /* room for the hover lift and glow — overflow-x:auto would clip them */
-  padding: 12px 0 26px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 4px;
 }
-.pf-strip::-webkit-scrollbar { display: none; }
-.pf-nav {
+/* how far along the strip is: a 2px track with the thumb sized to the visible
+   share of the seven cards, so it also says "there are more" */
+.pf-progress {
+  position: relative;
+  width: 120px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.pf-progress span {
   position: absolute;
-  top: 50%;
-  z-index: 4;
-  width: 48px;
-  height: 48px;
-  margin-top: -24px;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: left 0.15s linear, width 0.15s linear;
+}
+.pf-arrows {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-nav {
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -586,12 +626,51 @@ a:hover {
   background: rgba(34, 29, 66, 0.92);
   border-color: rgba(255, 255, 255, 0.34);
 }
+/* dimmed rather than hidden at the ends — a control that vanishes shifts the
+   row, and the slider should still look like a slider on the first card */
 .pf-nav:disabled {
-  opacity: 0;
+  opacity: 0.3;
+  cursor: default;
   pointer-events: none;
 }
-.pf-prev { left: 4px; }
-.pf-next { right: 4px; }
+.pf-all {
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: #0d0a1f;
+  background: #fff;
+  padding: 14px 20px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.pf-carousel {
+  grid-column: 1 / -1;
+  position: relative;
+  /* a grid item's automatic minimum is its min-content width, and seven
+     cards of 760px-intrinsic images make that enormous: without this the
+     column widens to fit them instead of the strip scrolling */
+  min-width: 0;
+}
+/* 12px of side padding pulled back with a negative margin: room for the hover
+   lift and glow (overflow-x:auto would clip them) without touching the
+   four-up math, because the flex container's content box is still exactly
+   the column width */
+.pf-strip {
+  display: flex;
+  gap: 14px;
+  margin: 0 -12px;
+  padding: 12px 12px 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.pf-strip::-webkit-scrollbar { display: none; }
 
 /* the card sizes itself: cover on top, copy below, CTA pinned to the bottom.
    Equal-height flex items keep every CTA on the same line. */
@@ -604,7 +683,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  border-radius: 22px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background:
     radial-gradient(125% 46% at 50% 0%, color-mix(in srgb, var(--pf) 34%, transparent) 0%, transparent 74%),
@@ -616,8 +695,11 @@ a:hover {
   display: block;
   position: relative;
   flex: none;
-  /* keep the crop close to the mockup — a taller box just adds dead gradient */
+  /* keep the crop close to the mockup — a taller box just adds dead gradient.
+     Capped in vh so a short, wide window still fits the whole section. */
   aspect-ratio: 16 / 9;
+  max-height: 30vh;
+  min-height: 150px;
   overflow: hidden;
 }
 /* fades the shot into the card. Deliberately an overlay and not mask-image:
@@ -630,6 +712,22 @@ a:hover {
   height: 22%;
   background: linear-gradient(180deg, rgba(12, 10, 26, 0), #0c0a1a);
   pointer-events: none;
+}
+/* 01…07 in the corner: the strip reads as a numbered series, and the number
+   is the cheapest "where am I" cue when the progress bar is off screen */
+.pf-index {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  z-index: 1;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(13, 10, 31, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 4px 7px;
+  border-radius: 6px;
 }
 .pf-panel .pf-img {
   width: 100%;
@@ -658,7 +756,7 @@ a:hover {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 14px 26px 28px;
+  padding: 16px 22px 20px;
   pointer-events: none;
 }
 .pf-eyebrow {
@@ -668,23 +766,52 @@ a:hover {
   text-transform: uppercase;
   color: var(--pf);
 }
+.pf-card-title {
+  color: #fff;
+  font-weight: 500;
+  font-size: clamp(18px, 1.2vw, 22px);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  margin: 10px 0 0;
+}
+.pf-meta {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.6);
+  /* the CTA's margin-top:auto collapses to 0 on a full card, so the gap above
+     it lives here */
+  margin: 10px 0 18px;
+}
+/* a hairline rule with the label left and the arrow right, instead of a
+   boxed button: same affordance, a third of the height, and it stops the
+   seven identical buttons from reading like a form */
 .pf-cta {
-  align-self: flex-start;
   margin-top: auto;
-  padding: 13px 20px;
-  border: 1px solid color-mix(in srgb, var(--pf) 55%, transparent);
-  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-family: var(--mono);
   font-size: 11.5px;
   font-weight: 500;
   letter-spacing: 0.14em;
   color: var(--pf);
-  transition: background 0.25s ease, border-color 0.25s ease;
+  transition: border-color 0.25s ease;
 }
-.pf-panel:hover .pf-cta {
-  background: color-mix(in srgb, var(--pf) 13%, transparent);
-  border-color: color-mix(in srgb, var(--pf) 80%, transparent);
+.pf-cta-arrow {
+  font-size: 15px;
+  line-height: 1;
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+.pf-panel:hover .pf-cta,
+.pf-panel:focus-visible .pf-cta {
+  border-top-color: color-mix(in srgb, var(--pf) 40%, transparent);
+}
+.pf-panel:hover .pf-cta-arrow,
+.pf-panel:focus-visible .pf-cta-arrow { transform: translateX(5px); }
 
 @media (max-width: 1240px) {
   .pf-panel { flex-basis: calc((100% - 2 * 14px) / 3); }
@@ -693,47 +820,48 @@ a:hover {
 .pf-dots { display: none; }
 
 @media (max-width: 900px) {
-  .pf-head { padding-left: 24px; padding-right: 24px; }
-  /* room under the strip for the arrows and dots */
-  .pf-carousel { padding: 0 0 68px; }
+  .pf-inner {
+    padding: 0 24px;
+    /* minmax(0,…), not 1fr: same min-content trap as .pf-carousel */
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  /* controls under the strip, where the thumb is */
+  .pf-carousel { order: 2; }
+  .pf-tools {
+    order: 3;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 18px;
+    padding-bottom: 0;
+  }
+  .pf-progress { display: none; }
+  .pf-all {
+    flex-basis: 100%;
+    text-align: center;
+  }
   /* phones: one card per view, swiped left/right, with the next one peeking
-     past the edge so the strip reads as a slider before anything is touched */
+     past the edge so the strip reads as a slider before anything is touched.
+     The strip bleeds to the screen edges. */
   .pf-strip {
     gap: 14px;
-    padding: 0 18px 4px;
+    margin: 0 -24px;
+    padding: 0 24px 4px;
     scroll-snap-type: x mandatory;
-    scroll-padding-left: 18px;
+    scroll-padding-left: 24px;
   }
   .pf-panel { flex: 0 0 88%; }
   .pf-strip .pf-panel:hover { transform: none; }
   .pf-panel .pf-img,
   .pf-panel:hover .pf-img { transform: none; }
-  .pf-reveal { padding: 14px 24px 26px; }
-
-  /* arrows move out from over the artwork and sit under the strip, where they
-     flank the dots instead of covering the cover shot */
+  .pf-media { max-height: none; }
+  .pf-reveal { padding: 14px 22px 20px; }
   .pf-nav {
     width: 42px;
     height: 42px;
-    top: auto;
-    bottom: 0;
-    margin-top: 0;
   }
-  /* far enough out that a 42px arrow never overlaps the 7×24px dot row
-     (168px wide, centered) — overlapping targets flunk WCAG target-size */
-  .pf-prev { left: calc(50% - 140px); }
-  .pf-next { right: calc(50% - 140px); }
-  /* dimmed rather than hidden at the ends — the control should stay visible
-     so the slider still looks like a slider on the first card */
-  .pf-nav:disabled { opacity: 0.32; }
-
+  .pf-arrows { gap: 4px; }
   .pf-dots {
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* was 15px with 7px dots — lowered so the bigger buttons keep the dots
-       visually in the same spot */
-    bottom: 7px;
     display: flex;
     justify-content: center;
     gap: 0;
@@ -836,7 +964,7 @@ a:hover {
   margin-top: 4px;
 }
 .map-group-head {
-  padding: 15px 0 7px;
+  padding: 13px 0 6px;
   font-family: var(--mono);
   font-size: 10.5px;
   font-weight: 500;
@@ -861,9 +989,10 @@ a:hover {
   /* the accent rail is the hover affordance — no box, no lift */
   border-left: 2px solid transparent;
   border-radius: 0 8px 8px 0;
-  padding: 9px 12px 9px 13px;
+  padding: 7px 12px 7px 13px;
   color: var(--ink);
   font: inherit;
+  line-height: 1.25;
   transition: background 0.2s ease, border-color 0.2s ease, padding-left 0.2s ease;
 }
 .map-row:hover,

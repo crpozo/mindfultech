@@ -168,7 +168,9 @@ export function FullStackLab() {
       style={{
         position: "relative",
         background: "linear-gradient(180deg,#ffffff,#f4f6fb 30%,#eef1f8)",
-        padding: "110px 0 120px",
+        /* vertical rhythm in vh clamps, like the sections below it, so a
+           short window loses padding before it loses content */
+        padding: "clamp(64px,9vh,110px) 0 clamp(56px,8vh,120px)",
       }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
@@ -193,7 +195,7 @@ export function FullStackLab() {
             color: "#64616e",
             fontWeight: 400,
             maxWidth: 640,
-            margin: "20px auto 56px",
+            margin: "16px auto clamp(28px,4.5vh,56px)",
           }}
         >
           {es ? "Impulsamos cada paso del viaje del producto, de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey, from first research session to production AI."}
@@ -206,7 +208,7 @@ export function FullStackLab() {
             display: "grid",
             gridTemplateColumns: "repeat(3,1fr)",
             gap: 20,
-            marginBottom: 20,
+            marginBottom: 16,
           }}
         >
           {TABS[lang].map((label, j) => (
@@ -223,7 +225,7 @@ export function FullStackLab() {
                 fontSize: "clamp(20px,1.8vw,27px)",
                 letterSpacing: "-.01em",
                 color: "var(--ink)",
-                padding: "26px 20px",
+                padding: "clamp(16px,2.4vh,26px) 20px",
                 borderRadius: 8,
                 background: "#fff",
               }}
@@ -261,7 +263,7 @@ export function FullStackLab() {
           style={{
             background: "#fff",
             borderRadius: 12,
-            padding: "clamp(28px,3.4vw,56px)",
+            padding: "clamp(24px,3.4vh,56px) clamp(28px,3.4vw,56px)",
             display: "grid",
             gridTemplateColumns: "1fr 1.15fr",
             gap: "clamp(28px,4vw,64px)",
