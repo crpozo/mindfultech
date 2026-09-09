@@ -1,5 +1,5 @@
-"""Builds public/brand/og.png, the social card: a capture of the hero brain with
-its chips on top and the hero headline, subtitle and buttons underneath, on one
+"""Builds public/brand/og.png, the social card, laid out like the hero itself:
+copy on the left, the captured 3D brain with its chips on the right, one
 seamless background. Input: a Retina screenshot of the hero stage (brain plus
 the five chips, with some air around). Fonts: Outfit[wght].ttf saved as
 Outfit.ttf and IBMPlexMono-Medium.ttf next to this file (open licences, not
@@ -8,57 +8,56 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 SP = __file__.rsplit("/", 1)[0]
 src_path, out_path = sys.argv[1], sys.argv[2]
-W, H, BAND = 1200, 630, 416
+W, H = 1200, 630
 INK, GREY, SUB = (0x0e, 0x0d, 0x12), (0x9a, 0xa0, 0xad), (0x4c, 0x4a, 0x55)
 def outfit(size, weight):
     f = ImageFont.truetype(f"{SP}/Outfit.ttf", size); f.set_variation_by_axes([weight]); return f
 mono = ImageFont.truetype(f"{SP}/IBMPlexMono-Medium.ttf", 12)
 
-src = Image.open(src_path).convert("RGB")
-# trim uniform borders (anything close to the corner colour), keep a little air
-px = src.load(); bg0 = px[3, 3]
+# --- brain: trim the capture to its content, keep a little air ------------------
+src = Image.open(src_path).convert("RGB"); px = src.load(); bg0 = px[3, 3]
 def far(c): return sum(abs(c[i] - bg0[i]) for i in range(3)) > 24
 xs = [x for x in range(src.width) if any(far(px[x, y]) for y in range(0, src.height, 3))]
 ys = [y for y in range(src.height) if any(far(px[x, y]) for x in range(0, src.width, 3))]
-pad = 30
+pad = 26
 src = src.crop((max(0, xs[0] - pad), max(0, ys[0] - pad), min(src.width, xs[-1] + pad), min(src.height, ys[-1] + pad)))
-# scale to the band height exactly
-s = BAND / src.height
-brain = src.resize((round(src.width * s), BAND), Image.LANCZOS)
-bp = brain.load()
+# right column: up to 600px wide, up to 540px tall
+s = min(600 / src.width, 540 / src.height)
+brain = src.resize((round(src.width * s), round(src.height * s)), Image.LANCZOS); bp = brain.load()
+bx, by = W - 44 - brain.width, (H - brain.height) // 2
 
-# background: each band row takes the capture's own edge colour on that row, so
-# the paste has no seam; below the band the last colour eases to white
-card = Image.new("RGB", (W, H), "#ffffff"); cp = card.load()
+# --- background: every row takes the capture's own edge colour on that row, so
+#     the paste has no seam; rows above and below continue the nearest colour ----
 def edge(y):
     cols = [bp[x, y] for x in range(0, 6)] + [bp[x, y] for x in range(brain.width - 6, brain.width)]
     return tuple(sum(c[i] for c in cols) // len(cols) for i in range(3))
-rows = [edge(y) for y in range(BAND)]
+rows = [edge(y) for y in range(brain.height)]
+card = Image.new("RGB", (W, H)); cp = card.load()
 for y in range(H):
-    if y < BAND: c = rows[y]
-    else:
-        t = (y - BAND) / (H - BAND); last = rows[-1]
-        c = tuple(round(last[i] + (255 - last[i]) * t) for i in range(3))
+    c = rows[min(max(y - by, 0), brain.height - 1)]
     for x in range(W): cp[x, y] = c
-x0 = (W - brain.width) // 2
-card.paste(brain, (x0, 0))
+card.paste(brain, (bx, by))
 
-# copy, centred under the brain
+# --- copy: left column, vertically centred as a block ---------------------------
 d = ImageDraw.Draw(card)
-h1 = outfit(46, 500); lh = 48; y = BAND + 10
-for line, col in (("Construyendo el futuro", INK), ("con software de IA", GREY)):
-    d.text((W / 2, y), line, font=h1, fill=col, anchor="ma"); y += lh
-y += 10
-d.text((W / 2, y), "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada.", font=outfit(18, 400), fill=SUB, anchor="ma")
-y += 26 + 16
+h1 = outfit(54, 500); lh = 56
+sub_f = outfit(19, 400)
+sub_lines = ["Laboratorio de software full-stack,", "impulsado por investigación UX e IA aplicada."]
 def sw(t, f, sp): return sum(f.getlength(ch) for ch in t) + sp * (len(t) - 1)
 def ds(x, yy, t, f, sp, fill):
     for ch in t: d.text((x, yy), ch, font=f, fill=fill); x += f.getlength(ch) + sp
 SPC = 12 * 0.12; b1, b2 = "EMPIEZA A CONSTRUIR", "HABLEMOS"
-w1, w2 = sw(b1, mono, SPC) + 48, sw(b2, mono, SPC) + 48; bh, gap = 42, 12
-bx = round((W - (w1 + gap + w2)) / 2)
-d.rounded_rectangle([bx, y, bx + w1, y + bh], radius=6, fill=INK); ds(bx + 24, y + 13, b1, mono, SPC, (255, 255, 255))
-bx2 = bx + w1 + gap
-d.rounded_rectangle([bx2, y, bx2 + w2, y + bh], radius=6, fill=(255, 255, 255), outline=(0x9e, 0x9d, 0xa2), width=2); ds(bx2 + 24, y + 13, b2, mono, SPC, INK)
+w1, w2 = sw(b1, mono, SPC) + 48, sw(b2, mono, SPC) + 48; bh, gap = 44, 12
+block_h = lh * 2 + 22 + 27 * len(sub_lines) + 30 + bh
+x0 = 84; y = (H - block_h) // 2
+for line, col in (("Construyendo el futuro", INK), ("con software de IA", GREY)):
+    d.text((x0, y), line, font=h1, fill=col, anchor="la"); y += lh
+y += 22
+for line in sub_lines:
+    d.text((x0, y), line, font=sub_f, fill=SUB, anchor="la"); y += 27
+y += 30
+d.rounded_rectangle([x0, y, x0 + w1, y + bh], radius=6, fill=INK); ds(x0 + 24, y + 14, b1, mono, SPC, (255, 255, 255))
+x1 = x0 + w1 + gap
+d.rounded_rectangle([x1, y, x1 + w2, y + bh], radius=6, fill=(255, 255, 255), outline=(0x9e, 0x9d, 0xa2), width=2); ds(x1 + 24, y + 14, b2, mono, SPC, INK)
 card.save(out_path, optimize=True)
-print("saved", out_path, "brain", brain.size, "buttons end at", y + bh)
+print("saved", out_path, "brain", brain.size, "at", (bx, by), "text block", block_h)
