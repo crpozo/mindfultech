@@ -40,14 +40,16 @@ export const metadata: Metadata = {
     url: "/",
     title: SITE_TITLE,
     description: SITE_DESC,
-    // tarjeta social — el hero de producto que ya vive en /art
-    images: [{ url: "/art/product.webp", width: 1200, height: 1020, alt: "MindfulTech" }],
+    // tarjeta social: el logo sobre el fondo claro del sitio, 1200×630, el
+    // formato que WhatsApp, LinkedIn y X muestran completo. Generada con
+    // Pillow a partir de la geometría de components/Logo.tsx y Outfit 600.
+    images: [{ url: "/brand/og.png", width: 1200, height: 630, alt: "MindfulTech" }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESC,
-    images: ["/art/product.webp"],
+    images: ["/brand/og.png"],
   },
 };
 
