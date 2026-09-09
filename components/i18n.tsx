@@ -5,23 +5,23 @@ import * as React from "react";
 export type Lang = "en" | "es";
 
 const LangCtx = React.createContext<{ lang: Lang; setLang: (l: Lang) => void }>({
-  lang: "es",
+  lang: "en",
   setLang: () => {},
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Spanish is the default: MindfulTech is a Quito studio and the site opens
-  // in its own language. The EN toggle is one click away and the choice is
-  // remembered, so an English-speaking visitor pays it once.
-  const [lang, setLangState] = React.useState<Lang>("es");
+  // The site always opens in English: most clients are in the US and Europe,
+  // and Carlos wants every fresh visit to start there. The ES toggle is one
+  // click away; the choice lasts for the tab (sessionStorage, so it survives
+  // a reload mid-visit) and the next visit starts in English again.
+  const [lang, setLangState] = React.useState<Lang>("en");
 
-  // Resolve once on mount: a saved choice wins over the default. Guarded —
-  // merely reading window.localStorage throws (SecurityError) when site data
-  // is blocked or inside a sandboxed iframe, which would otherwise crash this
-  // root provider and blank every page.
+  // Guarded — merely reading window storage throws (SecurityError) when site
+  // data is blocked or inside a sandboxed iframe, which would otherwise crash
+  // this root provider and blank every page.
   React.useEffect(() => {
     try {
-      const saved = window.localStorage.getItem("mt-lang");
+      const saved = window.sessionStorage.getItem("mt-lang");
       if (saved === "en" || saved === "es") setLangState(saved);
     } catch {
       /* storage blocked — stay on the default */
@@ -35,7 +35,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLang = React.useCallback((l: Lang) => {
     setLangState(l);
     try {
-      window.localStorage.setItem("mt-lang", l);
+      window.sessionStorage.setItem("mt-lang", l);
     } catch {
       /* private mode */
     }

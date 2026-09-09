@@ -1,5 +1,6 @@
 """Builds public/brand/og.png, the social card, laid out like the hero itself:
-copy on the left, the captured 3D brain with its chips on the right, one
+copy on the left, the captured 3D brain on the right (its label pills are
+erased so the card reads in one language), one
 seamless background. Input: a Retina screenshot of the hero stage (brain plus
 the five chips, with some air around). Fonts: Outfit[wght].ttf saved as
 Outfit.ttf and IBMPlexMono-Medium.ttf next to this file (open licences, not
@@ -16,6 +17,32 @@ mono = ImageFont.truetype(f"{SP}/IBMPlexMono-Medium.ttf", 12)
 
 # --- brain: trim the capture to its content, keep a little air ------------------
 src = Image.open(src_path).convert("RGB"); px = src.load(); bg0 = px[3, 3]
+def erase_chips(im):
+    """Paint over the white label pills (and their soft shadows) with the
+    background, row by row, so the brain stands alone."""
+    w, h = im.size; p = im.load()
+    white = [[min(p[x, y]) > 247 for x in range(w)] for y in range(h)]
+    seen = [[False] * w for _ in range(h)]; boxes = []
+    for y0 in range(h):
+        for x0 in range(w):
+            if white[y0][x0] and not seen[y0][x0]:
+                stack = [(x0, y0)]; seen[y0][x0] = True; xs = []; ys = []
+                while stack:
+                    x, y = stack.pop(); xs.append(x); ys.append(y)
+                    for nx, ny in ((x+1, y), (x-1, y), (x, y+1), (x, y-1)):
+                        if 0 <= nx < w and 0 <= ny < h and white[ny][nx] and not seen[ny][nx]:
+                            seen[ny][nx] = True; stack.append((nx, ny))
+                bw, bh = max(xs) - min(xs), max(ys) - min(ys)
+                if bw > 70 and 18 < bh < 90: boxes.append((min(xs), min(ys), max(xs), max(ys)))
+    def rowbg(y):
+        cols = [p[x, y] for x in range(0, 8)] + [p[x, y] for x in range(w - 8, w)]
+        return tuple(sum(c[i] for c in cols) // len(cols) for i in range(3))
+    for (x0, y0, x1, y1) in boxes:
+        for y in range(max(0, y0 - 16), min(h, y1 + 34)):
+            c = rowbg(y)
+            for x in range(max(0, x0 - 18), min(w, x1 + 18)): p[x, y] = c
+    return len(boxes)
+print("chips erased:", erase_chips(src))
 def far(c): return sum(abs(c[i] - bg0[i]) for i in range(3)) > 24
 xs = [x for x in range(src.width) if any(far(px[x, y]) for y in range(0, src.height, 3))]
 ys = [y for y in range(src.height) if any(far(px[x, y]) for x in range(0, src.width, 3))]
@@ -42,15 +69,15 @@ card.paste(brain, (bx, by))
 d = ImageDraw.Draw(card)
 h1 = outfit(54, 500); lh = 56
 sub_f = outfit(19, 400)
-sub_lines = ["Laboratorio de software full-stack,", "impulsado por investigación UX e IA aplicada."]
+sub_lines = ["Full-stack software lab, powered by", "UX research and applied AI."]
 def sw(t, f, sp): return sum(f.getlength(ch) for ch in t) + sp * (len(t) - 1)
 def ds(x, yy, t, f, sp, fill):
     for ch in t: d.text((x, yy), ch, font=f, fill=fill); x += f.getlength(ch) + sp
-SPC = 12 * 0.12; b1, b2 = "EMPIEZA A CONSTRUIR", "HABLEMOS"
+SPC = 12 * 0.12; b1, b2 = "START BUILDING", "CONTACT SALES"
 w1, w2 = sw(b1, mono, SPC) + 48, sw(b2, mono, SPC) + 48; bh, gap = 44, 12
 block_h = lh * 2 + 22 + 27 * len(sub_lines) + 30 + bh
 x0 = 84; y = (H - block_h) // 2
-for line, col in (("Construyendo el futuro", INK), ("con software de IA", GREY)):
+for line, col in (("Building the future", INK), ("with AI software", GREY)):
     d.text((x0, y), line, font=h1, fill=col, anchor="la"); y += lh
 y += 22
 for line in sub_lines:
