@@ -5,31 +5,26 @@ import * as React from "react";
 export type Lang = "en" | "es";
 
 const LangCtx = React.createContext<{ lang: Lang; setLang: (l: Lang) => void }>({
-  lang: "en",
+  lang: "es",
   setLang: () => {},
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = React.useState<Lang>("en");
+  // Spanish is the default: MindfulTech is a Quito studio and the site opens
+  // in its own language. The EN toggle is one click away and the choice is
+  // remembered, so an English-speaking visitor pays it once.
+  const [lang, setLangState] = React.useState<Lang>("es");
 
-  // Resolve once on mount: saved choice wins, else browser language.
-  // Guarded — merely reading window.localStorage throws (SecurityError) when
-  // site data is blocked or inside a sandboxed iframe, which would otherwise
-  // crash this root provider and blank every page.
+  // Resolve once on mount: a saved choice wins over the default. Guarded —
+  // merely reading window.localStorage throws (SecurityError) when site data
+  // is blocked or inside a sandboxed iframe, which would otherwise crash this
+  // root provider and blank every page.
   React.useEffect(() => {
     try {
       const saved = window.localStorage.getItem("mt-lang");
-      if (saved === "en" || saved === "es") {
-        setLangState(saved);
-        return;
-      }
+      if (saved === "en" || saved === "es") setLangState(saved);
     } catch {
-      /* storage blocked — fall through to browser language */
-    }
-    try {
-      if (navigator.language?.toLowerCase().startsWith("es")) setLangState("es");
-    } catch {
-      /* noop */
+      /* storage blocked — stay on the default */
     }
   }, []);
 

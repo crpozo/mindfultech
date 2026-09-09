@@ -21,9 +21,11 @@ const mono = IBM_Plex_Mono({
   preload: false,
 });
 
-const SITE_TITLE = "MindfulTech: Building the future with AI software";
+// Spanish, like the page it describes: the site opens in Spanish by default
+// (see LanguageProvider) and the document title should match what loads.
+const SITE_TITLE = "MindfulTech: Construyendo el futuro con software de IA";
 const SITE_DESC =
-  "Full-stack software lab, powered by UX research and applied AI. Human-centered products, built in Quito, Ecuador.";
+  "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada. Productos centrados en las personas, construidos en Quito, Ecuador.";
 
 export const metadata: Metadata = {
   // absolute base for og:url / og:image on the static export
@@ -33,7 +35,8 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "MindfulTech",
     type: "website",
-    locale: "en_US",
+    locale: "es_EC",
+    alternateLocale: ["en_US"],
     url: "/",
     title: SITE_TITLE,
     description: SITE_DESC,
@@ -54,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${mono.variable}`}>
+    <html lang="es" className={`${outfit.variable} ${mono.variable}`}>
       <body>
         <LanguageProvider>
           {children}
