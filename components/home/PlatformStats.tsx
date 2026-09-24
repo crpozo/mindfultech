@@ -55,7 +55,7 @@ export function PlatformStats() {
   return (
     <section
       id="platform"
-      style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0 0" }}
+      style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0" }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <h2
@@ -93,13 +93,11 @@ export function PlatformStats() {
           {CARDS.map((c) => (
             <div
               key={c.value}
-              className="stat-card"
+              className="stat-card tint-card"
               style={
                 {
-                  position: "relative",
                   background: c.bg,
-                  borderRadius: 8,
-                  padding: "22px 22px 20px",
+                  padding: "24px 24px 22px",
                   minHeight: 230,
                   display: "flex",
                   flexDirection: "column",
@@ -137,7 +135,7 @@ export function PlatformStats() {
               >
                 {c.value}
               </span>
-              <span style={{ marginTop: "auto", fontSize: 13.5, color: c.captionColor }}>
+              <span style={{ marginTop: "auto", fontSize: 15, lineHeight: 1.5, maxWidth: 330, color: c.captionColor }}>
                 {c.caption[lang]}
               </span>
               <Link
@@ -153,13 +151,11 @@ export function PlatformStats() {
                   fontWeight: 500,
                   letterSpacing: ".12em",
                   color: "#0e0d12",
-                  marginTop: 10,
-                  opacity: 0,
-                  transform: "translateY(6px)",
-                  transition: "opacity .35s ease,transform .35s ease",
+                  marginTop: 14,
                 }}
               >
                 {es ? "VER CÓMO" : "LEARN HOW"}
+                <span className="stat-more-arrow" aria-hidden>→</span>
               </Link>
               {c.connector && (
                 <span
@@ -179,14 +175,6 @@ export function PlatformStats() {
           ))}
         </div>
 
-        {/* section rule — four segments on desktop; on a phone the grid
-            collapses to one column, so the segments would stack into four
-            stray lines. `.ps-rule` keeps it a single rule there. */}
-        <div className="ps-rule" style={{ marginTop: 96 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <span key={i} style={{ borderTop: "1px solid rgba(14,13,18,.16)" }} />
-          ))}
-        </div>
       </div>
     </section>
   );

@@ -238,18 +238,17 @@ export function ServicesBody() {
               ].map(([bg, tc, title, body]) => (
                 <div
                   key={title}
+                  className="tint-card"
                   style={{
                     background: bg,
-                    borderRadius: 8,
-                    padding: 24,
-                    minHeight: 220,
+                    padding: "26px 26px 24px",
+                    minHeight: 200,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
                   }}
                 >
-                  <div style={{ fontWeight: 500, fontSize: 21, letterSpacing: "-.01em" }}>{title}</div>
-                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: tc }}>{body}</div>
+                  <div style={{ fontWeight: 500, fontSize: 22, letterSpacing: "-.01em", lineHeight: 1.2 }}>{title}</div>
+                  <div style={{ fontSize: 15, lineHeight: 1.55, color: tc, marginTop: 12, maxWidth: 360 }}>{body}</div>
                 </div>
               ))}
             </div>
