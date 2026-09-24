@@ -598,7 +598,9 @@ a:hover {
    tint, the ring on hover, the eyebrow and the CTA. */
 .pf-section {
   position: relative;
-  background: #0d0a1f;
+  /* same accent glow as the process section, centred here, so the two dark
+     blocks read as one lit space with a seam rather than two flat slabs */
+  background: radial-gradient(60% 45% at 50% 0%, rgba(105, 199, 185, 0.09), transparent 70%), #0d0a1f;
   padding: var(--section-y) 0;
   /* the process section above is the same #0d0a1f: without a seam the two
      read as one long dark block and the padding between them disappears */

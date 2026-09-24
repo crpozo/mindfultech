@@ -115,7 +115,17 @@ export function ProcessFlow() {
     onMouseLeave: () => setHot(null),
   });
   return (
-    <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "var(--section-y) 0" }}>
+    <section
+      id="research"
+      style={{
+        position: "relative",
+        /* a soft accent glow from the top-left corner: the flat #0d0a1f slab
+           gets the same depth the project cards carry, and the light section
+           above hands over to it instead of hitting a wall */
+        background: "radial-gradient(70% 55% at 12% 0%, rgba(105,199,185,.12), transparent 70%), #0d0a1f",
+        padding: "var(--section-y) 0",
+      }}
+    >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <SectionHead align="left" dark kicker={t.kicker} title={t.title} sub={t.sub} />
 
