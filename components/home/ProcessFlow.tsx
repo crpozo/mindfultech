@@ -2,11 +2,13 @@
 
 import * as React from "react";
 import { useLang } from "@/components/i18n";
+import { SectionHead } from "./SectionHead";
 
 const MONO = "var(--mono)";
 
 const T = {
   en: {
+    kicker: "HOW WE WORK",
     title: "How projects run at MindfulTech",
     sub: "From requirements to continuous improvement: one accountable team, end to end.",
     workingWith: "WORKING WITH",
@@ -20,6 +22,7 @@ const T = {
     ],
   },
   es: {
+    kicker: "CÓMO TRABAJAMOS",
     title: "Así corren los proyectos en MindfulTech",
     sub: "De los requerimientos a la mejora continua: un solo equipo responsable, de inicio a fin.",
     workingWith: "TRABAJAMOS CON",
@@ -114,19 +117,7 @@ export function ProcessFlow() {
   return (
     <section id="research" style={{ position: "relative", background: "#0d0a1f", padding: "var(--section-y) 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <h2
-          style={{
-            fontWeight: 500,
-            fontSize: "clamp(36px,3.8vw,60px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.04,
-            margin: 0,
-            color: "#fff",
-          }}
-        >
-          {t.title}
-        </h2>
-        <p style={{ fontSize: 19, color: "#8f8ba4", fontWeight: 400, margin: "16px 0 0", maxWidth: 620 }}>{t.sub}</p>
+        <SectionHead align="left" dark kicker={t.kicker} title={t.title} sub={t.sub} />
 
         {/* pipeline — desktop: nodes riding a dashed wave, text alternating above/below */}
         <div className="flow-wave" style={{ position: "relative", marginTop: 30 }}>

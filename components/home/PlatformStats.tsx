@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 
 const MONO = "var(--mono)";
 
@@ -58,33 +59,12 @@ export function PlatformStats() {
       style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0" }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <h2
-          style={{
-            textAlign: "center",
-            fontWeight: 500,
-            fontSize: "clamp(34px,3.6vw,56px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.05,
-            margin: 0,
-            color: "var(--ink)",
-          }}
-        >
-          {es ? "La diferencia MindfulTech" : "The MindfulTech difference"}
-        </h2>
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 19,
-            lineHeight: 1.5,
-            /* darker muted — #8b8896 was 3.5:1 on white, this is 5.3:1 */
-            color: "#6d6a77",
-            fontWeight: 400,
-            maxWidth: 620,
-            margin: "18px auto 54px",
-          }}
-        >
-          {es ? "Resultados medidos en diseño, ingeniería y automatización con IA." : "Measured results across design, engineering, and AI automation."}
-        </p>
+        <SectionHead
+          kicker={es ? "RESULTADOS" : "RESULTS"}
+          title={es ? "La diferencia MindfulTech" : "The MindfulTech difference"}
+          sub={es ? "Resultados medidos en diseño, ingeniería y automatización con IA." : "Measured results across design, engineering, and AI automation."}
+          style={{ marginBottom: 54 }}
+        />
 
         <div
           className="stack-3"

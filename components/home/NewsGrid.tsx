@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 import { POSTS } from "@/lib/blog/posts";
 
 const MONO = "var(--mono)";
@@ -36,24 +37,18 @@ export function NewsGrid() {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "end",
             justifyContent: "space-between",
             gap: 24,
             flexWrap: "wrap",
             marginBottom: 52,
           }}
         >
-          <h2
-            style={{
-              fontWeight: 500,
-              fontSize: "clamp(34px,3.6vw,56px)",
-              letterSpacing: "-.02em",
-              margin: 0,
-              color: "var(--ink)",
-            }}
-          >
-            {es ? "Novedades en MindfulTech" : "What's new at MindfulTech"}
-          </h2>
+          <SectionHead
+            align="left"
+            kicker="BLOG"
+            title={es ? "Novedades en MindfulTech" : "What's new at MindfulTech"}
+          />
           <Link
             href="/blog"
             className="btn-soft"
