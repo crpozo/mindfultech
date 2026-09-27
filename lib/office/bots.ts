@@ -1,9 +1,15 @@
 /**
- * The six AI employees of the office demo. Everything here is scripted: the
- * demo shows a client what a team of bots looks like, it does not run one.
+ * The AI employees of the office demo. Everything here is scripted: the demo
+ * shows a client what a team of bots looks like, it does not run one.
  * `color` is the pastel for cards and avatars, `accent` the strong colour for
  * rings, bubbles and screens, and `look` how the 3D character is dressed.
+ *
+ * The Spanish copy is the base (`BASE`); `EN` overlays the localized text per
+ * bot id. Consumers call `botsFor(lang)` / `botById(lang, id)` and get flat,
+ * already-localized bots.
  */
+import type { Lang } from "./i18n";
+
 export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops";
 
 /** How the character is built (see components/office/scene/character.js). */
@@ -48,7 +54,11 @@ export type Bot = {
   quick: string[];
 };
 
-export const BOTS: Bot[] = [
+/** The localized part of a bot; everything else (id, name, title, colours, look) is shared. */
+type BotText = Pick<Bot, "role" | "working" | "kpis" | "replies" | "quick">;
+
+/** Spanish base (production copy). */
+const BASE: Bot[] = [
   {
     id: "sofia",
     name: "Sofía",
@@ -351,7 +361,257 @@ export const BOTS: Bot[] = [
   },
 ];
 
-export const BOT_BY_ID: Record<string, Bot> = Object.fromEntries(BOTS.map((b) => [b.id, b]));
+/* Shared English keyword stems (matched with lowercase `includes`, see `reply`). */
+const K_NOW = ["doing", "now", "working"];
+const K_SUMMARY = ["summary", "today", "report"];
+const K_PENDING = ["pending", "next", "left"];
+const K_HELLO = ["hello", "hi", "hey"];
+
+const Q_NOW = "What are you doing right now?";
+const Q_SUMMARY = "Give me today's summary";
+const Q_PENDING = "What's still pending?";
+
+/** English overlay, by bot id. */
+const EN: Record<string, BotText> = {
+  sofia: {
+    role: "Sales",
+    working: [
+      "Qualifying HubSpot leads",
+      "Writing a follow-up to Grupo Andino",
+      "Updating the pipeline",
+      "Preparing the Farmacias Cruz proposal",
+    ],
+    kpis: [
+      { label: "Leads today", value: "38" },
+      { label: "Meetings booked", value: "6" },
+      { label: "Response rate", value: "41%" },
+    ],
+    replies: [
+      [K_NOW, "Right now I'm qualifying the 38 leads that came in from the website and LinkedIn. I've already booked 6 meetings for this week and I'm drafting the follow-up for Grupo Andino, who opened the proposal twice yesterday."],
+      [K_SUMMARY, "Today's summary: 38 new leads, 22 qualified, 6 meetings booked and 2 proposals sent (Farmacias Cruz and Logística del Pacífico). The pipeline is up $18,400 from yesterday."],
+      [K_PENDING, "Pending: send the revised quote to Farmacias Cruz before 5:00 PM, confirm Thursday's demo with Grupo Andino and clean up 14 duplicate leads in the CRM."],
+      [["lead", "client", "prospect", "customer"], "The hottest leads right now are Grupo Andino (score 92), Farmacias Cruz (88) and Cooperativa 29 de Octubre (81). Want me to prioritize one of them?"],
+      [K_HELLO, "Hi! I'm Sofía, your sales rep. I work 24/7 on the CRM: I qualify leads, write follow-ups and book meetings. How can I help?"],
+      [[], "Noted. I'll add it to my list and let you know as soon as it's ready. In the meantime I'll keep working this week's pipeline."],
+    ],
+    quick: [Q_NOW, Q_SUMMARY, Q_PENDING],
+  },
+  mateo: {
+    role: "Support",
+    working: [
+      "Answering Zendesk tickets",
+      "Resolving a billing complaint",
+      "Updating the knowledge base",
+      "Escalating a case to a human",
+    ],
+    kpis: [
+      { label: "Tickets resolved", value: "127" },
+      { label: "Response time", value: "42 s" },
+      { label: "Satisfaction (CSAT)", value: "4.8 / 5" },
+    ],
+    replies: [
+      [K_NOW, "I'm in the support inbox: 127 tickets resolved today, 9 open. Right now I'm replying to a customer who can't download their August invoice; I found the cause and I'm sending them the corrected link."],
+      [K_SUMMARY, "Today: 136 tickets received, 127 resolved with no human intervention, 3 escalated to your team. Average first response time: 42 seconds. Today's CSAT: 4.8 out of 5."],
+      [K_PENDING, "9 tickets are still open. Three are waiting on the customer, five I'll resolve within the hour, and one (a refund over $500) needs your approval."],
+      [["escalat", "human", "urgent"], "I escalated 3 cases today: a $640 refund, a social media complaint from an enterprise customer and a legal request. All three have a summary and context in your inbox."],
+      [K_HELLO, "Hi! I'm Mateo. I handle customer support over email, chat and WhatsApp, 24 hours a day. Ask me about any ticket."],
+      [[], "Got it, I'll look into it right now and get back to you with the details shortly. I'll keep working the inbox in the meantime."],
+    ],
+    quick: [Q_NOW, "Which cases did you escalate?", Q_SUMMARY],
+  },
+  valentina: {
+    role: "Marketing",
+    working: [
+      "Scheduling this week's posts",
+      "Designing the Instagram carousel",
+      "Replying to LinkedIn comments",
+      "Analyzing the September campaign",
+    ],
+    kpis: [
+      { label: "Posts scheduled", value: "14" },
+      { label: "Weekly reach", value: "48.2k" },
+      { label: "Engagement", value: "+23%" },
+    ],
+    replies: [
+      [K_NOW, "I'm building next week's content calendar: 14 posts across Instagram, LinkedIn and TikTok. Right now I'm writing the carousel for the October launch and replying to comments on yesterday's post."],
+      [K_SUMMARY, "Today I published 4 pieces, replied to 63 comments and messages, and weekly reach is at 48.2k (+23% engagement vs. last week). Tuesday's short video is the best-performing content of the month."],
+      [K_PENDING, "Pending: your approval on the 3 launch posts, closing out the September campaign report and preparing 5 reel ideas for next week."],
+      [["campaign", "ads", "advert"], "The September campaign has $1,240 spent, 312 leads and a $3.97 cost per lead, 18% better than August. I recommend moving budget from Facebook to Instagram Reels."],
+      [K_HELLO, "Hi! I'm Valentina. I run social media and content: I write, design, schedule and engage with the community. What do you need?"],
+      [[], "Love it! I'll add it to the content calendar and show you a draft in a few minutes."],
+    ],
+    quick: [Q_NOW, "How's the campaign going?", Q_PENDING],
+  },
+  nicolas: {
+    role: "Engineering",
+    working: [
+      "Fixing a checkout bug",
+      "Running the test suite",
+      "Reviewing a pull request",
+      "Deploying to staging",
+    ],
+    kpis: [
+      { label: "PRs today", value: "5" },
+      { label: "Tests", value: "248 ✓" },
+      { label: "Uptime", value: "99.98%" },
+    ],
+    replies: [
+      [K_NOW, "I'm fixing a bug in the checkout: the discount wasn't applied when coupons were typed in uppercase. The fix is ready with tests (248 passing) and I'm deploying it to staging for you to review."],
+      [K_SUMMARY, "Today: 5 pull requests, 2 deployed to production, 0 incidents. I cut the catalog load time from 2.4s to 0.9s and documented the orders endpoint."],
+      [K_PENDING, "Pending: your review of PR #482 (checkout), migrating the staging database tonight and updating the dependencies with security alerts."],
+      [["bug", "error", "fail", "broken", "down"], "The only open bug is the checkout one, already fixed and in testing. Production is stable: 99.98% uptime this month, no 5xx errors in the last 6 hours."],
+      [K_HELLO, "Hi! I'm Nicolás, the team's software engineer. I write code, tests and deployments. Ask me about any technical task."],
+      [[], "Understood. I'll create the task, estimate the effort and propose a plan in the next PR."],
+    ],
+    quick: [Q_NOW, "Are there any bugs?", Q_SUMMARY],
+  },
+  camila: {
+    role: "Finance",
+    working: [
+      "Reconciling bank payments",
+      "Issuing electronic invoices",
+      "Preparing the cash flow",
+      "Reviewing September expenses",
+    ],
+    kpis: [
+      { label: "Invoices issued", value: "42" },
+      { label: "Collected today", value: "$12,480" },
+      { label: "Receivable", value: "$31,200" },
+    ],
+    replies: [
+      [K_NOW, "I'm reconciling Banco Pichincha payments against the SRI invoices: 42 invoices issued today, 39 already collected. Right now I'm matching 3 unreferenced transfers against the customer list."],
+      [K_SUMMARY, "Today: $12,480 collected, $31,200 receivable (4 overdue invoices), 42 invoices issued to the SRI with no rejections. The 30-day projected cash flow closes positive at $58,900."],
+      [K_PENDING, "Pending: payment reminders for the 4 overdue invoices, filing VAT before the 20th and your approval for Friday's supplier payment ($8,350)."],
+      [["cash", "flow", "money", "collect", "receivable"], "Cash flow: current balance $74,300, expected 30-day income $61,200, outgoings $76,600. Closes at $58,900. No liquidity alerts."],
+      [K_HELLO, "Hi! I'm Camila. I handle invoicing, collections and financial reports. Which number do you need?"],
+      [[], "I'll check it against the accounting records and send you the details in a spreadsheet in a few minutes."],
+    ],
+    quick: [Q_NOW, "How's the cash flow?", Q_PENDING],
+  },
+  andres: {
+    role: "Operations",
+    working: [
+      "Coordinating the team's schedule",
+      "Confirming appointments over WhatsApp",
+      "Ordering supplies from the vendor",
+      "Updating inventory",
+    ],
+    kpis: [
+      { label: "Appointments confirmed", value: "23" },
+      { label: "Orders in progress", value: "7" },
+      { label: "Inventory OK", value: "98%" },
+    ],
+    replies: [
+      [K_NOW, "I'm confirming tomorrow's appointments over WhatsApp: 23 confirmed, 2 rescheduled. Right now I'm ordering the supplies that dropped below the inventory minimum from the vendor."],
+      [K_SUMMARY, "Today: 23 appointments confirmed, 2 reschedules, 7 vendor orders in progress and inventory at 98%. Zero unconfirmed customers."],
+      [K_PENDING, "Pending: receiving the supplies order on Thursday, scheduling the monthly team meeting and your sign-off to renew the cleaning contract."],
+      [["schedule", "appointment", "meeting", "calendar", "agenda"], "Tomorrow you have 3 meetings: 9:00 AM with Grupo Andino, 11:30 AM internal review and 3:00 PM demo with Farmacias Cruz. I left you 45 minutes free at midday."],
+      [K_HELLO, "Hi! I'm Andrés. I coordinate the schedule, vendors and inventory. Tell me what you need organized."],
+      [[], "Done, I'll coordinate it. I'll confirm here as soon as it's sorted."],
+    ],
+    quick: [Q_NOW, "How's the schedule looking?", Q_SUMMARY],
+  },
+  lucia: {
+    role: "People",
+    working: ["Screening candidates", "Scheduling interviews", "Preparing onboarding", "Updating payroll"],
+    kpis: [
+      { label: "Candidates", value: "24" },
+      { label: "Interviews", value: "5" },
+      { label: "Onboardings", value: "2" },
+    ],
+    replies: [
+      [K_NOW, "I'm screening 24 candidates for the support role and scheduling 5 interviews for this week. Now I'm preparing onboarding for the two new hires."],
+      [K_SUMMARY, "Today: 24 candidates screened, 5 interviews scheduled, 2 onboardings ready and September payroll reviewed with no discrepancies."],
+      [K_PENDING, "Pending: your approval of the offer for the sales role and confirming the date of the monthly training."],
+      [K_HELLO, "Hi! I'm Lucía. I look after people: recruiting, onboarding and team culture."],
+      [[], "Noted. I'll coordinate it with the team and confirm here."],
+    ],
+    quick: [Q_NOW, Q_SUMMARY, Q_PENDING],
+  },
+  diego: {
+    role: "Design",
+    working: ["Designing the checkout screen", "Tuning the design system", "Preparing the prototype", "Reviewing accessibility"],
+    kpis: [
+      { label: "Screens", value: "12" },
+      { label: "Prototypes", value: "3" },
+      { label: "User tests", value: "4" },
+    ],
+    replies: [
+      [K_NOW, "I'm designing the new checkout screen: 12 screens done and a clickable prototype for Thursday's demo."],
+      [K_SUMMARY, "Today: 12 screens, 3 prototypes and 4 user tests. The new pay button lifted conversion 9% in testing."],
+      [K_PENDING, "Pending: your feedback on the color palette and exporting the icons for Nicolás."],
+      [K_HELLO, "Hi! I'm Diego. I design the product: interfaces, prototypes and user testing."],
+      [[], "Good idea. I'll try it in the prototype and show you two options."],
+    ],
+    quick: [Q_NOW, Q_SUMMARY, Q_PENDING],
+  },
+  emma: {
+    role: "Legal",
+    working: ["Reviewing the Grupo Andino contract", "Updating the data policy", "Preparing the NDA", "Reviewing the terms of service"],
+    kpis: [
+      { label: "Contracts", value: "7" },
+      { label: "Reviews", value: "15" },
+      { label: "Open risks", value: "1" },
+    ],
+    replies: [
+      [K_NOW, "I'm reviewing the Grupo Andino contract: 7 contracts in progress, 15 clauses reviewed today and a single open risk (90-day payment terms)."],
+      [K_SUMMARY, "Today: 7 contracts reviewed, the data policy updated and the Farmacias Cruz NDA ready for signature."],
+      [K_PENDING, "Pending: your decision on Grupo Andino's payment terms and signing the Farmacias Cruz NDA."],
+      [K_HELLO, "Hi! I'm Emma. I review contracts, policies and compliance."],
+      [[], "I'll review it from a legal standpoint and send you a summary of the risks."],
+    ],
+    quick: [Q_NOW, Q_SUMMARY, Q_PENDING],
+  },
+  tomas: {
+    role: "Data",
+    working: ["Training the churn model", "Cleaning sales data", "Building the dashboard", "Analyzing the campaign"],
+    kpis: [
+      { label: "Models", value: "3" },
+      { label: "Accuracy", value: "94%" },
+      { label: "Reports", value: "8" },
+    ],
+    replies: [
+      [K_NOW, "I'm training the churn model on September data: 94% accuracy. I'm also cleaning the sales data for the dashboard."],
+      [K_SUMMARY, "Today: 3 models updated, 8 reports generated and the operations dashboard running on real-time data."],
+      [K_PENDING, "Pending: validating the model with Sofía and publishing the weekly report on Friday."],
+      [K_HELLO, "Hi! I'm Tomás. I analyze data and train models for the team."],
+      [[], "I'll check the data and bring you the exact figure in a moment."],
+    ],
+    quick: [Q_NOW, Q_SUMMARY, Q_PENDING],
+  },
+  ana: {
+    role: "Reception",
+    working: ["Greeting visitors", "Confirming today's appointments", "Handling packages", "Answering calls"],
+    kpis: [
+      { label: "Visitors today", value: "9" },
+      { label: "Calls", value: "31" },
+      { label: "Appointments", value: "6" },
+    ],
+    replies: [
+      [K_NOW, "I'm at the front desk: 9 visitors checked in today, 31 calls answered and 6 appointments confirmed. Right now I'm waiting for the Grupo Andino team."],
+      [K_SUMMARY, "Today: 9 visitors, 31 calls, 6 appointments and 3 packages received. No unregistered visits."],
+      [K_PENDING, "Pending: the Grupo Andino visit at 3:00 PM and confirming Friday's catering."],
+      [K_HELLO, "Welcome! I'm Ana. I run the front desk: visitors, calls and the schedule."],
+      [[], "Happy to, I'll take care of it right now."],
+    ],
+    quick: [Q_NOW, "Who's coming in today?", Q_SUMMARY],
+  },
+};
+
+const cache = new Map<Lang, Bot[]>();
+
+/** The bots with their text in `lang`. Memoized per language. */
+export function botsFor(lang: Lang): Bot[] {
+  const hit = cache.get(lang);
+  if (hit) return hit;
+  const bots = lang === "es" ? BASE : BASE.map((b) => ({ ...b, ...(EN[b.id] ?? {}) }));
+  cache.set(lang, bots);
+  return bots;
+}
+
+export function botById(lang: Lang, id: string): Bot | undefined {
+  return botsFor(lang).find((b) => b.id === id);
+}
 
 export function reply(bot: Bot, text: string): string {
   const t = text
