@@ -1,16 +1,19 @@
-// A low-poly stylised office worker: normal human proportions (about seven
-// heads tall, slim), faceted flat-shaded surfaces built from a handful of
-// tapered boxes, six/seven-sided tubes and eight-segment lathes, a simple face
-// (small eyes, thin brows, a small mouth, a wedge nose), chunky angular hair
-// and streetwear / office-casual outfits: hoodies with a hood, kangaroo pocket
-// and drawstrings, tees, sweaters, collared shirts with ties and lanyards,
-// blazers with lapels, straight trousers or a skirt, chunky sneakers with
-// white soles, flats, boots and heels. Everything rigid is merged per
+// A stylised office worker in the "smooth low-poly game character" style: normal
+// human proportions (about seven heads tall, slim), smooth-shaded skin, hair
+// and trousers, cloth with a faint facet. The skull, torso, pelvis, hair caps
+// and beard are parametric surfaces (elliptical rings that follow a profile),
+// limbs are ten-sided tapered tubes with ball joints, hands a palm, a curled
+// finger block and a thumb. The face has a forehead, cheekbones, a bridged
+// nose, eyes with a white, an iris and an upper lid, thin brows, closed lips
+// and ears. Outfits: hoodies with a hood ring, drawstrings, kangaroo pocket
+// and ribbing, tees, sweaters, collared shirts with ties and lanyards, blazers
+// with lapels, cargo or straight trousers or a skirt, sneakers with a white toe
+// cap, laces and sole, flats, boots and heels. Everything rigid is merged per
 // material, so a person costs ~25 draw calls. Every joint has a current and a
 // target value; poses only set targets and `update` eases towards them, so any
 // state change blends.
 import * as THREE from "three";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 
 // Body plan (metres). The leg pivots sit HIP_OFF below the hips group; with the
 // thigh level on a seat the pivot is ~0.08 above the cushion (thigh radius), so
@@ -60,21 +63,25 @@ const REST = {
 };
 
 const PI = Math.PI;
-/** matte, flat-shaded: every facet reads as a plane */
-const std = (color, roughness = 0.85, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, metalness: 0, flatShading: true, ...extra });
-const EYE_COLORS = { brown: "#3a2418", blue: "#34557d", green: "#3a6448", hazel: "#6b4a26", dark: "#17161a" };
+/** smooth-shaded standard material; skin is slightly glossy, cloth matte */
+const std = (color, roughness = 0.85, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, metalness: 0, ...extra });
+const EYE_COLORS = { brown: "#4a2c1a", blue: "#3d6a9a", green: "#4a7a55", hazel: "#7a5a2a", dark: "#1c1a1e" };
+const SCLERA = std("#f1eee8", 0.35);
+const PUPIL = std("#0e0d10", 0.3);
 const MOUTH = std("#4a2226", 0.6);
 const TEETH = std("#f3f1ea", 0.5);
 const GLASS = std("#2a2a30", 0.5, { metalness: 0.3 });
-const WHITE = std("#ebe9e2", 0.9);
+const WHITE = std("#ebe9e2", 0.8);
 const DARK = std("#26262c", 0.9);
 const BADGE = std("#2a2a30", 0.7);
 const BADGE_ICON = std("#f2c14e", 0.7);
-const STRING = std("#e6e3da", 0.9);
+const STRING = std("#eeece6", 0.8);
+const AGLET = std("#d9d7d1", 0.45);
+const HOOD_IN = std("#26262a", 0.95, { side: THREE.DoubleSide });
 const MUG_IN = std("#ffffff", 0.5);
 const PHONE = std("#1a1b20", 0.4, { metalness: 0.3 });
 const PHONE_SCREEN = new THREE.MeshStandardMaterial({ color: "#8fd3ff", emissive: "#5aa9ff", emissiveIntensity: 0.9, roughness: 0.3 });
-const SOLE = std("#ecebe6", 0.9);
+const SOLE = std("#ecebe6", 0.75);
 
 /** Merge the rigid children of a group (everything not flagged `dynamic`) into one mesh per material. */
 function mergeRigid(group, add) {
@@ -116,97 +123,267 @@ function frustum(wb, db, wt, dt, h, zb = 0, zt = 0) {
   g.computeVertexNormals();
   return g;
 }
-/** faceted limb segment: a seven-sided tapered tube along y */
-const tube = (rt, rb, h, n = 7) => new THREE.CylinderGeometry(rt, rb, h, n);
-/** faceted ball for joints, buns and curls */
-const blob = (r, detail = 1) => new THREE.IcosahedronGeometry(r, detail);
-const lathe = (pts, seg = 8, start = PI / 8, len = PI * 2) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg, start, len);
-
-// ---- head profile (radius, height above the neck pivot); lathed in 8 segments starting at
-// 22.5° so a flat facet faces forward, then stretched 1.1× front-to-back
-const HEAD = [[0, 0], [0.034, 0], [0.06, 0.022], [0.075, 0.065], [0.083, 0.11], [0.086, 0.155], [0.081, 0.195], [0.062, 0.225], [0.033, 0.242], [0, 0.248]];
-const HEAD_TOP = HEAD[HEAD.length - 1][1];
-const HEAD_DZ = 1.1;
-const SIDE_K = Math.cos(PI / 8);
-function headR(y) {
-  for (let i = 1; i < HEAD.length; i++) {
-    const [r0, y0] = HEAD[i - 1], [r1, y1] = HEAD[i];
-    if (y <= y1) return r0 + (r1 - r0) * ((y - y0) / (y1 - y0));
-  }
-  return 0;
-}
-/** z of the front facet at height y */
-const faceZ = (y) => headR(y) * HEAD_DZ * SIDE_K;
-/** x of the side facet at height y */
-const sideX = (y) => headR(y) * SIDE_K;
-/** A shell hugging the skull between y0 and y1, pushed out by `scale`, with rims folded back to the skull so the edges look solid. */
-function headShell(y0, y1, scale, seg = 8, start = PI / 8, len = PI * 2) {
-  const r0 = headR(y0);
-  const pts = r0 > 0 ? [[r0 * 0.96, y0], [r0 * scale, y0]] : [[0, y0]];
-  for (const [r, y] of HEAD) if (y > y0 && y < y1) pts.push([r * scale, y]);
-  pts.push([headR(y1) * scale, y1]);
-  if (y1 < HEAD_TOP) pts.push([headR(y1) * 0.96, y1]);
-  const g = lathe(pts, seg, start, len);
-  g.scale(1, 1, HEAD_DZ);
+/** smooth limb segment: an eight-sided tapered tube along y (aligned with the 8-segment ball joints) */
+const tube = (rt, rb, h, n = 8) => new THREE.CylinderGeometry(rt, rb, h, n);
+/** smooth ball for joints and buns */
+const ball = (r, w = 8, h = 6) => new THREE.SphereGeometry(r, w, h);
+/** an ellipsoid with radii rx, ry, rz: hair locks, ears, lips, shoe uppers */
+function blob(rx, ry, rz, w = 8, h = 6) {
+  const g = new THREE.SphereGeometry(1, w, h);
+  g.scale(rx, ry, rz);
   return g;
 }
+/** the same attribute set on every geometry so they can be merged */
+function finish(g) {
+  g.deleteAttribute("normal");
+  g.deleteAttribute("uv");
+  const m = mergeVertices(g);
+  m.setAttribute("uv", new THREE.Float32BufferAttribute(new Float32Array(m.attributes.position.count * 2), 2));
+  m.computeVertexNormals();
+  return m;
+}
+/** A box with rounded edges (a superellipsoid; n = 2 is a ball, 8 nearly square): palms, fingers, pockets. */
+function soft(w, h, d, n = 5, seg = 2) {
+  const g = new THREE.BoxGeometry(w, h, d, seg, seg, seg);
+  const p = g.attributes.position;
+  const hw = w / 2, hh = h / 2, hd = d / 2;
+  for (let i = 0; i < p.count; i++) {
+    const cx = p.getX(i) / hw, cy = p.getY(i) / hh, cz = p.getZ(i) / hd;
+    const k = (Math.abs(cx) ** n + Math.abs(cy) ** n + Math.abs(cz) ** n) ** (-1 / n);
+    p.setXYZ(i, cx * k * hw, cy * k * hh, cz * k * hd);
+  }
+  return finish(g);
+}
+/** Cloth look: blend the smooth normals towards the face normals by `k`, so the surface keeps a faint facet. */
+function facet(geo, k = 0.5) {
+  const g = geo.index ? geo.toNonIndexed() : geo;
+  const p = g.attributes.position, n = g.attributes.normal;
+  const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3(), N = new THREE.Vector3(), S = new THREE.Vector3();
+  for (let i = 0; i < p.count; i += 3) {
+    A.fromBufferAttribute(p, i);
+    B.fromBufferAttribute(p, i + 1);
+    C.fromBufferAttribute(p, i + 2);
+    N.subVectors(B, A).cross(S.subVectors(C, A)).normalize();
+    for (let j = 0; j < 3; j++) {
+      S.fromBufferAttribute(n, i + j).lerp(N, k).normalize();
+      n.setXYZ(i + j, S.x, S.y, S.z);
+    }
+  }
+  return g;
+}
+/**
+ * A smooth surface sampled from `f(v, a, r, pole)` on `rows` rings of `segs` columns; `a` is the
+ * angle around y (0 faces +z). `arc` = [a0, a1] makes an open strip instead of a ring;
+ * `poleBottom` / `poleTop` collapse the first / last row into one vertex.
+ */
+function surface(segs, rows, f, { arc = null, poleBottom = false, poleTop = false } = {}) {
+  const cols = arc ? segs + 1 : segs;
+  const pos = [], idx = [], start = [];
+  const v = new THREE.Vector3();
+  const angle = (s) => (arc ? arc[0] + ((arc[1] - arc[0]) * s) / segs : (s / segs) * PI * 2);
+  for (let r = 0; r < rows; r++) {
+    start.push(pos.length / 3);
+    const pole = (r === 0 && poleBottom) || (r === rows - 1 && poleTop);
+    const n = pole ? 1 : cols;
+    for (let s = 0; s < n; s++) {
+      f(v, angle(s), r, pole);
+      pos.push(v.x, v.y, v.z);
+    }
+  }
+  for (let r = 0; r < rows - 1; r++) {
+    const a0 = start[r], b0 = start[r + 1];
+    const ap = r === 0 && poleBottom, bp = r + 1 === rows - 1 && poleTop;
+    for (let s = 0; s < segs; s++) {
+      const s1 = (s + 1) % cols;
+      if (ap) idx.push(a0, b0 + s1, b0 + s);
+      else if (bp) idx.push(a0 + s, a0 + s1, b0);
+      else idx.push(a0 + s, a0 + s1, b0 + s1, a0 + s, b0 + s1, b0 + s);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("uv", new THREE.Float32BufferAttribute(new Float32Array((pos.length / 3) * 2), 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+/** Linear interpolation of a profile ([y, ...values] rows sorted by y) at height y. */
+function profileAt(rows, y) {
+  if (y <= rows[0][0]) return rows[0].slice(1);
+  for (let i = 1; i < rows.length; i++) {
+    const a = rows[i - 1], b = rows[i];
+    if (y <= b[0]) {
+      const t = (y - a[0]) / (b[0] - a[0]);
+      return a.slice(1).map((v, k) => v + ((b[k + 1] ?? v) - v) * t);
+    }
+  }
+  return rows[rows.length - 1].slice(1);
+}
+/** Point of an elliptical ring: half-width X, front depth Zf, back depth Zb; `ez` < 1 flattens the front, `ex` < 1 flattens the sides. */
+function ringPoint(v, a, y, X, Zf, Zb, ez = 1, ex = 1) {
+  const s = Math.sin(a), c = Math.cos(a);
+  v.set(X * Math.sign(s) * Math.abs(s) ** ex, y, c >= 0 ? Zf * c ** ez : -Zb * (-c) ** ez);
+}
+/** A body of stacked elliptical rings from `rows` = [y, X, Zf, Zb?, ez?, ex?]; rows with X = 0 are poles. */
+function rowsSurface(rows, segs = 12) {
+  return surface(segs, rows.length, (v, a, r) => ringPoint(v, a, ...rows[r]), { poleBottom: rows[0][1] === 0, poleTop: rows[rows.length - 1][1] === 0 });
+}
 
-/** Chunky angular hair: lathed shells over the crown, sides and nape, plus wedges, slabs, a bun, a tail or curls per style. */
+// ---- head: profile rows [y above the neck pivot, half width, front depth, back depth, front flatness, side flatness]
+const HEAD = [
+  [-0.012, 0, 0, 0],
+  [0.0, 0.036, 0.05, 0.032],
+  [0.012, 0.05, 0.068, 0.042],
+  [0.035, 0.064, 0.078, 0.054, 0.85],
+  [0.065, 0.071, 0.083, 0.072, 0.75],
+  [0.095, 0.079, 0.086, 0.088, 0.72],
+  [0.125, 0.084, 0.088, 0.098, 0.72, 0.9],
+  [0.15, 0.086, 0.087, 0.102, 0.78, 0.88],
+  [0.175, 0.086, 0.086, 0.104, 0.9, 0.88],
+  [0.2, 0.083, 0.079, 0.102, 1, 0.9],
+  [0.222, 0.074, 0.066, 0.09],
+  [0.24, 0.053, 0.044, 0.066],
+  [0.25, 0, 0, 0],
+];
+const HEAD_TOP = HEAD[HEAD.length - 1][0];
+const HEAD_C = 0.13; // hair caps scale about this height
+/**
+ * Point on the skull at angle `a` and height `y`, scaled by `scale` about the head centre.
+ * `drop` lets y go below the jaw for hair curtains: the ring keeps the cheek width and flares.
+ */
+function headAt(v, a, y, scale = 1, drop = false) {
+  let k = scale;
+  let py = y;
+  if (drop && y < 0.105) {
+    k *= 1 + 0.9 * (0.105 - y);
+    py = 0.105;
+  }
+  const [X, Zf, Zb, ez, ex] = profileAt(HEAD, py);
+  ringPoint(v, a, y, X, Zf, Zb, ez, ex);
+  v.x *= k;
+  v.z *= k;
+  v.y = HEAD_C + (v.y - HEAD_C) * scale;
+}
+/** z of the face surface at (x, y) */
+function faceZ(x, y) {
+  const [X, Zf, , ez = 1, ex = 1] = profileAt(HEAD, y);
+  const s = Math.min(1, Math.abs(x) / X) ** (1 / ex);
+  return Zf * Math.sqrt(Math.max(0, 1 - s * s)) ** ez;
+}
+/** half width of the head at height y */
+const sideX = (y) => profileAt(HEAD, y)[0];
+/**
+ * A chunky hair cap over the skull: the bottom edge follows `hairline(a)` (folded back into the
+ * skull so it reads solid), the shell sits `scale(a, t)` out from the skull and closes at the crown.
+ */
+function hairCap(hairline, scale, rows = 7, segs = 16) {
+  return surface(segs, rows, (v, a, r, pole) => {
+    if (pole) return headAt(v, 0, HEAD_TOP, scale(0, 1));
+    const y0 = hairline(a);
+    const t = r <= 1 ? 0 : (r - 1) / (rows - 2);
+    const y = y0 + (HEAD_TOP - y0) * t;
+    headAt(v, a, y, r === 0 ? 0.985 : scale(a, t), true);
+  }, { poleTop: true });
+}
+
+/** Chunky hair with volume: a smooth cap plus a few thick locks, a bun, a tail, curtains or curls per style. */
 function buildHair(head, look, hairMat, add) {
   const s = look.hairStyle;
   if (s === "bald") return;
-  const shell = (y0, y1, start, len, scale = 1.07) => add(head, mesh(headShell(y0, y1, scale, Math.round(len / (PI / 4)), start, len), hairMat));
-  const front = { short: 0.19, swept: 0.185, bun: 0.185, ponytail: 0.185, long: 0.175, curly: 0.17, bob: 0.19 }[s] ?? 0.185;
-  const side = { short: 0.155, swept: 0.15, bun: 0.15, ponytail: 0.15, long: 0.12, curly: 0.12, bob: 0.12 }[s] ?? 0.15;
-  const back = { short: 0.12, swept: 0.115, bun: 0.13, ponytail: 0.125, long: 0.1, curly: 0.1, bob: 0.1 }[s] ?? 0.12;
-  shell(front, HEAD_TOP, PI / 8, PI * 2); // crown, all round from the front hairline up
-  shell(side, front + 0.012, (3 * PI) / 8, (5 * PI) / 4); // sides and back, from above the ears
-  shell(back, side + 0.012, (5 * PI) / 8, (3 * PI) / 4); // nape
-  const wedge = (geo, x, y, z, rx = 0, ry = 0, rz = 0) => {
-    const m = mesh(geo, hairMat, x, y, z);
-    m.rotation.set(rx, ry, rz);
+  const f = (a) => 0.5 + 0.5 * Math.cos(a); // 1 at the front, 0 at the nape
+  const lock = (rx, ry, rz, x, y, z, ax = 0, ay = 0, az = 0) => {
+    const m = mesh(blob(rx, ry, rz, 7, 5), hairMat, x, y, z);
+    m.rotation.set(ax, ay, az);
     add(head, m);
     return m;
   };
-  if (s === "short") wedge(box(0.12, 0.022, 0.05), 0, 0.243, 0.045, -0.5);
+  const cap = (hairline, scale, rows) => add(head, mesh(hairCap(hairline, scale, rows), hairMat));
+  const thick = (base, top = 0.05) => (a, t) => base + top * t;
+  if (s === "short") {
+    cap((a) => 0.108 + 0.088 * f(a) ** 1.3, thick(1.15, 0.06));
+    lock(0.045, 0.011, 0.065, 0.028, 0.262, 0.02, 0, 0.5, -0.1);
+    lock(0.04, 0.01, 0.055, -0.03, 0.26, -0.02, 0, -0.4, 0.08);
+    lock(0.05, 0.012, 0.028, 0.005, 0.214, 0.09, -0.5, 0, -0.08);
+  }
   if (s === "swept") {
-    // a thick lock swept up and to one side over the forehead, a smaller one falling at the temple
-    wedge(frustum(0.15, 0.07, 0.09, 0.04, 0.055, 0, -0.01), 0.015, 0.235, 0.05, -0.35, 0, -0.25);
-    wedge(frustum(0.07, 0.06, 0.035, 0.03, 0.06), 0.065, 0.21, 0.045, -0.2, 0.3, -0.7);
+    // a thick fringe swept up and across the forehead, a lock at the temple, two on top
+    cap((a) => 0.11 + 0.08 * f(a) ** 1.3, thick(1.16, 0.06));
+    lock(0.072, 0.016, 0.034, 0.018, 0.224, 0.086, -0.5, 0.05, -0.28);
+    lock(0.024, 0.042, 0.026, 0.082, 0.2, 0.045, 0, 0.5, -0.22);
+    lock(0.05, 0.011, 0.07, -0.025, 0.262, 0.012, 0, -0.5, 0.06);
+  }
+  if (s === "bun" || s === "ponytail") {
+    // pulled back tight: a thinner cap, a small lift at the front
+    cap((a) => 0.11 + 0.08 * f(a) ** 1.4, thick(1.1, 0.03));
+    lock(0.06, 0.012, 0.028, 0, 0.216, 0.088, -0.45);
   }
   if (s === "bun") {
-    add(head, mesh(blob(0.042, 1), hairMat, 0, 0.215, -0.105));
-    add(head, mesh(tube(0.03, 0.03, 0.012, 6), DARK, 0, 0.215, -0.105).rotateX(PI / 2));
+    add(head, mesh(ball(0.046, 10, 7), hairMat, 0, 0.215, -0.11));
+    add(head, mesh(new THREE.TorusGeometry(0.03, 0.006, 4, 10), DARK, 0, 0.215, -0.108));
   }
   if (s === "ponytail") {
-    const tail = mesh(tube(0.028, 0.013, 0.23, 5), hairMat, 0, 0.05, -0.122);
-    tail.rotation.x = 0.25;
+    const tail = mesh(tube(0.03, 0.012, 0.26, 8), hairMat, 0, 0.03, -0.128);
+    tail.rotation.x = 0.28;
     add(head, tail);
-    add(head, mesh(tube(0.033, 0.033, 0.02, 6), DARK, 0, 0.155, -0.098).rotateX(0.25));
+    add(head, mesh(ball(0.036, 8, 6), hairMat, 0, 0.152, -0.108));
+    add(head, mesh(new THREE.TorusGeometry(0.03, 0.006, 4, 10), DARK, 0, 0.152, -0.108).rotateX(0.25));
   }
   if (s === "bob") {
-    for (const x of [-1, 1]) add(head, mesh(box(0.045, 0.15, 0.13), hairMat, x * 0.097, 0.1, -0.012));
-    add(head, mesh(box(0.19, 0.17, 0.06), hairMat, 0, 0.11, -0.088));
-    wedge(box(0.155, 0.04, 0.045), 0, 0.212, 0.062, -0.35); // straight fringe, ending above the brows
+    // a rounded curtain down to the jaw all round, a straight fringe ending above the brows
+    cap((a) => (f(a) > 0.82 ? 0.19 : 0.03 - 0.02 * (1 - f(a))), thick(1.12, 0.04), 8);
+    lock(0.07, 0.016, 0.03, 0, 0.205, 0.09, -0.35);
   }
   if (s === "long") {
-    for (const x of [-1, 1]) add(head, mesh(box(0.05, 0.24, 0.13), hairMat, x * 0.1, 0.05, -0.02));
-    add(head, mesh(box(0.185, 0.27, 0.07), hairMat, 0, 0.065, -0.088));
-    wedge(frustum(0.13, 0.05, 0.08, 0.03, 0.04), 0.02, 0.205, 0.068, -0.4, 0, -0.2); // side-swept fringe
+    // a curtain past the shoulders at the back and to the collarbone at the sides, a side-swept fringe
+    cap((a) => (f(a) > 0.8 ? 0.185 : -0.02 - 0.08 * (1 - f(a)) ** 2), thick(1.12, 0.04), 9);
+    lock(0.07, 0.016, 0.03, 0.018, 0.21, 0.088, -0.45, 0, -0.22);
   }
   if (s === "curly") {
-    // a cloud of faceted curls around the crown and the sides
+    // a bumpy thick cap and a crowd of curls around its edge and on top
+    cap((a) => 0.11 + 0.07 * f(a) ** 1.3, (a, t) => 1.2 + 0.05 * t + 0.04 * Math.sin(a * 4 + t * 9) * Math.sin(t * 5 + 1));
     for (let i = 0; i < 9; i++) {
-      const a = PI * 0.33 + (i / 8) * PI * 1.34, r = 0.095;
-      add(head, mesh(blob(0.04, 0), hairMat, Math.sin(a) * r, 0.16 + (i % 2) * 0.03, Math.cos(a) * r * HEAD_DZ)).castShadow = false;
+      const a = PI * 0.3 + (i / 8) * PI * 1.4, r = 0.098;
+      add(head, mesh(ball(0.036, 6, 5), hairMat, Math.sin(a) * r, 0.155 + (i % 2) * 0.035, Math.cos(a) * r * 1.08 - 0.01)).castShadow = false;
     }
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * PI * 2;
-      add(head, mesh(blob(0.04, 0), hairMat, Math.sin(a) * 0.06, 0.235, Math.cos(a) * 0.06 - 0.01)).castShadow = false;
+      add(head, mesh(ball(0.038, 6, 5), hairMat, Math.sin(a) * 0.065, 0.245, Math.cos(a) * 0.065 - 0.015)).castShadow = false;
     }
-    add(head, mesh(blob(0.045, 0), hairMat, 0, 0.262, -0.01)).castShadow = false;
+    add(head, mesh(ball(0.042, 6, 5), hairMat, 0, 0.272, -0.01)).castShadow = false;
   }
 }
+
+// ---- torso profile [y in the torso group, half width, front depth, back depth]; the hem row is added per outfit
+const TORSO = [
+  [-0.1, 0.15, 0.094, 0.09],
+  [-0.02, 0.146, 0.091, 0.088],
+  [0.1, 0.152, 0.096, 0.092],
+  [0.22, 0.166, 0.104, 0.1],
+  [0.33, 0.178, 0.104, 0.104],
+  [0.4, 0.182, 0.097, 0.102],
+  [0.44, 0.178, 0.09, 0.096],
+  [0.462, 0.14, 0.075, 0.082],
+  [0.478, 0.08, 0.052, 0.058],
+  [0.49, 0, 0, 0],
+];
+/** torso rows from `hem` up to the neck, grown by `b` all round (`y1` cuts them off early, closing flat) */
+function torsoRows(hem, b, y1 = 1) {
+  const rows = [[hem, ...profileAt(TORSO, hem)]];
+  for (const r of TORSO) if (r[0] > hem && r[0] < y1) rows.push(r);
+  if (y1 < 1) rows.push([y1, ...profileAt(TORSO, y1)], [y1, 0, 0, 0]);
+  const grown = rows.map(([y, X, Zf, Zb]) => (X ? [y, X + b, Zf + b, Zb + b] : [y, X, Zf, Zb]));
+  grown.unshift([hem, 0, 0, 0]); // closed underneath
+  return grown;
+}
+// ---- pelvis rows in the hips group
+const PELVIS = [
+  [-0.105, 0, 0, 0],
+  [-0.095, 0.125, 0.08, 0.08],
+  [-0.06, 0.16, 0.095, 0.1],
+  [0.0, 0.165, 0.095, 0.1],
+  [0.06, 0.152, 0.09, 0.092],
+  [0.07, 0, 0, 0],
+];
 
 /**
  * Build one character. `look` decides skin, hair, outfit. Returns the rig:
@@ -222,119 +399,166 @@ export function buildCharacter(bot) {
     parent.add(m);
     return m;
   };
-  const skin = std(look.skin, 0.8);
-  const hair = std(look.hair, 0.85);
+  const skin = std(look.skin, 0.55);
+  const skinDark = std(new THREE.Color(look.skin).multiplyScalar(0.7), 0.6);
+  const hair = std(look.hair, 0.55);
+  const brow = std(new THREE.Color(look.hair).multiplyScalar(0.75), 0.7);
   const shirt = std(look.shirt, 0.9);
-  const shirtDark = std(new THREE.Color(look.shirt).multiplyScalar(0.8), 0.9);
-  const jacket = look.jacket ? std(look.jacket, 0.9) : null;
-  const pants = std(look.pants, 0.9);
-  const shoes = std(look.shoes, look.shoeStyle === "heels" || look.shoeStyle === "boots" ? 0.45 : 0.8);
-  const lips = std(look.lips || new THREE.Color(look.skin).multiplyScalar(0.72), 0.7);
-  const eye = std(EYE_COLORS[look.eyes] || EYE_COLORS.dark, 0.4);
+  const shirtDark = std(new THREE.Color(look.shirt).multiplyScalar(0.72), 0.9);
+  const jacket = look.jacket ? std(look.jacket, 0.85) : null;
+  const pants = std(look.pants, 0.8);
+  const pantsDark = std(new THREE.Color(look.pants).multiplyScalar(0.75), 0.8);
+  const shoes = std(look.shoes, look.shoeStyle === "heels" || look.shoeStyle === "boots" ? 0.4 : 0.7);
+  const lips = std(look.lips || new THREE.Color(look.skin).multiplyScalar(0.8), 0.5);
+  const eye = std(EYE_COLORS[look.eyes] || EYE_COLORS.dark, 0.3);
   const style = look.shirtStyle || "tee";
   const bulk = style === "hoodie" || style === "sweater" ? 0.015 : 0; // knits sit looser than a shirt
   const shirtLight = new THREE.Color(look.shirt).getHSL({}).l > 0.6;
   const belt = !look.skirt && !jacket && (style === "collar" || style === "blouse"); // tucked shirt shows the belt
+  const cargo = !look.skirt && !jacket && (style === "hoodie" || style === "tee"); // streetwear: cargo pockets, gathered cuffs
 
   // ---- hips + legs ----
   const hips = new THREE.Group();
   hips.position.y = HIP_STAND;
   root.add(hips);
-  if (look.skirt) add(hips, mesh(frustum(0.36, 0.24, 0.29, 0.18, 0.27), pants, 0, -0.085, 0));
-  else {
-    add(hips, mesh(frustum(0.31, 0.19, 0.29, 0.18, 0.15), pants, 0, -0.025, 0));
-    if (belt) add(hips, mesh(box(0.3, 0.03, 0.19), DARK, 0, 0.06, 0));
+  if (look.skirt) {
+    const skirt = rowsSurface([[-0.27, 0, 0, 0], [-0.26, 0.19, 0.125, 0.125], [-0.1, 0.17, 0.108, 0.108], [0.03, 0.158, 0.096, 0.098], [0.06, 0.15, 0.09, 0.092], [0.07, 0, 0, 0]], 14);
+    add(hips, mesh(facet(skirt, 0.45), pants));
+  } else {
+    add(hips, mesh(facet(rowsSurface(PELVIS, 12), 0.45), pants));
+    if (belt) add(hips, mesh(rowsSurface([[0.03, 0.156, 0.094, 0.096], [0.062, 0.156, 0.094, 0.096]], 12), DARK));
+    else add(hips, mesh(rowsSurface([[0.035, 0.155, 0.093, 0.095], [0.065, 0.152, 0.091, 0.093]], 12), pantsDark)); // waistband
   }
   const leg = (side) => {
     const legMat = look.skirt ? skin : pants;
     const hip = new THREE.Group();
     hip.position.set(side * 0.095, -HIP_OFF, 0);
     hips.add(hip);
-    add(hip, mesh(tube(0.078, 0.062, THIGH), legMat, 0, -THIGH / 2, 0));
+    if (look.skirt) add(hip, mesh(tube(0.076, 0.06, THIGH), skin, 0, -THIGH / 2, 0));
+    else {
+      add(hip, mesh(facet(tube(0.081, 0.066, THIGH), 0.4), pants, 0, -THIGH / 2, 0));
+      if (cargo) {
+        // cargo pocket on the outer thigh, with a flap
+        add(hip, mesh(soft(0.026, 0.1, 0.09, 6), pants, side * 0.072, -0.215, 0.02));
+        add(hip, mesh(soft(0.03, 0.022, 0.095, 6), pantsDark, side * 0.073, -0.165, 0.02));
+      }
+    }
     const knee = new THREE.Group();
     knee.position.y = -THIGH;
     hip.add(knee);
-    add(knee, mesh(blob(0.058, 1), legMat, 0, 0, 0));
-    add(knee, mesh(tube(0.058, 0.044, SHIN), legMat, 0, -SHIN / 2, 0));
+    const floor = -SHIN - ANKLE;
+    add(knee, mesh(ball(look.skirt ? 0.056 : 0.062, 8, 6), legMat, 0, 0, 0));
+    if (look.skirt) {
+      add(knee, mesh(tube(0.056, 0.042, SHIN), skin, 0, -SHIN / 2, 0));
+      add(knee, mesh(tube(0.037, 0.034, 0.07), skin, 0, -SHIN - 0.025, 0));
+    } else if (cargo) {
+      // jogger-style: the leg bunches over a ribbed cuff above the ankle
+      add(knee, mesh(facet(tube(0.06, 0.056, 0.3), 0.4), pants, 0, -0.15, 0));
+      add(knee, mesh(blob(0.061, 0.032, 0.061, 8, 6), pants, 0, -0.305, 0));
+      add(knee, mesh(tube(0.047, 0.045, 0.05), pantsDark, 0, -0.345, 0));
+      add(knee, mesh(tube(0.034, 0.032, 0.07), skin, 0, -0.39, 0));
+    } else {
+      add(knee, mesh(facet(tube(0.062, 0.055, SHIN - 0.02), 0.4), pants, 0, -(SHIN - 0.02) / 2, 0));
+      add(knee, mesh(tube(0.056, 0.056, 0.012), pantsDark, 0, -SHIN + 0.014, 0));
+      add(knee, mesh(tube(0.035, 0.033, 0.07), skin, 0, -SHIN - 0.02, 0));
+    }
     // shoes: the ankle is at -SHIN, the floor ANKLE below it
     const st = look.shoeStyle || "flats";
-    const floor = -SHIN - ANKLE;
+    const sole = (w, l, h, mat, z) => {
+      // a rounded-oval slab, extruded then laid flat
+      const pts = [];
+      for (let i = 0; i < 14; i++) {
+        const a = (i / 14) * PI * 2, c = Math.cos(a), s = Math.sin(a);
+        pts.push(new THREE.Vector2(w * Math.sign(c) * Math.abs(c) ** 0.7, l * Math.sign(s) * Math.abs(s) ** 0.75 + (s > 0 ? 0.02 : 0)));
+      }
+      const g = new THREE.ExtrudeGeometry(new THREE.Shape(pts), { depth: h, bevelEnabled: false });
+      g.rotateX(-PI / 2);
+      return add(knee, mesh(g, mat, 0, floor, z));
+    };
     if (st === "sneakers") {
-      add(knee, mesh(box(0.1, 0.03, 0.27), SOLE, 0, floor + 0.015, 0.035));
-      add(knee, mesh(frustum(0.095, 0.25, 0.08, 0.19, 0.055, 0, -0.025), shoes, 0, floor + 0.0575, 0.035));
-      add(knee, mesh(box(0.04, 0.02, 0.05), WHITE, 0, floor + 0.09, 0.055)).castShadow = false; // tongue
+      sole(0.045, 0.115, 0.018, SOLE, 0.03);
+      const cy = floor + 0.06, cz = 0.03;
+      add(knee, mesh(blob(0.047, 0.046, 0.128, 8, 6), shoes, 0, cy, cz));
+      add(knee, mesh(new THREE.SphereGeometry(1, 5, 6, PI / 3, PI / 3).scale(0.049, 0.044, 0.131), SOLE, 0, cy - 0.004, cz));
+      for (const dz of [0.025, 0.05, 0.075]) add(knee, mesh(box(0.028, 0.004, 0.007), WHITE, 0, cy + 0.046 * Math.sqrt(1 - (dz / 0.128) ** 2) - 0.002, cz + dz)).castShadow = false;
     } else if (st === "boots") {
-      add(knee, mesh(box(0.1, 0.02, 0.26), DARK, 0, floor + 0.01, 0.04));
-      add(knee, mesh(frustum(0.095, 0.25, 0.085, 0.21, 0.06, 0, -0.015), shoes, 0, floor + 0.05, 0.04));
-      add(knee, mesh(tube(0.06, 0.064, 0.12), shoes, 0, -SHIN + 0.05, 0));
+      sole(0.048, 0.118, 0.022, DARK, 0.035);
+      add(knee, mesh(blob(0.047, 0.045, 0.128, 8, 6), shoes, 0, floor + 0.064, 0.035));
+      add(knee, mesh(tube(0.05, 0.055, 0.13), shoes, 0, -SHIN + 0.04, 0));
     } else if (st === "heels") {
-      const foot = mesh(frustum(0.08, 0.22, 0.068, 0.19, 0.035, 0, -0.01), shoes, 0, floor + 0.045, 0.05);
-      foot.rotation.x = 0.25;
+      sole(0.038, 0.1, 0.008, DARK, 0.05);
+      const foot = mesh(blob(0.039, 0.028, 0.115, 8, 6), shoes, 0, floor + 0.048, 0.05);
+      foot.rotation.x = 0.28;
       add(knee, foot);
-      add(knee, mesh(box(0.018, 0.07, 0.018), shoes, 0, floor + 0.035, -0.055));
+      add(knee, mesh(box(0.016, 0.07, 0.016), shoes, 0, floor + 0.035, -0.055));
     } else {
-      add(knee, mesh(box(0.09, 0.012, 0.25), DARK, 0, floor + 0.006, 0.04));
-      add(knee, mesh(frustum(0.088, 0.24, 0.07, 0.19, 0.045, 0, -0.02), shoes, 0, floor + 0.0345, 0.04));
+      sole(0.043, 0.11, 0.012, DARK, 0.04);
+      add(knee, mesh(blob(0.043, 0.032, 0.12, 8, 6), shoes, 0, floor + 0.04, 0.04));
     }
     return { hip, knee };
   };
   const L = leg(-1), Rg = leg(1);
 
-  // ---- torso: abdomen + chest with a vertical front, then the outfit ----
+  // ---- torso: a smooth body of stacked rings, then the outfit ----
   const torso = new THREE.Group();
   torso.position.y = 0.1;
   hips.add(torso);
-  const hem = belt ? -0.03 : -0.08; // an untucked shirt hangs over the hips
-  const FZ = 0.095 + bulk; // z of the torso's front face
-  const body = (mat, w0, w1, y0, y1, d0, d1, fz = FZ) => add(torso, mesh(frustum(w0, d0, w1, d1, y1 - y0, fz - d0 / 2, fz - d1 / 2), mat, 0, (y0 + y1) / 2, 0));
-  body(shirt, 0.28 + bulk, 0.32 + bulk, hem, 0.22, 0.17 + bulk, 0.19 + bulk);
-  body(shirt, 0.32 + bulk, 0.37 + bulk, 0.22, 0.44, 0.19 + bulk, 0.2 + bulk);
-  add(torso, mesh(tube(0.038, 0.046, 0.1, 6), skin, 0, 0.455, 0));
-  const front = (geo, mat, x, y, dz = 0) => add(torso, mesh(geo, mat, x, y, (jacket ? FZ + 0.025 : FZ) + dz));
-  if (style === "tee") add(torso, mesh(new THREE.TorusGeometry(0.052, 0.012, 4, 8), shirtDark, 0, 0.445, -0.005).rotateX(PI / 2));
+  const hem = belt ? -0.03 : -0.1; // an untucked shirt hangs over the hips
+  const JB = jacket ? 0.025 : 0;
+  /** z of the outfit's front at height y */
+  const frontZ = (y) => profileAt(TORSO, y)[1] + bulk + JB;
+  add(torso, mesh(facet(rowsSurface(torsoRows(hem, bulk), 12), 0.5), shirt));
+  add(torso, mesh(tube(0.045, 0.052, 0.11), skin, 0, 0.45, 0)); // neck
+  const front = (geo, mat, x, y, dz = 0) => add(torso, mesh(geo, mat, x, y, frontZ(y) + dz));
+  const ribHem = (mat) => add(torso, mesh(rowsSurface(torsoRows(hem, bulk + 0.003, hem + 0.035).slice(0, -1), 12), mat));
+  if (style === "tee") add(torso, mesh(new THREE.TorusGeometry(0.052, 0.011, 5, 12), shirtDark, 0, 0.45, -0.004).rotateX(PI / 2));
   if (style === "sweater") {
-    add(torso, mesh(new THREE.TorusGeometry(0.058, 0.017, 4, 8), shirtDark, 0, 0.445, -0.005).rotateX(PI / 2));
-    body(shirtDark, 0.3 + bulk, 0.3 + bulk, hem, hem + 0.035, 0.18 + bulk, 0.18 + bulk, FZ + 0.004); // ribbed hem
+    add(torso, mesh(new THREE.TorusGeometry(0.058, 0.017, 5, 12), shirtDark, 0, 0.45, -0.004).rotateX(PI / 2));
+    ribHem(shirtDark);
   }
   if (style === "hoodie") {
-    // hood bunched at the back of the neck, a chunky rim in a V at the front, drawstrings, kangaroo pocket
-    const hood = mesh(frustum(0.22 + bulk, 0.11, 0.15, 0.06, 0.14, 0, -0.03), shirtDark, 0, 0.44, -0.1);
-    hood.rotation.x = -0.4;
+    // a rolled hood ring around the neck, its inside dark, the hood bunched softly at the back of the
+    // neck; two drawstrings with aglets, a kangaroo pocket with slanted hand slits, ribbed hem
+    const ring = mesh(facet(new THREE.TorusGeometry(0.087, 0.031, 6, 12), 0.35), shirt, 0, 0.474, -0.016);
+    ring.rotation.x = PI / 2 + 0.24;
+    ring.scale.set(1, 1.06, 0.85);
+    add(torso, ring);
+    add(torso, mesh(new THREE.CylinderGeometry(0.06, 0.056, 0.07, 12, 1, true), HOOD_IN, 0, 0.47, -0.015));
+    // the hood itself lies down the upper back as a soft pointed fold
+    const hood = mesh(facet(rowsSurface([[0, 0, 0, 0], [0.01, 0.11, 0.03, 0.04], [0.08, 0.12, 0.035, 0.048], [0.15, 0.1, 0.035, 0.045], [0.2, 0.05, 0.03, 0.03], [0.225, 0, 0, 0]], 12), 0.5), shirt, 0, 0.28, -0.078 - bulk);
+    hood.rotation.x = -0.12;
     add(torso, hood);
-    add(torso, mesh(new THREE.TorusGeometry(0.072, 0.02, 4, 8), shirtDark, 0, 0.44, -0.01).rotateX(PI / 2));
     for (const s of [-1, 1]) {
-      const rim = front(box(0.1, 0.035, 0.035), shirtDark, s * 0.045, 0.415, -0.012);
-      rim.rotation.set(0, -s * 0.3, s * 0.7);
-      front(tube(0.004, 0.004, 0.14, 4), STRING, s * 0.03, 0.335, 0.006);
-      front(box(0.009, 0.018, 0.009), DARK, s * 0.03, 0.258, 0.006);
+      const str = front(tube(0.0035, 0.0035, 0.14, 6), STRING, s * 0.03, 0.375, 0.01);
+      str.rotation.z = -s * 0.04;
+      front(tube(0.0045, 0.0045, 0.016, 6), AGLET, s * 0.033, 0.297, 0.01);
     }
-    front(box(0.22, 0.1, 0.014), shirtDark, 0, 0.02, 0.004);
-    body(shirtDark, 0.3 + bulk, 0.3 + bulk, hem, hem + 0.035, 0.18 + bulk, 0.18 + bulk, FZ + 0.004);
+    front(soft(0.2, 0.125, 0.026, 6), shirt, 0, 0.035, 0.004);
+    for (const s of [-1, 1]) front(box(0.028, 0.004, 0.004), shirtDark, s * 0.092, 0.105, 0.016).castShadow = false;
+    ribHem(shirtDark);
   }
   if (style === "collar" || style === "blouse") {
     const blouse = style === "blouse";
     for (const s of [-1, 1]) {
-      const c = mesh(blouse ? box(0.06, 0.045, 0.01) : box(0.075, 0.05, 0.012), shirtDark, s * 0.042, 0.445, FZ - 0.025);
+      const c = mesh(blouse ? box(0.06, 0.045, 0.01) : box(0.075, 0.05, 0.012), shirtDark, s * 0.042, 0.45, frontZ(0.45) - 0.02);
       c.rotation.set(-0.3, -s * 0.35, s * 0.55);
       add(torso, c);
     }
     if (!jacket) {
-      front(box(0.024, 0.4, 0.006), shirtDark, 0, 0.19, 0.003);
-      if (!blouse) for (let i = 0; i < 4; i++) front(box(0.011, 0.011, 0.006), shirtLight ? DARK : WHITE, 0, 0.36 - i * 0.09, 0.008).castShadow = false;
+      for (let i = 0; i < 6; i++) front(box(0.024, 0.075, 0.006), shirtDark, 0, 0.395 - i * 0.07, 0.002);
+      if (!blouse) for (let i = 0; i < 4; i++) front(box(0.011, 0.011, 0.006), shirtLight ? DARK : WHITE, 0, 0.36 - i * 0.09, 0.006).castShadow = false;
     }
   }
   if (jacket) {
     // blazer: a looser body over the shirt, the shirt showing in a V between two lapels, a collar at the back of the neck
-    const JZ = FZ + 0.025;
-    body(jacket, 0.34 + bulk, 0.36 + bulk, -0.07, 0.22, 0.215 + bulk, 0.235 + bulk, JZ);
-    body(jacket, 0.36 + bulk, 0.41 + bulk, 0.22, 0.445, 0.235 + bulk, 0.245 + bulk, JZ);
+    add(torso, mesh(facet(rowsSurface(torsoRows(-0.07, bulk + JB, 0.455), 12), 0.5), jacket));
     const open = look.jacketOpen;
     front(frustum(open ? 0.08 : 0.03, 0.006, open ? 0.2 : 0.14, 0.006, 0.42), shirt, 0, 0.14, 0.002);
     for (const s of [-1, 1]) {
       const lapel = front(box(0.065, 0.24, 0.008), jacket, s * (open ? 0.075 : 0.052), 0.3, 0.007);
       lapel.rotation.set(0, -s * 0.12, -s * 0.28);
     }
-    add(torso, mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.035, 8, 1, true, PI / 2, PI), jacket, 0, 0.44, -0.01));
+    add(torso, mesh(new THREE.CylinderGeometry(0.078, 0.078, 0.035, 10, 1, true, PI / 2, PI), jacket, 0, 0.445, -0.01));
     if (!open) front(box(0.012, 0.012, 0.006), DARK, 0, 0.1, 0.008).castShadow = false;
   }
   if (look.tie) {
@@ -354,7 +578,7 @@ export function buildCharacter(bot) {
     front(box(0.04, 0.01, 0.004), BADGE_ICON, 0, 0.135, 0.011).castShadow = false;
   }
 
-  // ---- arms ----
+  // ---- arms: deltoid ball, tapered upper arm and forearm, palm + curled fingers + thumb ----
   const arm = (side) => {
     const sh = new THREE.Group();
     sh.position.set(side * (0.195 + bulk), 0.41, 0);
@@ -362,23 +586,35 @@ export function buildCharacter(bot) {
     const short = look.sleeves === "short" && !jacket;
     const upperMat = jacket || (short ? skin : shirt);
     const lowerMat = jacket || (look.sleeves === "long" ? shirt : skin);
-    add(sh, mesh(blob(0.058 + bulk / 2, 1), jacket || shirt, 0, 0, 0));
-    add(sh, mesh(tube(0.048, 0.04, 0.27), upperMat, 0, -0.15, 0));
-    if (short) add(sh, mesh(tube(0.057, 0.052, 0.13), shirt, 0, -0.065, 0));
+    const cloth = (g, mat) => (mat === skin ? g : facet(g, 0.45));
+    add(sh, mesh(blob(0.056 + bulk / 2, 0.048, 0.056 + bulk / 2, 8, 6), jacket || shirt, 0, -0.014, 0));
+    add(sh, mesh(cloth(tube(0.05 + bulk / 2, 0.041, 0.28), upperMat), upperMat, 0, -0.15, 0));
+    if (short) add(sh, mesh(facet(tube(0.054, 0.05, 0.13), 0.45), shirt, 0, -0.065, 0));
     const el = new THREE.Group();
     el.position.y = -UPPER_ARM;
     sh.add(el);
-    add(el, mesh(blob(0.042, 1), lowerMat, 0, 0, 0));
-    add(el, mesh(tube(0.04, 0.031, 0.25), lowerMat, 0, -0.125, 0));
-    if (jacket) add(el, mesh(tube(0.036, 0.036, 0.022), shirt, 0, -0.245, 0));
-    else if (bulk) add(el, mesh(tube(0.036, 0.034, 0.03), shirtDark, 0, -0.24, 0));
+    add(el, mesh(ball(0.042, 8, 6), lowerMat, 0, 0, 0));
+    if (jacket) {
+      add(el, mesh(facet(tube(0.042, 0.036, 0.245), 0.45), jacket, 0, -0.1225, 0));
+      add(el, mesh(tube(0.034, 0.034, 0.024), shirt, 0, -0.248, 0));
+    } else if (bulk) {
+      // knit sleeve bunching over a ribbed cuff
+      add(el, mesh(facet(tube(0.044, 0.042, 0.225), 0.45), lowerMat, 0, -0.1125, 0));
+      add(el, mesh(tube(0.036, 0.034, 0.036), shirtDark, 0, -0.238, 0));
+    } else add(el, mesh(cloth(tube(0.042, 0.033, 0.25), lowerMat), lowerMat, 0, -0.125, 0));
+    add(el, mesh(tube(0.029, 0.029, 0.05), skin, 0, -0.245, 0)); // wrist
     const hand = new THREE.Group();
     hand.position.y = -FOREARM;
     el.add(hand);
-    add(hand, mesh(frustum(0.06, 0.03, 0.05, 0.022, 0.09), skin, 0, -0.045, 0));
-    add(hand, mesh(frustum(0.05, 0.02, 0.06, 0.03, 0.065), skin, 0, -0.1225, 0));
-    const thumb = add(hand, mesh(box(0.018, 0.045, 0.02), skin, side * 0.032, -0.05, 0.01));
-    thumb.rotation.z = -side * 0.35;
+    const yaw = side * 0.45; // palms turned a little towards the thighs
+    const part = (geo, x, y, z, rx = 0, rz = 0) => {
+      const m = mesh(geo, skin, x * Math.cos(yaw) + z * Math.sin(yaw), y, -x * Math.sin(yaw) + z * Math.cos(yaw));
+      m.rotation.set(rx, yaw, rz, "YXZ");
+      return add(hand, m);
+    };
+    part(soft(0.062, 0.084, 0.028, 4), 0, -0.04, 0);
+    part(soft(0.056, 0.084, 0.022, 4), 0, -0.112, -0.004, 0.25);
+    part(blob(0.011, 0.027, 0.012, 6, 5), -side * 0.03, -0.05, 0.012, 0.15, side * 0.4);
     return { sh, el, hand };
   };
   const AL = arm(-1), AR = arm(1);
@@ -387,10 +623,10 @@ export function buildCharacter(bot) {
   const mug = new THREE.Group();
   mug.rotation.x = PI / 2 - 0.3; // upright with the forearm level, tipping towards the face as the wrist folds
   mug.position.set(0, -0.075, 0.02);
-  const mugBody = mesh(new THREE.CylinderGeometry(0.036, 0.032, 0.085, 8, 1, true), std(bot.accent, 0.6, { side: THREE.DoubleSide }), 0, 0.02, 0);
+  const mugBody = mesh(new THREE.CylinderGeometry(0.036, 0.032, 0.085, 10, 1, true), std(bot.accent, 0.6, { side: THREE.DoubleSide }), 0, 0.02, 0);
   mugBody.castShadow = false;
-  mug.add(mugBody, mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.01, 8), MUG_IN, 0, 0.052, 0));
-  const handle = mesh(new THREE.TorusGeometry(0.022, 0.006, 4, 8, PI), std(bot.accent, 0.6), 0.036, 0.02, 0);
+  mug.add(mugBody, mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.01, 10), MUG_IN, 0, 0.052, 0));
+  const handle = mesh(new THREE.TorusGeometry(0.022, 0.006, 5, 8, PI), std(bot.accent, 0.6), 0.036, 0.02, 0);
   handle.rotation.y = PI / 2;
   mug.add(handle);
   mug.visible = false;
@@ -411,72 +647,99 @@ export function buildCharacter(bot) {
   paddle.visible = false;
   AR.hand.add(paddle);
 
-  // ---- head: an eight-sided lathed skull, small eyes, thin brows, wedge nose, small mouth ----
+  // ---- head: a smooth skull with a jaw and chin, ears, a bridged nose, eyes, brows, lips ----
   const head = new THREE.Group();
   head.position.y = 0.48;
   torso.add(head);
-  const skull = lathe(HEAD);
-  skull.scale(1, 1, HEAD_DZ);
-  add(head, mesh(skull, skin));
+  add(head, mesh(surface(16, HEAD.length, (v, a, r) => headAt(v, a, HEAD[r][0]), { poleBottom: true, poleTop: true }), skin));
   const earStyles = new Set(["bald", "short", "swept", "bun", "ponytail"]);
-  if (earStyles.has(look.hairStyle)) for (const s of [-1, 1]) add(head, mesh(box(0.012, 0.03, 0.022), skin, s * (sideX(0.14) + 0.004), 0.14, -0.006));
-  const nose = add(head, mesh(new THREE.ConeGeometry(0.011, 0.028, 4), skin, 0, 0.128, faceZ(0.128) + 0.011));
-  nose.rotation.x = PI / 2 + 0.15;
-  const EYE_Y = 0.152, EYE_SY = 0.8;
+  if (earStyles.has(look.hairStyle)) {
+    for (const s of [-1, 1]) {
+      const ear = add(head, mesh(blob(0.008, 0.02, 0.014, 6, 5), skin, s * (sideX(0.13) + 0.002), 0.128, -0.012));
+      ear.rotation.y = s * 0.25;
+      const cup = add(head, mesh(blob(0.004, 0.011, 0.007, 5, 3), skinDark, s * (sideX(0.13) + 0.007), 0.128, -0.01));
+      cup.rotation.y = s * 0.25;
+      cup.castShadow = false;
+    }
+  }
+  // nose: a bridge running down from between the brows to a rounded tip, small alae either side
+  const NB = 0.162, NT = 0.1;
+  const bridge = add(head, mesh(new THREE.ConeGeometry(0.0115, 0.06, 7), skin, 0, (NB + NT) / 2, (faceZ(0, NB) + faceZ(0, NT)) / 2 + 0.009));
+  bridge.rotation.x = 0.16;
+  add(head, mesh(blob(0.0115, 0.0095, 0.011, 7, 5), skin, 0, NT, faceZ(0, NT) + 0.016));
+  for (const s of [-1, 1]) add(head, mesh(blob(0.0075, 0.0065, 0.0075, 6, 4), skin, s * 0.0115, NT - 0.003, faceZ(0.0115, NT) + 0.009));
+  // eyes: an almond white sunk into the socket, a dark iris and pupil, an upper lid line; brows in two strokes
+  const EYE_Y = 0.142, EYE_X = 0.031;
   const eyes = [];
   for (const s of [-1, 1]) {
-    const e = mesh(new THREE.SphereGeometry(0.011, 6, 4), eye, s * 0.031, EYE_Y, faceZ(EYE_Y) + 0.002);
-    e.scale.set(1, EYE_SY, 0.5);
-    e.castShadow = false;
-    e.userData.dynamic = true;
-    e.userData.bot = bot.id;
-    head.add(e);
-    eyes.push(e);
-    const brow = add(head, mesh(box(0.034, 0.006, 0.006), hair, s * 0.032, 0.178, faceZ(0.178) + 0.002));
-    brow.rotation.set(0, s * 0.3, -s * 0.1);
-    brow.castShadow = false;
+    const ez = faceZ(EYE_X, EYE_Y);
+    const g = new THREE.Group();
+    g.position.set(s * EYE_X, EYE_Y, ez - 0.004);
+    g.rotation.y = s * 0.14;
+    g.userData.dynamic = true;
+    head.add(g);
+    const white = mesh(blob(0.0135, 0.0065, 0.005, 8, 4), SCLERA, 0, 0, 0);
+    const iris = mesh(ball(0.0064, 7, 4), eye, s * -0.0005, -0.0005, 0.0035);
+    const pupil = mesh(ball(0.0028, 5, 3), PUPIL, s * -0.0005, -0.0005, 0.0085);
+    const lid = mesh(new THREE.TorusGeometry(0.0125, 0.003, 3, 6, PI), skinDark, 0, 0.0005, 0.005);
+    for (const m of [white, iris, pupil, lid]) {
+      m.castShadow = false;
+      m.userData.bot = bot.id;
+      g.add(m);
+    }
+    eyes.push(g);
+    const b1 = add(head, mesh(box(0.024, 0.0042, 0.004), brow, s * 0.02, 0.169, faceZ(0.02, 0.169) + 0.002));
+    b1.rotation.set(0, s * 0.22, s * 0.08);
+    const b2 = add(head, mesh(box(0.022, 0.0036, 0.004), brow, s * 0.042, 0.169, faceZ(0.042, 0.169) + 0.001));
+    b2.rotation.set(0, s * 0.62, -s * 0.16);
+    b1.castShadow = b2.castShadow = false;
   }
-  // a small closed smile; a laugh swaps it for a small open mouth with a strip of teeth
-  const MZ = faceZ(0.078) + 0.002;
+  // a closed neutral mouth: two lips and the line between them; a laugh swaps it for an open mouth with teeth
+  const MY = 0.06, MZ = faceZ(0, MY);
   const smile = new THREE.Group();
-  smile.position.set(0, 0.078, MZ);
+  smile.position.set(0, MY, MZ);
   smile.userData.dynamic = true;
   head.add(smile);
-  const smileLine = mesh(box(0.03, 0.005, 0.005), lips, 0, 0, 0);
-  smileLine.castShadow = false;
-  smile.add(smileLine);
-  for (const s of [-1, 1]) {
-    const corner = mesh(box(0.009, 0.005, 0.005), lips, s * 0.017, 0.003, 0);
-    corner.rotation.z = s * 0.7;
-    corner.castShadow = false;
-    smile.add(corner);
+  const upperLip = mesh(blob(0.018, 0.003, 0.0045, 8, 4), lips, 0, 0.002, 0);
+  const lowerLip = mesh(blob(0.015, 0.004, 0.005, 8, 4), lips, 0, -0.0032, 0);
+  const crease = mesh(box(0.031, 0.0012, 0.003), skinDark, 0, 0, 0.0035);
+  for (const m of [upperLip, lowerLip, crease]) {
+    m.castShadow = false;
+    smile.add(m);
   }
   const open = new THREE.Group();
-  open.position.set(0, 0.076, MZ);
+  open.position.set(0, MY, MZ);
   open.userData.dynamic = true;
   open.visible = false;
   head.add(open);
-  const openIn = mesh(box(0.024, 0.02, 0.006), MOUTH, 0, -0.003, 0);
-  openIn.castShadow = false;
-  const openTeeth = mesh(box(0.018, 0.004, 0.003), TEETH, 0, 0.005, 0.003);
-  openTeeth.castShadow = false;
-  open.add(openIn, openTeeth);
+  const openIn = mesh(soft(0.03, 0.022, 0.01, 4), MOUTH, 0, -0.004, 0);
+  const openTeeth = mesh(box(0.02, 0.004, 0.003), TEETH, 0, 0.004, 0.005);
+  const openLip = mesh(blob(0.018, 0.004, 0.005, 8, 4), lips, 0, -0.015, 0.002);
+  for (const m of [openIn, openTeeth, openLip]) {
+    m.castShadow = false;
+    open.add(m);
+  }
   if (look.beard) {
-    add(head, mesh(headShell(0, 0.07, 1.06, 5, (-5 * PI) / 8, (5 * PI) / 4), hair));
-    add(head, mesh(box(0.036, 0.008, 0.008), hair, 0, 0.093, faceZ(0.093) + 0.003)).castShadow = false;
+    // a short beard hugging the jaw and cheeks up to the sideburns (no moustache: a dark bar over the lips reads as an open mouth)
+    const top = (a) => 0.048 + 0.07 * Math.sin(a) ** 2;
+    const beard = surface(14, 5, (v, a, r) => {
+      const y = [0.004, 0.004, (0.004 + top(a)) / 2, top(a), top(a)][r];
+      headAt(v, a, y, r === 0 || r === 4 ? 0.985 : 1.055);
+    }, { arc: [-1.95, 1.95] });
+    add(head, mesh(beard, hair));
   }
   if (look.glasses) {
-    const gz = faceZ(EYE_Y) + 0.008;
+    const gz = faceZ(EYE_X, EYE_Y) + 0.012;
     for (const s of [-1, 1]) {
-      const ring = mesh(new THREE.TorusGeometry(0.019, 0.0025, 4, 8), GLASS, s * 0.031, EYE_Y, gz);
-      ring.rotation.z = PI / 8;
+      const ring = mesh(new THREE.TorusGeometry(0.02, 0.0025, 4, 12), GLASS, s * EYE_X, EYE_Y, gz);
+      ring.rotation.set(0, s * 0.2, PI / 12);
       ring.castShadow = false;
       add(head, ring);
-      const temple = mesh(box(0.003, 0.003, 0.1), GLASS, s * (sideX(EYE_Y) + 0.002), EYE_Y + 0.003, gz - 0.05);
+      const temple = mesh(box(0.003, 0.003, 0.1), GLASS, s * (sideX(EYE_Y) + 0.002), EYE_Y + 0.004, gz - 0.055);
       temple.castShadow = false;
       add(head, temple);
     }
-    add(head, mesh(box(0.02, 0.003, 0.003), GLASS, 0, EYE_Y + 0.003, gz)).castShadow = false;
+    add(head, mesh(box(0.024, 0.003, 0.003), GLASS, 0, EYE_Y + 0.004, gz)).castShadow = false;
   }
   buildHair(head, look, hair, add);
 
@@ -554,7 +817,7 @@ export function buildCharacter(bot) {
         blinkAt = t + 2.5 + Math.random() * 4;
       }
       const closed = t < blinkUntil;
-      for (const e of eyes) e.scale.y = closed ? 0.15 : EYE_SY;
+      for (const e of eyes) e.scale.y = closed ? 0.12 : 1;
     },
   };
   return rig;

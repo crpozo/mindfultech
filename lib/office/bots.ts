@@ -156,7 +156,7 @@ const BASE: Bot[] = [
     title: "AI Software Engineer",
     color: "#b9d7f2",
     accent: "#3f86d6",
-    look: { skin: "#c98b64", hair: "#211a17", hairStyle: "swept", eyes: "dark", lips: "#9c6a58", shirt: "#1f1f24", shirtStyle: "tee", sleeves: "short", pants: "#2b2d3a", shoes: "#111114", shoeStyle: "boots", beard: true },
+    look: { skin: "#c98b64", hair: "#211a17", hairStyle: "swept", eyes: "dark", lips: "#9c6a58", shirt: "#6b6e75", shirtStyle: "hoodie", sleeves: "long", pants: "#2a2b2f", shoes: "#5a1f28", shoeStyle: "sneakers", beard: true },
     screen: "dev",
     working: [
       "Corrigiendo un bug del checkout",
