@@ -776,6 +776,41 @@ export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
 }
 
 // ------------------------------------------------- reference-office extras ----
+/** Stepped bookshelf against the +z side of stairs rising towards +x; every column stays under the slope. */
+export function stairShelf(ctx, x0, x1, z, rise, depth = 0.42, cw = 0.5, rh = 0.55) {
+  const { B, M, nav, y } = ctx;
+  const run = x1 - x0;
+  const cols = Math.floor(run / cw);
+  const hAt = (x) => ((x - x0) / run) * rise;
+  const rowsAt = (k) => Math.floor((hAt(x0 + k * cw) - 0.08) / rh);
+  let first = -1;
+  for (let k = 0; k < cols; k++) {
+    const rows = rowsAt(k);
+    if (rows <= 0) continue;
+    if (first < 0) first = k;
+    const xl = x0 + k * cw, cx = xl + cw / 2, cz = z + depth / 2;
+    const h = rows * rh + 0.03;
+    B.add(box(cw, h, 0.02), M.lightWood, mat4(cx, y + h / 2, z + 0.01));
+    B.add(box(0.03, h, depth), M.lightWood, mat4(xl + 0.015, y + h / 2, cz));
+    if (k === cols - 1) B.add(box(0.03, h, depth), M.lightWood, mat4(xl + cw - 0.015, y + h / 2, cz));
+    for (let r = 0; r <= rows; r++) B.add(box(cw, 0.03, depth), M.lightWood, mat4(cx, y + r * rh + 0.015, cz));
+    for (let r = 0; r < rows; r++) {
+      const seed = (r * 7 + k * 13) % 10;
+      const by = r * rh + 0.03;
+      if (seed < 5) {
+        const n = 3 + (seed % 3);
+        for (let b = 0; b < n; b++) B.add(box(0.05, rh * 0.62 + (b % 2) * 0.05, depth * 0.55), M.books[(r + k + b) % 8], mat4(xl + 0.1 + b * 0.065, y + by + rh * 0.33, cz));
+      } else if (seed < 7) {
+        B.add(rbox(0.2, rh * 0.5, 0.2, 0.02), M.white, mat4(cx, y + by + rh * 0.27, cz));
+      } else if (seed < 9) {
+        plant(ctx, cx, cz, 0.22, by, M.potClay);
+      }
+    }
+    if (k % 3 === 1) plant(ctx, cx, cz, 0.3, h + 0.01, M.potClay);
+  }
+  if (first >= 0) nav.block(x0 + first * cw, z, x1, z + depth, 0.2);
+}
+
 /** Wall (along x at z=at, or along z at x=at) with arched openings: {x, w, h, sill}. */
 export function archWall(ctx, a0, a1, at, h, arches, mat, vertical = false, thick = 0.15) {
   const { B, nav, y } = ctx;

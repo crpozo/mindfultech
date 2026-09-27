@@ -74,6 +74,14 @@ export function buildRoom(scene, bots) {
   const dyn = { screens: [], tvs: [], leds: [], clock: null };
   const g = { B: B0, S: scene, M, nav: nav0, y: 0, dyn }; // ground context
   const u = { B: B1, S: upper, M, nav: nav1, y: UPPER_Y, dyn }; // upper context
+  // walls live in their own groups so the HUD can lower or hide them (Sims-style);
+  // W* hold the solid walls, WI* what hangs on them (signs, screens, glass panes)
+  const W0 = new THREE.Group(), WI0 = new THREE.Group(), W1 = new THREE.Group(), WI1 = new THREE.Group();
+  scene.add(W0, WI0);
+  upper.add(W1, WI1);
+  const BW0 = new F.Batcher(W0), BW1 = new F.Batcher(W1);
+  const gw = { ...g, B: BW0, S: WI0 }; // ground walls context
+  const uw = { ...u, B: BW1, S: WI1 }; // upper walls context
   const lights = [];
   const light = (parent, x, y, z, color = "#ffe6c8", intensity = 4, dist = 7) => {
     const l = new THREE.PointLight(color, intensity, dist, 2);
@@ -127,15 +135,15 @@ export function buildRoom(scene, bots) {
     m.position.set(x, y, z);
     m.castShadow = true;
     m.receiveShadow = true;
-    scene.add(m);
+    W0.add(m);
   };
   plasterBox(BX - x0 + 0.25, H2, 0.25, (x0 + BX) / 2 - 0.125, H2 / 2, z0 - 0.125);
-  B0.add(box(x1 - BX + 0.25, floorH, 0.25), M.navy, mat4((BX + x1) / 2 + 0.125, floorH / 2, z0 - 0.125));
-  B1.add(box(7.2 - BX, floorH, 0.25), M.navy, mat4((BX + 7.2) / 2, UPPER_Y + floorH / 2, z0 - 0.125));
-  F.glassWall(u, 7.2, x1, z0, floorH, [], false, true);
-  F.glassWall(u, z0, WZ, x1, floorH, [], true, true);
-  F.wall(g, z0, D, x1, floorH, M.navy, true, 0.25);
-  F.archWall(g, D, WZ, x1, floorH, [{ x: 1.7, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle, true);
+  BW0.add(box(x1 - BX + 0.25, floorH, 0.25), M.navy, mat4((BX + x1) / 2 + 0.125, floorH / 2, z0 - 0.125));
+  BW1.add(box(7.2 - BX, floorH, 0.25), M.navy, mat4((BX + 7.2) / 2, UPPER_Y + floorH / 2, z0 - 0.125));
+  F.glassWall(uw, 7.2, x1, z0, floorH, [], false, true);
+  F.glassWall(uw, z0, WZ, x1, floorH, [], true, true);
+  F.wall(gw, z0, D, x1, floorH, M.navy, true, 0.25);
+  F.archWall(gw, D, WZ, x1, floorH, [{ x: 1.7, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle, true);
   B0.add(box(0.04, 0.1, D - z0), M.darkWood, mat4(x0 + 0.02, 0.05, (z0 + D) / 2));
   B0.add(box(x1 - x0, 0.1, 0.04), M.darkWood, mat4(0, 0.05, z0 + 0.02));
   const aoMat = new THREE.MeshBasicMaterial({ map: T.aoStrip(), transparent: true, depthWrite: false });
@@ -150,12 +158,12 @@ export function buildRoom(scene, bots) {
   };
 
   // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
-  F.wall(g, 4.4, 7.8, LX, floorH, M.blackWall, true, 0.15);
-  F.glassWall(g, D, 4.4, LX, floorH, [[-0.1, 0.8]], true);
-  F.sign(g, LX - 0.09, 2.62, 6.1, -PI / 2, ["MINDFULTECH"], "#1b1b1f", "#ffffff", 1.9, 0.42);
-  F.clock(g, LX - 0.09, 1.75, 4.95, -PI / 2);
+  F.wall(gw, 4.4, 7.8, LX, floorH, M.blackWall, true, 0.15);
+  F.glassWall(gw, D, 4.4, LX, floorH, [[-0.2, 0.9]], true);
+  F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, ["MINDFULTECH"], "#1b1b1f", "#ffffff", 1.9, 0.42);
+  F.clock(gw, LX - 0.09, 1.75, 4.95, -PI / 2);
   F.receptionRound(g, -7.9, 6.3, -PI / 2);
-  stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], bot: bots[10] });
+  stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: bots[10] });
   nav0.clear(-7.25, 6.3, 0.15);
   F.planter(g, -7.9, 4.55);
   F.planter(g, -7.9, 8.05);
@@ -169,31 +177,34 @@ export function buildRoom(scene, bots) {
   desk({ x: -5.4, z: 1.6, yaw: -PI / 2 }, bots[6], 6);
   desk({ x: -5.4, z: 3.2, yaw: -PI / 2 }, bots[7], 7);
   F.plantWall(g, -5.3, 4.5, 0, 2.4);
-  const pp = F.pingpong(g, -4.9, 7.0, PI / 2);
-  F.pendant(g, -4.9, 2.6, 7.0, 4.6);
-  light(scene, -4.9, 2.4, 7.0, "#ffd7a6", 3.5, 6.5);
-  B0.add(box(1.1, floorH, 3.2), M.lightWood, mat4(-1.85, floorH / 2, 3.9));
-  nav0.block(-2.4, 2.3, -1.3, 5.5, 0.3);
-  F.bookshelfBig(g, 2.3, 5.5, -2.65, floorH, 6, 0.5, "z", true);
-  F.stairs(g, STAIRS.x0, STAIRS.x1, STAIRS.z0, STAIRS.z1, UPPER_Y, 20, [STAIRS.z0, STAIRS.z1]);
-  F.roundTable(g, 0.9, 7.0, 0.5, F.DESK_H, M.lightWood, 0.15);
-  for (const a of [PI * 0.25, PI * 1.25]) {
-    const x = 0.9 + Math.cos(a) * 0.85, z = 7.0 + Math.sin(a) * 0.85;
-    F.simpleChair(g, x, z, Math.atan2(0.9 - x, 7.0 - z), M.chairBlack);
+  const pp = F.pingpong(g, -4.0, 7.0, PI / 2);
+  F.pendant(g, -4.0, 2.6, 7.0, 4.6);
+  light(scene, -4.0, 2.4, 7.0, "#ffd7a6", 3.5, 6.5);
+  // the stairs carry the library on their side, like the reference's cube bookshelf
+  F.stairs(g, STAIRS.x0, STAIRS.x1, STAIRS.z0, STAIRS.z1, UPPER_Y, 20, [STAIRS.z0]);
+  F.stairShelf(g, STAIRS.x0, STAIRS.x1, STAIRS.z1, UPPER_Y);
+  // two small tables for a quick chat in the hall
+  for (const [tx, tz] of [[0.9, 7.0], [2.5, 4.9]]) {
+    F.roundTable(g, tx, tz, 0.5, F.DESK_H, M.lightWood, 0.15);
+    for (const a of [PI * 0.25, PI * 1.25]) {
+      const x = tx + Math.cos(a) * 0.85, z = tz + Math.sin(a) * 0.85;
+      F.simpleChair(g, x, z, Math.atan2(tx - x, tz - z), M.chairBlack);
+    }
   }
   F.plant(g, -3.5, 4.2, 0.9);
   nav0.blockCircle(-3.5, 4.2, 0.2);
-  F.plant(g, 2.9, 4.4, 1.0);
-  nav0.blockCircle(2.9, 4.4, 0.22);
+  F.planter(g, -2.0, 3.5);
+  F.plant(g, -0.4, 5.6, 1.0);
+  nav0.blockCircle(-0.4, 5.6, 0.22);
   F.plant(g, -1.0, 7.9, 0.9);
   nav0.blockCircle(-1.0, 7.9, 0.2);
 
-  // ---- open workspace: two rows of desks, everybody facing the hall ----
-  for (let k = 0; k < 3; k++) desk({ x: 5.4, z: 4.9 + k * 1.5, yaw: -PI / 2 }, bots[k], k);
-  for (let k = 0; k < 3; k++) desk({ x: 8.9, z: 4.9 + k * 1.5, yaw: -PI / 2 }, bots[3 + k], 3 + k);
-  for (const x of [4.75, 8.25]) {
-    F.pendant(g, x, 2.5, 6.4, 4.6);
-    light(scene, x, 2.3, 6.4, "#ffd7a6", 4, 6.5);
+  // ---- open workspace: two rows of desks facing each other across an aisle that opens onto the hall ----
+  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 5.2, yaw: PI }, bots[k], k);
+  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 7.5, yaw: 0 }, bots[3 + k], 3 + k);
+  for (const x of [5.6, 8.2]) {
+    F.pendant(g, x, 2.5, 6.35, 4.6);
+    light(scene, x, 2.3, 6.35, "#ffd7a6", 4, 6.5);
   }
   F.plant(g, 9.6, 4.4, 0.9);
   nav0.blockCircle(9.6, 4.4, 0.2);
@@ -201,10 +212,10 @@ export function buildRoom(scene, bots) {
   nav0.blockCircle(4.4, 8.4, 0.2);
 
   // ---- the periwinkle block: arched faces, reading nook inside ----
-  F.archWall(g, D, WZ, BX, floorH, [{ x: 0.2, w: 1.1, h: 2.1, sill: 0.85 }, { x: 3.15, w: 1.2, h: 2.3 }], M.periwinkle, true);
-  F.archWall(g, BX, x1, WZ, floorH, [{ x: 5.6, w: 1.1, h: 2.1, sill: 0.85 }, { x: 8.4, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle);
-  F.sign(g, 7.0, 2.9, WZ + 0.09, 0, ["CONSTRUIMOS EL FUTURO", "CON CALMA Y PROPÓSITO"], "#6b6fae", "#ffffff", 3.6, 0.62);
-  F.wall(g, BX, x1, D, floorH, M.navy);
+  F.archWall(gw, D, WZ, BX, floorH, [{ x: 0.2, w: 1.1, h: 2.1, sill: 0.85 }, { x: 3.15, w: 1.3, h: 2.3 }], M.periwinkle, true);
+  F.archWall(gw, BX, x1, WZ, floorH, [{ x: 5.6, w: 1.1, h: 2.1, sill: 0.85 }, { x: 8.4, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle);
+  F.sign(gw, 7.0, 2.9, WZ + 0.09, 0, ["CONSTRUIMOS EL FUTURO", "CON CALMA Y PROPÓSITO"], "#6b6fae", "#ffffff", 3.6, 0.62);
+  F.wall(gw, BX, x1, D, floorH, M.navy);
   const rugN = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.4), M.rug);
   rugN.rotation.x = -PI / 2;
   rugN.position.set(7.0, 0.03, 1.65);
@@ -216,16 +227,16 @@ export function buildRoom(scene, bots) {
   F.floorLamp(g, 9.4, 0.0);
   F.plant(g, 9.3, 3.4, 0.9);
   nav0.blockCircle(9.3, 3.4, 0.2);
-  F.picture(g, 8.6, 2.0, D + 0.09, 0, 1);
+  F.picture(gw, 8.6, 2.0, D + 0.09, 0, 1);
   light(scene, 7.0, 2.7, 1.7, "#ffd7a6", 3.5, 6);
 
   // ---- under the mezzanine ----
-  F.glassWall(g, x0, BX, D, floorH, [[-8.0, -7.1], [-2.3, -1.4], [2.0, 2.9]]);
-  F.wall(g, z0, D, LNG, floorH, M.navy, true);
-  F.wall(g, z0, D, -0.6, floorH, M.green, true);
-  F.wall(g, z0, -1.8, BX, floorH, M.navy, true);
-  F.wall(g, -0.9, D, BX, floorH, M.navy, true);
-  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.6, M.green], [-0.6, BX, M.orange]]) B0.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, floorH / 2, z0 + 0.03));
+  F.glassWall(gw, x0, BX, D, floorH, [[-8.1, -7.0], [-2.5, -1.2], [1.9, 3.0]]);
+  F.wall(gw, z0, D, LNG, floorH, M.navy, true);
+  F.wall(gw, z0, D, -0.6, floorH, M.green, true);
+  F.wall(gw, z0, -2.2, BX, floorH, M.navy, true);
+  F.wall(gw, -0.6, D, BX, floorH, M.navy, true);
+  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.6, M.green], [-0.6, BX, M.orange]]) BW0.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, floorH / 2, z0 + 0.03));
   // Sala Chimborazo
   F.roundTable(g, -7.6, -3.0, 0.85, F.DESK_H, M.lightWood, 0.15);
   const meet2Seats = [];
@@ -235,10 +246,10 @@ export function buildRoom(scene, bots) {
     F.simpleChair(g, x, z, yaw, M.chairBlack);
     meet2Seats.push({ x: x + Math.sin(yaw) * 0.28, z: z + Math.cos(yaw) * 0.28, yaw, sit: 0.27 });
   }
-  F.tv(g, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
-  F.sign(g, LNG - 0.09, 2.6, -3.0, -PI / 2, ["SALA", "CHIMBORAZO"], "#3d4a7a", "#ffffff", 1.4, 0.7);
-  F.picture(g, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
-  F.picture(g, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
+  F.tv(gw, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
+  F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, ["SALA", "CHIMBORAZO"], "#3d4a7a", "#ffffff", 1.4, 0.7);
+  F.picture(gw, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
+  F.picture(gw, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
   F.floorLamp(g, -9.5, -1.0);
   F.plant(g, -5.7, -5.4, 0.9);
   nav0.blockCircle(-5.7, -5.4, 0.2);
@@ -252,9 +263,9 @@ export function buildRoom(scene, bots) {
     F.simpleChair(g, x, -4.25, 0, M.chairOrange);
     meetSeats.push({ x, z: -4.25 + 0.28, yaw: 0, sit: 0.27 });
   }
-  F.tv(g, -2.9, 2.0, z0 + 0.09, 0, 1.6, 0.9);
-  F.whiteboard(g, LNG + 0.09, 1.75, -3.4, PI / 2, 2.0, 1.3);
-  F.sign(g, -4.6, 2.6, z0 + 0.12, 0, ["SALA ANDES"], "#8fb996", "#1e2a24", 1.3, 0.45);
+  F.tv(gw, -2.9, 2.0, z0 + 0.09, 0, 1.6, 0.9);
+  F.whiteboard(gw, LNG + 0.09, 1.75, -3.4, PI / 2, 2.0, 1.3);
+  F.sign(gw, -4.6, 2.6, z0 + 0.12, 0, ["SALA ANDES"], "#8fb996", "#1e2a24", 1.3, 0.45);
   F.plant(g, -1.0, -5.4, 0.9);
   nav0.blockCircle(-1.0, -5.4, 0.2);
   light(scene, -2.9, 3.05, -3.2, "#fff1dc", 5, 7);
@@ -267,18 +278,18 @@ export function buildRoom(scene, bots) {
   light(scene, 1.6, 3.05, -3.2, "#fff1dc", 4.5, 7);
   // server room
   for (const x of [5.0, 5.9, 6.8, 7.7, 8.6]) F.serverRack(g, x, z0 + 0.6);
-  F.sign(g, 6.9, 2.6, z0 + 0.12, 0, ["SERVIDORES"], "#1e2a44", "#7cc0ff", 1.6, 0.5);
+  F.sign(gw, 6.9, 2.6, z0 + 0.12, 0, ["SERVIDORES"], "#1e2a44", "#7cc0ff", 1.6, 0.5);
   light(scene, 6.9, 3.05, -3.2, "#9fc4ff", 4, 7);
 
   // ========================================================== upper floor ====
   F.railingBars(u, x0, BX, D);
   F.railingBars(u, D, WZ, BX, true, [[STAIRS.z0, STAIRS.z1]]);
   F.railingBars(u, BX, x1, WZ);
-  F.wall(u, z0, -1.8, LNG, PART_H, M.navy, true);
-  F.wall(u, z0, -1.8, -0.8, PART_H, M.green, true);
-  F.wall(u, z0, -1.8, 2.6, PART_H, M.orange, true);
-  F.wall(u, z0, -1.8, BX, PART_H, M.orange, true);
-  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) B1.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03));
+  F.wall(uw, z0, -1.8, LNG, PART_H, M.navy, true);
+  F.wall(uw, z0, -1.8, -0.8, PART_H, M.green, true);
+  F.wall(uw, z0, -1.8, 2.45, PART_H, M.orange, true);
+  F.wall(uw, z0, -1.8, BX, PART_H, M.orange, true);
+  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) BW1.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03));
   B1.add(box(0.1, 0.1, STAIRS.z1 - STAIRS.z0 + 0.1), M.lightWood, mat4(BX + 0.03, UPPER_Y - 0.05, 1.6));
   // lounge
   F.sofa(u, -7.6, z0 + 0.55, 0, 2.7, M.sofaBlack, M.sofaBlackDark);
@@ -294,10 +305,10 @@ export function buildRoom(scene, bots) {
   F.floorLamp(u, -9.5, -1.2);
   F.plant(u, -5.6, -5.5, 0.8);
   nav1.blockCircle(-5.6, -5.5, 0.18);
-  F.sign(u, LNG - 0.09, 2.1, -4.0, -PI / 2, ["HAZLO", "AHORA"], "#e08a5c", "#ffffff", 1.1, 0.9);
-  F.sign(u, -7.5, 2.35, z0 + 0.12, 0, ["PENSAR CON CALMA,", "CREAR CON PROPÓSITO"], "#e08a5c", "#ffffff", 2.4, 0.9);
+  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, ["HAZLO", "AHORA"], "#e08a5c", "#ffffff", 1.1, 0.9);
+  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, ["PENSAR CON CALMA,", "CREAR CON PROPÓSITO"], "#e08a5c", "#ffffff", 2.4, 0.9);
   // training room
-  F.whiteboard(u, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
+  F.whiteboard(uw, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
   const trainSeats = [];
   for (const x of [-3.5, -2.5, -1.5])
     for (const z of [-5.3, -4.3, -3.3, -2.3]) {
@@ -307,20 +318,22 @@ export function buildRoom(scene, bots) {
   F.floorLamp(u, -4.6, -5.5);
   F.plant(u, -1.2, -5.5, 0.9);
   nav1.blockCircle(-1.2, -5.5, 0.2);
-  F.sign(u, -2.5, 2.35, z0 + 0.12, 0, ["CADA DÍA,", "UN POCO MEJOR"], "#8fb996", "#1e2a24", 1.8, 0.8);
+  F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, ["CADA DÍA,", "UN POCO MEJOR"], "#8fb996", "#1e2a24", 1.8, 0.8);
   // studio: two desks face to face
-  desk({ x: 0.0, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
-  desk({ x: 2.0, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
-  F.stickyWall(u, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
+  desk({ x: -0.15, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
+  desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
+  stations[stations.length - 2].approach = { x: -0.15, z: -1.2 };
+  stations[stations.length - 1].approach = { x: 1.85, z: -1.2 };
+  F.stickyWall(uw, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
   F.plant(u, 0.3, -5.5, 0.8);
   nav1.blockCircle(0.3, -5.5, 0.18);
   // phone booth
-  F.highTable(u, 3.2, -4.7, 0.35);
-  F.stool(u, 3.2, -5.4);
-  F.sign(u, 3.2, 2.3, z0 + 0.12, 0, ["HAZLO CON", "INTENCIÓN"], "#e08a5c", "#ffffff", 1.0, 0.7);
+  F.highTable(u, 3.12, -4.7, 0.35);
+  F.stool(u, 3.12, -5.4);
+  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, ["HAZLO CON", "INTENCIÓN"], "#e08a5c", "#ffffff", 1.0, 0.7);
   // cafeteria
-  F.sign(u, 4.9, 2.25, z0 + 0.14, 0, ["PIENSA", "DIFERENTE"], "#e08a5c", "#ffffff", 1.3, 0.8);
-  F.tv(u, 6.3, 1.85, z0 + 0.14, 0, 1.6, 0.9);
+  F.sign(uw, 4.9, 2.25, z0 + 0.14, 0, ["PIENSA", "DIFERENTE"], "#e08a5c", "#ffffff", 1.3, 0.8);
+  F.tv(uw, 6.3, 1.85, z0 + 0.14, 0, 1.6, 0.9);
   const bar = F.cafeCounter(u, 8.0, -4.6, 0, 2.8);
   for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
   for (const [x, z] of [[5.4, -2.95], [5.4, -1.45], [9.35, -1.6], [8.6, -2.35], [9.35, 1.4], [8.6, 2.15], [6.0, 3.55], [5.25, 2.8], [6.75, 2.8]]) F.stool(u, x, z);
@@ -336,7 +349,13 @@ export function buildRoom(scene, bots) {
 
   B0.flush();
   B1.flush();
+  BW0.flush();
+  BW1.flush();
   stations.sort((a, b) => bots.indexOf(a.bot) - bots.indexOf(b.bot));
+  // seal every pocket of free cells that cannot be reached from the stairs, so spots and
+  // approach points always land on connected floor and nobody walks through furniture
+  nav0.sealPockets(STAIRS.portal0[0], STAIRS.portal0[1]);
+  nav1.sealPockets(STAIRS.portal1[0], STAIRS.portal1[1]);
 
   // ============================================================ spots ====
   const toward = (x, z, tx, tz) => Math.atan2(tx - x, tz - z);
@@ -351,7 +370,7 @@ export function buildRoom(scene, bots) {
     tv: [{ x: 5.3, z: -4.3, yaw: PI, floor: 1 }, { x: 6.05, z: -4.3, yaw: PI, floor: 1 }],
     meeting: meetSeats.map((s) => ({ ...s, floor: 0 })),
     meeting2: meet2Seats.map((s) => ({ ...s, floor: 0 })),
-    booth: [{ x: 3.2, z: -3.95, yaw: PI, floor: 1 }],
+    booth: [{ x: 3.12, z: -3.95, yaw: PI, floor: 1 }],
     printer: [{ x: 2.9, z: z0 + 1.1, yaw: PI, floor: 0 }],
     water: [{ x: -0.1, z: -1.35, yaw: PI, floor: 0 }],
     servers: [{ x: 6.9, z: z0 + 1.6, yaw: PI, floor: 0 }],
@@ -390,6 +409,23 @@ export function buildRoom(scene, bots) {
       v.floor = st.floor;
     }
   }
+  // people enter and leave a seat from behind the chair, never across the desk or table
+  for (const st of stations) {
+    const nav = navOf(st.floor);
+    const [ax, az] = st.approach ? nav.nearestFree(st.approach.x, st.approach.z) : nav.approachFor(st.seat.x, st.seat.z, st.seat.yaw);
+    st.approach = { x: ax, z: az };
+  }
+  for (const list of Object.values(spots))
+    for (const sp of list) {
+      if (!sp.sit) continue;
+      const f = F.fwd(sp.yaw);
+      // chairs are entered from behind; sofas, armchairs and poufs from the front
+      const fromFront = sp.low || sp.sit >= 0.5;
+      const [ax, az] = fromFront
+        ? navOf(sp.floor).approachFor(sp.x + f.x * 0.2, sp.z + f.z * 0.2, sp.yaw + PI)
+        : navOf(sp.floor).approachFor(sp.x - f.x * 0.1, sp.z - f.z * 0.1, sp.yaw);
+      sp.approach = { x: ax, z: az };
+    }
 
   // ========================================================= hotspots ====
   const hotspots = [
@@ -397,15 +433,15 @@ export function buildRoom(scene, bots) {
     { id: "tv", name: "Dashboard en vivo", icon: "📺", x: 6.3, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
     { id: "coffee", name: "Cafetera", icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
     { id: "printer", name: "Impresora", icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
-    { id: "shelf", name: "Base de conocimiento", icon: "📚", x: -2.65, y: 1.65, z: 3.9, w: 0.6, h: 3.3, d: 3.2, floor: 0 },
+    { id: "shelf", name: "Base de conocimiento", icon: "📚", x: 1.5, y: 1.4, z: STAIRS.z1 + 0.22, w: 4.4, h: 2.8, d: 0.44, floor: 0 },
     { id: "water", name: "Radio pasillo", icon: "💬", x: -0.1, y: 0.8, z: -2.0, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
     { id: "clock", name: "Línea de tiempo", icon: "🕒", x: LX - 0.1, y: 1.75, z: 4.95, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
     { id: "servers", name: "Estado de sistemas", icon: "🖥️", x: 6.8, y: 1.0, z: z0 + 0.6, w: 4.2, h: 2.0, d: 0.9, floor: 0 },
-    { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: -4.9, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
+    { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: -4.0, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
     { id: "reception", name: "Recepción", icon: "🛎️", x: -8.4, y: 0.6, z: 6.3, w: 1.4, h: 1.1, d: 2.6, floor: 0 },
     { id: "meeting", name: "Agenda de reuniones", icon: "📅", x: -2.9, y: 0.5, z: -3.4, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
     { id: "lounge", name: "Bienestar del equipo", icon: "🛋️", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
   ];
 
-  return { stations, spots, hotspots, nav0, nav1, upper, dyn, lights, pingpong: pp, materials: M };
+  return { stations, spots, hotspots, nav0, nav1, upper, dyn, lights, pingpong: pp, materials: M, walls: { W0, W1, WI0, WI1 } };
 }

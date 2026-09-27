@@ -11,6 +11,8 @@ export class NavGrid {
     this.w = Math.ceil((x1 - x0) / cell);
     this.h = Math.ceil((z1 - z0) / cell);
     this.blocked = new Uint8Array(this.w * this.h);
+    this.fails = 0; // searches that fell back to a straight line (debug)
+    this.failLog = [];
   }
   toCell(x, z) {
     return [Math.floor((x - this.x0) / this.cell), Math.floor((z - this.z0) / this.cell)];
@@ -51,6 +53,52 @@ export class NavGrid {
     for (let cz = Math.max(0, az); cz <= Math.min(this.h - 1, bz); cz++)
       for (let cx = Math.max(0, ax); cx <= Math.min(this.w - 1, bx); cx++) this.blocked[cz * this.w + cx] = 0;
   }
+  /** Flood-fill from a walkable point; every free cell it cannot reach is sealed, so no search ever targets a pocket. */
+  sealPockets(x, z) {
+    const [fx, fz] = this.nearestFree(x, z);
+    const [sx, sz] = this.toCell(fx, fz);
+    const seen = new Uint8Array(this.w * this.h);
+    const stack = [sz * this.w + sx];
+    seen[stack[0]] = 1;
+    while (stack.length) {
+      const c = stack.pop();
+      const cx = c % this.w, cz = (c / this.w) | 0;
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = cx + dx, nz = cz + dz;
+        if (!this.isFree(nx, nz)) continue;
+        const ni = nz * this.w + nx;
+        if (!seen[ni]) {
+          seen[ni] = 1;
+          stack.push(ni);
+        }
+      }
+    }
+    let sealed = 0;
+    for (let i = 0; i < this.blocked.length; i++)
+      if (!this.blocked[i] && !seen[i]) {
+        this.blocked[i] = 1;
+        sealed++;
+      }
+    return sealed;
+  }
+  /** Free cells around a cell (8-neighbourhood). */
+  freeAround(cx, cz) {
+    let n = 0;
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) if ((dx || dz) && this.isFree(cx + dx, cz + dz)) n++;
+    return n;
+  }
+  /** A walkable point to enter/leave a seat from: behind it first, then beside it; never an isolated cell. */
+  approachFor(x, z, yaw) {
+    const fx = Math.sin(yaw), fz = Math.cos(yaw), sx = Math.cos(yaw), sz = -Math.sin(yaw);
+    const cands = [];
+    for (const d of [0.85, 1.1, 1.4, 1.8, 2.2]) cands.push([x - fx * d, z - fz * d]);
+    for (const d of [0.9, 1.2]) for (const s of [1, -1]) cands.push([x - fx * 0.4 + sx * s * d, z - fz * 0.4 + sz * s * d]);
+    for (const [px, pz] of cands) {
+      const [cx, cz] = this.toCell(px, pz);
+      if (this.isFree(cx, cz) && this.freeAround(cx, cz) >= 3) return this.toWorld(cx, cz);
+    }
+    return this.nearestFree(x - fx * 0.85, z - fz * 0.85);
+  }
   /** Nearest free cell centre to a world point (spiral search). */
   nearestFree(x, z) {
     const [cx, cz] = this.toCell(x, z);
@@ -87,7 +135,11 @@ export class NavGrid {
   pathBetween(ax, az, bx, bz) {
     const [sx, sz] = this.toCell(ax, az);
     const [gx, gz] = this.toCell(bx, bz);
-    if (!this.inside(sx, sz) || !this.inside(gx, gz)) return [[bx, bz]];
+    if (!this.inside(sx, sz) || !this.inside(gx, gz)) {
+      this.fails++;
+      if (this.failLog.length < 30) this.failLog.push(["outside", ax, az, bx, bz]);
+      return [[bx, bz]];
+    }
     const W = this.w, H = this.h;
     const start = sz * W + sx, goal = gz * W + gx;
     const gScore = new Float32Array(W * H).fill(Infinity);
@@ -138,7 +190,11 @@ export class NavGrid {
           }
         }
     }
-    if (!found) return [[bx, bz]];
+    if (!found) {
+      this.fails++;
+      if (this.failLog.length < 30) this.failLog.push(["blocked", ax, az, bx, bz]);
+      return [[bx, bz]];
+    }
     const cells = [];
     for (let c = goal; c !== -1 && c !== start; c = prev[c]) cells.unshift(c);
     const pts = cells.map((c) => this.toWorld(c % W, (c / W) | 0));

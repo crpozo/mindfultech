@@ -10,11 +10,14 @@ import { HotspotPanel, HOTSPOT_META, type OfficeEvent } from "./Hotspots";
 import s from "./office.module.css";
 
 type Room = { id: string; name: string; floor: number };
+type WallMode = "full" | "low" | "none";
 type Scene = {
   setSelected: (id: string | null) => void;
   focusRoom: (id: string | null) => void;
   setFloorView: (mode: "all" | "ground" | "upper") => void;
   setLayout: (insets: { left?: number; right?: number }) => void;
+  setWalls: (mode: WallMode) => void;
+  setFloorLock: (locked: boolean) => void;
   rooms: Room[];
   roomNames: Record<string, string>;
   dispose: () => void;
@@ -54,6 +57,15 @@ export function OfficeDemo() {
   const [taskIdx, setTaskIdx] = React.useState(0);
   const [clock, setClock] = React.useState("");
   const [interacted, setInteracted] = React.useState(false);
+  // the HUD stays out of the way: the team list and the room menu open on demand
+  const [teamOpen, setTeamOpen] = React.useState(false);
+  const [roomsOpen, setRoomsOpen] = React.useState(false);
+  const roomsRef = React.useRef<HTMLDivElement>(null);
+  // Sims-style view filter: walls full / cut low / hidden, and the mezzanine shown or hidden
+  const [viewOpen, setViewOpen] = React.useState(false);
+  const viewRef = React.useRef<HTMLDivElement>(null);
+  const [walls, setWalls] = React.useState<WallMode>("full");
+  const [hideUpper, setHideUpper] = React.useState(false);
 
   React.useEffect(() => {
     const mount = mountRef.current, overlay = overlayRef.current;
@@ -127,40 +139,61 @@ export function OfficeDemo() {
       if (e.key === "Escape") {
         setSelected(null);
         setHotspot(null);
+        setRoomsOpen(false);
+        setTeamOpen(false);
+        setViewOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  React.useEffect(() => {
+    if (!roomsOpen && !viewOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (roomsRef.current && !roomsRef.current.contains(e.target as Node)) setRoomsOpen(false);
+      if (viewRef.current && !viewRef.current.contains(e.target as Node)) setViewOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [roomsOpen, viewOpen]);
+  React.useEffect(() => {
+    if (!ready) return;
+    sceneRef.current?.setWalls(walls);
+    sceneRef.current?.setFloorLock(hideUpper);
+  }, [ready, walls, hideUpper]);
 
   const goRoom = (id: string | null) => {
-    const next = id === room ? null : id;
-    setRoom(next);
+    setRoom(id);
     setSelected(null);
-    sceneRef.current?.focusRoom(next);
+    setHotspot(null);
+    setRoomsOpen(false);
+    sceneRef.current?.focusRoom(id);
     setInteracted(true);
   };
   const pickBot = (id: string) => {
     setSelected(selected === id ? null : id);
     setHotspot(null);
     setInteracted(true);
+    // on narrower screens the person's panel needs the room the team list takes
+    if (window.innerWidth < 1280) setTeamOpen(false);
   };
 
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? BOT_BY_ID[selected] : null;
   const hot = hotspot ? HOTSPOT_META[hotspot] : null;
   const panelOpen = !!bot || !!hot;
-  // keep the building centred in the part of the stage the panels leave uncovered
+  // keep the building centred in the part of the stage the open panels leave uncovered
   React.useEffect(() => {
     if (!ready) return;
     const apply = () => {
       const w = window.innerWidth;
-      sceneRef.current?.setLayout(w > 900 ? { left: 340, right: panelOpen ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
+      sceneRef.current?.setLayout(w > 900 ? { left: teamOpen ? 320 : 0, right: panelOpen ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
     };
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
-  }, [ready, panelOpen]);
+  }, [ready, panelOpen, teamOpen]);
+  const currentRoom = room ? rooms.find((r) => r.id === room) : null;
   const away = BOTS.filter((b) => status[b.id]).length;
 
   return (
@@ -188,6 +221,67 @@ export function OfficeDemo() {
           <strong>MindfulTech</strong>
           <span>Oficina de empleados IA · demo</span>
         </Link>
+        <div className={s.tools}>
+          <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
+            <i>👥</i>Equipo<b>{BOTS.length}</b>
+          </button>
+          <div className={s.menuWrap} ref={roomsRef}>
+            <button type="button" className={`${s.tool} ${roomsOpen ? s.toolActive : ""}`} onClick={() => setRoomsOpen((v) => !v)} aria-expanded={roomsOpen} aria-haspopup="menu">
+              <i>{currentRoom ? ROOM_ICONS[currentRoom.id] ?? "•" : "🏢"}</i>
+              <span className={s.toolLabel}>{currentRoom ? currentRoom.name : "Salas"}</span>
+              <em>▾</em>
+            </button>
+            {roomsOpen && rooms.length > 0 && (
+              <div className={s.menu} role="menu" aria-label="Salas">
+                <button type="button" role="menuitem" className={`${s.menuItem} ${room === null ? s.menuItemActive : ""}`} onClick={() => goRoom(null)}>
+                  <i>🏢</i>Todo el edificio
+                </button>
+                {[0, 1].map((floor) => (
+                  <React.Fragment key={floor}>
+                    <div className={s.menuFloor}>{floor ? "Piso 1" : "Planta baja"}</div>
+                    {rooms
+                      .filter((r) => r.floor === floor)
+                      .map((r) => (
+                        <button key={r.id} type="button" role="menuitem" className={`${s.menuItem} ${room === r.id ? s.menuItemActive : ""}`} onClick={() => goRoom(r.id)}>
+                          <i>{ROOM_ICONS[r.id] ?? "•"}</i>
+                          {r.name}
+                        </button>
+                      ))}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={s.menuWrap} ref={viewRef}>
+            <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
+              <i>👁️</i>
+              <span className={s.toolLabel}>Vista</span>
+              <em>▾</em>
+            </button>
+            {viewOpen && (
+              <div className={s.menu} role="menu" aria-label="Vista">
+                <div className={s.menuFloor}>Paredes</div>
+                <div className={s.seg}>
+                  {(["full", "low", "none"] as WallMode[]).map((m) => (
+                    <button key={m} type="button" className={`${s.segBtn} ${walls === m ? s.segActive : ""}`} onClick={() => setWalls(m)}>
+                      {m === "full" ? "Completas" : m === "low" ? "Bajas" : "Sin paredes"}
+                    </button>
+                  ))}
+                </div>
+                <div className={s.menuFloor}>Piso 1</div>
+                <div className={s.seg}>
+                  <button type="button" className={`${s.segBtn} ${!hideUpper ? s.segActive : ""}`} onClick={() => setHideUpper(false)}>
+                    Visible
+                  </button>
+                  <button type="button" className={`${s.segBtn} ${hideUpper ? s.segActive : ""}`} onClick={() => setHideUpper(true)}>
+                    Oculto
+                  </button>
+                </div>
+                <div className={s.menuNote}>Como en Los Sims: baja o quita las paredes para ver dentro de cada sala.</div>
+              </div>
+            )}
+          </div>
+        </div>
         <div className={s.stats}>
           <div className={s.stat}>
             <span className={s.dot} />
@@ -200,6 +294,7 @@ export function OfficeDemo() {
         </div>
       </header>
 
+      {teamOpen && (
       <aside className={s.team} aria-label="Equipo">
         <div className={s.teamHead}>
           <span className={s.dot} />
@@ -207,6 +302,9 @@ export function OfficeDemo() {
           <span>
             {BOTS.length - away} en su puesto · {away} en movimiento
           </span>
+          <button type="button" className={s.teamClose} onClick={() => setTeamOpen(false)} aria-label="Cerrar">
+            ×
+          </button>
         </div>
         <div className={s.teamList}>
           {BOTS.map((b, i) => {
@@ -238,32 +336,10 @@ export function OfficeDemo() {
           })}
         </div>
       </aside>
-
-      {rooms.length > 0 && (
-        <nav className={s.nav} aria-label="Salas">
-          {[0, 1].map((floor) => (
-            <div className={s.navRow} key={floor}>
-              <span className={s.navFloor}>{floor ? "Piso 1" : "Planta baja"}</span>
-              {rooms
-                .filter((r) => r.floor === floor)
-                .map((r) => (
-                  <button key={r.id} type="button" className={`${s.navBtn} ${room === r.id ? s.navBtnActive : ""}`} onClick={() => goRoom(r.id)}>
-                    <i>{ROOM_ICONS[r.id] ?? "•"}</i>
-                    {r.name}
-                  </button>
-                ))}
-              {floor === 1 && (
-                <button type="button" className={`${s.navBtn} ${room === null ? s.navBtnActive : ""}`} onClick={() => goRoom(null)}>
-                  <i>🏢</i>Todo el edificio
-                </button>
-              )}
-            </div>
-          ))}
-        </nav>
       )}
 
       <div className={`${s.hint} ${interacted || !ready ? s.hintHidden : ""}`}>
-        Haz clic en una persona o en un objeto con marcador · elige una sala abajo · arrastra para girar
+        Haz clic en una persona o en un objeto con marcador · «Salas» recorre la oficina · arrastra para girar
       </div>
 
       <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>

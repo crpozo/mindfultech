@@ -173,6 +173,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       yaw: st.seat.yaw, targetYaw: st.seat.yaw, walkT: 0, phase: Math.random() * 20,
       mug: false, laughUntil: 0, mouthOpen: false, hostReq: null, invite: null, visitorPending: null,
       status: undefined, headLook: 0, bubble: null, soloAt: rnd(15, 40), label: null, lw: 0, lh: 0, sx: undefined, sy: 0, ly: undefined,
+      leaveVia: null,
     };
     const el = document.createElement("div");
     el.className = classes.label;
@@ -221,24 +222,34 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const p = a.rig.root.position;
     const from = a.floor;
     const pts = [];
+    // leaving a seat: step back to the approach point first (behind the chair)
+    let sx = p.x, sz = p.z;
+    if (a.leaveVia) {
+      pts.push({ x: a.leaveVia.x, z: a.leaveVia.z, y: floorY(from) });
+      sx = a.leaveVia.x;
+      sz = a.leaveVia.z;
+      a.leaveVia = null;
+    }
     if (from === floor) {
-      for (const [px, pz] of navOf(floor).findPath(p.x, p.z, x, z)) pts.push({ x: px, z: pz, y: floorY(floor) });
+      for (const [px, pz] of navOf(floor).findPath(sx, sz, x, z)) pts.push({ x: px, z: pz, y: floorY(floor) });
       return pts;
     }
     const [p0x, p0z] = STAIRS.portal0, [p1x, p1z] = STAIRS.portal1;
     if (from === 0) {
-      for (const [px, pz] of nav0.findPath(p.x, p.z, p0x, p0z)) pts.push({ x: px, z: pz, y: 0 });
+      for (const [px, pz] of nav0.findPath(sx, sz, p0x, p0z)) pts.push({ x: px, z: pz, y: 0 });
       pts.push({ x: STAIRS.bottom[0], z: STAIRS.bottom[1], y: 0 }, { x: STAIRS.top[0], z: STAIRS.top[1], y: UPPER_Y }, { x: p1x, z: p1z, y: UPPER_Y });
       for (const [px, pz] of nav1.findPath(p1x, p1z, x, z)) pts.push({ x: px, z: pz, y: UPPER_Y });
     } else {
-      for (const [px, pz] of nav1.findPath(p.x, p.z, p1x, p1z)) pts.push({ x: px, z: pz, y: UPPER_Y });
+      for (const [px, pz] of nav1.findPath(sx, sz, p1x, p1z)) pts.push({ x: px, z: pz, y: UPPER_Y });
       pts.push({ x: STAIRS.top[0], z: STAIRS.top[1], y: UPPER_Y }, { x: STAIRS.bottom[0], z: STAIRS.bottom[1], y: 0 }, { x: p0x, z: p0z, y: 0 });
       for (const [px, pz] of nav0.findPath(p0x, p0z, x, z)) pts.push({ x: px, z: pz, y: 0 });
     }
     return pts;
   };
-  const goTo = (a, x, z, floor, dest) => {
+  /** walk to (x, z) on `floor`; `final` is a last straight step into a seat from its approach point */
+  const goTo = (a, x, z, floor, dest, final) => {
     a.path = route(a, x, z, floor);
+    if (final) a.path.push({ x: final.x, z: final.z, y: floorY(floor) });
     a.dest = dest;
     a.state = "walk";
   };
@@ -247,12 +258,14 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     a.spot = null;
   };
   const goHome = (a) => {
+    if (a.spot && a.spot.approach) a.leaveVia = a.spot.approach;
     leaveSpot(a);
     a.place = "walk";
-    goTo(a, a.st.seat.x, a.st.seat.z, a.st.floor, { kind: "desk" });
+    goTo(a, a.st.approach.x, a.st.approach.z, a.st.floor, { kind: "desk" }, a.st.seat);
     setStatus(a, a.st.floor !== a.floor ? (a.st.floor ? "Subiendo a su puesto" : "Bajando a su escritorio") : "Volviendo a su escritorio");
   };
   const standUp = (a, then) => {
+    a.leaveVia = a.st.approach;
     a.state = "standup";
     a.until = simT + (a.st.kind === "stand" ? 0.2 : 0.55);
     a.then = then;
@@ -331,7 +344,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       } else {
         a.spot = p.spot;
         a.place = p.kind;
-        goTo(a, p.spot.x, p.spot.z, p.spot.floor, { kind: "spot", place: p.kind, spot: p.spot });
+        const via = p.spot.approach;
+        goTo(a, via ? via.x : p.spot.x, via ? via.z : p.spot.z, p.spot.floor, { kind: "spot", place: p.kind, spot: p.spot }, via ? p.spot : null);
         const up = p.spot.floor !== a.floor;
         setStatus(a, up ? (p.spot.floor ? `Subiendo ${to(p.kind)}` : `Bajando ${to(p.kind)}`) : `Caminando ${to(p.kind)}`);
       }
@@ -868,13 +882,13 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const sitBack = a.spot && a.spot.sit;
     if (sitBack) {
       const sofa = a.place === "lounge" || a.place === "nook";
-      if (a.spot.low) POSES.sitLow(r, t, p, 0.46, -a.spot.sit);
+      if (a.spot.low) POSES.sitLow(r, t, p, 0.55, -a.spot.sit);
       else if (sofa) {
         POSES.sitSofa(r, t, p);
         r.set({ hipsZ: -a.spot.sit });
       } else POSES.sitIdle(r, t, p, HIP_CHAIR, -a.spot.sit);
       r.set({ headRy: a.headLook });
-      const seatY = a.spot.low ? 0.46 : sofa ? HIP_SOFA : HIP_CHAIR;
+      const seatY = a.spot.low ? 0.55 : sofa ? HIP_SOFA : HIP_CHAIR;
       if (a.gamePose === "pump") r.set({ shRx: -0.9 + Math.sin(t * 9) * 0.35, elRx: -1.4, shRz: 0.3 });
       else if (a.gamePose === "reveal") r.set({ shRx: -1.1, elRx: -1.0, shRz: 0.3 });
       else if (a.gamePose === "cheer") r.set({ shLx: -2.8, shRx: -2.8, elLx: -0.3, elRx: -0.3, torsoRx: -0.2, headRx: -0.3 });
@@ -985,16 +999,34 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const focusTarget = REST_TARGET.clone();
   let focusActor = null, focusPoint = null;
   let wantDistance = null;
+  let floorLock = false; // HUD "Piso 1: oculto"
   // camera angles to glide to: rooms under the mezzanine are looked at from the front and from higher up
   const REST_AZ = -PI / 4, REST_POLAR = Math.atan2(Math.SQRT2, 0.95);
   let wantAngles = null;
   const _sph = new THREE.Spherical();
   let floorView = "all";
-  const setFloorView = (mode) => {
-    floorView = mode;
-    const showUpper = floorView !== "ground";
+  const applyFloor = () => {
+    const showUpper = !floorLock && floorView !== "ground";
     upper.visible = showUpper;
     for (const h of hotspots) if (h.floor === 1) h.el.style.display = showUpper ? "" : "none";
+  };
+  const setFloorView = (mode) => {
+    floorView = mode;
+    applyFloor();
+  };
+  const setFloorLock = (locked) => {
+    floorLock = !!locked;
+    applyFloor();
+  };
+  /** Sims-style wall filter: "full", "low" (cut at a metre) or "none" */
+  const setWalls = (mode) => {
+    const { W0, W1, WI0, WI1 } = room.walls;
+    const s = mode === "low" ? 0.3 : 1;
+    W0.visible = W1.visible = mode !== "none";
+    WI0.visible = WI1.visible = mode === "full";
+    W0.scale.y = s;
+    W1.scale.y = s;
+    W1.position.y = UPPER_Y * (1 - s);
   };
   const restDistance = () => {
     const aspect = camera.aspect || 1.6;
@@ -1086,7 +1118,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       a.rig.ring.position.set(0, 0.045, a.rig.parts.hips.position.z);
       a.rig.shirtMat.emissive.set(a.bot.accent);
       a.rig.shirtMat.emissiveIntensity = lerp(a.rig.shirtMat.emissiveIntensity, sel ? 0.12 : hov ? 0.08 : 0, 0.15);
-      const hidden = floorView === "ground" && a.floor === 1;
+      const hidden = !upper.visible && a.floor === 1;
       a.rig.root.visible = !hidden;
       a.blob.visible = !hidden;
     }
@@ -1094,7 +1126,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     // camera glides to the selected person / room and back
     if (focusActor) {
       focusActor.rig.head.getWorldPosition(tmp);
-      tmp.y -= 0.3;
+      tmp.y -= 0.25;
       focusTarget.lerp(tmp, k6);
       const under = focusActor.floor === 0 && underDeck(focusActor.rig.root.position.x, focusActor.rig.root.position.z);
       if (under !== (floorView === "ground")) setFloorView(under ? "ground" : "all");
@@ -1167,7 +1199,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const items = [];
     for (const a of actors) {
       a.rig.head.getWorldPosition(projected);
-      projected.y += 0.42;
+      projected.y += 0.52;
       projected.project(camera);
       const behind = projected.z > 1 || !a.rig.root.visible;
       const tx = ((projected.x + 1) / 2) * w, ty = ((1 - projected.y) / 2) * h;
@@ -1214,7 +1246,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       }
     }
     for (const hs of hotspots) {
-      if (hs.floor === 1 && floorView === "ground") continue;
+      if (hs.floor === 1 && !upper.visible) continue;
       projected.copy(hs.anchor).project(camera);
       const behind = projected.z > 1;
       const x = ((projected.x + 1) / 2) * w, y = ((1 - projected.y) / 2) * h;
@@ -1242,12 +1274,15 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   if (window.__OFFICE_DEBUG) {
     window.__OFFICE_DEBUG.info = renderer.info;
     window.__OFFICE_DEBUG.actors = actors;
+    window.__OFFICE_DEBUG.nav = { nav0, nav1 };
   }
 
   return {
     setSelected,
     focusRoom,
     setFloorView,
+    setFloorLock,
+    setWalls,
     /** widths of the HUD panels covering the stage's left and right edges */
     setLayout: ({ left = 0, right = 0 }) => {
       insets.left = left;

@@ -26,7 +26,8 @@ export type Look = {
   glasses?: boolean;
   beard?: boolean;
   tie?: string;
-  lanyard?: boolean;
+  /** lanyard with an ID badge; a colour string picks the strap colour */
+  lanyard?: boolean | string;
 };
 
 export type Bot = {
@@ -85,7 +86,7 @@ export const BOTS: Bot[] = [
     title: "AI Customer Support",
     color: "#a9dcd3",
     accent: "#3aa392",
-    look: { skin: "#d9a274", hair: "#1e1a1a", hairStyle: "swept", eyes: "brown", lips: "#b07a6a", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#2b3a5c", pants: "#c9b48a", shoes: "#5a3a28", shoeStyle: "flats", glasses: true, lanyard: true },
+    look: { skin: "#e7b48f", hair: "#3b2a22", hairStyle: "swept", eyes: "brown", shirt: "#3b6fd6", shirtStyle: "collar", sleeves: "long", pants: "#2b2d3a", shoes: "#26262c", shoeStyle: "flats", tie: "#f4f4f4", lanyard: "#f2c14e" },
     screen: "support",
     working: [
       "Respondiendo tickets de Zendesk",
