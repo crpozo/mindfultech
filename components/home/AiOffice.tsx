@@ -18,7 +18,6 @@ const T = {
     title: "An office where every employee is an AI agent",
     sub: "We set one up for your company: one agent per role, connected to the tools you already use. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person. The office below is the demo, running.",
     cta: "OPEN THE LIVE DEMO",
-    hint: "Interactive 3D with a guided tour. Click any employee to see their screen and chat with them.",
     alt: "The 3D office with the AI employees at their desks",
     lead: "One agent per role",
     leadNote: "Each one works inside your tools: CRM, help desk, accounting, WhatsApp, calendar. A person approves what needs a signature.",
@@ -36,7 +35,6 @@ const T = {
     title: "Una oficina donde cada empleado es un agente de IA",
     sub: "La montamos para tu empresa: un agente por rol, conectado a las herramientas que ya usas. Abres la oficina, ves qué está haciendo cada agente, le preguntas y apruebas lo que necesita una persona. La oficina de abajo es la demo, funcionando.",
     cta: "ABRIR LA DEMO EN VIVO",
-    hint: "3D interactivo con tour guiado. Haz clic en cualquier empleado para ver su pantalla y chatear.",
     alt: "La oficina 3D con los empleados IA en sus escritorios",
     lead: "Un agente por rol",
     leadNote: "Cada uno trabaja dentro de tus herramientas: CRM, mesa de ayuda, contabilidad, WhatsApp, agenda. Una persona aprueba lo que necesita firma.",
@@ -95,7 +93,6 @@ export function AiOffice() {
               >
                 {t.cta}
               </Link>
-              <span style={{ fontSize: 12.5, lineHeight: 1.45, color: "#6b6880", maxWidth: 300 }}>{t.hint}</span>
             </div>
           </div>
         </div>
