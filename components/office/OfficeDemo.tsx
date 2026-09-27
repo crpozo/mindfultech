@@ -3,10 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { BOTS, BOT_BY_ID, type Bot } from "@/lib/office/bots";
+import { botsFor, botById, type Bot } from "@/lib/office/bots";
+import { useLang, type Lang } from "@/components/i18n";
+import { tx, LOCALE } from "@/lib/office/i18n";
 import { BotScreen } from "./BotScreen";
 import { BotChat } from "./BotChat";
-import { HotspotPanel, HOTSPOT_META, type OfficeEvent } from "./Hotspots";
+import { HotspotPanel, hotspotMeta, type OfficeEvent } from "./Hotspots";
 import s from "./office.module.css";
 
 type Room = { id: string; name: string; floor: number };
@@ -48,6 +50,10 @@ const IconFs = ({ on }: { on?: boolean }) => (
 );
 
 export function OfficeDemo() {
+  // the demo follows the site language (EN by default) and has its own toggle
+  const { lang, setLang } = useLang();
+  const t = tx(lang);
+  const BOTS = React.useMemo(() => botsFor(lang), [lang]);
   const mountRef = React.useRef<HTMLDivElement>(null);
   const overlayRef = React.useRef<HTMLDivElement>(null);
   const sceneRef = React.useRef<Scene | null>(null);
@@ -100,6 +106,10 @@ export function OfficeDemo() {
     const mount = mountRef.current, overlay = overlayRef.current;
     if (!mount || !overlay) return;
     let disposed = false;
+    setReady(false);
+    setStatus({});
+    setRoomOf({});
+    setEvents([]);
     (async () => {
       try {
         const { createOffice } = await import("./scene/index.js");
@@ -118,6 +128,7 @@ export function OfficeDemo() {
             markerActive: s.markerActive,
           },
           bots: BOTS,
+          lang,
           onSelect: (id: string | null) => {
             setSelected(id);
             if (id) setHotspot(null);
@@ -147,22 +158,27 @@ export function OfficeDemo() {
       sceneRef.current?.dispose();
       sceneRef.current = null;
     };
-  }, []);
+  }, [lang, BOTS]);
 
+  // `ready` is in the deps so the selection (and the room) are re-applied
+  // after the scene is rebuilt for a language change
   React.useEffect(() => {
+    if (!ready) return;
     sceneRef.current?.setSelected(selected);
     if (selected) setRoom(null);
-  }, [selected]);
+    else if (room) sceneRef.current?.focusRoom(room);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, ready]);
   React.useEffect(() => {
     const id = window.setInterval(() => setTaskIdx((i) => i + 1), 7000);
     return () => window.clearInterval(id);
   }, []);
   React.useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString("es-EC", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    const tick = () => setClock(new Date().toLocaleTimeString(LOCALE[lang], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [lang]);
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -192,11 +208,16 @@ export function OfficeDemo() {
     sceneRef.current?.setFloorLock(hideUpper);
   }, [ready, walls, hideUpper]);
 
-  const WA = "https://wa.me/593958731994?text=" + encodeURIComponent("Hola, vi la demo de la oficina de gestión con IA y quiero saber más.");
+  const WA =
+    "https://wa.me/593958731994?text=" +
+    encodeURIComponent(t("Hola, vi la demo de la oficina de gestión con IA y quiero saber más.", "Hi, I saw the AI Management Office demo and I would like to know more."));
   const TOUR: { title: string; text: string; target?: "team" | "rooms" | "view"; enter: () => void }[] = [
     {
-      title: "Bienvenido a tu oficina de gestión con IA",
-      text: "Cada persona que ves es un empleado de IA con un rol real: ventas, soporte, finanzas, marketing, operaciones. Trabajan las 24 horas con tus herramientas y aquí puedes ver, preguntar y auditar todo lo que hacen. Este tour te muestra cómo funciona.",
+      title: t("Bienvenido a tu oficina de gestión con IA", "Welcome to your AI Management Office"),
+      text: t(
+        "Cada persona que ves es un empleado de IA con un rol real: ventas, soporte, finanzas, marketing, operaciones. Trabajan las 24 horas con tus herramientas y aquí puedes ver, preguntar y auditar todo lo que hacen. Este tour te muestra cómo funciona.",
+        "Everyone you see is an AI employee with a real role: sales, support, finance, marketing, operations. They work around the clock inside your tools, and here you can watch, ask and audit everything they do. This tour shows how it works.",
+      ),
       enter: () => {
         setSelected(null);
         setHotspot(null);
@@ -209,8 +230,11 @@ export function OfficeDemo() {
       },
     },
     {
-      title: "El equipo",
-      text: "«Equipo» muestra a los 11 agentes, qué está haciendo cada uno en este momento y en qué sala está. Un clic sobre cualquiera lo selecciona.",
+      title: t("El equipo", "The team"),
+      text: t(
+        "«Equipo» muestra a los 11 agentes, qué está haciendo cada uno en este momento y en qué sala está. Un clic sobre cualquiera lo selecciona.",
+        "“Team” lists the 11 agents, what each one is doing right now and which room it is in. Click anyone to select them.",
+      ),
       target: "team",
       enter: () => {
         setSelected(null);
@@ -219,8 +243,11 @@ export function OfficeDemo() {
       },
     },
     {
-      title: "La pantalla en vivo de un agente",
-      text: "Seleccionamos a Mateo, de Soporte. Su panel muestra sus indicadores y su escritorio real en vivo: aquí está respondiendo tickets en Zendesk. Es como conectarte a su computador y mirar por encima de su hombro.",
+      title: t("La pantalla en vivo de un agente", "An agent's live screen"),
+      text: t(
+        "Seleccionamos a Mateo, de Soporte. Su panel muestra sus indicadores y su escritorio real en vivo: aquí está respondiendo tickets en Zendesk. Es como conectarte a su computador y mirar por encima de su hombro.",
+        "We selected Mateo, from Support. His panel shows his metrics and his real desktop, live: here he is answering tickets in Zendesk. It is like connecting to his computer and looking over his shoulder.",
+      ),
       enter: () => {
         if (window.innerWidth < 1280) setTeamOpen(false);
         setHotspot(null);
@@ -229,8 +256,11 @@ export function OfficeDemo() {
       },
     },
     {
-      title: "Chatea con él",
-      text: "En la pestaña «Chat» puedes preguntarle qué hizo hoy, cómo va un cliente o pedirle un resumen. Responde con el contexto de su propio trabajo.",
+      title: t("Chatea con él", "Chat with him"),
+      text: t(
+        "En la pestaña «Chat» puedes preguntarle qué hizo hoy, cómo va un cliente o pedirle un resumen. Responde con el contexto de su propio trabajo.",
+        "In the “Chat” tab you can ask what he did today, how a client is going, or request a summary. He answers with the context of his own work.",
+      ),
       enter: () => {
         setHotspot(null);
         setSelected("mateo");
@@ -238,32 +268,44 @@ export function OfficeDemo() {
       },
     },
     {
-      title: "Una oficina viva",
-      text: "Los agentes no se cansan, pero la oficina se comporta como una real: se reúnen, se capacitan, toman café y hasta juegan ping-pong. Cada pausa representa una coordinación entre agentes. Vamos a la cafetería.",
+      title: t("Una oficina viva", "A living office"),
+      text: t(
+        "Los agentes no se cansan, pero la oficina se comporta como una real: se reúnen, se capacitan, toman café y hasta juegan ping-pong. Cada pausa representa una coordinación entre agentes. Vamos a la cafetería.",
+        "The agents never tire, but the office behaves like a real one: they meet, train, grab coffee and even play ping-pong. Every break stands for a hand-off between agents. Let's go to the cafeteria.",
+      ),
       enter: () => {
         setTeamOpen(false);
         goRoom("cafe");
       },
     },
     {
-      title: "Dashboards con datos",
-      text: "Los objetos con marcador abren paneles. La pantalla de la cafetería es el dashboard de operaciones: leads, tickets, cobros y alcance, con tendencias de 30 días y comparativas contra el periodo anterior.",
+      title: t("Dashboards con datos", "Dashboards with data"),
+      text: t(
+        "Los objetos con marcador abren paneles. La pantalla de la cafetería es el dashboard de operaciones: leads, tickets, cobros y alcance, con tendencias de 30 días y comparativas contra el periodo anterior.",
+        "Objects with a marker open panels. The cafeteria screen is the operations dashboard: leads, tickets, collections and reach, with 30-day trends and comparisons against the previous period.",
+      ),
       enter: () => {
         setSelected(null);
         setHotspot("tv");
       },
     },
     {
-      title: "Rendimiento y costo",
-      text: "El sofá del lounge abre el rendimiento de los agentes: cuánto trabajan, cuántos tokens consumen y cuánto cuestan por área. Un humano aprueba lo que necesita firma.",
+      title: t("Rendimiento y costo", "Performance and cost"),
+      text: t(
+        "El sofá del lounge abre el rendimiento de los agentes: cuánto trabajan, cuántos tokens consumen y cuánto cuestan por área. Un humano aprueba lo que necesita firma.",
+        "The lounge sofa opens agent performance: how much they work, how many tokens they use and what they cost per area. A human approves whatever needs a signature.",
+      ),
       enter: () => {
         goRoom("lounge");
         setHotspot("lounge");
       },
     },
     {
-      title: "Mira dentro de cada sala",
-      text: "Con «Vista» bajas las paredes o quitas el piso 1, como en Los Sims, para ver las salas de abajo. Con «Salas» recorres la oficina, y puedes arrastrar para girar la cámara y usar la rueda para acercarte.",
+      title: t("Mira dentro de cada sala", "Look inside every room"),
+      text: t(
+        "Con «Vista» bajas las paredes o quitas el piso 1, como en Los Sims, para ver las salas de abajo. Con «Salas» recorres la oficina, y puedes arrastrar para girar la cámara y usar la rueda para acercarte.",
+        "With “View” you lower the walls or hide the upper floor, Sims-style, to see the rooms below. “Rooms” takes you around the office; drag to rotate the camera and scroll to zoom in.",
+      ),
       target: "view",
       enter: () => {
         setHotspot(null);
@@ -274,8 +316,11 @@ export function OfficeDemo() {
       },
     },
     {
-      title: "Así funciona",
-      text: "Empleados digitales con roles reales, visibles y auditables, trabajando en tus herramientas las 24 horas. Podemos montar una oficina así para tu empresa: mapeamos las tareas, contratamos los agentes y tú los ves trabajar.",
+      title: t("Así funciona", "How it works"),
+      text: t(
+        "Empleados digitales con roles reales, visibles y auditables, trabajando en tus herramientas las 24 horas. Podemos montar una oficina así para tu empresa: mapeamos las tareas, contratamos los agentes y tú los ves trabajar.",
+        "Digital employees with real roles, visible and auditable, working in your tools 24/7. We can set up an office like this for your company: we map the tasks, hire the agents, and you watch them work.",
+      ),
       enter: () => {
         setWalls("full");
         setHideUpper(false);
@@ -305,7 +350,7 @@ export function OfficeDemo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tourStep]);
   React.useEffect(() => {
-    if (!ready) return;
+    if (!ready || tourStep !== null) return;
     let seen = false;
     try {
       seen = !!window.localStorage.getItem("mt-office-tour");
@@ -315,6 +360,7 @@ export function OfficeDemo() {
     if (seen) return;
     const id = window.setTimeout(() => setTourStep(0), 1800);
     return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
   React.useEffect(() => {
     if (tourStep === null) return;
@@ -346,8 +392,8 @@ export function OfficeDemo() {
   };
 
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
-  const bot = selected ? BOT_BY_ID[selected] : null;
-  const hot = hotspot ? HOTSPOT_META[hotspot] : null;
+  const bot = selected ? botById(lang, selected) ?? null : null;
+  const hot = hotspot ? hotspotMeta(lang)[hotspot] : null;
   const panelOpen = !!bot || !!hot;
   React.useEffect(() => {
     if (!panelOpen) setPanelMax(false);
@@ -374,13 +420,13 @@ export function OfficeDemo() {
 
       {failed ? (
         <div className={s.fallback}>
-          Tu navegador no pudo iniciar WebGL. Abre la demo en Chrome, Edge o Safari actualizados para ver la oficina 3D.
+          {t("Tu navegador no pudo iniciar WebGL. Abre la demo en Chrome, Edge o Safari actualizados para ver la oficina 3D.", "Your browser could not start WebGL. Open the demo in an up-to-date Chrome, Edge or Safari to see the 3D office.")}
         </div>
       ) : (
         <div className={`${s.loading} ${ready ? s.loadingHidden : ""}`}>
           <div className={s.loadingInner}>
             <div className={s.spinner} />
-            Preparando la oficina…
+            {t("Preparando la oficina…", "Setting up the office…")}
           </div>
         </div>
       )}
@@ -389,26 +435,29 @@ export function OfficeDemo() {
         <Link href="/" className={s.brand}>
           <Logo size={22} />
           <strong>MindfulTech</strong>
-          <span>Oficina de empleados IA · demo</span>
+          <span>{t("Oficina de empleados IA · demo", "AI Management Office · demo")}</span>
         </Link>
         <div className={s.tools}>
           <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""} ${tour?.target === "team" ? s.tourGlow : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
-            <i>👥</i>Equipo<b>{BOTS.length}</b>
+            <i>👥</i>
+            {t("Equipo", "Team")}
+            <b>{BOTS.length}</b>
           </button>
           <div className={s.menuWrap} ref={roomsRef}>
             <button type="button" className={`${s.tool} ${roomsOpen ? s.toolActive : ""} ${tour?.target === "rooms" ? s.tourGlow : ""}`} onClick={() => setRoomsOpen((v) => !v)} aria-expanded={roomsOpen} aria-haspopup="menu">
               <i>{currentRoom ? ROOM_ICONS[currentRoom.id] ?? "•" : "🏢"}</i>
-              <span className={s.toolLabel}>{currentRoom ? currentRoom.name : "Salas"}</span>
+              <span className={s.toolLabel}>{currentRoom ? currentRoom.name : t("Salas", "Rooms")}</span>
               <em>▾</em>
             </button>
             {roomsOpen && rooms.length > 0 && (
-              <div className={s.menu} role="menu" aria-label="Salas">
+              <div className={s.menu} role="menu" aria-label={t("Salas", "Rooms")}>
                 <button type="button" role="menuitem" className={`${s.menuItem} ${room === null ? s.menuItemActive : ""}`} onClick={() => goRoom(null)}>
-                  <i>🏢</i>Todo el edificio
+                  <i>🏢</i>
+                  {t("Todo el edificio", "Whole building")}
                 </button>
                 {[0, 1].map((floor) => (
                   <React.Fragment key={floor}>
-                    <div className={s.menuFloor}>{floor ? "Piso 1" : "Planta baja"}</div>
+                    <div className={s.menuFloor}>{floor ? t("Piso 1", "Upper floor") : t("Planta baja", "Ground floor")}</div>
                     {rooms
                       .filter((r) => r.floor === floor)
                       .map((r) => (
@@ -425,63 +474,70 @@ export function OfficeDemo() {
           <div className={s.menuWrap} ref={viewRef}>
             <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""} ${tour?.target === "view" ? s.tourGlow : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
               <i>👁️</i>
-              <span className={s.toolLabel}>Vista</span>
+              <span className={s.toolLabel}>{t("Vista", "View")}</span>
               <em>▾</em>
             </button>
             {viewOpen && (
-              <div className={s.menu} role="menu" aria-label="Vista">
-                <div className={s.menuFloor}>Paredes</div>
+              <div className={s.menu} role="menu" aria-label={t("Vista", "View")}>
+                <div className={s.menuFloor}>{t("Paredes", "Walls")}</div>
                 <div className={s.seg}>
                   {(["full", "low", "none"] as WallMode[]).map((m) => (
                     <button key={m} type="button" className={`${s.segBtn} ${walls === m ? s.segActive : ""}`} onClick={() => setWalls(m)}>
-                      {m === "full" ? "Completas" : m === "low" ? "Bajas" : "Sin paredes"}
+                      {m === "full" ? t("Completas", "Full") : m === "low" ? t("Bajas", "Low") : t("Sin paredes", "None")}
                     </button>
                   ))}
                 </div>
-                <div className={s.menuFloor}>Piso 1</div>
+                <div className={s.menuFloor}>{t("Piso 1", "Upper floor")}</div>
                 <div className={s.seg}>
                   <button type="button" className={`${s.segBtn} ${!hideUpper ? s.segActive : ""}`} onClick={() => setHideUpper(false)}>
-                    Visible
+                    {t("Visible", "Visible")}
                   </button>
                   <button type="button" className={`${s.segBtn} ${hideUpper ? s.segActive : ""}`} onClick={() => setHideUpper(true)}>
-                    Oculto
+                    {t("Oculto", "Hidden")}
                   </button>
                 </div>
-                <div className={s.menuNote}>Como en Los Sims: baja o quita las paredes para ver dentro de cada sala.</div>
+                <div className={s.menuNote}>{t("Como en Los Sims: baja o quita las paredes para ver dentro de cada sala.", "Like in The Sims: lower or remove the walls to look inside every room.")}</div>
               </div>
             )}
           </div>
-          <button type="button" className={`${s.tool} ${tourStep !== null ? s.toolActive : ""}`} onClick={() => setTourStep(0)} title="Tour guiado">
+          <button type="button" className={`${s.tool} ${tourStep !== null ? s.toolActive : ""}`} onClick={() => setTourStep(0)} title={t("Tour guiado", "Guided tour")}>
             <i>🎓</i>
             <span className={s.toolLabel}>Tour</span>
           </button>
           {fsOk && (
-            <button type="button" className={`${s.tool} ${s.toolIcon} ${fullscreen ? s.toolActive : ""}`} onClick={toggleFullscreen} title={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"} aria-label={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}>
+            <button type="button" className={`${s.tool} ${s.toolIcon} ${fullscreen ? s.toolActive : ""}`} onClick={toggleFullscreen} title={fullscreen ? t("Salir de pantalla completa", "Exit full screen") : t("Pantalla completa", "Full screen")} aria-label={fullscreen ? t("Salir de pantalla completa", "Exit full screen") : t("Pantalla completa", "Full screen")}>
               <IconFs on={fullscreen} />
             </button>
           )}
+          <div className={s.langSeg} role="group" aria-label={t("Idioma", "Language")}>
+            {(["en", "es"] as Lang[]).map((l) => (
+              <button key={l} type="button" className={`${s.langBtn} ${lang === l ? s.langOn : ""}`} onClick={() => setLang(l)} aria-pressed={lang === l}>
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
         <div className={s.stats}>
           <div className={s.stat}>
             <span className={s.dot} />
-            <b>{BOTS.length}</b> empleados en línea
+            <b>{BOTS.length}</b> {t("empleados en línea", "employees online")}
           </div>
           <div className={s.stat}>
-            <b>24/7</b> sin pausas
+            <b>24/7</b> {t("sin pausas", "no breaks")}
           </div>
           <div className={`${s.stat} ${s.clock}`}>{clock}</div>
         </div>
       </header>
 
       {teamOpen && (
-      <aside className={s.team} aria-label="Equipo">
+      <aside className={s.team} aria-label={t("Equipo", "Team")}>
         <div className={s.teamHead}>
           <span className={s.dot} />
-          <strong>Equipo</strong>
+          <strong>{t("Equipo", "Team")}</strong>
           <span>
-            {BOTS.length - away} en su puesto · {away} en movimiento
+            {BOTS.length - away} {t("en su puesto", "at their desk")} · {away} {t("en movimiento", "on the move")}
           </span>
-          <button type="button" className={s.teamClose} onClick={() => setTeamOpen(false)} aria-label="Cerrar">
+          <button type="button" className={s.teamClose} onClick={() => setTeamOpen(false)} aria-label={t("Cerrar", "Close")}>
             ×
           </button>
         </div>
@@ -518,13 +574,13 @@ export function OfficeDemo() {
       )}
 
       {tour && tourStep !== null && (
-        <div className={`${s.tour} ${panelOpen && !panelMax ? s.tourShift : ""}`} role="dialog" aria-label="Tour guiado">
+        <div className={`${s.tour} ${panelOpen && !panelMax ? s.tourShift : ""}`} role="dialog" aria-label={t("Tour guiado", "Guided tour")}>
           <div className={s.tourHead}>
             <span className={s.tourStep}>
-              Paso {tourStep + 1} de {TOUR.length}
+              {t("Paso", "Step")} {tourStep + 1} {t("de", "of")} {TOUR.length}
             </span>
             <button type="button" className={s.tourSkip} onClick={() => endTour(false)}>
-              Saltar tour
+              {t("Saltar tour", "Skip tour")}
             </button>
           </div>
           <div className={s.tourTitle}>{tour.title}</div>
@@ -536,19 +592,19 @@ export function OfficeDemo() {
               ))}
             </div>
             <button type="button" className={s.tourBtn} onClick={() => setTourStep(Math.max(0, tourStep - 1))} disabled={tourStep === 0}>
-              Atrás
+              {t("Atrás", "Back")}
             </button>
             {tourStep < TOUR.length - 1 ? (
               <button type="button" className={`${s.tourBtn} ${s.tourPrimary}`} onClick={() => setTourStep(tourStep + 1)}>
-                Siguiente
+                {t("Siguiente", "Next")}
               </button>
             ) : (
               <>
                 <a className={s.tourBtn} href={WA} target="_blank" rel="noreferrer">
-                  Hablemos
+                  {t("Hablemos", "Let's talk")}
                 </a>
                 <button type="button" className={`${s.tourBtn} ${s.tourPrimary}`} onClick={() => endTour(true)}>
-                  Finalizar
+                  {t("Finalizar", "Finish")}
                 </button>
               </>
             )}
@@ -557,7 +613,7 @@ export function OfficeDemo() {
       )}
 
       <div className={`${s.hint} ${interacted || !ready || tourStep !== null ? s.hintHidden : ""}`}>
-        Haz clic en una persona o en un objeto con marcador · «Salas» recorre la oficina · arrastra para girar
+        {t("Haz clic en una persona o en un objeto con marcador · «Salas» recorre la oficina · arrastra para girar", "Click a person or an object with a marker · “Rooms” moves around the office · drag to rotate")}
       </div>
 
       <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""} ${panelMax ? s.panelMax : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>
@@ -574,21 +630,21 @@ export function OfficeDemo() {
               </div>
               <span className={s.pill}>
                 <span className={s.dot} />
-                {status[bot.id] ?? "Trabajando"}
+                {status[bot.id] ?? t("Trabajando", "Working")}
               </span>
-              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? "Restaurar tamaño" : "Ampliar panel"} title={panelMax ? "Restaurar tamaño" : "Pantalla completa"}>
+              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? t("Restaurar tamaño", "Restore size") : t("Ampliar panel", "Expand panel")} title={panelMax ? t("Restaurar tamaño", "Restore size") : t("Pantalla completa", "Full screen")}>
                 <IconMax back={panelMax} />
               </button>
-              <button type="button" className={s.close} onClick={() => setSelected(null)} aria-label="Cerrar">
+              <button type="button" className={s.close} onClick={() => setSelected(null)} aria-label={t("Cerrar", "Close")}>
                 ×
               </button>
             </div>
             <div className={s.tabs}>
               <button type="button" className={`${s.tab} ${tab === "screen" ? s.tabActive : ""}`} onClick={() => setTab("screen")}>
-                <span className={s.live} /> Su pantalla en vivo
+                <span className={s.live} /> {t("Su pantalla en vivo", "Live screen")}
               </button>
               <button type="button" className={`${s.tab} ${tab === "chat" ? s.tabActive : ""}`} onClick={() => setTab("chat")}>
-                Chat con {bot.name}
+                {t("Chat con", "Chat with")} {bot.name}
               </button>
             </div>
             <div className={s.panelBody}>
@@ -600,7 +656,7 @@ export function OfficeDemo() {
                   </div>
                 ))}
               </div>
-              {tab === "screen" ? <BotScreen key={bot.id} bot={bot} /> : <BotChat key={bot.id} bot={bot} />}
+              {tab === "screen" ? <BotScreen key={bot.id} bot={bot} lang={lang} /> : <BotChat key={bot.id} bot={bot} lang={lang} />}
             </div>
           </>
         )}
@@ -614,15 +670,15 @@ export function OfficeDemo() {
                 <strong>{hot.title}</strong>
                 <span>{hot.subtitle}</span>
               </div>
-              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? "Restaurar tamaño" : "Ampliar panel"} title={panelMax ? "Restaurar tamaño" : "Pantalla completa"}>
+              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? t("Restaurar tamaño", "Restore size") : t("Ampliar panel", "Expand panel")} title={panelMax ? t("Restaurar tamaño", "Restore size") : t("Pantalla completa", "Full screen")}>
                 <IconMax back={panelMax} />
               </button>
-              <button type="button" className={s.close} onClick={() => setHotspot(null)} aria-label="Cerrar">
+              <button type="button" className={s.close} onClick={() => setHotspot(null)} aria-label={t("Cerrar", "Close")}>
                 ×
               </button>
             </div>
             <div className={s.panelBody}>
-              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} />
+              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} lang={lang} />
             </div>
           </>
         )}
