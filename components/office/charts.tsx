@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import s from "./office.module.css";
+import { LOCALE, type Lang } from "@/lib/office/i18n";
 
 /**
  * Small, dependency-free charting kit for the office dashboards: seeded data
@@ -31,10 +32,14 @@ export function lastDays(n: number): Date[] {
   for (let i = n - 1; i >= 0; i--) out.push(new Date(today.getTime() - i * 86400000));
   return out;
 }
-const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-export const dayLabel = (d: Date) => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-const WEEKDAYS = ["D", "L", "M", "X", "J", "V", "S"];
-export const weekdayShort = (d: Date) => WEEKDAYS[d.getDay()];
+const MONTHS: Record<Lang, string[]> = {
+  es: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
+/** "27 sep" in Spanish, "Sep 27" in English. */
+export const dayLabel = (d: Date, lang: Lang = "es") => (lang === "es" ? `${d.getDate()} ${MONTHS.es[d.getMonth()]}` : `${MONTHS.en[d.getMonth()]} ${d.getDate()}`);
+const WEEKDAYS: Record<Lang, string[]> = { es: ["D", "L", "M", "X", "J", "V", "S"], en: ["S", "M", "T", "W", "T", "F", "S"] };
+export const weekdayShort = (d: Date, lang: Lang = "es") => WEEKDAYS[lang][d.getDay()];
 export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 
 export type SeriesOpts = {
@@ -81,20 +86,22 @@ export function hourlyToday(seed: number, total: number, peak = 10.5, peak2 = 15
 
 export const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
 export const avg = (a: number[]) => (a.length ? sum(a) / a.length : 0);
-export const fmtInt = (v: number) => Math.round(v).toLocaleString("es-EC");
-export const fmtK = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : fmtInt(v));
-export const fmtMoney = (v: number) => `$${Math.round(v).toLocaleString("es-EC")}`;
-export const fmtPct = (v: number) => `${v.toFixed(1).replace(".", ",")} %`;
+export const fmtInt = (v: number, lang: Lang = "es") => Math.round(v).toLocaleString(LOCALE[lang]);
+export const fmtK = (v: number, lang: Lang = "es") => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : fmtInt(v, lang));
+/** "$18.400" in Spanish, "$18,400" in English. */
+export const fmtMoney = (v: number, lang: Lang = "es") => `$${Math.round(v).toLocaleString(LOCALE[lang])}`;
+/** "5,3 %" in Spanish, "5.3%" in English. */
+export const fmtPct = (v: number, lang: Lang = "es") => (lang === "es" ? `${v.toFixed(1).replace(".", ",")} %` : `${v.toFixed(1)}%`);
 
 // ------------------------------------------------------------ pieces ----
 /** Change versus the previous period, as a coloured chip. */
-export function Delta({ now, prev, invert = false }: { now: number; prev: number; invert?: boolean }) {
+export function Delta({ now, prev, invert = false, lang = "es" }: { now: number; prev: number; invert?: boolean; lang?: Lang }) {
   if (!prev) return null;
   const pct = ((now - prev) / prev) * 100;
   const good = invert ? pct <= 0 : pct >= 0;
   return (
-    <span className={`${s.delta} ${good ? s.deltaUp : s.deltaDown}`} title="vs. periodo anterior">
-      {pct >= 0 ? "▲" : "▼"} {Math.abs(pct).toFixed(1).replace(".", ",")} %
+    <span className={`${s.delta} ${good ? s.deltaUp : s.deltaDown}`} title={lang === "es" ? "vs. periodo anterior" : "vs. previous period"}>
+      {pct >= 0 ? "▲" : "▼"} {fmtPct(Math.abs(pct), lang)}
     </span>
   );
 }
@@ -139,9 +146,10 @@ export function LineChart({
   labels,
   weekend,
   height = 190,
-  yFormat = fmtInt,
+  yFormat,
   target,
   every,
+  lang = "es",
 }: {
   series: LineSeries[];
   labels: string[];
@@ -151,7 +159,9 @@ export function LineChart({
   target?: { value: number; label: string };
   /** show every n-th x label */
   every?: number;
+  lang?: Lang;
 }) {
+  const fmt = yFormat ?? ((v: number) => fmtInt(v, lang));
   const W = 560, H = height, L = 44, R = 14, T = 12, B = 26;
   const n = Math.max(...series.map((q) => q.data.length));
   const all = series.flatMap((q) => q.data).concat(target ? [target.value] : []);
@@ -180,7 +190,7 @@ export function LineChart({
         <g key={i}>
           <line x1={L} x2={W - R} y1={y(t)} y2={y(t)} stroke="#0e0d12" strokeOpacity="0.07" />
           <text x={L - 6} y={y(t) + 3.5} fontSize="10" textAnchor="end" fill="#6b7280">
-            {yFormat(t)}
+            {fmt(t)}
           </text>
         </g>
       ))}
@@ -220,9 +230,10 @@ export function BarChart({
   groups,
   colors,
   height = 170,
-  yFormat = fmtInt,
+  yFormat,
   stacked = true,
   every,
+  lang = "es",
 }: {
   groups: { label: string; values: number[] }[];
   colors: string[];
@@ -230,7 +241,9 @@ export function BarChart({
   yFormat?: (v: number) => string;
   stacked?: boolean;
   every?: number;
+  lang?: Lang;
 }) {
+  const fmt = yFormat ?? ((v: number) => fmtInt(v, lang));
   const W = 560, H = height, L = 40, R = 10, T = 10, B = 26;
   const n = groups.length, m = colors.length;
   const tops = groups.map((g) => (stacked ? sum(g.values) : Math.max(...g.values)));
@@ -245,7 +258,7 @@ export function BarChart({
         <g key={i}>
           <line x1={L} x2={W - R} y1={y(hi * k)} y2={y(hi * k)} stroke="#0e0d12" strokeOpacity="0.07" />
           <text x={L - 6} y={y(hi * k) + 3.5} fontSize="10" textAnchor="end" fill="#6b7280">
-            {yFormat(hi * k)}
+            {fmt(hi * k)}
           </text>
         </g>
       ))}
@@ -273,7 +286,18 @@ export function BarChart({
 }
 
 /** Donut with a legend of shares. */
-export function Donut({ parts, size = 120, format = fmtInt }: { parts: { label: string; value: number; color: string }[]; size?: number; format?: (v: number) => string }) {
+export function Donut({
+  parts,
+  size = 120,
+  format,
+  lang = "es",
+}: {
+  parts: { label: string; value: number; color: string }[];
+  size?: number;
+  format?: (v: number) => string;
+  lang?: Lang;
+}) {
+  const fmt = format ?? ((v: number) => fmtInt(v, lang));
   const total = Math.max(1, sum(parts.map((p) => p.value)));
   const r = 44, c = 2 * Math.PI * r;
   let acc = 0;
@@ -300,7 +324,7 @@ export function Donut({ parts, size = 120, format = fmtInt }: { parts: { label: 
           return el;
         })}
         <text x="60" y="57" fontSize="17" fontWeight="600" textAnchor="middle" fill="#111827">
-          {format(total)}
+          {fmt(total)}
         </text>
         <text x="60" y="72" fontSize="9.5" textAnchor="middle" fill="#6b7280">
           total
@@ -311,8 +335,8 @@ export function Donut({ parts, size = 120, format = fmtInt }: { parts: { label: 
           <div key={p.label} className={s.legendRow}>
             <i style={{ background: p.color }} />
             <span>{p.label}</span>
-            <b>{Math.round((p.value / total) * 100)} %</b>
-            <small>{format(p.value)}</small>
+            <b>{lang === "es" ? `${Math.round((p.value / total) * 100)} %` : `${Math.round((p.value / total) * 100)}%`}</b>
+            <small>{fmt(p.value)}</small>
           </div>
         ))}
       </div>
