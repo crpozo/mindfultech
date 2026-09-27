@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   inset: 0;
-  background: #dfe9f2;
+  background: radial-gradient(120% 90% at 50% 30%, #8b8ae0 0%, #6d6ccf 45%, #4b48a6 100%);
   color: #0e0d12;
   overflow: hidden;
   font-family: var(--font-outfit), system-ui, sans-serif;
@@ -13,6 +13,94 @@
 }
 .stage canvas {
   touch-action: none;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(80% 70% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(20, 16, 50, 0.35) 100%);
+  z-index: 1;
+}
+
+/* ---- overlay: name labels + speech bubbles, positioned by the scene ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+.label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: rgba(14, 13, 18, 0.78);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.15s, box-shadow 0.15s;
+  will-change: transform;
+}
+.label i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.label b {
+  font-weight: 600;
+}
+.label span {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11px;
+}
+.label:hover,
+.labelActive {
+  background: #0e0d12;
+  box-shadow: 0 0 0 2px #fff;
+}
+.bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 280px;
+  padding: 10px 15px;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: #fff;
+  color: #0e0d12;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  box-shadow: 0 8px 22px rgba(14, 13, 18, 0.22), 0 0 0 2px var(--c);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-right: 2px solid var(--c);
+  border-bottom: 2px solid var(--c);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.bubbleEmoji {
+  font-size: 30px;
+  padding: 6px 14px;
 }
 
 .loading {
@@ -870,6 +958,18 @@
   }
   .card {
     min-width: 160px;
+  }
+  .label {
+    font-size: 10px;
+    padding: 3px 8px 3px 5px;
+  }
+  .label span {
+    display: none;
+  }
+  .bubble {
+    font-size: 13px;
+    max-width: 200px;
+    padding: 7px 11px;
   }
   .kpis {
     display: none;

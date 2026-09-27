@@ -1,19 +1,37 @@
 /**
  * The six AI employees of the office demo. Everything here is scripted: the
  * demo shows a client what a team of bots looks like, it does not run one.
- * Colours are the suit (body) and the accent (badge, ring, panel header).
+ * `color` is the pastel for cards and avatars, `accent` the strong colour for
+ * rings, bubbles and screens, and `look` how the 3D character is dressed.
  */
 export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops";
+
+/** How the character is built (see components/office/scene/character.js). */
+export type Look = {
+  skin: string;
+  hair: string;
+  hairStyle: "short" | "side" | "bun" | "ponytail" | "long" | "curly" | "bald";
+  shirt: string;
+  shirtStyle: "tee" | "collar" | "sweater" | "hoodie" | "blouse";
+  sleeves: "long" | "short";
+  pants: string;
+  skirt?: boolean;
+  shoes: string;
+  glasses?: boolean;
+  beard?: boolean;
+  tie?: string;
+  lanyard?: boolean;
+};
 
 export type Bot = {
   id: string;
   name: string;
   role: string;
   title: string;
-  suit: string;
+  /** pastel for avatars and cards */
+  color: string;
   accent: string;
-  skin: string;
-  hair: string;
+  look: Look;
   screen: ScreenKind;
   /** what the roster shows while the bot is at its desk */
   working: string[];
@@ -29,10 +47,9 @@ export const BOTS: Bot[] = [
     name: "Sofía",
     role: "Ventas",
     title: "AI Sales Rep",
-    suit: "#f4d98a",
+    color: "#f4d98a",
     accent: "#e0a83a",
-    skin: "#f6d3b8",
-    hair: "#3b2a22",
+    look: { skin: "#f3cdb0", hair: "#3b2418", hairStyle: "long", shirt: "#e9b949", shirtStyle: "sweater", sleeves: "long", pants: "#2b2d42", skirt: true, shoes: "#1c1c22" },
     screen: "sales",
     working: [
       "Calificando leads de HubSpot",
@@ -60,10 +77,9 @@ export const BOTS: Bot[] = [
     name: "Mateo",
     role: "Soporte",
     title: "AI Customer Support",
-    suit: "#a9dcd3",
+    color: "#a9dcd3",
     accent: "#3aa392",
-    skin: "#e8bfa0",
-    hair: "#1e1a1a",
+    look: { skin: "#d9a274", hair: "#1e1a1a", hairStyle: "short", shirt: "#2a9d8f", shirtStyle: "collar", sleeves: "short", pants: "#c9b48a", shoes: "#f1f1f1", glasses: true, lanyard: true },
     screen: "support",
     working: [
       "Respondiendo tickets de Zendesk",
@@ -91,10 +107,9 @@ export const BOTS: Bot[] = [
     name: "Valentina",
     role: "Marketing",
     title: "AI Social Media Manager",
-    suit: "#d9c6f2",
+    color: "#d9c6f2",
     accent: "#8a63d2",
-    skin: "#f1cdb5",
-    hair: "#5a2d1c",
+    look: { skin: "#efc3a4", hair: "#7a3b1e", hairStyle: "bun", shirt: "#9b5de5", shirtStyle: "blouse", sleeves: "long", pants: "#1f1f24", shoes: "#6b3e2e" },
     screen: "social",
     working: [
       "Programando posts de la semana",
@@ -122,10 +137,9 @@ export const BOTS: Bot[] = [
     name: "Nicolás",
     role: "Desarrollo",
     title: "AI Software Engineer",
-    suit: "#b9d7f2",
+    color: "#b9d7f2",
     accent: "#3f86d6",
-    skin: "#d9a98a",
-    hair: "#221b1b",
+    look: { skin: "#c98b64", hair: "#211a17", hairStyle: "curly", shirt: "#457b9d", shirtStyle: "hoodie", sleeves: "long", pants: "#1d3557", shoes: "#8d99ae", beard: true },
     screen: "dev",
     working: [
       "Corrigiendo un bug del checkout",
@@ -153,10 +167,9 @@ export const BOTS: Bot[] = [
     name: "Camila",
     role: "Finanzas",
     title: "AI Finance Analyst",
-    suit: "#f7c4b6",
+    color: "#f7c4b6",
     accent: "#e2694f",
-    skin: "#f4d6c2",
-    hair: "#2d1e1a",
+    look: { skin: "#f6dcc6", hair: "#d9a55a", hairStyle: "ponytail", shirt: "#f4845f", shirtStyle: "blouse", sleeves: "short", pants: "#6c757d", shoes: "#1c1c22", glasses: true },
     screen: "finance",
     working: [
       "Conciliando pagos del banco",
@@ -184,10 +197,9 @@ export const BOTS: Bot[] = [
     name: "Andrés",
     role: "Operaciones",
     title: "AI Operations Assistant",
-    suit: "#c9e8b2",
+    color: "#c9e8b2",
     accent: "#5fa54a",
-    skin: "#e3b797",
-    hair: "#1c1414",
+    look: { skin: "#8d5a3b", hair: "#141010", hairStyle: "side", shirt: "#f1faee", shirtStyle: "collar", sleeves: "long", pants: "#1b263b", shoes: "#5a3a28", tie: "#2d6a4f" },
     screen: "ops",
     working: [
       "Coordinando la agenda del equipo",
@@ -213,19 +225,6 @@ export const BOTS: Bot[] = [
 ];
 
 export const BOT_BY_ID: Record<string, Bot> = Object.fromEntries(BOTS.map((b) => [b.id, b]));
-
-/** Where the bot is, from the scene's point of view (place ids the scene emits). */
-export const PLACE_LABEL: Record<string, string> = {
-  desk: "En su escritorio",
-  walk: "Caminando por la oficina",
-  coffee: "En la cafetera",
-  meeting: "En la sala de reuniones",
-  board: "Frente a la pizarra",
-  lounge: "En el lounge",
-  printer: "En la impresora",
-  plant: "Junto a la ventana",
-  visit: "Visitando a un compañero",
-};
 
 export function reply(bot: Bot, text: string): string {
   const t = text

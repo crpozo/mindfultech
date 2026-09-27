@@ -3,46 +3,52 @@
 import * as React from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { BOTS, BOT_BY_ID, PLACE_LABEL, type Bot } from "@/lib/office/bots";
+import { BOTS, BOT_BY_ID, type Bot } from "@/lib/office/bots";
 import { BotScreen } from "./BotScreen";
 import { BotChat } from "./BotChat";
 import s from "./office.module.css";
 
 type Scene = {
   setSelected: (id: string | null) => void;
-  placeOf: (id: string) => string | undefined;
   dispose: () => void;
 };
 
 /**
- * /office-demo — the 3D office of AI employees. The scene (officeScene.js)
- * owns the bots and the camera; this component draws the HUD (brand, live
- * stats, roster with each bot's current activity) and the side panel with the
- * bot's remote screen and chat when one is clicked.
+ * /office-demo — the 3D office of AI employees. The scene (scene/index.js)
+ * owns the room, the people and the camera and reports what each person is
+ * doing; this component draws the HUD (brand, live stats, roster with each
+ * bot's current activity) and the side panel with the bot's remote screen
+ * and chat when one is clicked. Speech bubbles and name labels live in the
+ * overlay div, positioned by the scene every frame.
  */
 export function OfficeDemo() {
   const mountRef = React.useRef<HTMLDivElement>(null);
+  const overlayRef = React.useRef<HTMLDivElement>(null);
   const sceneRef = React.useRef<Scene | null>(null);
   const [ready, setReady] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState<"screen" | "chat">("screen");
-  const [places, setPlaces] = React.useState<Record<string, string>>({});
+  // what each person is doing right now; null = typing at the desk (the
+  // roster then rotates through the role's tasks)
+  const [status, setStatus] = React.useState<Record<string, string | null>>({});
   const [taskIdx, setTaskIdx] = React.useState(0);
   const [clock, setClock] = React.useState("");
   const [interacted, setInteracted] = React.useState(false);
 
   React.useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
+    const mount = mountRef.current, overlay = overlayRef.current;
+    if (!mount || !overlay) return;
     let disposed = false;
     (async () => {
       try {
-        const { createOffice } = await import("./officeScene.js");
+        const { createOffice } = await import("./scene/index.js");
         if (disposed || !mountRef.current) return;
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const scene: Scene = createOffice({
           mount,
+          overlay,
+          classes: { label: s.label, labelActive: s.labelActive, bubble: s.bubble, bubbleEmoji: s.bubbleEmoji },
           bots: BOTS,
           reduced,
           onSelect: (id: string | null) => {
@@ -50,7 +56,7 @@ export function OfficeDemo() {
             setInteracted(true);
           },
           onHover: () => {},
-          onStatus: (id: string, place: string) => setPlaces((p) => (p[id] === place ? p : { ...p, [id]: place })),
+          onStatus: (id: string, text: string | null) => setStatus((p) => (p[id] === text ? p : { ...p, [id]: text })),
         });
         sceneRef.current = scene;
         setReady(true);
@@ -70,7 +76,6 @@ export function OfficeDemo() {
     sceneRef.current?.setSelected(selected);
   }, [selected]);
 
-  // the roster's "what am I doing" rotates while a bot is at its desk
   React.useEffect(() => {
     const id = window.setInterval(() => setTaskIdx((i) => i + 1), 7000);
     return () => window.clearInterval(id);
@@ -81,7 +86,6 @@ export function OfficeDemo() {
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
   }, []);
-
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelected(null);
@@ -90,17 +94,14 @@ export function OfficeDemo() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const statusOf = (b: Bot, i: number) => {
-    const place = places[b.id] ?? "desk";
-    if (place === "desk") return b.working[(taskIdx + i) % b.working.length];
-    return PLACE_LABEL[place] ?? PLACE_LABEL.walk;
-  };
-
+  const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? BOT_BY_ID[selected] : null;
 
   return (
     <div className={s.root}>
       <div className={s.stage} ref={mountRef} />
+      <div className={s.overlay} ref={overlayRef} />
+      <div className={s.vignette} />
 
       {failed ? (
         <div className={s.fallback}>
@@ -134,7 +135,7 @@ export function OfficeDemo() {
       </header>
 
       <div className={`${s.hint} ${interacted || !ready ? s.hintHidden : ""}`}>
-        Haz clic en un empleado para hablar con él y ver su pantalla · arrastra para girar la cámara
+        Haz clic en un empleado para hablar con él y ver su pantalla · arrastra para girar la oficina
       </div>
 
       <div className={s.roster}>
@@ -143,7 +144,7 @@ export function OfficeDemo() {
             key={b.id}
             type="button"
             className={`${s.card} ${selected === b.id ? s.cardActive : ""}`}
-            style={{ ["--c" as string]: b.suit }}
+            style={{ ["--c" as string]: b.color }}
             onClick={() => {
               setSelected(selected === b.id ? null : b.id);
               setInteracted(true);
@@ -159,7 +160,7 @@ export function OfficeDemo() {
         ))}
       </div>
 
-      <aside className={`${s.panel} ${bot ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.suit ?? "#fff" }} aria-hidden={!bot}>
+      <aside className={`${s.panel} ${bot ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? "#fff" }} aria-hidden={!bot}>
         {bot && (
           <>
             <div className={s.panelHead}>
@@ -172,7 +173,7 @@ export function OfficeDemo() {
               </div>
               <span className={s.pill}>
                 <span className={s.dot} />
-                {places[bot.id] && places[bot.id] !== "desk" ? PLACE_LABEL[places[bot.id]] : "Trabajando"}
+                {status[bot.id] ?? "Trabajando"}
               </span>
               <button type="button" className={s.close} onClick={() => setSelected(null)} aria-label="Cerrar">
                 ×
