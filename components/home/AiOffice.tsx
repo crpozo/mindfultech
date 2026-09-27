@@ -56,45 +56,41 @@ export function AiOffice() {
     <section id="ai-office" style={{ position: "relative", background: "#f4efe3", padding: "var(--section-y) 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         <div className="aio-head">
-          <div>
-            <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
-            <h2
-              style={{
-                fontWeight: 500,
-                fontSize: "clamp(34px,3.4vw,54px)",
-                letterSpacing: "-.02em",
-                lineHeight: 1.06,
-                margin: "14px 0 0",
-                color: "var(--ink)",
-                maxWidth: 640,
-              }}
-            >
-              {t.title}
-            </h2>
-          </div>
-          <div>
-            <p style={{ fontSize: 18, lineHeight: 1.55, color: "#4c4a55", margin: 0, maxWidth: 600 }}>{t.sub}</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 22, flexWrap: "wrap" }}>
-              <Link
-                href="/office-demo/"
-                className="btn-dark"
-                style={{
-                  textDecoration: "none",
-                  fontFamily: MONO,
-                  fontSize: 13,
-                  fontWeight: 500,
-                  letterSpacing: ".12em",
-                  background: "#0e0d12",
-                  color: "#fff",
-                  padding: "16px 26px",
-                  borderRadius: 6,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t.cta}
-              </Link>
-            </div>
-          </div>
+          <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
+          <h2
+            style={{
+              fontWeight: 500,
+              fontSize: "clamp(34px,3.4vw,54px)",
+              letterSpacing: "-.02em",
+              lineHeight: 1.06,
+              margin: "14px 0 0",
+              color: "var(--ink)",
+              maxWidth: 760,
+            }}
+          >
+            {t.title}
+          </h2>
+          <p style={{ fontSize: 18, lineHeight: 1.55, color: "#4c4a55", margin: "20px 0 0", maxWidth: 680 }}>{t.sub}</p>
+          <Link
+            href="/office-demo/"
+            className="btn-dark"
+            style={{
+              textDecoration: "none",
+              fontFamily: MONO,
+              fontSize: 13,
+              fontWeight: 500,
+              letterSpacing: ".12em",
+              background: "#0e0d12",
+              color: "#fff",
+              padding: "16px 26px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+              display: "inline-block",
+              marginTop: 26,
+            }}
+          >
+            {t.cta}
+          </Link>
         </div>
 
         {/* the office itself; the whole picture opens the demo */}

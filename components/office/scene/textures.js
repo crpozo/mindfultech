@@ -487,8 +487,14 @@ export function signText(lines, bg, fg, w = 512, h = 256) {
   g.fillStyle = fg;
   g.textAlign = "center";
   g.textBaseline = "middle";
-  const size = Math.min(h / (lines.length + 0.8), w / 9);
-  g.font = `700 ${size}px Outfit, system-ui, sans-serif`;
+  // start from the height budget, then shrink until the widest line fits the
+  // board with a margin on both sides (long lines used to run off the edges)
+  let size = h / (lines.length + 0.8);
+  const font = (px) => `700 ${px}px Outfit, system-ui, sans-serif`;
+  g.font = font(size);
+  const widest = Math.max(...lines.map((l) => g.measureText(l).width));
+  if (widest > w * 0.86) size *= (w * 0.86) / widest;
+  g.font = font(size);
   lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * size * 1.15));
   return tex(c, { wrap: false, aniso: 4 });
 }
