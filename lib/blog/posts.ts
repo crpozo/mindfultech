@@ -18,6 +18,8 @@ export interface Post {
   title: Bi;
   excerpt: Bi;
   cover: string;
+  /** optional right-sized copy (800×450) for small cards; falls back to `cover` */
+  coverCard?: string;
   bg: string;
   onDark: boolean;
   dateLabel: Bi;
@@ -27,6 +29,103 @@ export interface Post {
 }
 
 export const POSTS: Post[] = [
+  {
+    slug: "ai-management-office",
+    tag: { en: "AI OFFICE", es: "OFICINA IA" },
+    title: {
+      en: "Inside the AI Management Office: a company run by AI employees you can watch",
+      es: "Dentro de la Oficina de Gestión con IA: una empresa operada por empleados IA que puedes ver",
+    },
+    excerpt: {
+      en: "One AI agent per role, working inside your real tools, with a 3D office where you can see every screen, chat with each agent, and approve what needs a signature.",
+      es: "Un agente de IA por rol, trabajando dentro de tus herramientas reales, con una oficina 3D donde ves cada pantalla, chateas con cada agente y apruebas lo que necesita firma.",
+    },
+    cover: "/office-demo-preview.webp",
+    bg: "#e8dfc9",
+    onDark: false,
+    dateLabel: { en: "September 27, 2026", es: "27 de septiembre de 2026" },
+    readMins: 5,
+    author: { en: "Carlos Pozo · Founder", es: "Carlos Pozo · Fundador" },
+    body: [
+      {
+        t: "p",
+        en: "Most companies don't have an AI problem. They have a routine-work problem: the same invoices to chase, the same support tickets to triage, the same leads to qualify, week after week. The AI Management Office is our answer to that. It's not a chatbot and it's not a dashboard bolted onto one. It's a small team of AI employees, one per role, doing that routine work inside the tools your company already uses.",
+        es: "La mayoría de las empresas no tiene un problema de IA. Tiene un problema de trabajo rutinario: las mismas facturas por cobrar, los mismos tickets de soporte por clasificar, los mismos leads por calificar, semana tras semana. La Oficina de Gestión con IA es nuestra respuesta a eso. No es un chatbot ni un dashboard pegado a uno. Es un equipo pequeño de empleados IA, uno por rol, que hace ese trabajo rutinario dentro de las herramientas que tu empresa ya usa.",
+      },
+      {
+        t: "h2",
+        en: "One agent per role",
+        es: "Un agente por rol",
+      },
+      {
+        t: "p",
+        en: "Each agent owns a job the way a person would: sales qualifies and follows up on leads, support answers and escalates tickets, finance reconciles and chases invoices, marketing drafts and schedules, operations keeps the queue moving, and reception routes whatever comes in the front door. They don't live in a separate app. They log into your CRM, your inbox, your accounting system and your calendar, with their own credentials and least-privilege access, and leave a trail you can audit.",
+        es: "Cada agente es dueño de un trabajo como lo sería una persona: ventas califica y hace seguimiento de leads, soporte responde y escala tickets, finanzas concilia y cobra facturas, marketing redacta y programa, operaciones mantiene la cola en movimiento y recepción enruta todo lo que entra por la puerta. No viven en una app aparte. Entran a tu CRM, tu correo, tu sistema contable y tu calendario, con sus propias credenciales y acceso de privilegios mínimos, y dejan un rastro que puedes auditar.",
+      },
+      {
+        t: "h2",
+        en: "Why a 3D office",
+        es: "Por qué una oficina 3D",
+      },
+      {
+        t: "p",
+        en: "The honest reason is visibility. The hardest part of handing work to software isn't the software, it's not knowing what it's doing. So we built the office you would actually walk through if these were people. Every agent has a desk and a live screen. You can watch the finance agent work through a reconciliation, open the support agent's queue, or click on any of them and ask what they're doing and why.",
+        es: "La razón honesta es visibilidad. Lo más difícil de delegarle trabajo al software no es el software, es no saber qué está haciendo. Así que construimos la oficina por la que caminarías si fueran personas. Cada agente tiene un escritorio y una pantalla en vivo. Puedes ver al agente de finanzas conciliar, abrir la cola del agente de soporte, o hacer clic en cualquiera y preguntarle qué está haciendo y por qué.",
+      },
+      {
+        t: "ul",
+        en: [
+          "Live screens: what each agent is working on right now, not a summary written afterward.",
+          "Chat with any agent, in plain language, and get an answer grounded in its actual records.",
+          "Dashboards per area with 30-day trends, so you see the direction, not just today's number.",
+          "Cost per area, so you know exactly what each function is spending.",
+          "An approval queue: anything that needs a signature waits for a human, with the context attached.",
+        ],
+        es: [
+          "Pantallas en vivo: en qué está trabajando cada agente ahora mismo, no un resumen escrito después.",
+          "Chatea con cualquier agente, en lenguaje natural, y recibe una respuesta anclada en sus registros reales.",
+          "Dashboards por área con tendencias a 30 días, para ver la dirección y no solo el número de hoy.",
+          "Costo por área, para saber exactamente cuánto gasta cada función.",
+          "Una cola de aprobaciones: todo lo que necesita firma espera a una persona, con el contexto adjunto.",
+        ],
+      },
+      {
+        t: "quote",
+        en: "If you can't see what an agent is doing, you won't trust it with anything that matters. The office is the trust layer.",
+        es: "Si no puedes ver lo que hace un agente, no le vas a confiar nada que importe. La oficina es la capa de confianza.",
+      },
+      {
+        t: "h2",
+        en: "How an engagement works",
+        es: "Cómo funciona un proyecto",
+      },
+      {
+        t: "p",
+        en: "We start by mapping the routine work: two or three weeks shadowing the roles, listing the tasks that repeat, the tools they touch and the decisions that must stay human. Then you hire the agents you need, one role at a time. We connect them to your systems, set the approval rules, and run them alongside your team. From there you watch it run in the office, adjust what needs adjusting, and add roles as the first ones earn their place.",
+        es: "Empezamos mapeando el trabajo rutinario: dos o tres semanas acompañando a los roles, listando las tareas que se repiten, las herramientas que tocan y las decisiones que deben seguir siendo humanas. Luego contratas los agentes que necesitas, un rol a la vez. Los conectamos a tus sistemas, definimos las reglas de aprobación y los ponemos a trabajar junto a tu equipo. Desde ahí ves cómo funciona en la oficina, ajustas lo que haga falta y sumas roles a medida que los primeros se ganan su lugar.",
+      },
+      {
+        t: "h2",
+        en: "What it costs",
+        es: "Qué cuesta",
+      },
+      {
+        t: "p",
+        en: "An agent runs for a fraction of what the equivalent headcount costs, and it works the night shift without being asked. We won't put a universal number on it because it depends on your volume and the tools involved, but the cost-per-area view in the office shows you the real figure every day, next to the work it produced. The point isn't to replace your team. It's to give the people you have their week back.",
+        es: "Un agente cuesta una fracción de lo que costaría el puesto equivalente, y trabaja el turno de noche sin que nadie se lo pida. No vamos a poner un número universal porque depende de tu volumen y de las herramientas involucradas, pero la vista de costo por área en la oficina te muestra la cifra real cada día, junto al trabajo que produjo. La idea no es reemplazar a tu equipo. Es devolverle a la gente que ya tienes su semana.",
+      },
+      {
+        t: "h2",
+        en: "See it running",
+        es: "Míralo funcionando",
+      },
+      {
+        t: "p",
+        en: "The office is live at /office-demo/ with real agents, real dashboards and a guided tour that walks you desk by desk. Open it, click on an agent, and ask it what it's doing. If it feels like a team you'd want, that's the conversation we'd like to have next.",
+        es: "La oficina está en vivo en /office-demo/ con agentes reales, dashboards reales y un recorrido guiado que te lleva escritorio por escritorio. Ábrela, haz clic en un agente y pregúntale qué está haciendo. Si se siente como un equipo que querrías tener, esa es la conversación que nos gustaría tener después.",
+      },
+    ],
+  },
   {
     slug: "ai-first-software-lab",
     tag: { en: "COMPANY", es: "COMPAÑÍA" },
@@ -38,9 +137,10 @@ export const POSTS: Post[] = [
       en: "Ten years of human-centered software, now with applied AI in every engagement. Here's what changes, and what never will.",
       es: "Diez años de software centrado en personas, ahora con IA aplicada en cada proyecto. Esto es lo que cambia, y lo que nunca cambiará.",
     },
-    cover: "/art/ailab.webp",
-    bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 18%,#e8e4f4),#efeaf6 55%,color-mix(in srgb,var(--accent) 30%,#fff))",
-    onDark: false,
+    cover: "/blog/ai-first-software-lab.webp",
+    coverCard: "/blog/ai-first-software-lab-card.webp",
+    bg: "#0e0d12",
+    onDark: true,
     dateLabel: { en: "July 15, 2026", es: "15 de julio de 2026" },
     readMins: 4,
     author: { en: "Carlos Pozo · Founder", es: "Carlos Pozo · Fundador" },
@@ -118,8 +218,9 @@ export const POSTS: Post[] = [
       en: "Published in the App Store, with an AI survey module that turns open feedback into themes.",
       es: "Publicada en el App Store, con un módulo de encuestas con IA que convierte los comentarios en temas.",
     },
-    cover: "/portfolio/eventflow-banner.webp",
-    bg: "linear-gradient(140deg,#141126,color-mix(in srgb,var(--accent) 55%,#141126))",
+    cover: "/blog/eventflow-usfq.webp",
+    coverCard: "/blog/eventflow-usfq-card.webp",
+    bg: "#0e0d12",
     onDark: true,
     dateLabel: { en: "June 20, 2026", es: "20 de junio de 2026" },
     readMins: 5,
@@ -195,8 +296,9 @@ export const POSTS: Post[] = [
       en: "Reading the practice's records, preparing claims, and handling payer submissions: end to end, with a human check where it counts.",
       es: "Leyendo los registros de la clínica, preparando reclamos y gestionando envíos a las aseguradoras, de punta a punta, con revisión humana donde importa.",
     },
-    cover: "/art/healthcare.webp",
-    bg: "linear-gradient(140deg,color-mix(in srgb,var(--accent) 40%,#f0e8ee),#f6f1f5)",
+    cover: "/blog/helixona-billing-agent.webp",
+    coverCard: "/blog/helixona-billing-agent-card.webp",
+    bg: "#f4efe3",
     onDark: false,
     dateLabel: { en: "May 28, 2026", es: "28 de mayo de 2026" },
     readMins: 6,
@@ -275,8 +377,9 @@ export const POSTS: Post[] = [
       en: "Our playbook for grounding, transparency, and human review in production AI.",
       es: "Nuestro playbook de grounding, transparencia y revisión humana en IA de producción.",
     },
-    cover: "/art/research.webp",
-    bg: "linear-gradient(140deg,#dfe6f2,#c9d4e8)",
+    cover: "/blog/designing-ai-people-trust.webp",
+    coverCard: "/blog/designing-ai-people-trust-card.webp",
+    bg: "#f4efe3",
     onDark: false,
     dateLabel: { en: "May 10, 2026", es: "10 de mayo de 2026" },
     readMins: 5,
@@ -353,6 +456,12 @@ export function getPost(slug: string): Post | undefined {
   return POSTS.find((p) => p.slug === slug);
 }
 
+// Same-tag posts first, then the newest of the rest; never the post itself.
 export function relatedPosts(slug: string, n = 2): Post[] {
-  return POSTS.filter((p) => p.slug !== slug).slice(0, n);
+  const current = getPost(slug);
+  const others = POSTS.filter((p) => p.slug !== slug);
+  if (!current) return others.slice(0, n);
+  const same = others.filter((p) => p.tag.en === current.tag.en);
+  const rest = others.filter((p) => p.tag.en !== current.tag.en);
+  return [...same, ...rest].slice(0, n);
 }

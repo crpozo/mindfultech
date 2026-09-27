@@ -3,127 +3,154 @@
 import * as React from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Pill } from "@/components/internal/Shared";
 import { useLang } from "@/components/i18n";
-import { POSTS } from "@/lib/blog/posts";
+import { POSTS, type Post } from "@/lib/blog/posts";
 
-const MONO = "var(--mono)";
+/* Blog index: short header with tag filters, the latest post featured
+   (image left / copy right), then a card grid of the rest. Filtering is
+   client-side on the English tag key; the active filter is plain state. */
+
+type Lang = "en" | "es";
+
+function Meta({ post, lang }: { post: Post; lang: Lang }) {
+  return (
+    <div className="blog-meta">
+      <span>{post.dateLabel[lang]}</span>
+      <i aria-hidden />
+      <span>
+        {post.readMins} {lang === "es" ? "min de lectura" : "min read"}
+      </span>
+    </div>
+  );
+}
+
+function Card({ post, lang }: { post: Post; lang: Lang }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="blog-card" prefetch={false}>
+      <div className="blog-media" style={{ background: post.bg }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img loading="lazy" decoding="async" src={post.coverCard ?? post.cover} width={800} height={500} alt="" />
+      </div>
+      <span className="blog-tag" style={{ display: "inline-block", marginTop: 18 }}>
+        {post.tag[lang]}
+      </span>
+      <h2 className="blog-card-title">{post.title[lang]}</h2>
+      <p className="blog-excerpt blog-clamp-2">{post.excerpt[lang]}</p>
+      <Meta post={post} lang={lang} />
+    </Link>
+  );
+}
 
 export function BlogBody() {
   const { lang } = useLang();
   const es = lang === "es";
-  const featured = POSTS[0];
-  const list = POSTS.slice(1);
+  const [filter, setFilter] = React.useState<string>("all");
+
+  // unique tags in post order (English key, localized label)
+  const tags = React.useMemo(() => {
+    const seen = new Map<string, Post["tag"]>();
+    for (const p of POSTS) if (!seen.has(p.tag.en)) seen.set(p.tag.en, p.tag);
+    return Array.from(seen.entries());
+  }, []);
+
+  const visible = filter === "all" ? POSTS : POSTS.filter((p) => p.tag.en === filter);
+  const featured = filter === "all" ? visible[0] : null;
+  const list = featured ? visible.slice(1) : visible;
 
   return (
     <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
       <SiteHeader active="blog" megaMenus />
       <main>
-
-        <section style={{ background: "linear-gradient(180deg,#ffffff,#f4f7fc)", padding: "80px 0 50px", textAlign: "center" }}>
-          <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 40px" }}>
-            <Pill>BLOG</Pill>
-            <h1
-              style={{
-                fontWeight: 500,
-                fontSize: "clamp(38px,4.4vw,68px)",
-                lineHeight: 1.04,
-                letterSpacing: "-.025em",
-                margin: "24px 0 0",
-                color: "var(--ink)",
-              }}
-            >
-              {es ? "Novedades en MindfulTech" : "What's new at MindfulTech"}
-            </h1>
-            <p style={{ fontSize: 18, lineHeight: 1.55, color: "#6b6875", maxWidth: 520, margin: "20px auto 0" }}>
-              {es
-                ? "Notas sobre investigación, ingeniería y cómo construir IA confiable."
-                : "Notes on research, engineering, and building AI people can trust."}
-            </p>
+        <section style={{ background: "#fff", padding: "72px 0 0" }}>
+          <div className="pad-x" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+            <div className="blog-head">
+              <div>
+                <h1
+                  style={{
+                    fontWeight: 500,
+                    fontSize: "clamp(44px,5vw,76px)",
+                    lineHeight: 1,
+                    letterSpacing: "-.03em",
+                    margin: 0,
+                    color: "var(--ink)",
+                  }}
+                >
+                  Blog
+                </h1>
+                <p style={{ fontSize: 18, lineHeight: 1.55, color: "#5d5b66", maxWidth: 480, margin: "18px 0 0" }}>
+                  {es
+                    ? "Notas sobre agentes de IA, ingeniería y cómo construimos software en el que la gente confía."
+                    : "Notes on AI agents, engineering, and how we build software people trust."}
+                </p>
+              </div>
+              <div className="blog-filters" role="group" aria-label={es ? "Filtrar por tema" : "Filter by topic"}>
+                <button
+                  type="button"
+                  className="blog-filter"
+                  aria-pressed={filter === "all"}
+                  onClick={() => setFilter("all")}
+                >
+                  {es ? "TODO" : "ALL"}
+                </button>
+                {tags.map(([key, tag]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className="blog-filter"
+                    aria-pressed={filter === key}
+                    onClick={() => setFilter(key)}
+                  >
+                    {tag[lang]}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="featured" style={{ background: "#fff", padding: "50px 0 90px" }}>
+        <section style={{ background: "#fff", padding: "56px 0 110px" }}>
           <div className="pad-x" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-            <div
-              className="stack-2"
-              style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: "clamp(30px,4vw,64px)", alignItems: "start" }}
-            >
-              {/* featured */}
-              <Link href={`/blog/${featured.slug}`} className="blog-link" style={{ textDecoration: "none", color: "var(--ink)", display: "block" }}>
-                <div
-                  style={{
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    aspectRatio: "16/10",
-                    position: "relative",
-                    background: featured.bg,
-                  }}
-                >
+            {featured && (
+              <Link href={`/blog/${featured.slug}`} className="blog-card blog-featured">
+                <div className="blog-media" style={{ background: featured.bg }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img decoding="async" src={featured.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img decoding="async" src={featured.cover} width={1600} height={1000} alt="" />
                 </div>
-                <span
-                  style={{
-                    display: "inline-block",
-                    fontFamily: MONO,
-                    fontSize: 11,
-                    letterSpacing: ".12em",
-                    color: "#44424d",
-                    background: "#f1f2f6",
-                    padding: "7px 12px",
-                    borderRadius: 4,
-                    marginTop: 22,
-                  }}
-                >
-                  {featured.tag[lang]}
-                </span>
-                <h2 style={{ fontWeight: 500, fontSize: "clamp(24px,2.4vw,34px)", lineHeight: 1.2, letterSpacing: "-.015em", margin: "14px 0 10px" }}>
-                  {featured.title[lang]}
-                </h2>
-                <p style={{ fontSize: 16, lineHeight: 1.55, color: "#6b6875", margin: 0, maxWidth: 560 }}>{featured.excerpt[lang]}</p>
+                <div>
+                  <span className="blog-tag blog-tag--accent">{featured.tag[lang]}</span>
+                  <h2 className="blog-card-title">{featured.title[lang]}</h2>
+                  <p className="blog-excerpt">{featured.excerpt[lang]}</p>
+                  <div className="blog-meta">
+                    <span style={{ color: "var(--ink)" }}>{featured.author[lang]}</span>
+                    <i aria-hidden />
+                    <span>{featured.dateLabel[lang]}</span>
+                    <i aria-hidden />
+                    <span>
+                      {featured.readMins} {es ? "min de lectura" : "min read"}
+                    </span>
+                  </div>
+                </div>
               </Link>
+            )}
 
-              {/* list */}
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {list.map((p, i) => {
-                  const style: React.CSSProperties = {
-                    textDecoration: "none",
-                    color: "var(--ink)",
-                    padding: i === 0 ? "0 0 26px" : i === list.length - 1 ? "26px 0 0" : "26px 0",
-                    borderBottom: i < list.length - 1 ? "1px solid rgba(14,13,18,.1)" : "none",
-                  };
-                  return (
-                    <Link key={p.slug} href={`/blog/${p.slug}`} className="blog-link news-row" style={style}>
-                      <div className="news-thumb" style={{ background: p.bg }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img decoding="async" src={p.cover} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                      <div>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            fontFamily: MONO,
-                            fontSize: 10.5,
-                            letterSpacing: ".12em",
-                            color: "#44424d",
-                            background: "#f1f2f6",
-                            padding: "6px 10px",
-                            borderRadius: 4,
-                          }}
-                        >
-                          {p.tag[lang]}
-                        </span>
-                        <h3 style={{ fontWeight: 500, fontSize: 21, lineHeight: 1.25, letterSpacing: "-.01em", margin: "10px 0 6px" }}>
-                          {p.title[lang]}
-                        </h3>
-                        <p style={{ fontSize: 14, lineHeight: 1.5, color: "#6b6875", margin: 0 }}>{p.excerpt[lang]}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
+            {list.length > 0 ? (
+              <div
+                className="blog-grid"
+                style={
+                  featured
+                    ? { marginTop: 72, paddingTop: 56, borderTop: "1px solid rgba(14,13,18,.1)" }
+                    : undefined
+                }
+              >
+                {list.map((p) => (
+                  <Card key={p.slug} post={p} lang={lang} />
+                ))}
               </div>
-            </div>
+            ) : (
+              !featured && (
+                <div className="blog-empty">{es ? "Todavía no hay notas en este tema." : "No posts in this topic yet."}</div>
+              )
+            )}
           </div>
         </section>
       </main>
