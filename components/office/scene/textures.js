@@ -465,3 +465,72 @@ export function monitor(kind, accent) {
   draw();
   return { tex: t, draw };
 }
+
+/** Light polished concrete for the ground-floor open space; tile 2 m × 2 m. */
+export function concrete() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#d9d3c8";
+  g.fillRect(0, 0, S, S);
+  grain(g, S, S, 14000, 0.09, false);
+  grain(g, S, S, 9000, 0.18, true);
+  g.strokeStyle = "rgba(0,0,0,0.12)";
+  g.lineWidth = 2;
+  g.strokeRect(1, 1, S - 2, S - 2);
+  return tex(c);
+}
+
+/** A wall sign with big text, like the motivational boards in the reference. */
+export function signText(lines, bg, fg, w = 512, h = 256) {
+  const c = makeCanvas(w, h), g = c.getContext("2d");
+  g.fillStyle = bg;
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = fg;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  const size = Math.min(h / (lines.length + 0.8), w / 9);
+  g.font = `700 ${size}px Outfit, system-ui, sans-serif`;
+  lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * size * 1.15));
+  return tex(c, { wrap: false, aniso: 4 });
+}
+
+/** A wall of sticky notes for the lab. */
+export function stickyWall() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#f3eee6";
+  g.fillRect(0, 0, S, S);
+  const cols = ["#ffe66d", "#ff9ecb", "#9be8a1", "#8fd3ff", "#ffc67a"];
+  for (let r = 0; r < 5; r++)
+    for (let k = 0; k < 6; k++) {
+      if (Math.random() < 0.15) continue;
+      g.save();
+      g.translate(50 + k * 76, 50 + r * 90);
+      g.rotate(rnd(-0.12, 0.12));
+      g.fillStyle = pick(cols);
+      g.fillRect(-30, -30, 60, 60);
+      g.strokeStyle = "rgba(0,0,0,0.45)";
+      g.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        g.beginPath();
+        g.moveTo(-20, -12 + i * 12);
+        g.lineTo(-20 + rnd(15, 40), -12 + i * 12);
+        g.stroke();
+      }
+      g.restore();
+    }
+  return tex(c, { wrap: false, aniso: 4 });
+}
+
+/** Ping-pong table top with the centre line. */
+export function pingpongTop() {
+  const c = makeCanvas(256, 512), g = c.getContext("2d");
+  g.fillStyle = "#2b6cb0";
+  g.fillRect(0, 0, 256, 512);
+  g.strokeStyle = "#ffffff";
+  g.lineWidth = 6;
+  g.strokeRect(4, 4, 248, 504);
+  g.beginPath();
+  g.moveTo(128, 0);
+  g.lineTo(128, 512);
+  g.stroke();
+  return tex(c, { wrap: false, aniso: 4 });
+}

@@ -73,8 +73,18 @@ export class NavGrid {
     }
     return true;
   }
-  /** World-space path from (ax, az) to (bx, bz), ending exactly at the goal. */
+  /** World-space path from (ax, az) to (bx, bz), ending exactly at the goal.
+   *  A seat or a spot squeezed between furniture may sit in a blocked cell: the
+   *  route then runs to the nearest free cell and finishes with a short
+   *  straight approach, never a long line through walls. */
   findPath(ax, az, bx, bz) {
+    const [fsx, fsz] = this.nearestFree(ax, az);
+    const [fgx, fgz] = this.nearestFree(bx, bz);
+    const inner = this.pathBetween(fsx, fsz, fgx, fgz);
+    if (Math.hypot(fgx - bx, fgz - bz) > 0.02) inner.push([bx, bz]);
+    return inner;
+  }
+  pathBetween(ax, az, bx, bz) {
     const [sx, sz] = this.toCell(ax, az);
     const [gx, gz] = this.toCell(bx, bz);
     if (!this.inside(sx, sz) || !this.inside(gx, gz)) return [[bx, bz]];

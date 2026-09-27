@@ -6,20 +6,28 @@ import { Logo } from "@/components/Logo";
 import { BOTS, BOT_BY_ID, type Bot } from "@/lib/office/bots";
 import { BotScreen } from "./BotScreen";
 import { BotChat } from "./BotChat";
+import { HotspotPanel, HOTSPOT_META, type OfficeEvent } from "./Hotspots";
 import s from "./office.module.css";
 
+type Room = { id: string; name: string; floor: number };
 type Scene = {
   setSelected: (id: string | null) => void;
+  focusRoom: (id: string | null) => void;
+  setFloorView: (mode: "all" | "ground" | "upper") => void;
+  rooms: Room[];
   dispose: () => void;
+};
+
+const ROOM_ICONS: Record<string, string> = {
+  reception: "🛎️", open: "💻", kitchen: "☕", meeting: "📅", booths: "📞", servers: "🖥️", lounge: "🛋️", training: "🎓", meeting2: "🗣️", lab: "🧪",
 };
 
 /**
  * /office-demo — the 3D office of AI employees. The scene (scene/index.js)
- * owns the room, the people and the camera and reports what each person is
- * doing; this component draws the HUD (brand, live stats, roster with each
- * bot's current activity) and the side panel with the bot's remote screen
- * and chat when one is clicked. Speech bubbles and name labels live in the
- * overlay div, positioned by the scene every frame.
+ * owns the building, the people and the camera and reports what each person
+ * is doing plus office events; this component draws the HUD (brand, room
+ * navigator, roster with each bot's current activity) and the side panel:
+ * an employee's remote screen and chat, or a clicked object's dashboard.
  */
 export function OfficeDemo() {
   const mountRef = React.useRef<HTMLDivElement>(null);
@@ -28,10 +36,14 @@ export function OfficeDemo() {
   const [ready, setReady] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
   const [selected, setSelected] = React.useState<string | null>(null);
+  const [hotspot, setHotspot] = React.useState<string | null>(null);
+  const [room, setRoom] = React.useState<string | null>(null);
+  const [rooms, setRooms] = React.useState<Room[]>([]);
   const [tab, setTab] = React.useState<"screen" | "chat">("screen");
-  // what each person is doing right now; null = typing at the desk (the
+  // what each person is doing right now; null = working at the desk (the
   // roster then rotates through the role's tasks)
   const [status, setStatus] = React.useState<Record<string, string | null>>({});
+  const [events, setEvents] = React.useState<OfficeEvent[]>([]);
   const [taskIdx, setTaskIdx] = React.useState(0);
   const [clock, setClock] = React.useState("");
   const [interacted, setInteracted] = React.useState(false);
@@ -44,21 +56,36 @@ export function OfficeDemo() {
       try {
         const { createOffice } = await import("./scene/index.js");
         if (disposed || !mountRef.current) return;
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const scene: Scene = createOffice({
           mount,
           overlay,
-          classes: { label: s.label, labelActive: s.labelActive, bubble: s.bubble, bubbleEmoji: s.bubbleEmoji },
+          classes: {
+            label: s.label,
+            labelActive: s.labelActive,
+            bubble: s.bubble,
+            bubbleEmoji: s.bubbleEmoji,
+            marker: s.marker,
+            markerIcon: s.markerIcon,
+            markerName: s.markerName,
+            markerActive: s.markerActive,
+          },
           bots: BOTS,
-          reduced,
           onSelect: (id: string | null) => {
             setSelected(id);
+            if (id) setHotspot(null);
+            setInteracted(true);
+          },
+          onHotspot: (id: string) => {
+            setHotspot(id);
+            setSelected(null);
             setInteracted(true);
           },
           onHover: () => {},
           onStatus: (id: string, text: string | null) => setStatus((p) => (p[id] === text ? p : { ...p, [id]: text })),
+          onEvent: (e: OfficeEvent) => setEvents((p) => [e, ...p].slice(0, 400)),
         });
         sceneRef.current = scene;
+        setRooms(scene.rooms);
         setReady(true);
       } catch (e) {
         console.error(e);
@@ -74,8 +101,8 @@ export function OfficeDemo() {
 
   React.useEffect(() => {
     sceneRef.current?.setSelected(selected);
+    if (selected) setRoom(null);
   }, [selected]);
-
   React.useEffect(() => {
     const id = window.setInterval(() => setTaskIdx((i) => i + 1), 7000);
     return () => window.clearInterval(id);
@@ -88,14 +115,27 @@ export function OfficeDemo() {
   }, []);
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSelected(null);
+      if (e.key === "Escape") {
+        setSelected(null);
+        setHotspot(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const goRoom = (id: string | null) => {
+    const next = id === room ? null : id;
+    setRoom(next);
+    setSelected(null);
+    sceneRef.current?.focusRoom(next);
+    setInteracted(true);
+  };
+
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? BOT_BY_ID[selected] : null;
+  const hot = hotspot ? HOTSPOT_META[hotspot] : null;
+  const panelOpen = !!bot || !!hot;
 
   return (
     <div className={s.root}>
@@ -134,8 +174,29 @@ export function OfficeDemo() {
         </div>
       </header>
 
+      {rooms.length > 0 && (
+        <nav className={s.nav} aria-label="Salas">
+          {[0, 1].map((floor) => (
+            <React.Fragment key={floor}>
+              <div className={s.navFloor}>{floor ? "Piso 1" : "Planta baja"}</div>
+              {rooms
+                .filter((r) => r.floor === floor)
+                .map((r) => (
+                  <button key={r.id} type="button" className={`${s.navBtn} ${room === r.id ? s.navBtnActive : ""}`} onClick={() => goRoom(r.id)}>
+                    <i>{ROOM_ICONS[r.id] ?? "•"}</i>
+                    {r.name}
+                  </button>
+                ))}
+            </React.Fragment>
+          ))}
+          <button type="button" className={`${s.navBtn} ${room === null ? s.navBtnActive : ""}`} onClick={() => goRoom(null)} style={{ marginTop: 6 }}>
+            <i>🏢</i>Todo el edificio
+          </button>
+        </nav>
+      )}
+
       <div className={`${s.hint} ${interacted || !ready ? s.hintHidden : ""}`}>
-        Haz clic en un empleado para hablar con él y ver su pantalla · arrastra para girar la oficina
+        Haz clic en una persona o en un objeto con marcador · elige una sala en el menú · arrastra para girar
       </div>
 
       <div className={s.roster}>
@@ -147,6 +208,7 @@ export function OfficeDemo() {
             style={{ ["--c" as string]: b.color }}
             onClick={() => {
               setSelected(selected === b.id ? null : b.id);
+              setHotspot(null);
               setInteracted(true);
             }}
           >
@@ -160,7 +222,7 @@ export function OfficeDemo() {
         ))}
       </div>
 
-      <aside className={`${s.panel} ${bot ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? "#fff" }} aria-hidden={!bot}>
+      <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>
         {bot && (
           <>
             <div className={s.panelHead}>
@@ -197,6 +259,25 @@ export function OfficeDemo() {
                 ))}
               </div>
               {tab === "screen" ? <BotScreen key={bot.id} bot={bot} /> : <BotChat key={bot.id} bot={bot} />}
+            </div>
+          </>
+        )}
+        {hot && hotspot && (
+          <>
+            <div className={s.panelHead}>
+              <span className={s.avatar} style={{ fontSize: 20 }}>
+                {hot.icon}
+              </span>
+              <div className={s.panelTitle}>
+                <strong>{hot.title}</strong>
+                <span>{hot.subtitle}</span>
+              </div>
+              <button type="button" className={s.close} onClick={() => setHotspot(null)} aria-label="Cerrar">
+                ×
+              </button>
+            </div>
+            <div className={s.panelBody}>
+              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} />
             </div>
           </>
         )}

@@ -48,6 +48,25 @@ export const SCRIPTS = {
     [["a", "Mira, los tickets bajaron un 30 %."], ["b", "El bot de soporte está rindiendo."], ["a", "🙌"]],
     [["a", "¿Ese pico de leads es de la campaña?"], ["b", "Sí, el reel del martes."], ["a", "Hay que repetirlo."]],
   ],
+  meeting: [
+    [["a", "Empecemos. ¿Cómo vamos con Grupo Andino?"], ["b", "Propuesta enviada, demo el jueves."], ["c", "Yo preparo los datos del piloto."], ["a", "Perfecto. Siguiente punto: soporte."], ["d", "127 tickets hoy, 3 escalados. Todo bajo control."], ["a", "Gran trabajo, equipo. 👏"]],
+    [["a", "Revisión rápida del sprint."], ["b", "El checkout ya está en staging."], ["c", "Los diseños del onboarding, listos."], ["a", "¿Bloqueos?"], ["b", "Ninguno. Solo falta tu revisión."], ["a", "La hago hoy. Cerramos. ✅"]],
+    [["a", "¿Vieron el dashboard? Vamos muy bien."], ["b", "El engagement subió 23 %."], ["c", "Y el pipeline, $18.400."], ["d", "Jajaja el que más sube es el consumo de café."], ["a", "😂 Eso lo pagamos con gusto."]],
+    [["a", "Tema: la campaña de octubre."], ["b", "Propongo empezar el 3."], ["c", "Yo tengo la landing lista para el 1."], ["a", "Entonces el 3. Anotado. 📅"]],
+  ],
+  training: [
+    [["a", "Hoy: cómo califica leads el agente de ventas."], ["b", "👍"], ["a", "Primero mira el correo, la web y LinkedIn."], ["c", "¿Y si el lead no responde?"], ["a", "Seguimiento automático a los 3 días."], ["d", "¡Qué bueno! 🙌"], ["a", "Preguntas al final. Sigamos."]],
+    [["a", "Capacitación: escalar un ticket a humano."], ["b", "¿Cuándo se escala?"], ["a", "Reembolsos mayores a $500 o temas legales."], ["c", "Anotado. ✍️"], ["a", "Y siempre con resumen y contexto."], ["d", "Perfecto, gracias."]],
+    [["a", "Cierre de mes en 5 pasos."], ["b", "Paso 1: conciliar el banco."], ["a", "Exacto. Paso 2: facturas al SRI."], ["c", "Jajaja el paso 3 es café."], ["a", "😂 Paso 3: revisar por cobrar."]],
+  ],
+  pingpong: [
+    [["a", "¿Una partida rápida?"], ["b", "Prepárate para perder. 😏"]],
+    [["a", "Saco yo."], ["b", "Dale. 🏓"]],
+  ],
+  lab: [
+    [["a", "Este es el flujo del nuevo agente."], ["b", "Me gusta, ¿y la validación?"], ["a", "Aquí, antes de enviar."], ["b", "Perfecto. 👌"]],
+    [["a", "Idea: un bot que resuma cada reunión."], ["b", "¡Sí! Con acciones y responsables."], ["a", "Lo prototipo esta semana. 🚀"]],
+  ],
   water: [
     [["a", "Hidratarse es importante."], ["b", "Dice el que toma 6 cafés. 😂"], ["a", "Jajaja equilibrio."]],
     [["a", "¿Cómo va tu día?"], ["b", "A tope, pero bien."]],
@@ -64,6 +83,12 @@ export const RPS = {
   lose: ["Nooo 😩", "Otra vez… 😅", "Revancha mañana 😤"],
   tie: ["Empate 😆", "¡Otra!"],
 };
+
+/** What people say into the phone in a booth. */
+export const CALL = ["Sí, la demo es el jueves a las 10.", "Le envío la cotización hoy mismo.", "Perfecto, quedamos así. ¡Gracias!", "¿Me confirma el RUC, por favor?", "Claro, lo revisamos y le aviso.", "Un momento, lo verifico… listo."];
+
+/** Ping-pong table talk. */
+export const PP = { point: ["¡Punto!", "¡Mía!", "¡Toma!", "Uff, casi."], win: ["¡Gané {s}! 🏓", "¡Campeón! {s} 🏆"], lose: ["Revancha mañana… {s}", "Buena partida. {s} 😅"] };
 
 /** Coffee-machine chatter for whoever is alone there. */
 export const COFFEE_SOLO = ["☕ Un espresso…", "☕ Doble, por favor", "☕☕"];
