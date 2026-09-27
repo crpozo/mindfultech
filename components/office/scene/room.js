@@ -19,6 +19,7 @@ import * as THREE from "three";
 import * as F from "./furniture.js";
 import * as T from "./textures.js";
 import { NavGrid } from "./nav.js";
+import { textsFor } from "./i18n.js";
 
 const { PI, box, mat4 } = F;
 
@@ -47,6 +48,14 @@ export const ROOMS = [
 ];
 export const ROOM_NAMES = { ...Object.fromEntries(ROOMS.map((r) => [r.id, r.name])), booth: "Cabina", stairs: "Escaleras" };
 
+/** ROOMS with their names in `lang` ("es" | "en"); same ids, centers and camera stops. */
+export const roomsFor = (lang) => {
+  const names = textsFor(lang).rooms;
+  return ROOMS.map((r) => ({ ...r, name: names[r.id] || r.name }));
+};
+/** ROOM_NAMES in `lang`: every room id (plus "booth" and "stairs") → display name. */
+export const roomNamesFor = (lang) => ({ ...ROOM_NAMES, ...textsFor(lang).rooms });
+
 /** True where the ground floor is covered by the mezzanine (the camera hides it to look inside). */
 export const underDeck = (x, z) => z < D || (x > BX && z < WZ);
 
@@ -61,9 +70,11 @@ export function roomAt(x, z, y) {
 /**
  * @param scene THREE.Scene
  * @param bots the employees, in station order
+ * @param lang "es" | "en" — the language of the wall signs and hotspot names
  * @returns everything the simulation needs: stations, spots, nav grids, hotspots…
  */
-export function buildRoom(scene, bots) {
+export function buildRoom(scene, bots, lang = "es") {
+  const L = textsFor(lang);
   const M = F.makeMaterials(bots);
   const upper = new THREE.Group();
   scene.add(upper);
@@ -160,7 +171,7 @@ export function buildRoom(scene, bots) {
   // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
   F.wall(gw, 4.4, 7.8, LX, floorH, M.blackWall, true, 0.15);
   F.glassWall(gw, D, 4.4, LX, floorH, [[-0.2, 0.9]], true);
-  F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, ["MINDFULTECH"], "#1b1b1f", "#ffffff", 1.9, 0.42);
+  F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, L.signs.logo, "#1b1b1f", "#ffffff", 1.9, 0.42);
   F.clock(gw, LX - 0.09, 1.75, 4.95, -PI / 2);
   F.receptionRound(g, -7.9, 6.3, -PI / 2);
   stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: bots[10] });
@@ -214,7 +225,7 @@ export function buildRoom(scene, bots) {
   // ---- the periwinkle block: arched faces, reading nook inside ----
   F.archWall(gw, D, WZ, BX, floorH, [{ x: 0.2, w: 1.1, h: 2.1, sill: 0.85 }, { x: 3.15, w: 1.3, h: 2.3 }], M.periwinkle, true);
   F.archWall(gw, BX, x1, WZ, floorH, [{ x: 5.6, w: 1.1, h: 2.1, sill: 0.85 }, { x: 8.4, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle);
-  F.sign(gw, 7.0, 2.9, WZ + 0.09, 0, ["CONSTRUIMOS EL FUTURO", "CON CALMA Y PROPÓSITO"], "#6b6fae", "#ffffff", 3.6, 0.62);
+  F.sign(gw, 7.0, 2.9, WZ + 0.09, 0, L.signs.future, "#6b6fae", "#ffffff", 3.6, 0.62);
   F.wall(gw, BX, x1, D, floorH, M.navy);
   const rugN = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.4), M.rug);
   rugN.rotation.x = -PI / 2;
@@ -247,7 +258,7 @@ export function buildRoom(scene, bots) {
     meet2Seats.push({ x: x + Math.sin(yaw) * 0.28, z: z + Math.cos(yaw) * 0.28, yaw, sit: 0.27 });
   }
   F.tv(gw, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
-  F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, ["SALA", "CHIMBORAZO"], "#3d4a7a", "#ffffff", 1.4, 0.7);
+  F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, L.signs.chimborazo, "#3d4a7a", "#ffffff", 1.4, 0.7);
   F.picture(gw, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
   F.picture(gw, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
   F.floorLamp(g, -9.5, -1.0);
@@ -265,7 +276,7 @@ export function buildRoom(scene, bots) {
   }
   F.tv(gw, -2.9, 2.0, z0 + 0.09, 0, 1.6, 0.9);
   F.whiteboard(gw, LNG + 0.09, 1.75, -3.4, PI / 2, 2.0, 1.3);
-  F.sign(gw, -4.6, 2.6, z0 + 0.12, 0, ["SALA ANDES"], "#8fb996", "#1e2a24", 1.3, 0.45);
+  F.sign(gw, -4.6, 2.6, z0 + 0.12, 0, L.signs.andes, "#8fb996", "#1e2a24", 1.3, 0.45);
   F.plant(g, -1.0, -5.4, 0.9);
   nav0.blockCircle(-1.0, -5.4, 0.2);
   light(scene, -2.9, 3.05, -3.2, "#fff1dc", 5, 7);
@@ -278,7 +289,7 @@ export function buildRoom(scene, bots) {
   light(scene, 1.6, 3.05, -3.2, "#fff1dc", 4.5, 7);
   // server room
   for (const x of [5.0, 5.9, 6.8, 7.7, 8.6]) F.serverRack(g, x, z0 + 0.6);
-  F.sign(gw, 6.9, 2.6, z0 + 0.12, 0, ["SERVIDORES"], "#1e2a44", "#7cc0ff", 1.6, 0.5);
+  F.sign(gw, 6.9, 2.6, z0 + 0.12, 0, L.signs.servers, "#1e2a44", "#7cc0ff", 1.6, 0.5);
   light(scene, 6.9, 3.05, -3.2, "#9fc4ff", 4, 7);
 
   // ========================================================== upper floor ====
@@ -305,8 +316,8 @@ export function buildRoom(scene, bots) {
   F.floorLamp(u, -9.5, -1.2);
   F.plant(u, -5.6, -5.5, 0.8);
   nav1.blockCircle(-5.6, -5.5, 0.18);
-  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, ["HAZLO", "AHORA"], "#e08a5c", "#ffffff", 1.1, 0.9);
-  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, ["PENSAR CON CALMA,", "CREAR CON PROPÓSITO"], "#e08a5c", "#ffffff", 2.4, 0.9);
+  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#e08a5c", "#ffffff", 1.1, 0.9);
+  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#e08a5c", "#ffffff", 2.4, 0.9);
   // training room
   F.whiteboard(uw, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
   const trainSeats = [];
@@ -318,7 +329,7 @@ export function buildRoom(scene, bots) {
   F.floorLamp(u, -4.6, -5.5);
   F.plant(u, -1.2, -5.5, 0.9);
   nav1.blockCircle(-1.2, -5.5, 0.2);
-  F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, ["CADA DÍA,", "UN POCO MEJOR"], "#8fb996", "#1e2a24", 1.8, 0.8);
+  F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, L.signs.everyDay, "#8fb996", "#1e2a24", 1.8, 0.8);
   // studio: two desks face to face
   desk({ x: -0.15, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
   desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
@@ -330,9 +341,9 @@ export function buildRoom(scene, bots) {
   // phone booth
   F.highTable(u, 3.12, -4.7, 0.35);
   F.stool(u, 3.12, -5.4);
-  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, ["HAZLO CON", "INTENCIÓN"], "#e08a5c", "#ffffff", 1.0, 0.7);
+  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#e08a5c", "#ffffff", 1.0, 0.7);
   // cafeteria
-  F.sign(uw, 4.9, 2.25, z0 + 0.14, 0, ["PIENSA", "DIFERENTE"], "#e08a5c", "#ffffff", 1.3, 0.8);
+  F.sign(uw, 4.9, 2.25, z0 + 0.14, 0, L.signs.think, "#e08a5c", "#ffffff", 1.3, 0.8);
   F.tv(uw, 6.3, 1.85, z0 + 0.14, 0, 1.6, 0.9);
   const bar = F.cafeCounter(u, 8.0, -4.6, 0, 2.8);
   for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
@@ -428,19 +439,21 @@ export function buildRoom(scene, bots) {
     }
 
   // ========================================================= hotspots ====
+  // names come from the language dictionary (i18n.js → hotspots)
+  const H = L.hotspots;
   const hotspots = [
-    { id: "board", name: "Tablero de tareas", icon: "📋", x: LNG + 0.1, y: UPPER_Y + 1.7, z: -3.6, w: 0.3, h: 1.4, d: 2.3, floor: 1 },
-    { id: "tv", name: "Dashboard en vivo", icon: "📺", x: 6.3, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
-    { id: "coffee", name: "Cafetera", icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
-    { id: "printer", name: "Impresora", icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
-    { id: "shelf", name: "Base de conocimiento", icon: "📚", x: 1.5, y: 1.4, z: STAIRS.z1 + 0.22, w: 4.4, h: 2.8, d: 0.44, floor: 0 },
-    { id: "water", name: "Radio pasillo", icon: "💬", x: -0.1, y: 0.8, z: -2.0, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
-    { id: "clock", name: "Línea de tiempo", icon: "🕒", x: LX - 0.1, y: 1.75, z: 4.95, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
-    { id: "servers", name: "Estado de sistemas", icon: "🖥️", x: 6.8, y: 1.0, z: z0 + 0.6, w: 4.2, h: 2.0, d: 0.9, floor: 0 },
-    { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: -4.0, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
-    { id: "reception", name: "Recepción", icon: "🛎️", x: -8.4, y: 0.6, z: 6.3, w: 1.4, h: 1.1, d: 2.6, floor: 0 },
-    { id: "meeting", name: "Agenda de reuniones", icon: "📅", x: -2.9, y: 0.5, z: -3.4, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
-    { id: "lounge", name: "Rendimiento de los agentes", icon: "📊", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
+    { id: "board", name: H.board, icon: "📋", x: LNG + 0.1, y: UPPER_Y + 1.7, z: -3.6, w: 0.3, h: 1.4, d: 2.3, floor: 1 },
+    { id: "tv", name: H.tv, icon: "📺", x: 6.3, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
+    { id: "coffee", name: H.coffee, icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
+    { id: "printer", name: H.printer, icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
+    { id: "shelf", name: H.shelf, icon: "📚", x: 1.5, y: 1.4, z: STAIRS.z1 + 0.22, w: 4.4, h: 2.8, d: 0.44, floor: 0 },
+    { id: "water", name: H.water, icon: "💬", x: -0.1, y: 0.8, z: -2.0, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
+    { id: "clock", name: H.clock, icon: "🕒", x: LX - 0.1, y: 1.75, z: 4.95, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
+    { id: "servers", name: H.servers, icon: "🖥️", x: 6.8, y: 1.0, z: z0 + 0.6, w: 4.2, h: 2.0, d: 0.9, floor: 0 },
+    { id: "pingpong", name: H.pingpong, icon: "🏓", x: -4.0, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
+    { id: "reception", name: H.reception, icon: "🛎️", x: -8.4, y: 0.6, z: 6.3, w: 1.4, h: 1.1, d: 2.6, floor: 0 },
+    { id: "meeting", name: H.meeting, icon: "📅", x: -2.9, y: 0.5, z: -3.4, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
+    { id: "lounge", name: H.lounge, icon: "📊", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
   ];
 
   return { stations, spots, hotspots, nav0, nav1, upper, dyn, lights, pingpong: pp, materials: M, walls: { W0, W1, WI0, WI1 } };

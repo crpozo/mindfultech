@@ -13,9 +13,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildRoom, ROOMS, ROOM_NAMES, STAIRS, UPPER_Y, roomAt, underDeck } from "./room.js";
+import { buildRoom, roomsFor, roomNamesFor, STAIRS, UPPER_Y, roomAt, underDeck } from "./room.js";
 import { buildCharacter, POSES, HIP_CHAIR, HIP_SOFA } from "./character.js";
-import { SCRIPTS, SOLO, RPS, COFFEE_SOLO, CALL, PP, LAUGH_RE, fill } from "./dialogue.js";
+import { scriptsFor, LAUGH_RE, fill } from "./dialogue.js";
+import { textsFor, langOf } from "./i18n.js";
 import { blob as blobTexture } from "./textures.js";
 
 const PI = Math.PI;
@@ -32,11 +33,7 @@ const angleLerp = (a, b, t) => a + angleDiff(a, b) * t;
 
 const MAX_AWAY = 5;
 const WALK = 1.15;
-const PLACE_LABEL = {
-  coffee: "la cafetera", kitchen: "las mesas de la cafetería", meeting: "la Sala Andes", meeting2: "la Sala Chimborazo", training: "la capacitación",
-  booth: "la cabina", printer: "la impresora", water: "el dispensador", servers: "la sala de servidores", pingpong: "jugar ping-pong",
-  tv: "la pantalla", lounge: "el lounge", beanbag: "el puf", nook: "el rincón de lectura",
-};
+// place labels ("la cafetera" / "the coffee machine") live in i18n.js → place
 const DWELL = {
   coffee: [9, 16], kitchen: [8, 14], meeting: [20, 30], meeting2: [18, 28], training: [26, 36], booth: [10, 16], printer: [4, 6], water: [5, 8],
   servers: [8, 12], pingpong: [6, 9], tv: [6, 10], lounge: [12, 20], beanbag: [10, 16], nook: [12, 18], visit: [3, 5],
@@ -46,14 +43,24 @@ const OUTINGS = (typeof window !== "undefined" && window.__OFFICE_DEBUG && windo
   ["coffee", 22, 2], ["visit", 12, 0], ["meeting", 9, 4], ["lounge", 9, 2], ["pingpong", 8, 2], ["meeting2", 7, 3], ["training", 6, 4],
   ["booth", 6, 0], ["kitchen", 7, 2], ["nook", 6, 2], ["tv", 4, 2], ["printer", 4, 0], ["water", 4, 0], ["servers", 4, 0], ["beanbag", 4, 0],
 ];
-/** "a la cafetera" / "al lounge" */
-const to = (kind) => {
-  const l = PLACE_LABEL[kind] || kind;
-  return l.startsWith("el ") ? "al " + l.slice(3) : l.startsWith("jugar") ? "a " + l : "a " + l;
-};
 const CONTEXT = { coffee: "coffee", kitchen: "coffee", meeting: "meeting", meeting2: "meeting", training: "training", lounge: "lounge", nook: "lounge", tv: "tv", water: "water", pingpong: "pingpong" };
 
-export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot, onRoom }) {
+/**
+ * @param lang "es" | "en" — every text the scene renders (signs, hotspot markers,
+ *   speech bubbles) or emits (statuses, event lines, room names) is built in
+ *   this language. Bot names and roles come already localized in `bots`.
+ */
+export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot, onRoom, lang = "es" }) {
+  // --------------------------------------------------------------- text ----
+  lang = langOf(lang);
+  const L = textsFor(lang);
+  const S = L.status;
+  const { SCRIPTS, SOLO, RPS, COFFEE_SOLO, CALL, PP } = scriptsFor(lang);
+  /** "a la cafetera" / "to the coffee machine" */
+  const to = (kind) => L.to(kind);
+  const rooms = roomsFor(lang);
+  const roomNames = roomNamesFor(lang);
+
   // ------------------------------------------------------------ renderer ----
   const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
   let dpr = maxDpr;
@@ -116,7 +123,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   scene.add(fillLight);
 
   // --------------------------------------------------------------- room ----
-  const room = buildRoom(scene, bots);
+  const room = buildRoom(scene, bots, lang);
   const { stations, spots, hotspots, nav0, nav1, upper, dyn } = room;
   const navOf = (floor) => (floor ? nav1 : nav0);
   const floorY = (floor) => (floor ? UPPER_Y : 0);
@@ -262,7 +269,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     leaveSpot(a);
     a.place = "walk";
     goTo(a, a.st.approach.x, a.st.approach.z, a.st.floor, { kind: "desk" }, a.st.seat);
-    setStatus(a, a.st.floor !== a.floor ? (a.st.floor ? "Subiendo a su puesto" : "Bajando a su escritorio") : "Volviendo a su escritorio");
+    setStatus(a, a.st.floor !== a.floor ? (a.st.floor ? S.upToDesk : S.downToDesk) : S.backToDesk);
   };
   const standUp = (a, then) => {
     a.leaveVia = a.st.approach;
@@ -340,14 +347,14 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         a.partner = p.host;
         a.place = "visit";
         goTo(a, p.spot.x, p.spot.z, p.spot.floor, { kind: "visit", host: p.host, spot: p.spot });
-        setStatus(a, `Yendo al escritorio de ${p.host.bot.name}`);
+        setStatus(a, S.goingToDeskOf(p.host.bot.name));
       } else {
         a.spot = p.spot;
         a.place = p.kind;
         const via = p.spot.approach;
         goTo(a, via ? via.x : p.spot.x, via ? via.z : p.spot.z, p.spot.floor, { kind: "spot", place: p.kind, spot: p.spot }, via ? p.spot : null);
         const up = p.spot.floor !== a.floor;
-        setStatus(a, up ? (p.spot.floor ? `Subiendo ${to(p.kind)}` : `Bajando ${to(p.kind)}`) : `Caminando ${to(p.kind)}`);
+        setStatus(a, up ? (p.spot.floor ? S.upTo(to(p.kind)) : S.downTo(to(p.kind))) : S.walkingTo(to(p.kind)));
       }
     });
   };
@@ -364,7 +371,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     for (const p of people) p.conv = conv;
     convs.push(conv);
     const names = (x) => people.filter((p) => p !== x).map((p) => p.bot.name).join(", ");
-    for (const p of people) setStatus(p, context === "meeting" ? `En reunión con ${names(p)}` : context === "training" ? (p === people[0] ? "Dando la capacitación" : "En la capacitación") : `Charlando con ${names(p)}`);
+    for (const p of people) setStatus(p, context === "meeting" ? S.inMeetingWith(names(p)) : context === "training" ? (p === people[0] ? S.givingTraining : S.inTraining) : S.chattingWith(names(p)));
     if (people.length > 2) emit({ type: "meeting", place: people[0].place, bots: people.map((p) => p.bot.id) });
   };
   const endConv = (conv) => {
@@ -411,7 +418,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     conv.speaker = speaker;
     if (LAUGH_RE.test(text)) {
       laugh(speaker, Math.min(dur, 2.4));
-      if (people.length === 2) setStatus(speaker, `Riéndose con ${listener.bot.name}`);
+      if (people.length === 2) setStatus(speaker, S.laughingWith(listener.bot.name));
       for (const o of people) if (o !== speaker && Math.random() < 0.6) laugh(o, 1.6);
     }
     conv.stepUntil = simT + dur + 0.35;
@@ -423,18 +430,18 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     if (kind === "rps") {
       conv.game = { kind, phase: "pump" };
       a.gamePose = b.gamePose = "pump";
-      say(a, "Piedra…", 1.0);
-      say(b, "papel…", 1.6);
-      setStatus(a, `Jugando piedra, papel o tijera con ${b.bot.name}`);
-      setStatus(b, `Jugando piedra, papel o tijera con ${a.bot.name}`);
+      say(a, L.bubble.rock, 1.0);
+      say(b, L.bubble.paper, 1.6);
+      setStatus(a, S.playingRpsWith(b.bot.name));
+      setStatus(b, S.playingRpsWith(a.bot.name));
       conv.stepUntil = simT + 1.7;
     } else {
       conv.game = { kind: "pingpong", phase: "rally", hits: 0, hitsToPoint: 3 + Math.floor(Math.random() * 4), toward: 1, hitAt: simT, score: [0, 0], swing: [0, 0] };
       a.rig.hold("paddle");
       b.rig.hold("paddle");
       room.pingpong.ball.visible = true;
-      setStatus(a, `Jugando ping-pong con ${b.bot.name}`);
-      setStatus(b, `Jugando ping-pong con ${a.bot.name}`);
+      setStatus(a, S.playingPingpongWith(b.bot.name));
+      setStatus(b, S.playingPingpongWith(a.bot.name));
       conv.stepUntil = simT;
     }
   };
@@ -465,8 +472,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
           w.gamePose = "cheer";
           l.gamePose = "slump";
           w.mouthOpen = true;
-          setStatus(w, `¡Le ganó a ${l.bot.name}!`);
-          setStatus(l, `Perdió contra ${w.bot.name} 😅`);
+          setStatus(w, S.beat(l.bot.name));
+          setStatus(l, S.lostTo(w.bot.name));
           emit({ type: "game", game: "rps", winner: w.bot.id, loser: l.bot.id });
         }
         conv.stepUntil = simT + 2.5;
@@ -510,8 +517,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
           w.gamePose = "cheer";
           l.gamePose = "slump";
           w.mouthOpen = true;
-          setStatus(w, `Ganó el ping-pong ${s} a ${l.bot.name} 🏓`);
-          setStatus(l, `Perdió el ping-pong ${s} con ${w.bot.name}`);
+          setStatus(w, S.wonPingpong(s, l.bot.name));
+          setStatus(l, S.lostPingpong(s, w.bot.name));
           emit({ type: "pingpong", winner: w.bot.id, loser: l.bot.id, score: s });
           room.pingpong.ball.visible = false;
           g.phase = "over";
@@ -566,7 +573,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       if (a.hostReq && a.hostReq.state === "away") {
         a.state = "host";
         a.partner = a.hostReq;
-        setStatus(a, `Atendiendo a ${a.partner.bot.name}`);
+        setStatus(a, S.hosting(a.partner.bot.name));
         startConv([a.hostReq, a], "visit");
       } else {
         if (t > a.subUntil) nextSub(a);
@@ -612,7 +619,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
           a.arrivedAt = t;
           a.targetYaw = d.spot.yaw;
           a.until = t + 30;
-          setStatus(a, `Visitando a ${d.host.bot.name}`);
+          setStatus(a, S.visiting(d.host.bot.name));
           emit({ type: "visit", bot: a.bot.id, host: d.host.bot.id });
           if (d.host.state === "work") d.host.hostReq = a;
           else a.until = t + rnd(1, 2);
@@ -735,23 +742,23 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     if (r < 0.3) {
       a.sub = "think";
       a.subUntil = t + rnd(3, 5);
-      setStatus(a, "Pensando en la siguiente tarea");
+      setStatus(a, S.thinking);
     } else if (r < 0.5) {
       a.sub = "sip";
       a.subUntil = t + rnd(2, 3);
-      setStatus(a, "Un sorbo de café");
+      setStatus(a, S.sip);
     } else if (r < 0.62) {
       a.sub = "stretch";
       a.subUntil = t + 2.6;
-      setStatus(a, "Estirando la espalda");
+      setStatus(a, S.stretch);
     } else if (r < 0.75) {
       a.sub = "phone";
       a.subUntil = t + rnd(4, 6);
-      setStatus(a, "Revisando el celular");
+      setStatus(a, S.phone);
     } else if (r < 0.88) {
       a.sub = "lean";
       a.subUntil = t + rnd(3, 4);
-      setStatus(a, "Tomando un respiro");
+      setStatus(a, S.breather);
     } else {
       a.subUntil = t + rnd(8, 18);
       say(a, pick(SOLO), 2.2);
@@ -760,21 +767,21 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   const placeStatus = (a) => {
     switch (a.place) {
-      case "coffee": return a.stage >= 2 ? "Tomando un café" : "Preparando un café";
-      case "kitchen": return "Picando algo en la cafetería";
-      case "meeting": return "En la Sala Andes";
-      case "meeting2": return "En la Sala Chimborazo";
-      case "training": return a.spot === spots.trainer[0] ? "Preparando la capacitación" : "En la capacitación";
-      case "booth": return "En una llamada";
-      case "printer": return "Recogiendo una impresión";
-      case "water": return "Tomando agua";
-      case "servers": return "Revisando los servidores";
-      case "pingpong": return "Esperando rival en el ping-pong";
-      case "tv": return "Mirando el dashboard";
-      case "lounge": return "Descansando en el lounge";
-      case "beanbag": return "Leyendo en el puf";
-      case "nook": return "Leyendo en el rincón";
-      default: return "En una pausa";
+      case "coffee": return a.stage >= 2 ? S.drinkingCoffee : S.makingCoffee;
+      case "kitchen": return S.kitchen;
+      case "meeting": return S.meeting;
+      case "meeting2": return S.meeting2;
+      case "training": return a.spot === spots.trainer[0] ? S.preparingTraining : S.inTraining;
+      case "booth": return S.booth;
+      case "printer": return S.printer;
+      case "water": return S.water;
+      case "servers": return S.servers;
+      case "pingpong": return S.pingpong;
+      case "tv": return S.tv;
+      case "lounge": return S.lounge;
+      case "beanbag": return S.beanbag;
+      case "nook": return S.nook;
+      default: return S.pause;
     }
   };
 
@@ -794,7 +801,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         a.sipAt = t + rnd(1.5, 3);
         emit({ type: "coffee", bot: a.bot.id });
         if (!a.conv) {
-          setStatus(a, "Tomando un café");
+          setStatus(a, S.drinkingCoffee);
           a.targetYaw = a.spot === spots.coffee[0] ? PI / 2 : -PI / 2;
         }
       } else if (a.stage === 2 && t > a.sipAt) {
@@ -841,7 +848,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       if (a.stage === 0 && t > a.stageAt + 1.5) {
         a.stage = 1;
         a.rig.hold("phone");
-        say(a, "✅ Todo en verde", 2);
+        say(a, L.bubble.allGreen, 2);
       }
     }
   };
@@ -1047,7 +1054,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     if (!focusActor) setFloorView("all");
   };
   const focusRoom = (id) => {
-    const rm = ROOMS.find((r) => r.id === id);
+    const rm = rooms.find((r) => r.id === id);
     focusActor = null;
     if (!rm) {
       focusPoint = null;
@@ -1293,8 +1300,9 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       insets.right = right;
       resize();
     },
-    rooms: ROOMS,
-    roomNames: ROOM_NAMES,
+    /** camera stops and room names, in the scene's language */
+    rooms,
+    roomNames,
     dispose: () => {
       disposed = true;
       cancelAnimationFrame(raf);

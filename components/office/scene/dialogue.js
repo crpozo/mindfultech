@@ -1,10 +1,13 @@
 // What the team says to each other. Each script is a list of turns: `a` is the
 // person who started the encounter, `b` the other. A turn that starts with
-// "Jaja" or carries 😂 / 😅 / 😆 makes the speaker laugh; `{ game: "rps" }`
-// plays rock-paper-scissors before the next turn. Names are filled in at run
-// time ({a} / {b}).
+// "Jaja" / "Haha" / "lol" or carries 😂 / 😅 / 😆 makes the speaker laugh;
+// `{ game: "rps" }` plays rock-paper-scissors before the next turn. Names are
+// filled in at run time ({a} / {b}).
+//
+// The Spanish sets are the originals and keep their names (SCRIPTS, SOLO, …);
+// the English sets end in _EN. index.js picks one language with scriptsFor().
 
-export const LAUGH_RE = /^jaja|😂|😅|😆|🤣/i;
+export const LAUGH_RE = /^jaja|^haha|^lol\b|😂|😅|😆|🤣/i;
 
 export const SCRIPTS = {
   coffee: [
@@ -92,6 +95,102 @@ export const PP = { point: ["¡Punto!", "¡Mía!", "¡Toma!", "Uff, casi."], win
 
 /** Coffee-machine chatter for whoever is alone there. */
 export const COFFEE_SOLO = ["☕ Un espresso…", "☕ Doble, por favor", "☕☕"];
+
+// ================================================================ English ====
+
+export const SCRIPTS_EN = {
+  coffee: [
+    [["a", "Have you tried the new coffee yet?"], ["b", "Yes, it's way better than the old one."], ["a", "Hahaha anything was better."]],
+    [["a", "How's the month-end close going?"], ["b", "Almost done, just two invoices left."], ["a", "Great! Let me know if you need anything."]],
+    [["a", "I saw engagement went up 23%."], ["b", "Yeah, Tuesday's video took off."], ["a", "Nice! 🎉"]],
+    [["a", "Did you watch the game last night?"], ["b", "Hahaha don't remind me, we lost in the last minute."], ["a", "😅 There's always a rematch."]],
+    [["a", "Grupo Andino got back to us."], ["b", "And? Did they say yes?"], ["a", "They want the demo on Thursday."], ["b", "Let's go! 💪"]],
+    [["a", "I need 5 minutes away from the spreadsheet."], ["b", "I hear you, I'm at 40 tickets today."], ["a", "Unsung heroes. 😂"]],
+    [["a", "Is anyone else cold in here?"], ["b", "Always. The AC is in Antarctica mode."], ["a", "Hahaha I'm requesting a company sweater."]],
+    [["a", "Want a hand with the deploy?"], ["b", "It's already in staging, just needs your review."], ["a", "I'll look after coffee. ☕"]],
+    [["a", "Rock, paper, scissors for the last croissant."], ["b", "You're on. 😏"], { game: "rps" }],
+    [["a", "I closed 3 meetings before lunch today."], ["b", "Legend! 🙌"], ["a", "It's all the coffee."]],
+    [["a", "How many tickets so far?"], ["b", "127. And it's 11 a.m."], ["a", "😂 Machine."]],
+    [["a", "Do you know if {b} is coming to the meeting?"], ["b", "That's me, {a}. 😆"], ["a", "Hahaha sorry, I need more coffee."]],
+  ],
+  visit: [
+    [["a", "Got a minute? Look at this number."], ["b", "Let's see… yes, that lead is hot."], ["a", "I'm calling them right now."]],
+    [["a", "Can you review PR #482?"], ["b", "Sure, give me 10 minutes."], ["a", "Thanks!"]],
+    [["a", "The report is in the shared folder."], ["b", "Perfect, I'll go through it and get back to you."]],
+    [["a", "Coffee later?"], ["b", "Give me 5 and I'm there."]],
+    [["a", "Hahaha did you see the meme in the group chat?"], ["b", "😂 The spreadsheet one. Brilliant."]],
+    [["a", "The client asked to move the demo date."], ["b", "No problem, I'll update the calendar."], ["a", "You're the best."]],
+    [["a", "Did you get the Farmacias Cruz invoice?"], ["b", "Yes, it's already reconciled."], ["a", "Perfect. 👌"]],
+    [["a", "Psst… there are croissants in the kitchen."], ["b", "😆 On my way."]],
+  ],
+  lounge: [
+    [["a", "Five-minute break and I'm back at it."], ["b", "Well earned."]],
+    [["a", "Did I tell you the client signed?"], ["b", "No! Congratulations! 🎉"], ["a", "We celebrate on Friday."]],
+    [["a", "Quick round of rock, paper, scissors?"], ["b", "Sure. 😄"], { game: "rps" }],
+    [["a", "How was your weekend?"], ["b", "Short. As always. 😅"], ["a", "Hahaha same here."]],
+    [["a", "This sofa is the best thing in the office."], ["b", "After the coffee machine."], ["a", "😂 True."]],
+    [["a", "Seen the dashboard? We're on fire."], ["b", "Yep, 99.98% uptime. 💪"]],
+  ],
+  board: [
+    [["a", "This is how the agent flow would look."], ["b", "I like it, but the validation is missing."], ["a", "Good point, adding it."]],
+    [["a", "If the lead replies, we book straight away."], ["b", "And if not, follow up in 3 days."], ["a", "Exactly. ✅"]],
+    [["a", "Demo on Thursday or Friday?"], ["b", "Thursday. Nobody listens on Fridays. 😆"], ["a", "Hahaha true."]],
+  ],
+  tv: [
+    [["a", "Look, tickets are down 30%."], ["b", "The support bot is paying off."], ["a", "🙌"]],
+    [["a", "Is that spike in leads from the campaign?"], ["b", "Yes, Tuesday's reel."], ["a", "We should do it again."]],
+  ],
+  meeting: [
+    [["a", "Let's start. Where are we with Grupo Andino?"], ["b", "Proposal sent, demo on Thursday."], ["c", "I'm preparing the pilot data."], ["a", "Perfect. Next up: support."], ["d", "127 tickets today, 3 escalated. All under control."], ["a", "Great work, team. 👏"]],
+    [["a", "Quick sprint review."], ["b", "Checkout is already in staging."], ["c", "The onboarding designs are done."], ["a", "Blockers?"], ["b", "None. Just needs your review."], ["a", "I'll do it today. We're done. ✅"]],
+    [["a", "Have you seen the dashboard? We're doing great."], ["b", "Engagement is up 23%."], ["c", "And the pipeline, $18,400."], ["d", "Hahaha the fastest-growing number is coffee consumption."], ["a", "😂 Happy to pay for that one."]],
+    [["a", "Topic: the October campaign."], ["b", "I suggest we start on the 3rd."], ["c", "I'll have the landing page ready by the 1st."], ["a", "The 3rd it is. Noted. 📅"]],
+  ],
+  training: [
+    [["a", "Today: how the sales agent qualifies leads."], ["b", "👍"], ["a", "First it checks email, the website and LinkedIn."], ["c", "And if the lead doesn't reply?"], ["a", "Automatic follow-up after 3 days."], ["d", "Nice! 🙌"], ["a", "Questions at the end. Let's continue."]],
+    [["a", "Training: escalating a ticket to a human."], ["b", "When do we escalate?"], ["a", "Refunds over $500 or legal matters."], ["c", "Noted. ✍️"], ["a", "And always with a summary and context."], ["d", "Perfect, thanks."]],
+    [["a", "Month-end close in 5 steps."], ["b", "Step 1: reconcile the bank."], ["a", "Exactly. Step 2: invoices to the tax office."], ["c", "Hahaha step 3 is coffee."], ["a", "😂 Step 3: review receivables."]],
+  ],
+  pingpong: [
+    [["a", "Quick game?"], ["b", "Get ready to lose. 😏"]],
+    [["a", "My serve."], ["b", "Go for it. 🏓"]],
+  ],
+  lab: [
+    [["a", "This is the new agent's flow."], ["b", "I like it. What about validation?"], ["a", "Right here, before sending."], ["b", "Perfect. 👌"]],
+    [["a", "Idea: a bot that summarizes every meeting."], ["b", "Yes! With action items and owners."], ["a", "I'll prototype it this week. 🚀"]],
+  ],
+  water: [
+    [["a", "Staying hydrated is important."], ["b", "Says the one on 6 coffees. 😂"], ["a", "Hahaha balance."]],
+    [["a", "How's your day going?"], ["b", "Flat out, but good."]],
+  ],
+};
+
+/** Things people say to themselves at the desk. */
+export const SOLO_EN = ["💡", "✅ Done", "Hmm… 🤔", "☕ I need coffee", "🎯", "📞 Calling…", "🔥 On a roll", "✔ Sent", "🧮", "🚀 Deployed"];
+
+/** Lines for rock-paper-scissors. */
+export const RPS_EN = {
+  hands: ["✊", "✋", "✌️"],
+  win: ["I won! 🎉", "Take that! 😎", "Yes! 🙌"],
+  lose: ["Nooo 😩", "Again… 😅", "Rematch tomorrow 😤"],
+  tie: ["Tie 😆", "Again!"],
+};
+
+/** What people say into the phone in a booth. */
+export const CALL_EN = ["Yes, the demo is Thursday at 10.", "I'll send you the quote today.", "Perfect, that's settled. Thank you!", "Could you confirm your tax ID, please?", "Sure, we'll look into it and get back to you.", "One moment, let me check… done."];
+
+/** Ping-pong table talk. */
+export const PP_EN = { point: ["Point!", "Mine!", "Take that!", "Oof, so close."], win: ["I won {s}! 🏓", "Champion! {s} 🏆"], lose: ["Rematch tomorrow… {s}", "Good game. {s} 😅"] };
+
+/** Coffee-machine chatter for whoever is alone there. */
+export const COFFEE_SOLO_EN = ["☕ An espresso…", "☕ Double, please", "☕☕"];
+
+/** All the line sets for a language ("es" | "en"); anything else falls back to Spanish. */
+export function scriptsFor(lang) {
+  return lang === "en"
+    ? { SCRIPTS: SCRIPTS_EN, SOLO: SOLO_EN, RPS: RPS_EN, COFFEE_SOLO: COFFEE_SOLO_EN, CALL: CALL_EN, PP: PP_EN }
+    : { SCRIPTS, SOLO, RPS, COFFEE_SOLO, CALL, PP };
+}
 
 export function fill(text, a, b) {
   return text.replace(/\{a\}/g, a).replace(/\{b\}/g, b);
