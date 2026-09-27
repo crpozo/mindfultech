@@ -1049,7 +1049,12 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     focusActor = actors.find((a) => a.bot.id === id) || null;
     focusPoint = null;
     wantDistance = focusActor ? 7.5 : restDistance();
-    wantAngles = focusActor ? null : { az: REST_AZ, polar: REST_POLAR };
+    // a person is framed from a bit higher up (keeping the current azimuth)
+    // so walls and shelves between the camera and the desk do not hide them
+    if (focusActor) {
+      const cur = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+      wantAngles = { az: cur.theta, polar: Math.min(cur.phi, 0.7) };
+    } else wantAngles = { az: REST_AZ, polar: REST_POLAR };
     for (const a of actors) a.label.classList.toggle(classes.labelActive, a.bot.id === id);
     if (!focusActor) setFloorView("all");
   };
@@ -1210,7 +1215,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const items = [];
     for (const a of actors) {
       a.rig.head.getWorldPosition(projected);
-      projected.y += 0.52;
+      projected.y += 0.32;
       projected.project(camera);
       const behind = projected.z > 1 || !a.rig.root.visible;
       const tx = ((projected.x + 1) / 2) * w, ty = ((1 - projected.y) / 2) * h;
