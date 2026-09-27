@@ -407,27 +407,6 @@ export function Hero() {
             >
               {es ? "EMPIEZA A CONSTRUIR" : "START BUILDING"}
             </a>
-            <a
-              href="#contact"
-              onClick={openForm}
-              className="btn-light"
-              style={{
-                textDecoration: "none",
-                fontFamily: MONO,
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: ".12em",
-                background: "#fff",
-                color: "var(--ink)",
-                border: "1.5px solid rgba(14,13,18,.28)",
-                padding: "14.5px 26px",
-                borderRadius: 6,
-                boxShadow: "0 8px 20px -14px rgba(14,13,18,.35)",
-                transition: "background .2s",
-              }}
-            >
-              {es ? "HABLEMOS" : "CONTACT SALES"}
-            </a>
             <Link
               href="/office-demo/"
               className="btn-light"

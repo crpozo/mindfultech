@@ -36,6 +36,17 @@ const ROOM_ICONS: Record<string, string> = {
  * navigator) and the side panel: an employee's remote screen and chat, or a
  * clicked object's dashboard.
  */
+const IconMax = ({ back }: { back?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    {back ? <path d="M10 4v6H4M14 20v-6h6M4 4l6 6M20 20l-6-6" /> : <path d="M14 4h6v6M10 20H4v-6M20 4l-6 6M4 20l6-6" />}
+  </svg>
+);
+const IconFs = ({ on }: { on?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    {on ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6" />}
+  </svg>
+);
+
 export function OfficeDemo() {
   const mountRef = React.useRef<HTMLDivElement>(null);
   const overlayRef = React.useRef<HTMLDivElement>(null);
@@ -66,6 +77,24 @@ export function OfficeDemo() {
   const viewRef = React.useRef<HTMLDivElement>(null);
   const [walls, setWalls] = React.useState<WallMode>("full");
   const [hideUpper, setHideUpper] = React.useState(false);
+  // guided tour: step index, or null when closed
+  const [tourStep, setTourStep] = React.useState<number | null>(null);
+  // the side panel can grow to cover the whole stage (dashboards get two columns)
+  const [panelMax, setPanelMax] = React.useState(false);
+  // browser fullscreen of the whole demo, when the browser allows it
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const [fsOk, setFsOk] = React.useState(false);
+  const [fullscreen, setFullscreen] = React.useState(false);
+  React.useEffect(() => {
+    setFsOk(!!document.fullscreenEnabled);
+    const on = () => setFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", on);
+    return () => document.removeEventListener("fullscreenchange", on);
+  }, []);
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen?.();
+    else void rootRef.current?.requestFullscreen?.().catch(() => {});
+  };
 
   React.useEffect(() => {
     const mount = mountRef.current, overlay = overlayRef.current;
@@ -139,6 +168,7 @@ export function OfficeDemo() {
       if (e.key === "Escape") {
         setSelected(null);
         setHotspot(null);
+        setPanelMax(false);
         setRoomsOpen(false);
         setTeamOpen(false);
         setViewOpen(false);
@@ -162,6 +192,143 @@ export function OfficeDemo() {
     sceneRef.current?.setFloorLock(hideUpper);
   }, [ready, walls, hideUpper]);
 
+  const WA = "https://wa.me/593958731994?text=" + encodeURIComponent("Hola, vi la demo de la oficina de gestión con IA y quiero saber más.");
+  const TOUR: { title: string; text: string; target?: "team" | "rooms" | "view"; enter: () => void }[] = [
+    {
+      title: "Bienvenido a tu oficina de gestión con IA",
+      text: "Cada persona que ves es un empleado de IA con un rol real: ventas, soporte, finanzas, marketing, operaciones. Trabajan las 24 horas con tus herramientas y aquí puedes ver, preguntar y auditar todo lo que hacen. Este tour te muestra cómo funciona.",
+      enter: () => {
+        setSelected(null);
+        setHotspot(null);
+        setTeamOpen(false);
+        setRoomsOpen(false);
+        setViewOpen(false);
+        setWalls("full");
+        setHideUpper(false);
+        goRoom(null);
+      },
+    },
+    {
+      title: "El equipo",
+      text: "«Equipo» muestra a los 11 agentes, qué está haciendo cada uno en este momento y en qué sala está. Un clic sobre cualquiera lo selecciona.",
+      target: "team",
+      enter: () => {
+        setSelected(null);
+        setHotspot(null);
+        setTeamOpen(true);
+      },
+    },
+    {
+      title: "La pantalla en vivo de un agente",
+      text: "Seleccionamos a Mateo, de Soporte. Su panel muestra sus indicadores y su escritorio real en vivo: aquí está respondiendo tickets en Zendesk. Es como conectarte a su computador y mirar por encima de su hombro.",
+      enter: () => {
+        if (window.innerWidth < 1280) setTeamOpen(false);
+        setHotspot(null);
+        setTab("screen");
+        setSelected("mateo");
+      },
+    },
+    {
+      title: "Chatea con él",
+      text: "En la pestaña «Chat» puedes preguntarle qué hizo hoy, cómo va un cliente o pedirle un resumen. Responde con el contexto de su propio trabajo.",
+      enter: () => {
+        setHotspot(null);
+        setSelected("mateo");
+        setTab("chat");
+      },
+    },
+    {
+      title: "Una oficina viva",
+      text: "Los agentes no se cansan, pero la oficina se comporta como una real: se reúnen, se capacitan, toman café y hasta juegan ping-pong. Cada pausa representa una coordinación entre agentes. Vamos a la cafetería.",
+      enter: () => {
+        setTeamOpen(false);
+        goRoom("cafe");
+      },
+    },
+    {
+      title: "Dashboards con datos",
+      text: "Los objetos con marcador abren paneles. La pantalla de la cafetería es el dashboard de operaciones: leads, tickets, cobros y alcance, con tendencias de 30 días y comparativas contra el periodo anterior.",
+      enter: () => {
+        setSelected(null);
+        setHotspot("tv");
+      },
+    },
+    {
+      title: "Rendimiento y costo",
+      text: "El sofá del lounge abre el rendimiento de los agentes: cuánto trabajan, cuántos tokens consumen y cuánto cuestan por área. Un humano aprueba lo que necesita firma.",
+      enter: () => {
+        goRoom("lounge");
+        setHotspot("lounge");
+      },
+    },
+    {
+      title: "Mira dentro de cada sala",
+      text: "Con «Vista» bajas las paredes o quitas el piso 1, como en Los Sims, para ver las salas de abajo. Con «Salas» recorres la oficina, y puedes arrastrar para girar la cámara y usar la rueda para acercarte.",
+      target: "view",
+      enter: () => {
+        setHotspot(null);
+        setSelected(null);
+        setWalls("low");
+        setHideUpper(true);
+        goRoom(null);
+      },
+    },
+    {
+      title: "Así funciona",
+      text: "Empleados digitales con roles reales, visibles y auditables, trabajando en tus herramientas las 24 horas. Podemos montar una oficina así para tu empresa: mapeamos las tareas, contratamos los agentes y tú los ves trabajar.",
+      enter: () => {
+        setWalls("full");
+        setHideUpper(false);
+        goRoom(null);
+      },
+    },
+  ];
+  const endTour = (finished: boolean) => {
+    setTourStep(null);
+    setWalls("full");
+    setHideUpper(false);
+    if (finished) {
+      setSelected(null);
+      setHotspot(null);
+      goRoom(null);
+    }
+    try {
+      window.localStorage.setItem("mt-office-tour", "1");
+    } catch {
+      /* storage blocked */
+    }
+  };
+  // run each step's scene actions; the first visit starts the tour on its own
+  React.useEffect(() => {
+    if (tourStep === null) return;
+    TOUR[tourStep]?.enter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStep]);
+  React.useEffect(() => {
+    if (!ready) return;
+    let seen = false;
+    try {
+      seen = !!window.localStorage.getItem("mt-office-tour");
+    } catch {
+      /* storage blocked */
+    }
+    if (seen) return;
+    const id = window.setTimeout(() => setTourStep(0), 1800);
+    return () => window.clearTimeout(id);
+  }, [ready]);
+  React.useEffect(() => {
+    if (tourStep === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" && tourStep < TOUR.length - 1) setTourStep(tourStep + 1);
+      else if (e.key === "ArrowLeft" && tourStep > 0) setTourStep(tourStep - 1);
+      else if (e.key === "Escape") endTour(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStep]);
+  const tour = tourStep === null ? null : TOUR[tourStep];
+
   const goRoom = (id: string | null) => {
     setRoom(id);
     setSelected(null);
@@ -182,22 +349,25 @@ export function OfficeDemo() {
   const bot = selected ? BOT_BY_ID[selected] : null;
   const hot = hotspot ? HOTSPOT_META[hotspot] : null;
   const panelOpen = !!bot || !!hot;
+  React.useEffect(() => {
+    if (!panelOpen) setPanelMax(false);
+  }, [panelOpen]);
   // keep the building centred in the part of the stage the open panels leave uncovered
   React.useEffect(() => {
     if (!ready) return;
     const apply = () => {
       const w = window.innerWidth;
-      sceneRef.current?.setLayout(w > 900 ? { left: teamOpen ? 320 : 0, right: panelOpen ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
+      sceneRef.current?.setLayout(w > 900 ? { left: teamOpen ? 320 : 0, right: panelOpen && !panelMax ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
     };
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
-  }, [ready, panelOpen, teamOpen]);
+  }, [ready, panelOpen, teamOpen, panelMax]);
   const currentRoom = room ? rooms.find((r) => r.id === room) : null;
   const away = BOTS.filter((b) => status[b.id]).length;
 
   return (
-    <div className={s.root}>
+    <div className={`${s.root} ${panelMax ? s.rootMax : ""}`} ref={rootRef}>
       <div className={s.stage} ref={mountRef} />
       <div className={s.overlay} ref={overlayRef} />
       <div className={s.vignette} />
@@ -222,11 +392,11 @@ export function OfficeDemo() {
           <span>Oficina de empleados IA · demo</span>
         </Link>
         <div className={s.tools}>
-          <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
+          <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""} ${tour?.target === "team" ? s.tourGlow : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
             <i>👥</i>Equipo<b>{BOTS.length}</b>
           </button>
           <div className={s.menuWrap} ref={roomsRef}>
-            <button type="button" className={`${s.tool} ${roomsOpen ? s.toolActive : ""}`} onClick={() => setRoomsOpen((v) => !v)} aria-expanded={roomsOpen} aria-haspopup="menu">
+            <button type="button" className={`${s.tool} ${roomsOpen ? s.toolActive : ""} ${tour?.target === "rooms" ? s.tourGlow : ""}`} onClick={() => setRoomsOpen((v) => !v)} aria-expanded={roomsOpen} aria-haspopup="menu">
               <i>{currentRoom ? ROOM_ICONS[currentRoom.id] ?? "•" : "🏢"}</i>
               <span className={s.toolLabel}>{currentRoom ? currentRoom.name : "Salas"}</span>
               <em>▾</em>
@@ -253,7 +423,7 @@ export function OfficeDemo() {
             )}
           </div>
           <div className={s.menuWrap} ref={viewRef}>
-            <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
+            <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""} ${tour?.target === "view" ? s.tourGlow : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
               <i>👁️</i>
               <span className={s.toolLabel}>Vista</span>
               <em>▾</em>
@@ -281,6 +451,15 @@ export function OfficeDemo() {
               </div>
             )}
           </div>
+          <button type="button" className={`${s.tool} ${tourStep !== null ? s.toolActive : ""}`} onClick={() => setTourStep(0)} title="Tour guiado">
+            <i>🎓</i>
+            <span className={s.toolLabel}>Tour</span>
+          </button>
+          {fsOk && (
+            <button type="button" className={`${s.tool} ${s.toolIcon} ${fullscreen ? s.toolActive : ""}`} onClick={toggleFullscreen} title={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"} aria-label={fullscreen ? "Salir de pantalla completa" : "Pantalla completa"}>
+              <IconFs on={fullscreen} />
+            </button>
+          )}
         </div>
         <div className={s.stats}>
           <div className={s.stat}>
@@ -338,11 +517,50 @@ export function OfficeDemo() {
       </aside>
       )}
 
-      <div className={`${s.hint} ${interacted || !ready ? s.hintHidden : ""}`}>
+      {tour && tourStep !== null && (
+        <div className={`${s.tour} ${panelOpen && !panelMax ? s.tourShift : ""}`} role="dialog" aria-label="Tour guiado">
+          <div className={s.tourHead}>
+            <span className={s.tourStep}>
+              Paso {tourStep + 1} de {TOUR.length}
+            </span>
+            <button type="button" className={s.tourSkip} onClick={() => endTour(false)}>
+              Saltar tour
+            </button>
+          </div>
+          <div className={s.tourTitle}>{tour.title}</div>
+          <p className={s.tourText}>{tour.text}</p>
+          <div className={s.tourNav}>
+            <div className={s.tourDots} aria-hidden>
+              {TOUR.map((_, i) => (
+                <i key={i} className={i === tourStep ? s.on : ""} />
+              ))}
+            </div>
+            <button type="button" className={s.tourBtn} onClick={() => setTourStep(Math.max(0, tourStep - 1))} disabled={tourStep === 0}>
+              Atrás
+            </button>
+            {tourStep < TOUR.length - 1 ? (
+              <button type="button" className={`${s.tourBtn} ${s.tourPrimary}`} onClick={() => setTourStep(tourStep + 1)}>
+                Siguiente
+              </button>
+            ) : (
+              <>
+                <a className={s.tourBtn} href={WA} target="_blank" rel="noreferrer">
+                  Hablemos
+                </a>
+                <button type="button" className={`${s.tourBtn} ${s.tourPrimary}`} onClick={() => endTour(true)}>
+                  Finalizar
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className={`${s.hint} ${interacted || !ready || tourStep !== null ? s.hintHidden : ""}`}>
         Haz clic en una persona o en un objeto con marcador · «Salas» recorre la oficina · arrastra para girar
       </div>
 
-      <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>
+      <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""} ${panelMax ? s.panelMax : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>
         {bot && (
           <>
             <div className={s.panelHead}>
@@ -358,6 +576,9 @@ export function OfficeDemo() {
                 <span className={s.dot} />
                 {status[bot.id] ?? "Trabajando"}
               </span>
+              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? "Restaurar tamaño" : "Ampliar panel"} title={panelMax ? "Restaurar tamaño" : "Pantalla completa"}>
+                <IconMax back={panelMax} />
+              </button>
               <button type="button" className={s.close} onClick={() => setSelected(null)} aria-label="Cerrar">
                 ×
               </button>
@@ -393,6 +614,9 @@ export function OfficeDemo() {
                 <strong>{hot.title}</strong>
                 <span>{hot.subtitle}</span>
               </div>
+              <button type="button" className={`${s.close} ${s.maxBtn}`} onClick={() => setPanelMax((v) => !v)} aria-label={panelMax ? "Restaurar tamaño" : "Ampliar panel"} title={panelMax ? "Restaurar tamaño" : "Pantalla completa"}>
+                <IconMax back={panelMax} />
+              </button>
               <button type="button" className={s.close} onClick={() => setHotspot(null)} aria-label="Cerrar">
                 ×
               </button>
