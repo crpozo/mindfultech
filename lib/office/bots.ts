@@ -10,13 +10,19 @@ export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "o
 export type Look = {
   skin: string;
   hair: string;
-  hairStyle: "short" | "side" | "bun" | "ponytail" | "long" | "curly" | "bald";
+  hairStyle: "short" | "swept" | "bun" | "ponytail" | "long" | "curly" | "bob" | "bald";
+  eyes: "brown" | "blue" | "green" | "hazel" | "dark";
+  lips?: string;
   shirt: string;
   shirtStyle: "tee" | "collar" | "sweater" | "hoodie" | "blouse";
   sleeves: "long" | "short";
+  /** blazer colour; drawn over the shirt with lapels */
+  jacket?: string;
+  jacketOpen?: boolean;
   pants: string;
   skirt?: boolean;
   shoes: string;
+  shoeStyle?: "flats" | "sneakers" | "boots" | "heels";
   glasses?: boolean;
   beard?: boolean;
   tie?: string;
@@ -49,7 +55,7 @@ export const BOTS: Bot[] = [
     title: "AI Sales Rep",
     color: "#f4d98a",
     accent: "#e0a83a",
-    look: { skin: "#f3cdb0", hair: "#3b2418", hairStyle: "long", shirt: "#e9b949", shirtStyle: "sweater", sleeves: "long", pants: "#2b2d42", skirt: true, shoes: "#1c1c22" },
+    look: { skin: "#f3cdb0", hair: "#3b2418", hairStyle: "long", eyes: "hazel", lips: "#c0443f", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#1e1e24", pants: "#1e1e24", shoes: "#111114", shoeStyle: "heels" },
     screen: "sales",
     working: [
       "Calificando leads de HubSpot",
@@ -79,7 +85,7 @@ export const BOTS: Bot[] = [
     title: "AI Customer Support",
     color: "#a9dcd3",
     accent: "#3aa392",
-    look: { skin: "#d9a274", hair: "#1e1a1a", hairStyle: "short", shirt: "#2a9d8f", shirtStyle: "collar", sleeves: "short", pants: "#c9b48a", shoes: "#f1f1f1", glasses: true, lanyard: true },
+    look: { skin: "#d9a274", hair: "#1e1a1a", hairStyle: "swept", eyes: "brown", lips: "#b07a6a", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#2b3a5c", pants: "#c9b48a", shoes: "#5a3a28", shoeStyle: "flats", glasses: true, lanyard: true },
     screen: "support",
     working: [
       "Respondiendo tickets de Zendesk",
@@ -109,7 +115,7 @@ export const BOTS: Bot[] = [
     title: "AI Social Media Manager",
     color: "#d9c6f2",
     accent: "#8a63d2",
-    look: { skin: "#efc3a4", hair: "#7a3b1e", hairStyle: "bun", shirt: "#9b5de5", shirtStyle: "blouse", sleeves: "long", pants: "#1f1f24", shoes: "#6b3e2e" },
+    look: { skin: "#f1cdb5", hair: "#d9b46a", hairStyle: "bun", eyes: "blue", lips: "#c9605a", shirt: "#f7f7f8", shirtStyle: "tee", sleeves: "short", pants: "#1f1f24", shoes: "#f1f1f1", shoeStyle: "sneakers", glasses: true },
     screen: "social",
     working: [
       "Programando posts de la semana",
@@ -139,7 +145,7 @@ export const BOTS: Bot[] = [
     title: "AI Software Engineer",
     color: "#b9d7f2",
     accent: "#3f86d6",
-    look: { skin: "#c98b64", hair: "#211a17", hairStyle: "curly", shirt: "#457b9d", shirtStyle: "hoodie", sleeves: "long", pants: "#1d3557", shoes: "#8d99ae", beard: true },
+    look: { skin: "#c98b64", hair: "#211a17", hairStyle: "swept", eyes: "dark", lips: "#9c6a58", shirt: "#1f1f24", shirtStyle: "tee", sleeves: "short", pants: "#2b2d3a", shoes: "#111114", shoeStyle: "boots", beard: true },
     screen: "dev",
     working: [
       "Corrigiendo un bug del checkout",
@@ -169,7 +175,7 @@ export const BOTS: Bot[] = [
     title: "AI Finance Analyst",
     color: "#f7c4b6",
     accent: "#e2694f",
-    look: { skin: "#f6dcc6", hair: "#d9a55a", hairStyle: "ponytail", shirt: "#f4845f", shirtStyle: "blouse", sleeves: "short", pants: "#6c757d", shoes: "#1c1c22", glasses: true },
+    look: { skin: "#f6dcc6", hair: "#141010", hairStyle: "bob", eyes: "brown", lips: "#b8544f", shirt: "#1f1f24", shirtStyle: "tee", sleeves: "short", pants: "#f1efe9", shoes: "#111114", shoeStyle: "boots" },
     screen: "finance",
     working: [
       "Conciliando pagos del banco",
@@ -199,7 +205,7 @@ export const BOTS: Bot[] = [
     title: "AI Operations Assistant",
     color: "#c9e8b2",
     accent: "#5fa54a",
-    look: { skin: "#8d5a3b", hair: "#141010", hairStyle: "side", shirt: "#f1faee", shirtStyle: "collar", sleeves: "long", pants: "#1b263b", shoes: "#5a3a28", tie: "#2d6a4f" },
+    look: { skin: "#8d5a3b", hair: "#141010", hairStyle: "short", eyes: "dark", lips: "#7a4a3c", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#1b263b", pants: "#1b263b", shoes: "#3a2418", shoeStyle: "flats", tie: "#2d6a4f" },
     screen: "ops",
     working: [
       "Coordinando la agenda del equipo",
@@ -229,7 +235,7 @@ export const BOTS: Bot[] = [
     title: "AI HR Partner",
     color: "#f9d5e5",
     accent: "#d64f8a",
-    look: { skin: "#f1c9a5", hair: "#2a1a14", hairStyle: "long", shirt: "#f4f1ec", shirtStyle: "blouse", sleeves: "long", pants: "#3c3c48", shoes: "#1c1c22", glasses: false },
+    look: { skin: "#f1c9a5", hair: "#2a1a14", hairStyle: "ponytail", eyes: "brown", lips: "#c0443f", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#232326", pants: "#232326", shoes: "#111114", shoeStyle: "heels", glasses: true },
     screen: "ops",
     working: ["Revisando candidatos", "Agendando entrevistas", "Preparando el onboarding", "Actualizando la nómina"],
     kpis: [
@@ -253,7 +259,7 @@ export const BOTS: Bot[] = [
     title: "AI Product Designer",
     color: "#d6e6ff",
     accent: "#3b6fd6",
-    look: { skin: "#e6bc9c", hair: "#4a2e1f", hairStyle: "side", shirt: "#1f1f24", shirtStyle: "tee", sleeves: "short", pants: "#c9b48a", shoes: "#f1f1f1" },
+    look: { skin: "#e6bc9c", hair: "#4a2e1f", hairStyle: "curly", eyes: "green", lips: "#b07a6a", shirt: "#e9c46a", shirtStyle: "sweater", sleeves: "long", pants: "#2b2d3a", shoes: "#f1f1f1", shoeStyle: "sneakers" },
     screen: "social",
     working: ["Diseñando la pantalla de checkout", "Ajustando el sistema de diseño", "Preparando el prototipo", "Revisando accesibilidad"],
     kpis: [
@@ -277,7 +283,7 @@ export const BOTS: Bot[] = [
     title: "AI Legal Analyst",
     color: "#e3e0f7",
     accent: "#5d4fb3",
-    look: { skin: "#f6dcc6", hair: "#8a5a2b", hairStyle: "bun", shirt: "#2b2d42", shirtStyle: "blouse", sleeves: "long", pants: "#3c3c48", skirt: true, shoes: "#1c1c22", glasses: true },
+    look: { skin: "#f6dcc6", hair: "#c9a25a", hairStyle: "bun", eyes: "blue", lips: "#c9605a", shirt: "#f7f7f8", shirtStyle: "blouse", sleeves: "long", jacket: "#3a3a44", pants: "#1e1e24", skirt: true, shoes: "#111114", shoeStyle: "heels", glasses: true },
     screen: "finance",
     working: ["Revisando el contrato de Grupo Andino", "Actualizando la política de datos", "Preparando el acuerdo de confidencialidad", "Revisando términos de servicio"],
     kpis: [
@@ -301,7 +307,7 @@ export const BOTS: Bot[] = [
     title: "AI Data Analyst",
     color: "#d9f2e6",
     accent: "#1f9d6a",
-    look: { skin: "#c98b64", hair: "#1a1412", hairStyle: "short", shirt: "#e9c46a", shirtStyle: "sweater", sleeves: "long", pants: "#1d3557", shoes: "#8d99ae", glasses: true },
+    look: { skin: "#c98b64", hair: "#1a1412", hairStyle: "short", eyes: "brown", lips: "#9c6a58", shirt: "#cfe3f5", shirtStyle: "collar", sleeves: "long", pants: "#1d3557", shoes: "#5a3a28", shoeStyle: "flats", glasses: true },
     screen: "dev",
     working: ["Entrenando el modelo de churn", "Limpiando datos de ventas", "Construyendo el dashboard", "Analizando la campaña"],
     kpis: [
@@ -325,7 +331,7 @@ export const BOTS: Bot[] = [
     title: "AI Front Desk",
     color: "#ffe3c2",
     accent: "#e07a2f",
-    look: { skin: "#efc3a4", hair: "#3b2418", hairStyle: "ponytail", shirt: "#3d4a7a", shirtStyle: "collar", sleeves: "long", pants: "#1f1f24", shoes: "#1c1c22", lanyard: true },
+    look: { skin: "#efc3a4", hair: "#3b2418", hairStyle: "ponytail", eyes: "hazel", lips: "#c0443f", shirt: "#3d4a7a", shirtStyle: "blouse", sleeves: "long", pants: "#1f1f24", shoes: "#111114", shoeStyle: "flats", lanyard: true },
     screen: "support",
     working: ["Recibiendo visitantes", "Confirmando citas del día", "Gestionando paquetería", "Atendiendo llamadas"],
     kpis: [

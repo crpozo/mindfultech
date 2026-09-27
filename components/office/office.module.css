@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 90% at 50% 30%, #8b8ae0 0%, #6d6ccf 45%, #4b48a6 100%);
+  background: radial-gradient(120% 90% at 50% 32%, #d8caab 0%, #cbbc9d 48%, #b7a583 100%);
   color: #0e0d12;
   overflow: hidden;
   font-family: var(--font-outfit), system-ui, sans-serif;
@@ -18,7 +18,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(80% 70% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(20, 16, 50, 0.35) 100%);
+  background: radial-gradient(80% 70% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(72, 52, 20, 0.28) 100%);
   z-index: 1;
 }
 
@@ -111,7 +111,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #e9f1f7, #d7e4ee);
+  background: linear-gradient(180deg, #e3d8bf, #cbbc9d);
   z-index: 5;
   transition: opacity 0.6s ease;
 }
@@ -132,7 +132,7 @@
   height: 34px;
   border-radius: 50%;
   border: 3px solid rgba(14, 13, 18, 0.12);
-  border-top-color: #69c7b9;
+  border-top-color: #3d4a7a;
   animation: spin 0.9s linear infinite;
 }
 @keyframes spin {
@@ -300,51 +300,56 @@
   opacity: 0;
 }
 
-/* ---- room navigator ---- */
+/* ---- room navigator: two rows of chips along the bottom ---- */
 .nav {
   position: absolute;
-  top: 68px;
-  left: 20px;
+  left: 352px;
+  right: 20px;
+  bottom: 18px;
   z-index: 3;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
-  max-height: calc(100vh - 200px);
-  overflow: auto;
-  scrollbar-width: none;
+  pointer-events: none;
 }
-.nav::-webkit-scrollbar {
-  display: none;
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  pointer-events: auto;
 }
 .navFloor {
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
-  padding: 8px 6px 2px;
+  color: rgba(40, 30, 14, 0.7);
+  padding: 0 6px 0 2px;
 }
 .navBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   padding: 7px 12px 7px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(10px);
   font: inherit;
   font-size: 12.5px;
   font-weight: 500;
   color: #0e0d12;
   cursor: pointer;
-  text-align: left;
   white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(40, 30, 14, 0.08);
   transition: background 0.15s, transform 0.15s;
 }
 .navBtn:hover {
   background: #fff;
-  transform: translateX(2px);
+  transform: translateY(-1px);
 }
 .navBtnActive {
   background: #0e0d12;
@@ -356,67 +361,124 @@
   width: 18px;
   text-align: center;
 }
-.navCount {
-  margin-left: auto;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: rgba(14, 13, 18, 0.08);
-}
-.navBtnActive .navCount {
-  background: rgba(255, 255, 255, 0.2);
-}
 
-/* ---- roster ---- */
-.roster {
+/* ---- team panel: every agent, live status and room ---- */
+.team {
   position: absolute;
+  top: 68px;
   left: 20px;
   bottom: 20px;
-  display: flex;
-  gap: 10px;
+  width: 316px;
   z-index: 3;
-  max-width: calc(100vw - 40px);
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(40, 30, 14, 0.12);
+  overflow: hidden;
 }
-.roster::-webkit-scrollbar {
-  display: none;
+.teamHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid rgba(14, 13, 18, 0.08);
+  font-size: 12.5px;
+  color: #6b7280;
 }
-.card {
-  flex: 0 0 196px;
-  width: 196px;
+.teamHead strong {
+  color: #0e0d12;
+  font-weight: 600;
+  font-size: 14px;
+}
+.teamList {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  scrollbar-width: thin;
+}
+.member {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px 10px 10px;
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(14, 13, 18, 0.1);
-  cursor: pointer;
-  text-align: left;
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
   font: inherit;
   color: inherit;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
-.card > span:last-child {
-  min-width: 0;
-  flex: 1;
+.member:hover {
+  background: rgba(14, 13, 18, 0.05);
 }
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(14, 13, 18, 0.14);
-}
-.cardActive {
+.memberActive {
+  background: #fff;
   border-color: var(--c);
-  box-shadow: 0 0 0 2px var(--c), 0 12px 28px rgba(14, 13, 18, 0.14);
+  box-shadow: 0 0 0 1px var(--c), 0 6px 16px rgba(40, 30, 14, 0.1);
+}
+.memberBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.memberName {
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.memberName em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11.5px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+.memberStatus {
+  font-size: 11.5px;
+  color: #0e0d12;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.memberRoom {
+  flex: 0 0 auto;
+  max-width: 96px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  background: rgba(14, 13, 18, 0.06);
+  font-size: 10.5px;
+  color: #374151;
+}
+.memberRoom i {
+  font-style: normal;
+  font-size: 11px;
+}
+.memberRoom span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .avatar {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -437,27 +499,6 @@
   border-radius: 50%;
   background: #22c55e;
   border: 2px solid #fff;
-}
-.cardName {
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.15;
-}
-.cardRole {
-  font-size: 11.5px;
-  color: #6b7280;
-}
-.cardStatus {
-  font-size: 11.5px;
-  color: #0e0d12;
-  margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cardName,
-.cardRole {
-  white-space: nowrap;
 }
 
 /* ---- side panel ---- */
@@ -1074,12 +1115,34 @@
   font-size: 15px;
 }
 
+@media (max-width: 1280px) and (min-width: 721px) {
+  .team {
+    width: 290px;
+  }
+  .nav {
+    left: 320px;
+  }
+  .navBtn {
+    font-size: 11.5px;
+    padding: 6px 10px 6px 8px;
+  }
+  .memberRoom span {
+    display: none;
+  }
+  .memberRoom {
+    padding: 3px 6px;
+  }
+  .brand span {
+    display: none;
+  }
+}
+
 @media (max-width: 720px) {
   .stats {
     display: none;
   }
   .hint {
-    top: 66px;
+    top: 106px;
     font-size: 12px;
     white-space: normal;
     text-align: center;
@@ -1098,25 +1161,64 @@
   .panelOpen {
     transform: translateY(0);
   }
-  .roster {
+  .team {
+    top: auto;
     left: 10px;
+    right: 10px;
     bottom: 10px;
-    max-width: calc(100vw - 20px);
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    overflow: visible;
   }
-  .card {
-    flex-basis: 170px;
-    width: 170px;
+  .teamHead {
+    display: none;
+  }
+  .teamList {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 8px;
+    padding: 0 0 2px;
+    scrollbar-width: none;
+  }
+  .teamList::-webkit-scrollbar {
+    display: none;
+  }
+  .member {
+    flex: 0 0 200px;
+    width: 200px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border-color: rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+  }
+  .memberRoom {
+    display: none;
   }
   .nav {
     top: 60px;
     left: 10px;
     right: 10px;
+    bottom: auto;
     flex-direction: row;
-    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
     overflow-x: auto;
+    scrollbar-width: none;
+    pointer-events: auto;
+  }
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+  .navRow {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     gap: 6px;
-    max-height: none;
-    padding-bottom: 4px;
+    padding-right: 6px;
   }
   .navFloor {
     display: none;
@@ -1125,9 +1227,6 @@
     flex: 0 0 auto;
     font-size: 12px;
     padding: 6px 10px 6px 8px;
-  }
-  .hint {
-    top: 106px;
   }
   .label {
     font-size: 10px;

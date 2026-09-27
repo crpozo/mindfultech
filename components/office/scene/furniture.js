@@ -90,6 +90,10 @@ export function makeMaterials(bots) {
     green: std("#8fb996", 0.9),
     orange: std("#e08a5c", 0.9),
     purple: std("#6f5a9e", 0.9),
+    periwinkle: std("#6b6fae", 0.9),
+    blackWall: std("#1b1b1f", 0.85),
+    chairOrangeDark: std("#c9683a", 0.95),
+    pouf: new THREE.MeshStandardMaterial({ map: T.fabric("#3a3b44"), roughness: 1 }),
     teal: std("#2f6f68", 0.8),
     frame: std("#f4f2ee", 0.6),
     black: std("#1e1f24", 0.5, { metalness: 0.3 }),
@@ -160,7 +164,7 @@ export function desk(ctx, seat, bot, i) {
   B.add(rbox(1.4, 0.4, 0.03, 0.01), M.divider, mat4(d.x, y + DESK_H + 0.2, d.z, 0, yaw, 0));
   B.add(box(1.42, 0.03, 0.06), M.deskWood, mat4(d.x, y + DESK_H + 0.41, d.z, 0, yaw, 0));
   for (let k = 0; k < 2; k++) {
-    const p = at(0.965, -0.45 + k * 0.16 + (i % 3) * 0.08, DESK_H + 0.22 + (k % 2) * 0.09);
+    const p = at(0.952, -0.45 + k * 0.16 + (i % 3) * 0.08, DESK_H + 0.22 + (k % 2) * 0.09);
     const n = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.1), M.stickies[(i + k) % 3]);
     n.position.copy(p);
     n.rotation.y = yaw + PI + (k ? 0.08 : -0.06);
@@ -243,7 +247,7 @@ function monitor(ctx, mp, yaw, h, bot) {
     new THREE.MeshStandardMaterial({ map: scr.tex, emissiveMap: scr.tex, emissive: "#ffffff", emissiveIntensity: 0.6, roughness: 0.5 })
   );
   const f = fwd(yaw);
-  face.position.set(mp.x - f.x * 0.018, y + h + 0.33, mp.z - f.z * 0.018);
+  face.position.set(mp.x - f.x * 0.024, y + h + 0.33, mp.z - f.z * 0.024);
   face.rotation.y = yaw + PI;
   ctx.S.add(face);
   ctx.dyn.screens.push(scr);
@@ -557,17 +561,18 @@ export function lockers(ctx, x, z, yaw, n = 5) {
 }
 /** Big grid shelving. Runs along x at `at` (z) or, with axis "z", along z at `at` (x),
  *  with its open face towards +z / +x respectively. */
-export function bookshelfBig(ctx, a0, a1, at, h = 3.0, rows = 6, depth = 0.4, axis = "x") {
+export function bookshelfBig(ctx, a0, a1, at, h = 3.0, rows = 6, depth = 0.4, axis = "x", flip = false) {
   const { B, M, y, nav } = ctx;
   const len = a1 - a0, c = (a0 + a1) / 2;
   const cols = Math.round(len / 0.5);
   const cw = len / cols, rh = h / rows;
+  const sgn = flip ? -1 : 1; // flip: open face towards -z / -x instead
   // P(a, dOff) → world x,z; geo(w,h,d) → box with the long side along the run
-  const P = (a, dOff) => (axis === "x" ? [a, at + dOff] : [at + dOff, a]);
+  const P = (a, dOff) => (axis === "x" ? [a, at + sgn * dOff] : [at + sgn * dOff, a]);
   const G = (w, hh, d) => (axis === "x" ? box(w, hh, d) : box(d, hh, w));
   const put = (geo, mat, a, hh, dOff = 0, rx = 0) => {
     const [px, pz] = P(a, dOff);
-    B.add(geo, mat, mat4(px, y + hh, pz, rx, axis === "x" ? 0 : PI / 2, 0));
+    B.add(geo, mat, mat4(px, y + hh, pz, axis === "x" ? rx : 0, 0, axis === "x" ? 0 : rx));
   };
   put(G(len, 0.03, depth), M.lightWood, c, 0.02);
   for (let r = 1; r <= rows; r++) put(G(len, 0.03, depth), M.lightWood, c, r * rh);
@@ -666,13 +671,15 @@ export function reception(ctx, x, z) {
   B.add(cyl(0.05, 0.05, 0.06, 12), M.white, mat4(x - 0.2, y + 1.13, z + 0.1));
   nav.blockBox(x, z, 2.7, 0.8, 0, 0.3);
 }
-export function turnstile(ctx, x, z) {
+/** Turnstile gate: body long along fwd(yaw), arm out to the side. */
+export function turnstile(ctx, x, z, yaw = 0) {
   const { B, M, y, nav } = ctx;
-  B.add(rbox(0.25, 1.0, 1.0, 0.04), M.steel, mat4(x, y + 0.5, z));
-  B.add(box(0.29, 0.06, 1.04), M.chairDark, mat4(x, y + 1.02, z));
-  B.add(cyl(0.02, 0.02, 0.5, 8), M.chairDark, mat4(x + 0.35, y + 0.85, z, 0, 0, PI / 2));
-  B.add(box(0.06, 0.06, 0.06), M.ledOn, mat4(x, y + 1.06, z + 0.4));
-  nav.blockBox(x, z, 0.3, 1.0, 0, 0.2);
+  const s = side(yaw), f = fwd(yaw);
+  B.add(rbox(0.25, 1.0, 1.0, 0.04), M.steel, mat4(x, y + 0.5, z, 0, yaw, 0));
+  B.add(box(0.29, 0.06, 1.04), M.chairDark, mat4(x, y + 1.02, z, 0, yaw, 0));
+  B.add(cyl(0.02, 0.02, 0.5, 8), M.chairDark, mat4(x + s.x * 0.35, y + 0.85, z + s.z * 0.35, 0, yaw, PI / 2));
+  B.add(box(0.06, 0.06, 0.06), M.ledOn, mat4(x + f.x * 0.4, y + 1.06, z + f.z * 0.4, 0, yaw, 0));
+  nav.blockBox(x, z, 0.3, 1.0, yaw, 0.2);
 }
 
 // ---------------------------------------------------------- building ----
@@ -689,7 +696,7 @@ export function wall(ctx, a0, a1, at, h, mat, vertical = false, thick = 0.15, bl
   }
 }
 /** Glass partition with black frames and door gaps; gaps = [[a0,a1], ...] along the run. */
-export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false) {
+export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false, noStartPost = false) {
   const { B, M, nav, y } = ctx;
   const segs = [];
   let cur = Math.min(a0, a1);
@@ -711,7 +718,7 @@ export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false) {
     B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, 0.03)));
     B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, h - 0.03)));
     const n = Math.max(1, Math.round(len / 1.2));
-    for (let k = 0; k <= n; k++) B.add(geo(0.05, h, 0.08), M.black, mat4(...P(s0 + (k * len) / n, h / 2)));
+    for (let k = noStartPost && s0 === Math.min(a0, a1) ? 1 : 0; k <= n; k++) B.add(geo(0.05, h, 0.08), M.black, mat4(...P(s0 + (k * len) / n, h / 2)));
     if (vertical) nav.block(at - 0.05, s0, at + 0.05, s1, 0.28);
     else nav.block(s0, at - 0.05, s1, at + 0.05, 0.28);
   }
@@ -739,24 +746,218 @@ export function railing(ctx, x0, x1, z, gap) {
     nav.block(s0, z - 0.05, s1, z + 0.05, 0.28);
   }
 }
-/** Straight stairs along -x: bottom at x0 (y=0), top at x1 (y=rise), between z0..z1. */
-export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20) {
+/** Straight stairs along x: bottom at x0 (y=0), top at x1 (y=rise), between z0..z1; rails on the sides listed. */
+export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
   const { B, M, nav, y } = ctx;
-  const run = x0 - x1, sw = z1 - z0, cz = (z0 + z1) / 2;
+  const dir = Math.sign(x1 - x0), run = Math.abs(x1 - x0), sw = z1 - z0, cz = (z0 + z1) / 2;
   const sr = rise / steps, sd = run / steps;
+  // solid body: a right-triangle prism extruded across the width
+  const shape = new THREE.Shape();
+  shape.moveTo(x0, 0);
+  shape.lineTo(x1, 0);
+  shape.lineTo(x1, rise);
+  shape.closePath();
+  const prism = new THREE.ExtrudeGeometry(shape, { depth: sw, bevelEnabled: false });
+  B.add(prism, M.lightWood, mat4(0, y, z0));
   for (let k = 0; k < steps; k++) {
-    const x = x0 - (k + 0.5) * sd;
-    B.add(box(sd + 0.02, (k + 1) * sr, sw), M.lightWood, mat4(x, y + ((k + 1) * sr) / 2, cz));
+    const xt = x0 + dir * (k + 0.5) * sd, yt = (k + 1) * sr;
+    B.add(box(sd + 0.02, 0.035, sw + 0.02), M.white, mat4(xt, y + yt - 0.0175, cz)); // tread
+    B.add(box(0.03, sr, sw), M.slab, mat4(x0 + dir * (k * sd + 0.015), y + yt - sr / 2, cz)); // riser
   }
-  // stringer and handrail on the open side (z1)
-  B.add(box(0.04, 1.0, 0.04), M.black, mat4(x0 - 0.1, y + 0.6, z1 + 0.02));
-  B.add(box(0.04, 1.0, 0.04), M.black, mat4(x1 + 0.1, y + rise + 0.5, z1 + 0.02));
-  const len = Math.hypot(run, rise);
-  const ang = Math.atan2(rise, run);
-  B.add(box(len, 0.05, 0.05), M.black, mat4((x0 + x1) / 2, y + rise / 2 + 1.05, z1 + 0.02, 0, 0, -ang));
-  for (let k = 1; k < steps; k += 3) {
-    const x = x0 - k * sd, h = k * sr;
-    B.add(box(0.03, 1.0, 0.03), M.black, mat4(x, y + h + 0.5, z1 + 0.02));
+  const len = Math.hypot(run, rise), ang = Math.atan2(rise, run) * dir;
+  for (const zr of rails) {
+    const zz = zr + (zr > cz ? 0.02 : -0.02);
+    B.add(box(0.04, 1.0, 0.04), M.black, mat4(x0 + dir * 0.1, y + 0.6, zz));
+    B.add(box(0.04, 1.0, 0.04), M.black, mat4(x1 - dir * 0.1, y + rise + 0.5, zz));
+    B.add(box(len, 0.05, 0.05), M.black, mat4((x0 + x1) / 2, y + rise / 2 + 1.05, zz, 0, 0, ang));
+    for (let k = 1; k < steps; k += 3) B.add(box(0.03, 1.0, 0.03), M.black, mat4(x0 + dir * k * sd, y + k * sr + 0.5, zz));
   }
-  nav.block(x1 - 0.2, z0, x0 + 0.1, z1, 0.3);
+  nav.block(Math.min(x0, x1) - 0.1, z0, Math.max(x0, x1) + 0.1, z1, 0.3);
+}
+
+// ------------------------------------------------- reference-office extras ----
+/** Wall (along x at z=at, or along z at x=at) with arched openings: {x, w, h, sill}. */
+export function archWall(ctx, a0, a1, at, h, arches, mat, vertical = false, thick = 0.15) {
+  const { B, nav, y } = ctx;
+  const len = a1 - a0;
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.lineTo(len, 0);
+  shape.lineTo(len, h);
+  shape.lineTo(0, h);
+  shape.closePath();
+  for (const a of arches) {
+    const cx = a.x - a0, r = a.w / 2, sill = a.sill || 0, top = a.h;
+    const hole = new THREE.Path();
+    hole.moveTo(cx - r, sill);
+    hole.lineTo(cx - r, top - r);
+    hole.absarc(cx, top - r, r, PI, 0, true);
+    hole.lineTo(cx + r, sill);
+    hole.closePath();
+    shape.holes.push(hole);
+  }
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: false, curveSegments: 24 });
+  if (vertical) B.add(geo, mat, mat4(at + thick / 2, y, a0, 0, -PI / 2, 0));
+  else B.add(geo, mat, mat4(a0, y, at - thick / 2));
+  // nav: solid parts blocked, door arches (sill 0) left open
+  let cur = a0;
+  const doors = arches.filter((a) => !a.sill).sort((p, q) => p.x - q.x);
+  const segs = [];
+  for (const d of doors) {
+    if (d.x - d.w / 2 > cur) segs.push([cur, d.x - d.w / 2]);
+    cur = d.x + d.w / 2;
+  }
+  if (cur < a1) segs.push([cur, a1]);
+  for (const [s0, s1] of segs) {
+    if (vertical) nav.block(at - thick / 2, s0, at + thick / 2, s1, 0.3);
+    else nav.block(s0, at - thick / 2, s1, at + thick / 2, 0.3);
+  }
+}
+
+/** Black bar balustrade along x (z=at) or along z (x=at), with optional gaps. */
+export function railingBars(ctx, a0, a1, at, vertical = false, gaps = []) {
+  const { B, M, y, nav } = ctx;
+  const segs = [];
+  let cur = Math.min(a0, a1);
+  const end = Math.max(a0, a1);
+  for (const [g0, g1] of gaps.sort((p, q) => p[0] - q[0])) {
+    if (g0 > cur) segs.push([cur, g0]);
+    cur = g1;
+  }
+  if (cur < end) segs.push([cur, end]);
+  const P = (a, hh) => (vertical ? [at, y + hh, a] : [a, y + hh, at]);
+  const geo = (w, hh, d) => (vertical ? box(d, hh, w) : box(w, hh, d));
+  for (const [s0, s1] of segs) {
+    const len = s1 - s0, c = (s0 + s1) / 2;
+    B.add(geo(len, 0.05, 0.06), M.black, mat4(...P(c, 1.02)));
+    B.add(geo(len, 0.03, 0.04), M.black, mat4(...P(c, 0.1)));
+    const n = Math.max(1, Math.round(len / 0.45));
+    for (let k = 0; k <= n; k++) B.add(geo(0.03, 1.0, 0.03), M.black, mat4(...P(s0 + (k * len) / n, 0.52)));
+    if (vertical) nav.block(at - 0.04, s0, at + 0.04, s1, 0.28);
+    else nav.block(s0, at - 0.04, s1, at + 0.04, 0.28);
+  }
+}
+
+/** Half-round welcome desk (the reference's WELCOME counter): the round front faces fwd(yaw). */
+export function receptionRound(ctx, x, z, yaw = 0) {
+  const { B, M, y, nav } = ctx;
+  const r = 1.25;
+  const f = fwd(yaw), sd = side(yaw);
+  const at = (fw, sw, h) => [x + f.x * fw + sd.x * sw, y + h, z + f.z * fw + sd.z * sw];
+  let p;
+  B.add(new THREE.CylinderGeometry(r, r, 1.02, 40, 1, false, -PI / 2, PI), M.lightWood, mat4(x, y + 0.51, z, 0, yaw, 0));
+  B.add(new THREE.CylinderGeometry(r + 0.05, r + 0.05, 0.05, 40, 1, false, -PI / 2, PI), M.deskWood, mat4(x, y + 1.045, z, 0, yaw, 0));
+  p = at(-0.03, 0, 0.51);
+  B.add(box(2 * r, 1.02, 0.06), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.3, 0, 0.72);
+  B.add(box(2 * r - 0.3, 0.04, 0.55), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.2), new THREE.MeshStandardMaterial({ map: T.signText(["BIENVENIDOS"], "#e0b87a", "#2a2320", 512, 114), roughness: 0.8 }));
+  p = at(r + 0.012, 0, 0.6);
+  logo.position.set(p[0], p[1], p[2]);
+  logo.rotation.y = yaw;
+  ctx.S.add(logo);
+  p = at(0.35, 0.5, 1.08);
+  B.add(cyl(0.11, 0.13, 0.02, 20), M.screenBezel, mat4(p[0], p[1], p[2]));
+  p = at(0.35, 0.5, 1.16);
+  B.add(box(0.04, 0.16, 0.03), M.screenBezel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.35, 0.5, 1.38);
+  B.add(rbox(0.5, 0.32, 0.03, 0.008), M.screenBezel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.26), M.laptopScreen);
+  p = at(0.33, 0.5, 1.38);
+  scr.position.set(p[0], p[1], p[2]);
+  scr.rotation.y = yaw + PI;
+  ctx.S.add(scr);
+  p = at(0.1, 0.5, 1.08);
+  B.add(box(0.36, 0.02, 0.12), M.keyboard, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.4, -0.4, 1.1);
+  B.add(cyl(0.05, 0.05, 0.06, 12), M.white, mat4(p[0], p[1], p[2]));
+  p = at(0.3, -0.75, 1.08);
+  B.add(rbox(0.16, 0.012, 0.22, 0.004), M.paper, mat4(p[0], p[1], p[2], 0, yaw + 0.3, 0));
+  p = at(0.55, 0, 0);
+  nav.blockBox(p[0], p[2], 2.6, 1.3, yaw, 0.3);
+}
+
+/** Tall terracotta planter with a shrub. */
+export function planter(ctx, x, z, h = 0.9) {
+  const { B, M, y, nav } = ctx;
+  B.add(cyl(0.3, 0.24, h, 24), M.potClay, mat4(x, y + h / 2, z));
+  B.add(cyl(0.27, 0.27, 0.02, 24), M.soil, mat4(x, y + h, z));
+  for (let k = 0; k < 6; k++) {
+    const a = (k / 6) * PI * 2;
+    B.add(sph(0.2, 12, 10), k % 2 ? M.plant : M.plant3, mat4(x + Math.cos(a) * 0.17, y + h + 0.22 + (k % 3) * 0.06, z + Math.sin(a) * 0.17, 0, 0, 0, 1, 0.8, 1));
+  }
+  B.add(sph(0.22, 12, 10), M.plant2, mat4(x, y + h + 0.42, z, 0, 0, 0, 1, 0.8, 1));
+  nav.blockCircle(x, z, 0.3, 0.22);
+}
+
+/** Square upholstered pouf. */
+export function pouf(ctx, x, z, mat) {
+  const { B, M, y, nav } = ctx;
+  B.add(rbox(0.6, 0.42, 0.6, 0.08), mat || M.pouf, mat4(x, y + 0.21, z));
+  nav.blockBox(x, z, 0.6, 0.6, 0, 0.2);
+}
+
+/** Freestanding coffee bar: wood front, white top, machine + cups; faces +fwd(yaw). Returns the machine's spot. */
+export function cafeCounter(ctx, x, z, yaw, len = 2.6) {
+  const { B, M, y, nav } = ctx;
+  const f = fwd(yaw), s = side(yaw);
+  const at = (fw, sw, h) => [x + f.x * fw + s.x * sw, y + h, z + f.z * fw + s.z * sw];
+  let p = at(0, 0, 0.5);
+  B.add(box(len, 1.0, 0.6), M.deskWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0, 0, 1.025);
+  B.add(rbox(len + 0.08, 0.05, 0.68, 0.01), M.white, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  for (let k = 1; k < Math.round(len / 0.65); k++) {
+    p = at(0.31, -len / 2 + (k * len) / Math.round(len / 0.65), 0.5);
+    B.add(box(0.01, 0.9, 0.02), M.darkWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  }
+  // espresso machine at the left end, cups and a plant along the top
+  const mx = -len / 2 + 0.45;
+  p = at(-0.05, mx, 1.25);
+  B.add(rbox(0.44, 0.4, 0.4, 0.03), M.steel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(-0.05, mx, 1.48);
+  B.add(rbox(0.48, 0.06, 0.42, 0.02), M.chairDark, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.12, mx, 1.1);
+  B.add(box(0.3, 0.1, 0.24), M.chairDark, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.2, mx - 0.06, 1.1);
+  B.add(cyl(0.04, 0.035, 0.08, 12), M.white, mat4(p[0], p[1], p[2]));
+  for (let k = 0; k < 5; k++) {
+    p = at(-0.1, mx + 0.5 + k * 0.16, 1.095);
+    B.add(cyl(0.04, 0.034, 0.09, 12), M.accents[k % M.accents.length], mat4(p[0], p[1], p[2]));
+  }
+  p = at(-0.08, mx + 1.4, 1.15);
+  B.add(cyl(0.1, 0.09, 0.2, 16), M.steel, mat4(p[0], p[1], p[2]));
+  p = at(-0.05, len / 2 - 0.35, 1.05);
+  plant(ctx, p[0], p[2], 0.34, 1.05, M.potClay);
+  p = at(-0.1, mx + 0.95, 1.06);
+  B.add(rbox(0.28, 0.08, 0.2, 0.02), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  nav.blockBox(x, z, len, 0.6, yaw, 0.3);
+  const spot = at(0.65, mx, 0);
+  return { machine: [spot[0], spot[2]], yaw: yaw + PI };
+}
+
+/** Small desk with a laptop and a chair (no station). */
+export function laptopDesk(ctx, x, z, yaw) {
+  const { B, M, y, nav } = ctx;
+  const f = fwd(yaw), s = side(yaw);
+  const at = (fw, sw, h) => [x + f.x * fw + s.x * sw, y + h, z + f.z * fw + s.z * sw];
+  let p = at(0.5, 0, DESK_H - 0.02);
+  B.add(rbox(1.2, 0.04, 0.6, 0.01), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  for (const sw of [-0.52, 0.52]) {
+    p = at(0.5, sw, (DESK_H - 0.04) / 2);
+    B.add(box(0.05, DESK_H - 0.04, 0.5), M.metal, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  }
+  p = at(0.45, 0.05, DESK_H + 0.008);
+  B.add(rbox(0.3, 0.014, 0.21, 0.005), M.steel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0.55, 0.05, DESK_H + 0.11);
+  B.add(rbox(0.3, 0.2, 0.012, 0.005), M.steel, mat4(p[0], p[1], p[2], -0.25, yaw, 0));
+  const ls = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.17), M.laptopScreen);
+  const q = at(0.547, 0.05, DESK_H + 0.11);
+  ls.position.set(q[0], q[1], q[2]);
+  ls.rotation.set(-0.25, yaw + PI, 0, "YXZ");
+  ctx.S.add(ls);
+  p = at(0.6, -0.4, DESK_H + 0.05);
+  B.add(cyl(0.042, 0.037, 0.1), M.accents[3], mat4(p[0], p[1], p[2]));
+  p = at(-0.1, 0, 0);
+  simpleChair(ctx, p[0], p[2], yaw, M.chairBlack);
+  nav.blockBox(x + f.x * 0.5, z + f.z * 0.5, 1.2, 0.6, yaw, 0.28);
 }

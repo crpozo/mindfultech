@@ -1,10 +1,20 @@
-// The office building: a two-storey cut-away like the reference. Ground floor —
-// reception with turnstiles, an open workspace with two four-desk pods, a
-// ping-pong table, lockers and a plant wall; under the upper deck a kitchen,
-// the "Sala Andes" meeting room, phone booths with printer and water cooler,
-// and a server room, all behind black-framed glass. Upper floor (over the back
-// half) — lounge, training room, the round "Sala Chimborazo" and a lab with
-// standing desks. A staircase links the floors; the right facade is glass.
+// The office building, laid out like the isometric reference: a two-storey
+// cut-away on a sand-coloured base, seen from the front-left corner.
+//
+// Ground floor — the lobby strip along the left edge: turnstiles, the
+// half-round welcome desk facing them, the black wall with the logo and a
+// glass wall with a door. The hall: two quiet desks behind the glass, a plant
+// grid, the ping-pong table, the tall cube bookshelf and the staircase that
+// climbs to the right onto the periwinkle block. The block hides a reading
+// nook behind arched openings; the open workspace with two rows of desks
+// sits in front of it. Under the mezzanine: "Sala Chimborazo" (round table),
+// "Sala Andes", the print/lockers corner and the server room, behind glass.
+//
+// Upper floor — a strip along the back plus the block's roof: the lounge
+// with the dark L-sofa and poufs, the green training room with rows of
+// orange chairs, the orange studio with two desks face to face, a phone
+// booth, and the cafeteria on the right: coffee counter, high tables, TV and
+// the "Piensa diferente" sign, behind glass curtain walls.
 import * as THREE from "three";
 import * as F from "./furniture.js";
 import * as T from "./textures.js";
@@ -12,25 +22,41 @@ import { NavGrid } from "./nav.js";
 
 const { PI, box, mat4 } = F;
 
-export const BLD = { x0: -9, x1: 9, z0: -6, z1: 6, deckZ: 0.3, floorH: 3.3, slabT: 0.25 };
+export const BLD = { x0: -10, x1: 10, z0: -6, z1: 8.8, deckZ: -0.5, wingZ: 4.0, lobbyX: -6.6, loungeX: -5.2, blockX: 3.8, floorH: 3.3, slabT: 0.25 };
 export const UPPER_Y = BLD.floorH + BLD.slabT; // 3.55
+const { x0, x1, z0, z1, deckZ: D, wingZ: WZ, lobbyX: LX, loungeX: LNG, blockX: BX, floorH } = BLD;
+const PART_H = 2.5; // upper-floor partitions stay below the camera's eye
 
-/** The staircase: bottom at x0 on the ground, top at x1 on the deck. */
-export const STAIRS = { x0: -2.7, x1: -7.0, z0: 0.35, z1: 1.55, mid: 0.95, portal0: [-2.0, 0.95], portal1: [-7.0, -0.35] };
+/** The staircase: climbs towards +x beside the hall, from the ground at x=-1.3 onto the block's roof. */
+export const STAIRS = { x0: -1.3, x1: 3.8, z0: 0.9, z1: 2.3, bottom: [-1.45, 1.6], top: [3.95, 1.6], portal0: [-2.1, 1.6], portal1: [4.55, 1.6] };
 
-/** Camera stops for the room navigator. */
+/** Camera stops for the room navigator; `under` = hide the mezzanine to look inside. */
 export const ROOMS = [
-  { id: "reception", name: "Recepción", floor: 0, center: [-6.0, 0, 3.5], dist: 11 },
-  { id: "open", name: "Sala abierta", floor: 0, center: [1.0, 0, 3.4], dist: 12.5 },
-  { id: "kitchen", name: "Cafetería", floor: 0, center: [-6.5, 0, -2.9], dist: 10 },
-  { id: "meeting", name: "Sala Andes", floor: 0, center: [-1.5, 0, -2.9], dist: 10 },
-  { id: "booths", name: "Cabinas", floor: 0, center: [3.0, 0, -2.9], dist: 9.5 },
-  { id: "servers", name: "Servidores", floor: 0, center: [7.0, 0, -2.9], dist: 9.5 },
-  { id: "lounge", name: "Lounge", floor: 1, center: [-6.2, UPPER_Y, -2.9], dist: 10 },
-  { id: "training", name: "Capacitación", floor: 1, center: [-1.0, UPPER_Y, -2.9], dist: 10 },
-  { id: "meeting2", name: "Sala Chimborazo", floor: 1, center: [3.5, UPPER_Y, -2.9], dist: 9.5 },
-  { id: "lab", name: "Laboratorio", floor: 1, center: [7.2, UPPER_Y, -2.9], dist: 9.5 },
+  { id: "reception", name: "Recepción", floor: 0, center: [-8.2, 0, 6.2], dist: 10 },
+  { id: "hall", name: "Área central", floor: 0, center: [-2.6, 0, 4.6], dist: 13 },
+  { id: "open", name: "Sala abierta", floor: 0, center: [7.0, 0, 6.4], dist: 11 },
+  { id: "nook", name: "Rincón de lectura", floor: 0, center: [7.0, 0, 1.7], dist: 9, under: true, polar: 0.5 },
+  { id: "meeting", name: "Sala Andes", floor: 0, center: [-2.9, 0, -3.3], dist: 10, under: true, azimuth: 0.1, polar: 0.6 },
+  { id: "meeting2", name: "Sala Chimborazo", floor: 0, center: [-7.6, 0, -3.3], dist: 10, under: true, azimuth: -0.3, polar: 0.6 },
+  { id: "utility", name: "Impresión y casilleros", floor: 0, center: [1.6, 0, -3.3], dist: 9, under: true, azimuth: 0.1, polar: 0.6 },
+  { id: "servers", name: "Servidores", floor: 0, center: [6.9, 0, -3.3], dist: 10, under: true, azimuth: 0.0, polar: 0.45 },
+  { id: "lounge", name: "Lounge", floor: 1, center: [-7.6, UPPER_Y, -3.4], dist: 10 },
+  { id: "training", name: "Capacitación", floor: 1, center: [-3.0, UPPER_Y, -3.5], dist: 10 },
+  { id: "studio", name: "Estudio", floor: 1, center: [1.0, UPPER_Y, -3.7], dist: 8.5 },
+  { id: "cafe", name: "Cafetería", floor: 1, center: [6.9, UPPER_Y, -0.6], dist: 12 },
 ];
+export const ROOM_NAMES = { ...Object.fromEntries(ROOMS.map((r) => [r.id, r.name])), booth: "Cabina", stairs: "Escaleras" };
+
+/** True where the ground floor is covered by the mezzanine (the camera hides it to look inside). */
+export const underDeck = (x, z) => z < D || (x > BX && z < WZ);
+
+/** Which room a point is in. */
+export function roomAt(x, z, y) {
+  if (y > 1.6 && y < UPPER_Y - 0.05) return "stairs";
+  if (y >= UPPER_Y - 0.05) return x < LNG ? "lounge" : x > BX ? "cafe" : x < -0.8 ? "training" : x < 2.6 ? "studio" : "booth";
+  if (z >= D) return x < LX ? "reception" : x > BX ? (z < WZ ? "nook" : "open") : "hall";
+  return x < LNG ? "meeting2" : x < -0.6 ? "meeting" : x < BX ? "utility" : "servers";
+}
 
 /**
  * @param scene THREE.Scene
@@ -41,8 +67,9 @@ export function buildRoom(scene, bots) {
   const M = F.makeMaterials(bots);
   const upper = new THREE.Group();
   scene.add(upper);
-  const nav0 = new NavGrid(BLD.x0 + 0.45, BLD.z0 + 0.45, BLD.x1 - 0.45, BLD.z1 - 0.25, 0.25);
-  const nav1 = new NavGrid(BLD.x0 + 0.45, BLD.z0 + 0.45, BLD.x1 - 0.45, 0.0, 0.25);
+  const nav0 = new NavGrid(x0 + 0.45, z0 + 0.45, x1 - 0.45, z1 - 0.25, 0.25);
+  const nav1 = new NavGrid(x0 + 0.45, z0 + 0.45, x1 - 0.45, WZ, 0.25);
+  nav1.block(x0 - 1, D, BX, z1 + 1, 0.3); // the void: everything in front of the back strip except the block's roof
   const B0 = new F.Batcher(scene), B1 = new F.Batcher(upper);
   const dyn = { screens: [], tvs: [], leds: [], clock: null };
   const g = { B: B0, S: scene, M, nav: nav0, y: 0, dyn }; // ground context
@@ -55,40 +82,43 @@ export function buildRoom(scene, bots) {
     lights.push(l);
     return l;
   };
+  const woodPlane = (parent, w, d, x, y, z) => {
+    const mat = M.wood.clone();
+    mat.map = M.wood.map.clone();
+    mat.map.repeat.set(w / 2, d / 2);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+    m.rotation.x = -PI / 2;
+    m.position.set(x, y, z);
+    m.receiveShadow = true;
+    parent.add(m);
+  };
 
   // =============================================================== shell ====
-  B0.add(box(BLD.x1 - BLD.x0 + 0.6, 0.6, BLD.z1 - BLD.z0 + 0.6), M.slab, mat4(0, -0.3, 0));
-  const groundFloor = new THREE.Mesh(new THREE.PlaneGeometry(BLD.x1 - BLD.x0, BLD.z1 - BLD.z0), M.concrete);
-  M.concrete.map.repeat.set(9, 6);
+  B0.add(box(x1 - x0 + 0.6, 0.6, z1 - z0 + 0.6), M.slab, mat4(0, -0.3, (z0 + z1) / 2));
+  const groundFloor = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M.concrete);
+  M.concrete.map.repeat.set(10, 7.4);
   groundFloor.rotation.x = -PI / 2;
-  groundFloor.position.y = 0.002;
+  groundFloor.position.set(0, 0.004, (z0 + z1) / 2);
   groundFloor.receiveShadow = true;
   scene.add(groundFloor);
-  const backWood = new THREE.Mesh(new THREE.PlaneGeometry(BLD.x1 - BLD.x0, BLD.deckZ - BLD.z0), M.wood);
-  M.wood.map.repeat.set(9, 3.15);
-  backWood.rotation.x = -PI / 2;
-  backWood.position.set(0, 0.004, (BLD.z0 + BLD.deckZ) / 2);
-  backWood.receiveShadow = true;
-  scene.add(backWood);
-  const under = new THREE.Mesh(new THREE.PlaneGeometry(30, 24), new THREE.MeshBasicMaterial({ map: T.blob(), transparent: true, depthWrite: false }));
+  // wood under the mezzanine: back strip and the block
+  woodPlane(scene, x1 - x0, D - z0, 0, 0.016, (z0 + D) / 2);
+  woodPlane(scene, x1 - BX, WZ - D, (BX + x1) / 2, 0.016, (D + WZ) / 2);
+  const under = new THREE.Mesh(new THREE.PlaneGeometry(34, 28), new THREE.MeshBasicMaterial({ map: T.blob(), transparent: true, depthWrite: false }));
   under.rotation.x = -PI / 2;
-  under.position.set(0.8, -0.75, 0.8);
+  under.position.set(0.8, -0.75, 1.6);
   scene.add(under);
-  // upper deck slab (the back rooms' ceiling) + its wood floor
-  const deckD = BLD.deckZ - BLD.z0;
-  B1.add(box(BLD.x1 - BLD.x0 + 0.3, BLD.slabT, deckD), M.slab, mat4(0, BLD.floorH + BLD.slabT / 2, (BLD.z0 + BLD.deckZ) / 2));
-  const upWood = new THREE.Mesh(new THREE.PlaneGeometry(BLD.x1 - BLD.x0, deckD), M.wood.clone());
-  upWood.material.map = M.wood.map.clone();
-  upWood.material.map.repeat.set(9, 3.15);
-  upWood.rotation.x = -PI / 2;
-  upWood.position.set(0, UPPER_Y + 0.003, (BLD.z0 + BLD.deckZ) / 2);
-  upWood.receiveShadow = true;
-  upper.add(upWood);
+  // mezzanine slabs (back strip + the block's roof) with wood on top
+  const slabY = floorH + BLD.slabT / 2;
+  B1.add(box(x1 - x0 + 0.3, BLD.slabT, D - z0), M.slab, mat4(0, slabY, (z0 + D) / 2));
+  B1.add(box(x1 - BX + 0.15, BLD.slabT, WZ - D), M.slab, mat4((BX + x1) / 2 + 0.075, slabY, (D + WZ) / 2));
+  woodPlane(upper, x1 - x0, D - z0, 0, UPPER_Y + 0.012, (z0 + D) / 2);
+  woodPlane(upper, x1 - BX, WZ - D, (BX + x1) / 2, UPPER_Y + 0.012, (D + WZ) / 2);
   // ceiling light panels belong to the deck, so they vanish with it
-  for (const [x, z] of [[-6.5, -2.9], [-6.5, -4.6], [-1.5, -2.9], [-1.5, -4.6], [3.0, -2.9], [3.0, -4.6], [7.0, -2.9], [7.0, -4.6]]) F.ceilingPanel({ ...u, y: 0 }, x, BLD.floorH - 0.03, z);
+  for (const [x, z] of [[-7.6, -2.9], [-7.6, -4.6], [-2.9, -2.9], [-2.9, -4.6], [1.6, -2.9], [1.6, -4.6], [6.9, -2.9], [6.9, -4.6], [6.9, 0.6], [6.9, 2.6]]) F.ceilingPanel({ ...u, y: 0 }, x, floorH - 0.03, z);
 
-  // exterior walls: back and left plaster, right a glass facade
-  const H2 = BLD.floorH * 2 + BLD.slabT;
+  // exterior walls: plaster back and left (as far as the mezzanine), navy behind the servers and the cafe sign, glass on the right
+  const H2 = floorH * 2 + BLD.slabT;
   const plasterBox = (w, h, d, x, y, z) => {
     const pl = M.plaster.clone();
     pl.map = M.plaster.map.clone();
@@ -99,183 +129,244 @@ export function buildRoom(scene, bots) {
     m.receiveShadow = true;
     scene.add(m);
   };
-  plasterBox(BLD.x1 - BLD.x0 + 0.5, H2, 0.25, 0, H2 / 2, BLD.z0 - 0.125);
-  plasterBox(0.25, H2, BLD.deckZ - BLD.z0 + 0.25, BLD.x0 - 0.125, H2 / 2, (BLD.z0 + BLD.deckZ) / 2 - 0.125);
-  plasterBox(0.25, BLD.floorH, BLD.z1 - BLD.deckZ, BLD.x0 - 0.125, BLD.floorH / 2, (BLD.deckZ + BLD.z1) / 2);
-  F.glassWall(g, BLD.z0, BLD.deckZ, BLD.x1, H2, [], true);
-  F.glassWall(g, BLD.deckZ, BLD.z1, BLD.x1, BLD.floorH, [], true);
-  const outside = new THREE.Mesh(new THREE.PlaneGeometry(14, 8.5), new THREE.MeshBasicMaterial({ map: T.outside() }));
-  outside.rotation.y = -PI / 2;
-  outside.position.set(BLD.x1 + 0.7, 3.6, 0);
-  scene.add(outside);
-  B0.add(box(0.04, 0.1, BLD.z1 - BLD.z0), M.darkWood, mat4(BLD.x0 + 0.02, 0.05, 0));
-  B0.add(box(BLD.x1 - BLD.x0, 0.1, 0.04), M.darkWood, mat4(0, 0.05, BLD.z0 + 0.02));
+  plasterBox(BX - x0 + 0.25, H2, 0.25, (x0 + BX) / 2 - 0.125, H2 / 2, z0 - 0.125);
+  B0.add(box(x1 - BX + 0.25, floorH, 0.25), M.navy, mat4((BX + x1) / 2 + 0.125, floorH / 2, z0 - 0.125));
+  B1.add(box(7.2 - BX, floorH, 0.25), M.navy, mat4((BX + 7.2) / 2, UPPER_Y + floorH / 2, z0 - 0.125));
+  F.glassWall(u, 7.2, x1, z0, floorH, [], false, true);
+  F.glassWall(u, z0, WZ, x1, floorH, [], true, true);
+  F.wall(g, z0, D, x1, floorH, M.navy, true, 0.25);
+  F.archWall(g, D, WZ, x1, floorH, [{ x: 1.7, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle, true);
+  B0.add(box(0.04, 0.1, D - z0), M.darkWood, mat4(x0 + 0.02, 0.05, (z0 + D) / 2));
+  B0.add(box(x1 - x0, 0.1, 0.04), M.darkWood, mat4(0, 0.05, z0 + 0.02));
   const aoMat = new THREE.MeshBasicMaterial({ map: T.aoStrip(), transparent: true, depthWrite: false });
-  scene.add(new THREE.Mesh(F.quad([BLD.x0, 0.006, BLD.z0], [BLD.x0, 0.006, BLD.z1], [BLD.x0 + 0.6, 0.006, BLD.z1], [BLD.x0 + 0.6, 0.006, BLD.z0]), aoMat));
-  scene.add(new THREE.Mesh(F.quad([BLD.x1, 0.006, BLD.z0], [BLD.x0, 0.006, BLD.z0], [BLD.x0, 0.006, BLD.z0 + 0.6], [BLD.x1, 0.006, BLD.z0 + 0.6]), aoMat));
-  upper.add(new THREE.Mesh(F.quad([BLD.x1, UPPER_Y + 0.006, BLD.z0], [BLD.x0, UPPER_Y + 0.006, BLD.z0], [BLD.x0, UPPER_Y + 0.006, BLD.z0 + 0.6], [BLD.x1, UPPER_Y + 0.006, BLD.z0 + 0.6]), aoMat));
-
-  // ground back rooms: coloured partitions + glass fronts with doors
-  F.wall(g, BLD.z0, BLD.deckZ, -4.0, BLD.floorH, M.green, true);
-  F.wall(g, BLD.z0, BLD.deckZ, 1.0, BLD.floorH, M.orange, true);
-  F.wall(g, BLD.z0, BLD.deckZ, 5.0, BLD.floorH, M.navy, true);
-  F.glassWall(g, BLD.x0, BLD.x1, BLD.deckZ, BLD.floorH, [[-5.6, -4.6], [-2.0, -1.0], [2.5, 3.5], [6.5, 7.5]]);
-  for (const [x0, x1, mat] of [[-4.0, 1.0, M.green], [1.0, 5.0, M.orange], [5.0, BLD.x1, M.navy]]) B0.add(box(x1 - x0, BLD.floorH, 0.05), mat, mat4((x0 + x1) / 2, BLD.floorH / 2, BLD.z0 + 0.03));
-  // upper rooms: partitions + railing
-  F.wall(u, BLD.z0, -1.1, -3.5, BLD.floorH, M.navy, true);
-  F.wall(u, BLD.z0, -1.1, 1.5, BLD.floorH, M.green, true);
-  F.wall(u, BLD.z0, -1.1, 5.5, BLD.floorH, M.orange, true);
-  F.railing(u, BLD.x0, BLD.x1, BLD.deckZ, [-7.6, -6.4]);
-  for (const [x0, x1, mat] of [[BLD.x0, -3.5, M.navy], [-3.5, 1.5, M.green], [1.5, 5.5, M.orange], [5.5, BLD.x1, M.purple]]) B1.add(box(x1 - x0, BLD.floorH, 0.05), mat, mat4((x0 + x1) / 2, UPPER_Y + BLD.floorH / 2, BLD.z0 + 0.03));
-  F.stairs(g, STAIRS.x0, STAIRS.x1, STAIRS.z0, STAIRS.z1, UPPER_Y, 20);
-  B1.add(box(0.9, 0.1, 0.1), M.lightWood, mat4(-7.0, UPPER_Y - 0.05, BLD.deckZ + 0.02));
+  scene.add(new THREE.Mesh(F.quad([x1, 0.03, z0], [x0, 0.03, z0], [x0, 0.03, z0 + 0.6], [x1, 0.03, z0 + 0.6]), aoMat));
+  upper.add(new THREE.Mesh(F.quad([x1, UPPER_Y + 0.03, z0], [x0, UPPER_Y + 0.03, z0], [x0, UPPER_Y + 0.03, z0 + 0.6], [x1, UPPER_Y + 0.03, z0 + 0.6]), aoMat));
 
   // ========================================================= ground floor ====
   const stations = [];
-  const desk = (seat, bot, i, ctx = g, standing = false) => {
-    const visit = standing ? F.standingDesk(ctx, seat, bot, i) : F.desk(ctx, seat, bot, i);
-    stations.push({ seat: { ...seat, y: ctx.y }, floor: ctx === g ? 0 : 1, kind: standing ? "stand" : "desk", visit, bot });
+  const desk = (seat, bot, i, ctx = g) => {
+    const visit = F.desk(ctx, seat, bot, i);
+    stations.push({ seat: { ...seat, y: ctx.y }, floor: ctx === g ? 0 : 1, kind: "desk", visit, bot });
   };
-  const pod = (cx, cz, firstIdx) => {
-    const seats = [
-      { x: cx - 1.25, z: cz + 0.45, yaw: PI / 2 }, // west, faces +x
-      { x: cx - 0.45, z: cz - 1.25, yaw: 0 }, // north, faces +z
-      { x: cx + 0.45, z: cz + 1.25, yaw: PI }, // south, faces -z
-      { x: cx + 1.25, z: cz - 0.45, yaw: -PI / 2 }, // east, faces -x
-    ];
-    seats.forEach((s, k) => desk(s, bots[firstIdx + k], firstIdx + k));
-    F.pendant(g, cx, 2.5, cz, 4.2);
-    light(scene, cx, 2.3, cz, "#ffd7a6", 4, 6.5);
-  };
-  pod(-1.4, 3.5, 0);
-  pod(3.2, 3.5, 4);
-  desk({ x: 6.5, z: -2.65, yaw: 0 }, bots[8], 8, u, true);
-  desk({ x: 8.0, z: -2.65, yaw: 0 }, bots[9], 9, u, true);
-  F.reception(g, -6.3, 5.05);
-  stations.push({ seat: { x: -6.3, z: 4.35, yaw: 0, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -4.6, z: 4.6, yaw: -PI / 2 }, { x: -6.3, z: 5.95, yaw: PI }], bot: bots[10] });
-  nav0.clear(-6.3, 4.35, 0.15);
-  // reception area
-  F.turnstile(g, -8.3, 5.5);
-  F.turnstile(g, -7.55, 5.5);
-  F.bench(g, -5.0, 2.7, 0, 1.6);
-  F.plant(g, -4.0, 2.7, 1.0);
-  nav0.blockCircle(-4.0, 2.7, 0.2);
-  F.bookshelfBig(g, 1.9, 4.5, BLD.x0 + 0.22, 2.8, 5, 0.4, "z");
-  F.tv(g, BLD.x0 + 0.16, 2.2, 5.2, PI / 2, 1.4, 0.8);
-  F.clock(g, BLD.x0 + 0.16, 3.05, 3.2, PI / 2);
-  // open space extras
-  const pp = F.pingpong(g, 6.4, 3.6, 0);
-  F.lockers(g, BLD.x1 - 0.35, 1.2, -PI / 2, 5);
-  F.plantWall(g, BLD.x1 - 0.3, 4.2, -PI / 2, 2.4);
-  F.sign(g, 4.6, 2.5, BLD.deckZ + 0.12, 0, ["JUNTOS ES", "EL CAMINO"], "#3d4a7a", "#ffffff", 2.2, 0.9);
-  F.plant(g, 1.0, 1.2, 0.9);
-  nav0.blockCircle(1.0, 1.2, 0.2);
-  F.plant(g, 8.4, 5.4, 1.0);
-  nav0.blockCircle(8.4, 5.4, 0.22);
-  B0.add(F.cyl(0.14, 0.11, 0.3, 16, true), M.metal, mat4(0.4, 0.15, 5.4));
-  nav0.blockCircle(0.4, 5.4, 0.14, 0.15);
 
-  // kitchen
-  const bar = F.coffeeBar(g, -8.7, -5.2, BLD.z0 + 0.35);
-  F.fridge(g, -4.55, BLD.z0 + 0.45);
-  F.highTable(g, -7.0, -2.6, 0.45);
-  for (const a of [0.4, 2.5, 4.6]) F.stool(g, -7.0 + Math.cos(a) * 0.85, -2.6 + Math.sin(a) * 0.85);
-  F.plant(g, -8.5, -0.4, 0.9);
-  nav0.blockCircle(-8.5, -0.4, 0.2);
-  F.picture(g, BLD.x0 + 0.16, 2.1, -1.6, PI / 2, 1);
-  F.picture(g, BLD.x0 + 0.16, 2.1, -1.0, PI / 2, 2);
-  light(scene, -6.5, 3.05, -2.9, "#fff1dc", 5, 7);
-  // Sala Andes
-  F.table(g, -1.5, -3.0, 2.8, 1.1, 0, F.DESK_H, M.lightWood, 0.15);
-  const meetSeats = [];
-  for (const x of [-2.4, -1.5, -0.6]) {
-    F.simpleChair(g, x, -2.15, PI, M.chairOrange);
-    meetSeats.push({ x, z: -2.15 - 0.28, yaw: PI, sit: 0.27 });
-    F.simpleChair(g, x, -3.85, 0, M.chairOrange);
-    meetSeats.push({ x, z: -3.85 + 0.28, yaw: 0, sit: 0.27 });
+  // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
+  F.wall(g, 4.4, 7.8, LX, floorH, M.blackWall, true, 0.15);
+  F.glassWall(g, D, 4.4, LX, floorH, [[-0.1, 0.8]], true);
+  F.sign(g, LX - 0.09, 2.62, 6.1, -PI / 2, ["MINDFULTECH"], "#1b1b1f", "#ffffff", 1.9, 0.42);
+  F.clock(g, LX - 0.09, 1.75, 4.95, -PI / 2);
+  F.receptionRound(g, -7.9, 6.3, -PI / 2);
+  stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], bot: bots[10] });
+  nav0.clear(-7.25, 6.3, 0.15);
+  F.planter(g, -7.9, 4.55);
+  F.planter(g, -7.9, 8.05);
+  for (const z of [5.0, 5.75, 6.5, 7.25, 8.0]) F.turnstile(g, -9.75, z, PI / 2);
+  F.bench(g, -9.5, 2.3, PI / 2, 1.6);
+  F.plant(g, -9.4, 0.3, 0.9);
+  nav0.blockCircle(-9.4, 0.3, 0.2);
+  light(scene, -8.2, 2.9, 6.3, "#ffd7a6", 3.5, 7);
+
+  // ---- hall: quiet desks behind the glass, plant grid, ping-pong, bookshelf block and the stairs ----
+  desk({ x: -5.4, z: 1.6, yaw: -PI / 2 }, bots[6], 6);
+  desk({ x: -5.4, z: 3.2, yaw: -PI / 2 }, bots[7], 7);
+  F.plantWall(g, -5.3, 4.5, 0, 2.4);
+  const pp = F.pingpong(g, -4.9, 7.0, PI / 2);
+  F.pendant(g, -4.9, 2.6, 7.0, 4.6);
+  light(scene, -4.9, 2.4, 7.0, "#ffd7a6", 3.5, 6.5);
+  B0.add(box(1.1, floorH, 3.2), M.lightWood, mat4(-1.85, floorH / 2, 3.9));
+  nav0.block(-2.4, 2.3, -1.3, 5.5, 0.3);
+  F.bookshelfBig(g, 2.3, 5.5, -2.65, floorH, 6, 0.5, "z", true);
+  F.stairs(g, STAIRS.x0, STAIRS.x1, STAIRS.z0, STAIRS.z1, UPPER_Y, 20, [STAIRS.z0, STAIRS.z1]);
+  F.roundTable(g, 0.9, 7.0, 0.5, F.DESK_H, M.lightWood, 0.15);
+  for (const a of [PI * 0.25, PI * 1.25]) {
+    const x = 0.9 + Math.cos(a) * 0.85, z = 7.0 + Math.sin(a) * 0.85;
+    F.simpleChair(g, x, z, Math.atan2(0.9 - x, 7.0 - z), M.chairBlack);
   }
-  F.tv(g, -1.5, 2.0, BLD.z0 + 0.09, 0, 1.6, 0.9);
-  F.plant(g, 0.5, -5.4, 0.9);
-  nav0.blockCircle(0.5, -5.4, 0.2);
-  light(scene, -1.5, 3.05, -2.9, "#fff1dc", 5, 7);
-  // booths + printer + water
-  for (const x of [1.8, 3.0, 4.2]) F.booth(g, x, -5.2);
-  F.sign(g, 3.0, 2.85, BLD.z0 + 0.12, 0, ["HAZLO AHORA"], "#e08a5c", "#ffffff", 1.6, 0.5);
-  F.printer(g, 4.4, -1.4, 0);
-  F.waterCooler(g, 1.6, -1.4);
-  light(scene, 3.0, 3.05, -2.9, "#fff1dc", 4.5, 7);
-  // server room
-  for (const x of [5.8, 6.7, 7.6, 8.5]) F.serverRack(g, x, -5.4);
-  F.sign(g, 7.0, 2.6, BLD.z0 + 0.12, 0, ["SERVIDORES"], "#1e2a44", "#7cc0ff", 1.6, 0.5);
-  light(scene, 7.0, 3.05, -2.9, "#9fc4ff", 4, 7);
+  F.plant(g, -3.5, 4.2, 0.9);
+  nav0.blockCircle(-3.5, 4.2, 0.2);
+  F.plant(g, 2.9, 4.4, 1.0);
+  nav0.blockCircle(2.9, 4.4, 0.22);
+  F.plant(g, -1.0, 7.9, 0.9);
+  nav0.blockCircle(-1.0, 7.9, 0.2);
 
-  // ========================================================== upper floor ====
-  F.sofa(u, -8.25, -3.8, PI / 2, 2.7, M.sofaBlack, M.sofaBlackDark);
-  F.coffeeTable(u, -7.0, -3.8);
-  F.beanbag(u, -5.2, -4.9, M.beanbag);
-  F.beanbag(u, -5.0, -2.5, M.beanbag2);
-  const rugM = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.2), M.rug);
-  rugM.rotation.x = -PI / 2;
-  rugM.position.set(-6.6, UPPER_Y + 0.006, -3.8);
-  rugM.receiveShadow = true;
-  upper.add(rugM);
-  F.tv(u, -3.58, 1.9, -3.8, -PI / 2, 1.5, 0.86);
-  F.floorLamp(u, -8.3, -1.0);
-  F.plant(u, -4.0, -5.4, 1.1);
-  nav1.blockCircle(-4.0, -5.4, 0.22);
-  F.sign(u, -6.2, 2.3, BLD.z0 + 0.12, 0, ["TRABAJAR JUNTOS", "ES EL CAMINO"], "#3d4a7a", "#ffffff", 2.8, 0.9);
-  // training room
-  F.whiteboard(u, 1.42, 1.75, -3.0, -PI / 2, 2.4, 1.4);
-  const trainSeats = [];
-  for (const x of [-2.5, -1.5, -0.5])
-    for (const z of [-1.4, -2.4, -3.4, -4.4]) {
-      F.simpleChair(u, x, z, PI / 2, M.chairBlack);
-      trainSeats.push({ x: x + 0.28, z, yaw: PI / 2, sit: 0.27 });
-    }
-  F.plant(u, -3.0, -5.4, 0.9);
-  nav1.blockCircle(-3.0, -5.4, 0.2);
-  F.sign(u, -1.0, 2.4, BLD.z0 + 0.12, 0, ["APRENDER", "CADA DÍA"], "#8fb996", "#1e2a24", 1.6, 0.8);
+  // ---- open workspace: two rows of desks, everybody facing the hall ----
+  for (let k = 0; k < 3; k++) desk({ x: 5.4, z: 4.9 + k * 1.5, yaw: -PI / 2 }, bots[k], k);
+  for (let k = 0; k < 3; k++) desk({ x: 8.9, z: 4.9 + k * 1.5, yaw: -PI / 2 }, bots[3 + k], 3 + k);
+  for (const x of [4.75, 8.25]) {
+    F.pendant(g, x, 2.5, 6.4, 4.6);
+    light(scene, x, 2.3, 6.4, "#ffd7a6", 4, 6.5);
+  }
+  F.plant(g, 9.6, 4.4, 0.9);
+  nav0.blockCircle(9.6, 4.4, 0.2);
+  F.plant(g, 4.4, 8.4, 0.9);
+  nav0.blockCircle(4.4, 8.4, 0.2);
+
+  // ---- the periwinkle block: arched faces, reading nook inside ----
+  F.archWall(g, D, WZ, BX, floorH, [{ x: 0.2, w: 1.1, h: 2.1, sill: 0.85 }, { x: 3.15, w: 1.2, h: 2.3 }], M.periwinkle, true);
+  F.archWall(g, BX, x1, WZ, floorH, [{ x: 5.6, w: 1.1, h: 2.1, sill: 0.85 }, { x: 8.4, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle);
+  F.sign(g, 7.0, 2.9, WZ + 0.09, 0, ["CONSTRUIMOS EL FUTURO", "CON CALMA Y PROPÓSITO"], "#6b6fae", "#ffffff", 3.6, 0.62);
+  F.wall(g, BX, x1, D, floorH, M.navy);
+  const rugN = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.4), M.rug);
+  rugN.rotation.x = -PI / 2;
+  rugN.position.set(7.0, 0.03, 1.65);
+  rugN.receiveShadow = true;
+  scene.add(rugN);
+  F.sofa(g, 7.4, 0.6, -PI / 2 + 0.45, 0.95, M.chairOrange, M.chairOrangeDark);
+  F.sofa(g, 7.4, 2.7, -PI / 2 - 0.45, 0.95, M.chairOrange, M.chairOrangeDark);
+  F.roundTable(g, 6.4, 1.65, 0.35, 0.45, M.darkWood, 0.2);
+  F.floorLamp(g, 9.4, 0.0);
+  F.plant(g, 9.3, 3.4, 0.9);
+  nav0.blockCircle(9.3, 3.4, 0.2);
+  F.picture(g, 8.6, 2.0, D + 0.09, 0, 1);
+  light(scene, 7.0, 2.7, 1.7, "#ffd7a6", 3.5, 6);
+
+  // ---- under the mezzanine ----
+  F.glassWall(g, x0, BX, D, floorH, [[-8.0, -7.1], [-2.3, -1.4], [2.0, 2.9]]);
+  F.wall(g, z0, D, LNG, floorH, M.navy, true);
+  F.wall(g, z0, D, -0.6, floorH, M.green, true);
+  F.wall(g, z0, -1.8, BX, floorH, M.navy, true);
+  F.wall(g, -0.9, D, BX, floorH, M.navy, true);
+  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.6, M.green], [-0.6, BX, M.orange]]) B0.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, floorH / 2, z0 + 0.03));
   // Sala Chimborazo
-  F.roundTable(u, 3.5, -3.3, 0.8, F.DESK_H, M.lightWood, 0.15);
+  F.roundTable(g, -7.6, -3.0, 0.85, F.DESK_H, M.lightWood, 0.15);
   const meet2Seats = [];
   for (const a of [PI / 4, (3 * PI) / 4, (5 * PI) / 4, (7 * PI) / 4]) {
-    const x = 3.5 + Math.cos(a) * 1.2, z = -3.3 + Math.sin(a) * 1.2;
-    const yaw = Math.atan2(3.5 - x, -3.3 - z);
-    F.simpleChair(u, x, z, yaw, M.chairOrange);
+    const x = -7.6 + Math.cos(a) * 1.25, z = -3.0 + Math.sin(a) * 1.25;
+    const yaw = Math.atan2(-7.6 - x, -3.0 - z);
+    F.simpleChair(g, x, z, yaw, M.chairBlack);
     meet2Seats.push({ x: x + Math.sin(yaw) * 0.28, z: z + Math.cos(yaw) * 0.28, yaw, sit: 0.27 });
   }
-  F.tv(u, 3.5, 2.0, BLD.z0 + 0.09, 0, 1.6, 0.9);
-  F.plant(u, 5.0, -5.4, 0.9);
-  nav1.blockCircle(5.0, -5.4, 0.2);
-  F.sign(u, 3.5, 2.7, BLD.z0 + 0.12, 0, ["SALA", "CHIMBORAZO"], "#e08a5c", "#ffffff", 1.4, 0.7);
-  // lab
-  F.whiteboard(u, 7.2, 1.75, BLD.z0 + 0.09, 0, 2.2, 1.4);
-  F.stickyWall(u, 5.58, 1.6, -3.4, PI / 2, 2.2, 1.6);
-  F.sign(u, 5.58, 2.8, -3.4, PI / 2, ["PIENSA", "DIFERENTE"], "#6f5a9e", "#ffffff", 1.6, 0.7);
-  F.beanbag(u, 8.1, -0.9, M.beanbag2);
-  F.plant(u, 8.4, -5.4, 0.9);
-  nav1.blockCircle(8.4, -5.4, 0.2);
+  F.tv(g, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
+  F.sign(g, LNG - 0.09, 2.6, -3.0, -PI / 2, ["SALA", "CHIMBORAZO"], "#3d4a7a", "#ffffff", 1.4, 0.7);
+  F.picture(g, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
+  F.picture(g, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
+  F.floorLamp(g, -9.5, -1.0);
+  F.plant(g, -5.7, -5.4, 0.9);
+  nav0.blockCircle(-5.7, -5.4, 0.2);
+  light(scene, -7.6, 3.05, -3.0, "#fff1dc", 5, 7);
+  // Sala Andes
+  F.table(g, -2.9, -3.4, 2.8, 1.1, 0, F.DESK_H, M.lightWood, 0.15);
+  const meetSeats = [];
+  for (const x of [-3.8, -2.9, -2.0]) {
+    F.simpleChair(g, x, -2.55, PI, M.chairOrange);
+    meetSeats.push({ x, z: -2.55 - 0.28, yaw: PI, sit: 0.27 });
+    F.simpleChair(g, x, -4.25, 0, M.chairOrange);
+    meetSeats.push({ x, z: -4.25 + 0.28, yaw: 0, sit: 0.27 });
+  }
+  F.tv(g, -2.9, 2.0, z0 + 0.09, 0, 1.6, 0.9);
+  F.whiteboard(g, LNG + 0.09, 1.75, -3.4, PI / 2, 2.0, 1.3);
+  F.sign(g, -4.6, 2.6, z0 + 0.12, 0, ["SALA ANDES"], "#8fb996", "#1e2a24", 1.3, 0.45);
+  F.plant(g, -1.0, -5.4, 0.9);
+  nav0.blockCircle(-1.0, -5.4, 0.2);
+  light(scene, -2.9, 3.05, -3.2, "#fff1dc", 5, 7);
+  // print / lockers corner
+  F.lockers(g, 0.6, z0 + 0.3, 0, 5);
+  F.printer(g, 2.9, z0 + 0.4, 0);
+  F.waterCooler(g, -0.1, -2.0);
+  F.plant(g, 1.6, -1.1, 0.9);
+  nav0.blockCircle(1.6, -1.1, 0.2);
+  light(scene, 1.6, 3.05, -3.2, "#fff1dc", 4.5, 7);
+  // server room
+  for (const x of [5.0, 5.9, 6.8, 7.7, 8.6]) F.serverRack(g, x, z0 + 0.6);
+  F.sign(g, 6.9, 2.6, z0 + 0.12, 0, ["SERVIDORES"], "#1e2a44", "#7cc0ff", 1.6, 0.5);
+  light(scene, 6.9, 3.05, -3.2, "#9fc4ff", 4, 7);
+
+  // ========================================================== upper floor ====
+  F.railingBars(u, x0, BX, D);
+  F.railingBars(u, D, WZ, BX, true, [[STAIRS.z0, STAIRS.z1]]);
+  F.railingBars(u, BX, x1, WZ);
+  F.wall(u, z0, -1.8, LNG, PART_H, M.navy, true);
+  F.wall(u, z0, -1.8, -0.8, PART_H, M.green, true);
+  F.wall(u, z0, -1.8, 2.6, PART_H, M.orange, true);
+  F.wall(u, z0, -1.8, BX, PART_H, M.orange, true);
+  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) B1.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03));
+  B1.add(box(0.1, 0.1, STAIRS.z1 - STAIRS.z0 + 0.1), M.lightWood, mat4(BX + 0.03, UPPER_Y - 0.05, 1.6));
+  // lounge
+  F.sofa(u, -7.6, z0 + 0.55, 0, 2.7, M.sofaBlack, M.sofaBlackDark);
+  F.sofa(u, x0 + 0.55, -3.4, PI / 2, 2.0, M.sofaBlack, M.sofaBlackDark);
+  F.coffeeTable(u, -7.8, -3.9);
+  F.pouf(u, -6.2, -3.9);
+  F.pouf(u, -6.2, -2.6);
+  const rugM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.4), M.rug);
+  rugM.rotation.x = -PI / 2;
+  rugM.position.set(-7.7, UPPER_Y + 0.03, -3.9);
+  rugM.receiveShadow = true;
+  upper.add(rugM);
+  F.floorLamp(u, -9.5, -1.2);
+  F.plant(u, -5.6, -5.5, 0.8);
+  nav1.blockCircle(-5.6, -5.5, 0.18);
+  F.sign(u, LNG - 0.09, 2.1, -4.0, -PI / 2, ["HAZLO", "AHORA"], "#e08a5c", "#ffffff", 1.1, 0.9);
+  F.sign(u, -7.5, 2.35, z0 + 0.12, 0, ["PENSAR CON CALMA,", "CREAR CON PROPÓSITO"], "#e08a5c", "#ffffff", 2.4, 0.9);
+  // training room
+  F.whiteboard(u, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
+  const trainSeats = [];
+  for (const x of [-3.5, -2.5, -1.5])
+    for (const z of [-5.3, -4.3, -3.3, -2.3]) {
+      F.simpleChair(u, x, z, -PI / 2, M.chairOrange);
+      trainSeats.push({ x: x - 0.28, z, yaw: -PI / 2, sit: 0.27 });
+    }
+  F.floorLamp(u, -4.6, -5.5);
+  F.plant(u, -1.2, -5.5, 0.9);
+  nav1.blockCircle(-1.2, -5.5, 0.2);
+  F.sign(u, -2.5, 2.35, z0 + 0.12, 0, ["CADA DÍA,", "UN POCO MEJOR"], "#8fb996", "#1e2a24", 1.8, 0.8);
+  // studio: two desks face to face
+  desk({ x: 0.0, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
+  desk({ x: 2.0, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
+  F.stickyWall(u, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
+  F.plant(u, 0.3, -5.5, 0.8);
+  nav1.blockCircle(0.3, -5.5, 0.18);
+  // phone booth
+  F.highTable(u, 3.2, -4.7, 0.35);
+  F.stool(u, 3.2, -5.4);
+  F.sign(u, 3.2, 2.3, z0 + 0.12, 0, ["HAZLO CON", "INTENCIÓN"], "#e08a5c", "#ffffff", 1.0, 0.7);
+  // cafeteria
+  F.sign(u, 4.9, 2.25, z0 + 0.14, 0, ["PIENSA", "DIFERENTE"], "#e08a5c", "#ffffff", 1.3, 0.8);
+  F.tv(u, 6.3, 1.85, z0 + 0.14, 0, 1.6, 0.9);
+  const bar = F.cafeCounter(u, 8.0, -4.6, 0, 2.8);
+  for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
+  for (const [x, z] of [[5.4, -2.95], [5.4, -1.45], [9.35, -1.6], [8.6, -2.35], [9.35, 1.4], [8.6, 2.15], [6.0, 3.55], [5.25, 2.8], [6.75, 2.8]]) F.stool(u, x, z);
+  F.planter(u, 4.4, 3.55);
+  F.plant(u, 9.5, -5.5, 0.9);
+  nav1.blockCircle(9.5, -5.5, 0.2);
+  F.plant(u, 9.5, 3.5, 0.8);
+  nav1.blockCircle(9.5, 3.5, 0.18);
+  light(upper, 6.6, UPPER_Y + 2.4, -2.4, "#ffe6c8", 4, 8);
+  light(upper, 7.0, UPPER_Y + 2.4, 1.8, "#ffe6c8", 3, 7);
+  light(upper, -2.9, UPPER_Y + 2.4, -3.6, "#ffe6c8", 3, 7);
+  light(upper, -7.6, UPPER_Y + 2.4, -3.2, "#ffe6c8", 3, 7);
 
   B0.flush();
   B1.flush();
+  stations.sort((a, b) => bots.indexOf(a.bot) - bots.indexOf(b.bot));
 
   // ============================================================ spots ====
+  const toward = (x, z, tx, tz) => Math.atan2(tx - x, tz - z);
   const spots = {
-    coffee: [{ x: bar.machine[0], z: -4.85, yaw: PI, floor: 0 }, { x: bar.machine[0] + 0.85, z: -4.85, yaw: PI, floor: 0 }],
-    kitchen: [{ x: -7.0, z: -1.6, yaw: PI, floor: 0 }, { x: -6.0, z: -2.6, yaw: -PI / 2, floor: 0 }],
+    coffee: [{ x: bar.machine[0], z: bar.machine[1], yaw: PI, floor: 1 }, { x: bar.machine[0] + 0.85, z: bar.machine[1], yaw: PI, floor: 1 }],
+    kitchen: [
+      { x: 4.6, z: -2.2, yaw: toward(4.6, -2.2, 5.4, -2.2), floor: 1 },
+      { x: 6.2, z: -2.2, yaw: toward(6.2, -2.2, 5.4, -2.2), floor: 1 },
+      { x: 7.8, z: 1.4, yaw: toward(7.8, 1.4, 8.6, 1.4), floor: 1 },
+      { x: 8.6, z: 0.6, yaw: toward(8.6, 0.6, 8.6, 1.4), floor: 1 },
+    ],
+    tv: [{ x: 5.3, z: -4.3, yaw: PI, floor: 1 }, { x: 6.05, z: -4.3, yaw: PI, floor: 1 }],
     meeting: meetSeats.map((s) => ({ ...s, floor: 0 })),
-    booth: [1.8, 3.0, 4.2].map((x) => ({ x, z: -4.95, yaw: PI, floor: 0 })),
-    printer: [{ x: 4.4, z: -0.75, yaw: PI, floor: 0 }],
-    water: [{ x: 1.6, z: -0.75, yaw: PI, floor: 0 }],
-    servers: [{ x: 7.2, z: -4.5, yaw: PI, floor: 0 }],
-    pingpong: [{ x: pp.ends[0][0], z: pp.ends[0][1], yaw: 0, floor: 0 }, { x: pp.ends[1][0], z: pp.ends[1][1], yaw: PI, floor: 0 }],
-    tv: [{ x: -8.0, z: 5.2, yaw: -PI / 2, floor: 0 }, { x: -8.0, z: 4.4, yaw: -PI / 2, floor: 0 }],
-    lounge: [-4.7, -3.8, -2.9].map((z) => ({ x: -7.65, z, yaw: PI / 2, sit: 0.6, floor: 1 })),
-    beanbag: [{ x: -5.2, z: -4.2, yaw: PI, sit: 0.55, low: true, floor: 1 }, { x: -5.0, z: -1.8, yaw: PI, sit: 0.55, low: true, floor: 1 }],
-    trainer: [{ x: 0.75, z: -2.9, yaw: PI / 2, floor: 1 }],
-    trainee: trainSeats.filter((s) => s.x < 0 && s.z < -1.6).map((s) => ({ ...s, floor: 1 })),
-    meeting2: meet2Seats.map((s) => ({ ...s, floor: 1 })),
-    labBoard: [{ x: 7.6, z: -5.0, yaw: PI, floor: 1 }, { x: 6.7, z: -4.9, yaw: PI, floor: 1 }],
+    meeting2: meet2Seats.map((s) => ({ ...s, floor: 0 })),
+    booth: [{ x: 3.2, z: -3.95, yaw: PI, floor: 1 }],
+    printer: [{ x: 2.9, z: z0 + 1.1, yaw: PI, floor: 0 }],
+    water: [{ x: -0.1, z: -1.35, yaw: PI, floor: 0 }],
+    servers: [{ x: 6.9, z: z0 + 1.6, yaw: PI, floor: 0 }],
+    pingpong: [{ x: pp.ends[0][0], z: pp.ends[0][1], yaw: PI / 2, floor: 0 }, { x: pp.ends[1][0], z: pp.ends[1][1], yaw: -PI / 2, floor: 0 }],
+    lounge: [
+      ...[-8.5, -7.6, -6.7].map((x) => ({ x, z: z0 + 0.55 + 0.6, yaw: 0, sit: 0.6, floor: 1 })),
+      ...[-3.9, -2.9].map((z) => ({ x: x0 + 0.55 + 0.6, z, yaw: PI / 2, sit: 0.6, floor: 1 })),
+    ],
+    beanbag: [{ x: -6.75, z: -3.9, yaw: -PI / 2, sit: 0.55, low: true, floor: 1 }, { x: -6.75, z: -2.6, yaw: -PI / 2, sit: 0.55, low: true, floor: 1 }],
+    nook: [
+      { x: 7.4 + Math.sin(-PI / 2 + 0.45) * 0.6, z: 0.6 + Math.cos(-PI / 2 + 0.45) * 0.6, yaw: -PI / 2 + 0.45, sit: 0.6, floor: 0 },
+      { x: 7.4 + Math.sin(-PI / 2 - 0.45) * 0.6, z: 2.7 + Math.cos(-PI / 2 - 0.45) * 0.6, yaw: -PI / 2 - 0.45, sit: 0.6, floor: 0 },
+    ],
+    trainer: [{ x: -4.35, z: -3.6, yaw: -PI / 2, floor: 1 }],
+    trainee: trainSeats.map((s) => ({ ...s, floor: 1 })),
   };
   const navOf = (fl) => (fl ? nav1 : nav0);
   // standing spots snap to a free cell; seats keep their exact place (the route
@@ -302,18 +393,18 @@ export function buildRoom(scene, bots) {
 
   // ========================================================= hotspots ====
   const hotspots = [
-    { id: "board", name: "Tablero de tareas", icon: "📋", x: 1.42, y: UPPER_Y + 1.75, z: -3.0, w: 0.3, h: 1.5, d: 2.5, floor: 1 },
-    { id: "tv", name: "Dashboard en vivo", icon: "📺", x: BLD.x0 + 0.2, y: 2.2, z: 5.2, w: 0.3, h: 0.9, d: 1.5, floor: 0 },
-    { id: "coffee", name: "Cafetera", icon: "☕", x: bar.machine[0], y: 1.15, z: bar.machine[1], w: 0.6, h: 0.7, d: 0.6, floor: 0 },
-    { id: "printer", name: "Impresora", icon: "🖨️", x: 4.4, y: 0.7, z: -1.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
-    { id: "shelf", name: "Base de conocimiento", icon: "📚", x: BLD.x0 + 0.22, y: 1.4, z: 3.2, w: 0.5, h: 2.8, d: 2.6, floor: 0 },
-    { id: "water", name: "Radio pasillo", icon: "💬", x: 1.6, y: 0.8, z: -1.4, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
-    { id: "clock", name: "Línea de tiempo", icon: "🕒", x: BLD.x0 + 0.2, y: 3.05, z: 3.2, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
-    { id: "servers", name: "Estado de sistemas", icon: "🖥️", x: 7.15, y: 1.0, z: -5.4, w: 3.4, h: 2.0, d: 0.9, floor: 0 },
-    { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: 6.4, y: 0.6, z: 3.6, w: 1.6, h: 0.5, d: 2.8, floor: 0 },
-    { id: "reception", name: "Recepción", icon: "🛎️", x: -6.3, y: 0.6, z: 5.05, w: 2.7, h: 1.1, d: 0.8, floor: 0 },
-    { id: "meeting", name: "Agenda de reuniones", icon: "📅", x: -1.5, y: 0.5, z: -3.0, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
-    { id: "lounge", name: "Bienestar del equipo", icon: "🛋️", x: -8.25, y: UPPER_Y + 0.4, z: -3.8, w: 1.0, h: 0.9, d: 2.7, floor: 1 },
+    { id: "board", name: "Tablero de tareas", icon: "📋", x: LNG + 0.1, y: UPPER_Y + 1.7, z: -3.6, w: 0.3, h: 1.4, d: 2.3, floor: 1 },
+    { id: "tv", name: "Dashboard en vivo", icon: "📺", x: 6.3, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
+    { id: "coffee", name: "Cafetera", icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
+    { id: "printer", name: "Impresora", icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
+    { id: "shelf", name: "Base de conocimiento", icon: "📚", x: -2.65, y: 1.65, z: 3.9, w: 0.6, h: 3.3, d: 3.2, floor: 0 },
+    { id: "water", name: "Radio pasillo", icon: "💬", x: -0.1, y: 0.8, z: -2.0, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
+    { id: "clock", name: "Línea de tiempo", icon: "🕒", x: LX - 0.1, y: 1.75, z: 4.95, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
+    { id: "servers", name: "Estado de sistemas", icon: "🖥️", x: 6.8, y: 1.0, z: z0 + 0.6, w: 4.2, h: 2.0, d: 0.9, floor: 0 },
+    { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: -4.9, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
+    { id: "reception", name: "Recepción", icon: "🛎️", x: -8.4, y: 0.6, z: 6.3, w: 1.4, h: 1.1, d: 2.6, floor: 0 },
+    { id: "meeting", name: "Agenda de reuniones", icon: "📅", x: -2.9, y: 0.5, z: -3.4, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
+    { id: "lounge", name: "Bienestar del equipo", icon: "🛋️", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
   ];
 
   return { stations, spots, hotspots, nav0, nav1, upper, dyn, lights, pingpong: pp, materials: M };

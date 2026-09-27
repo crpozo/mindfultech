@@ -13,8 +13,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildRoom, ROOMS, STAIRS, UPPER_Y, BLD } from "./room.js";
-import { buildCharacter, POSES, HIP_SIT, HIP_SOFA } from "./character.js";
+import { buildRoom, ROOMS, ROOM_NAMES, STAIRS, UPPER_Y, roomAt, underDeck } from "./room.js";
+import { buildCharacter, POSES, HIP_CHAIR, HIP_SOFA } from "./character.js";
 import { SCRIPTS, SOLO, RPS, COFFEE_SOLO, CALL, PP, LAUGH_RE, fill } from "./dialogue.js";
 import { blob as blobTexture } from "./textures.js";
 
@@ -33,27 +33,27 @@ const angleLerp = (a, b, t) => a + angleDiff(a, b) * t;
 const MAX_AWAY = 5;
 const WALK = 1.15;
 const PLACE_LABEL = {
-  coffee: "la cafetera", kitchen: "la cafetería", meeting: "la Sala Andes", meeting2: "la Sala Chimborazo", training: "la capacitación",
-  booth: "una cabina", printer: "la impresora", water: "el dispensador", servers: "la sala de servidores", pingpong: "jugar ping-pong",
-  tv: "la pantalla", lounge: "el lounge", beanbag: "el puf", labBoard: "la pizarra del lab",
+  coffee: "la cafetera", kitchen: "las mesas de la cafetería", meeting: "la Sala Andes", meeting2: "la Sala Chimborazo", training: "la capacitación",
+  booth: "la cabina", printer: "la impresora", water: "el dispensador", servers: "la sala de servidores", pingpong: "jugar ping-pong",
+  tv: "la pantalla", lounge: "el lounge", beanbag: "el puf", nook: "el rincón de lectura",
 };
 const DWELL = {
   coffee: [9, 16], kitchen: [8, 14], meeting: [20, 30], meeting2: [18, 28], training: [26, 36], booth: [10, 16], printer: [4, 6], water: [5, 8],
-  servers: [8, 12], pingpong: [6, 9], tv: [6, 10], lounge: [12, 20], beanbag: [10, 16], labBoard: [8, 14], visit: [3, 5],
+  servers: [8, 12], pingpong: [6, 9], tv: [6, 10], lounge: [12, 20], beanbag: [10, 16], nook: [12, 18], visit: [3, 5],
 };
 // outing kinds → [weight, party size (0 = solo, n = organiser + up to n-1 mates)]
 const OUTINGS = (typeof window !== "undefined" && window.__OFFICE_DEBUG && window.__OFFICE_DEBUG.outings) || [
   ["coffee", 22, 2], ["visit", 12, 0], ["meeting", 9, 4], ["lounge", 9, 2], ["pingpong", 8, 2], ["meeting2", 7, 3], ["training", 6, 4],
-  ["booth", 8, 0], ["kitchen", 6, 2], ["labBoard", 5, 2], ["tv", 4, 2], ["printer", 4, 0], ["water", 4, 0], ["servers", 4, 0], ["beanbag", 4, 0],
+  ["booth", 6, 0], ["kitchen", 7, 2], ["nook", 6, 2], ["tv", 4, 2], ["printer", 4, 0], ["water", 4, 0], ["servers", 4, 0], ["beanbag", 4, 0],
 ];
 /** "a la cafetera" / "al lounge" */
 const to = (kind) => {
   const l = PLACE_LABEL[kind] || kind;
   return l.startsWith("el ") ? "al " + l.slice(3) : l.startsWith("jugar") ? "a " + l : "a " + l;
 };
-const CONTEXT = { coffee: "coffee", kitchen: "coffee", meeting: "meeting", meeting2: "meeting", training: "training", lounge: "lounge", tv: "tv", labBoard: "lab", water: "water", pingpong: "pingpong" };
+const CONTEXT = { coffee: "coffee", kitchen: "coffee", meeting: "meeting", meeting2: "meeting", training: "training", lounge: "lounge", nook: "lounge", tv: "tv", water: "water", pingpong: "pingpong" };
 
-export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot }) {
+export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot, onRoom }) {
   // ------------------------------------------------------------ renderer ----
   const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
   let dpr = maxDpr;
@@ -75,10 +75,11 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0.35;
 
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 160);
-  const REST_TARGET = new THREE.Vector3(0.8, 1.2, 1.3);
-  const REST_DIR = new THREE.Vector3(1, 0.8, 1).normalize();
-  const REST_DIST = 29;
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.6, 120);
+  // seen from the front-left corner, like the reference
+  const REST_TARGET = new THREE.Vector3(0.3, 1.4, 1.4);
+  const REST_DIR = new THREE.Vector3(-1, 0.95, 1).normalize();
+  const REST_DIST = 40;
   camera.position.copy(REST_TARGET).addScaledVector(REST_DIR, REST_DIST);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -86,32 +87,32 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.minDistance = 4;
-  controls.maxDistance = 40;
+  controls.maxDistance = 44;
   controls.minPolarAngle = 0.3;
   controls.maxPolarAngle = 1.35;
-  controls.minAzimuthAngle = PI / 4 - 1.2;
-  controls.maxAzimuthAngle = PI / 4 + 1.2;
+  controls.minAzimuthAngle = -PI / 4 - 1.2;
+  controls.maxAzimuthAngle = -PI / 4 + 1.2;
   controls.enablePan = false;
   controls.update();
 
   // ------------------------------------------------------------- lights ----
   const sun = new THREE.DirectionalLight("#fff1d6", 2.4);
-  sun.position.set(14, 16, -6);
+  sun.position.set(-10, 18, 9);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 60;
-  sun.shadow.camera.left = -14;
-  sun.shadow.camera.right = 14;
-  sun.shadow.camera.top = 14;
-  sun.shadow.camera.bottom = -14;
+  sun.shadow.camera.left = -17;
+  sun.shadow.camera.right = 17;
+  sun.shadow.camera.top = 17;
+  sun.shadow.camera.bottom = -17;
   sun.shadow.bias = -0.0005;
   sun.shadow.normalBias = 0.03;
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
   scene.add(new THREE.HemisphereLight("#dbe7ff", "#7a6a55", 0.9));
   const fillLight = new THREE.DirectionalLight("#ffffff", 0.45);
-  fillLight.position.set(12, 8, 14);
+  fillLight.position.set(-12, 8, 14);
   scene.add(fillLight);
 
   // --------------------------------------------------------------- room ----
@@ -162,6 +163,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     scene.add(rig.root);
     const blob = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.75), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, opacity: 0.35 }));
     blob.rotation.x = -PI / 2;
+    blob.renderOrder = 1;
     scene.add(blob);
     const a = {
       bot, rig, st, idx: i, blob, floor: st.floor,
@@ -226,11 +228,11 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const [p0x, p0z] = STAIRS.portal0, [p1x, p1z] = STAIRS.portal1;
     if (from === 0) {
       for (const [px, pz] of nav0.findPath(p.x, p.z, p0x, p0z)) pts.push({ x: px, z: pz, y: 0 });
-      pts.push({ x: STAIRS.x0, z: STAIRS.mid, y: 0 }, { x: STAIRS.x1, z: STAIRS.mid, y: UPPER_Y }, { x: p1x, z: p1z, y: UPPER_Y });
+      pts.push({ x: STAIRS.bottom[0], z: STAIRS.bottom[1], y: 0 }, { x: STAIRS.top[0], z: STAIRS.top[1], y: UPPER_Y }, { x: p1x, z: p1z, y: UPPER_Y });
       for (const [px, pz] of nav1.findPath(p1x, p1z, x, z)) pts.push({ x: px, z: pz, y: UPPER_Y });
     } else {
       for (const [px, pz] of nav1.findPath(p.x, p.z, p1x, p1z)) pts.push({ x: px, z: pz, y: UPPER_Y });
-      pts.push({ x: STAIRS.x1, z: STAIRS.mid, y: UPPER_Y }, { x: STAIRS.x0, z: STAIRS.mid, y: 0 }, { x: p0x, z: p0z, y: 0 });
+      pts.push({ x: STAIRS.top[0], z: STAIRS.top[1], y: UPPER_Y }, { x: STAIRS.bottom[0], z: STAIRS.bottom[1], y: 0 }, { x: p0x, z: p0z, y: 0 });
       for (const [px, pz] of nav0.findPath(p0x, p0z, x, z)) pts.push({ x: px, z: pz, y: 0 });
     }
     return pts;
@@ -530,7 +532,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   let encounterAt = 0;
   const spotsOf = (place) => (place === "training" ? [...spots.trainer, ...spots.trainee] : spots[place] || []);
   const checkEncounters = () => {
-    for (const place of ["coffee", "kitchen", "tv", "lounge", "labBoard", "water", "meeting", "meeting2", "training"]) {
+    for (const place of ["coffee", "kitchen", "tv", "lounge", "nook", "water", "meeting", "meeting2", "training"]) {
       const here = actors.filter((o) => o.state === "away" && o.place === place && !o.conv && simT > o.arrivedAt + 0.9);
       if (here.length >= 2 && Math.random() < 0.9) {
         const order = spotsOf(place);
@@ -697,7 +699,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     r.mouth(laughing || a.mouthOpen ? "open" : "smile");
     r.update(dt, t, a.state === "walk" ? 16 : 9);
     const hips = r.parts.hips;
-    a.blob.position.set(root.position.x + Math.sin(a.yaw) * hips.position.z, root.position.y + 0.008, root.position.z + Math.cos(a.yaw) * hips.position.z);
+    a.blob.position.set(root.position.x + Math.sin(a.yaw) * hips.position.z, root.position.y + 0.04, root.position.z + Math.cos(a.yaw) * hips.position.z);
 
     if (a.state === "work" && a.sub === "type" && t > a.soloAt) {
       a.soloAt = t + rnd(30, 70);
@@ -757,7 +759,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       case "tv": return "Mirando el dashboard";
       case "lounge": return "Descansando en el lounge";
       case "beanbag": return "Leyendo en el puf";
-      case "labBoard": return a.spot === spots.labBoard[0] ? "Dibujando en la pizarra del lab" : "Mirando la pizarra del lab";
+      case "nook": return "Leyendo en el rincón";
       default: return "En una pausa";
     }
   };
@@ -801,7 +803,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         a.stage = 1;
         a.stageAt = t;
       }
-    } else if (a.place === "lounge" || a.place === "beanbag") {
+    } else if (a.place === "lounge" || a.place === "beanbag" || a.place === "nook") {
       if (a.stageDur === undefined) a.stageDur = rnd(3, 6);
       if (a.stage === 0 && t > a.stageAt + a.stageDur) {
         a.stage = 1;
@@ -865,13 +867,14 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     // away
     const sitBack = a.spot && a.spot.sit;
     if (sitBack) {
-      if (a.spot.low) POSES.sitLow(r, t, p, 0.44, -a.spot.sit);
-      else if (a.place === "lounge") {
+      const sofa = a.place === "lounge" || a.place === "nook";
+      if (a.spot.low) POSES.sitLow(r, t, p, 0.46, -a.spot.sit);
+      else if (sofa) {
         POSES.sitSofa(r, t, p);
         r.set({ hipsZ: -a.spot.sit });
-      } else POSES.sitIdle(r, t, p, HIP_SIT, -a.spot.sit);
+      } else POSES.sitIdle(r, t, p, HIP_CHAIR, -a.spot.sit);
       r.set({ headRy: a.headLook });
-      const seatY = a.spot.low ? 0.44 : a.place === "lounge" ? HIP_SOFA : HIP_SIT;
+      const seatY = a.spot.low ? 0.46 : sofa ? HIP_SOFA : HIP_CHAIR;
       if (a.gamePose === "pump") r.set({ shRx: -0.9 + Math.sin(t * 9) * 0.35, elRx: -1.4, shRz: 0.3 });
       else if (a.gamePose === "reveal") r.set({ shRx: -1.1, elRx: -1.0, shRz: 0.3 });
       else if (a.gamePose === "cheer") r.set({ shLx: -2.8, shRx: -2.8, elLx: -0.3, elRx: -0.3, torsoRx: -0.2, headRx: -0.3 });
@@ -883,7 +886,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         const g = Math.sin(t * 5.5 + p);
         r.set({ shRx: -0.7 + g * 0.25, elRx: -1.35 + Math.cos(t * 4 + p) * 0.25, shRz: 0.35, shRy: -0.3, headRx: 0.03, torsoRx: 0.05 });
       } else if (a.conv) r.set({ headRx: 0.05 + Math.max(0, Math.sin(t * 2.4 + p)) * 0.08 });
-      else if (a.stage === 1 && (a.place === "lounge" || a.place === "beanbag")) r.set({ shRx: -0.85, elRx: -1.95, shRz: 0.2, shRy: -0.25, headRx: 0.4 });
+      else if (a.stage === 1 && (sofa || a.place === "beanbag")) r.set({ shRx: -0.85, elRx: -1.95, shRz: 0.2, shRy: -0.25, headRx: 0.4 });
       return;
     }
     if (a.gamePose === "pump") return POSES.pump(r, t, p);
@@ -921,8 +924,6 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         if (a.stage === 0) return POSES.press(r, t, p);
         if (a.stage === 2) return POSES.sipStand(r, t, p);
         return POSES.holdMug(r, t, p);
-      case "labBoard":
-        return a.spot === spots.labBoard[0] ? POSES.write(r, t, p) : POSES.crossed(r, t, p);
       case "training":
         return POSES.write(r, t, p);
       case "printer":
@@ -964,6 +965,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   };
   const onDown = (ev) => {
     downAt = [ev.clientX, ev.clientY];
+    wantAngles = null;
   };
   const onUp = (ev) => {
     if (!downAt) return;
@@ -983,6 +985,10 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const focusTarget = REST_TARGET.clone();
   let focusActor = null, focusPoint = null;
   let wantDistance = null;
+  // camera angles to glide to: rooms under the mezzanine are looked at from the front and from higher up
+  const REST_AZ = -PI / 4, REST_POLAR = Math.atan2(Math.SQRT2, 0.95);
+  let wantAngles = null;
+  const _sph = new THREE.Spherical();
   let floorView = "all";
   const setFloorView = (mode) => {
     floorView = mode;
@@ -999,6 +1005,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     focusActor = actors.find((a) => a.bot.id === id) || null;
     focusPoint = null;
     wantDistance = focusActor ? 7.5 : restDistance();
+    wantAngles = focusActor ? null : { az: REST_AZ, polar: REST_POLAR };
     for (const a of actors) a.label.classList.toggle(classes.labelActive, a.bot.id === id);
     if (!focusActor) setFloorView("all");
   };
@@ -1008,19 +1015,26 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     if (!rm) {
       focusPoint = null;
       wantDistance = restDistance();
+      wantAngles = { az: REST_AZ, polar: REST_POLAR };
       setFloorView("all");
       return;
     }
     focusPoint = new THREE.Vector3(rm.center[0], rm.center[1] + 1.0, rm.center[2]);
     wantDistance = rm.dist;
-    setFloorView(rm.floor === 0 && rm.center[2] < BLD.deckZ ? "ground" : "all");
+    wantAngles = { az: rm.azimuth ?? REST_AZ, polar: rm.polar ?? REST_POLAR };
+    setFloorView(rm.under ? "ground" : "all");
   };
 
   // ------------------------------------------------------------- resize ----
+  // HUD insets (team panel on the left, side panel on the right): the view is
+  // shifted so the building stays centred in the uncovered part of the stage
+  const insets = { left: 0, right: 0 };
   const resize = () => {
     const w = mount.clientWidth || 1, h = mount.clientHeight || 1;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    if (w > 900) camera.setViewOffset(w, h, (insets.right - insets.left) / 2, 24, w, h);
+    else camera.setViewOffset(w, h, 0, insets.right ? -40 : 36, w, h);
     camera.updateProjectionMatrix();
     if (!focusActor && !focusPoint) wantDistance = restDistance();
   };
@@ -1044,10 +1058,19 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     last = nowMs;
     if (document.hidden) return;
     // clamped so a stalled tab never teleports anyone; window.__OFFICE_TIME_SCALE is a test hook
-    const dt = Math.min(rawDt, 0.1) * (window.__OFFICE_TIME_SCALE || 1);
+    const dt = Math.min(rawDt, window.__OFFICE_MAX_DT || 0.1) * (window.__OFFICE_TIME_SCALE || 1);
     simT += dt;
+    // frame-rate independent smoothing factors for the camera
+    const k6 = 1 - Math.exp(-3.7 * rawDt), k5 = 1 - Math.exp(-3.1 * rawDt), k40 = 1 - Math.exp(-30 * rawDt);
 
-    for (const a of actors) stepActor(a, dt);
+    for (const a of actors) {
+      stepActor(a, dt);
+      const rm = roomAt(a.rig.root.position.x, a.rig.root.position.z, a.rig.root.position.y);
+      if (rm !== a.room) {
+        a.room = rm;
+        onRoom && onRoom(a.bot.id, rm);
+      }
+    }
     for (const c of [...convs]) stepConv(c);
     updateBall();
     if (simT > encounterAt) {
@@ -1060,7 +1083,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       const sel = a.bot.id === selectedId, hov = a.bot.id === hoverId;
       const want = sel ? 0.8 + Math.sin(simT * 4) * 0.15 : hov ? 0.45 : 0;
       a.rig.ring.material.opacity = lerp(a.rig.ring.material.opacity, want, 0.15);
-      a.rig.ring.position.set(0, 0.012, a.rig.parts.hips.position.z);
+      a.rig.ring.position.set(0, 0.045, a.rig.parts.hips.position.z);
       a.rig.shirtMat.emissive.set(a.bot.accent);
       a.rig.shirtMat.emissiveIntensity = lerp(a.rig.shirtMat.emissiveIntensity, sel ? 0.12 : hov ? 0.08 : 0, 0.15);
       const hidden = floorView === "ground" && a.floor === 1;
@@ -1071,19 +1094,26 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     // camera glides to the selected person / room and back
     if (focusActor) {
       focusActor.rig.head.getWorldPosition(tmp);
-      tmp.y -= 0.35;
-      focusTarget.lerp(tmp, 0.06);
-      const under = focusActor.floor === 0 && focusActor.rig.root.position.z < BLD.deckZ;
+      tmp.y -= 0.3;
+      focusTarget.lerp(tmp, k6);
+      const under = focusActor.floor === 0 && underDeck(focusActor.rig.root.position.x, focusActor.rig.root.position.z);
       if (under !== (floorView === "ground")) setFloorView(under ? "ground" : "all");
-    } else if (focusPoint) focusTarget.lerp(focusPoint, 0.06);
-    else focusTarget.lerp(REST_TARGET, 0.05);
-    controls.target.lerp(focusTarget, 0.4);
+    } else if (focusPoint) focusTarget.lerp(focusPoint, k6);
+    else focusTarget.lerp(REST_TARGET, k5);
+    controls.target.lerp(focusTarget, k40);
     if (wantDistance !== null) {
       const d = camera.position.distanceTo(controls.target);
-      const nd = lerp(d, wantDistance, 0.05);
+      const nd = lerp(d, wantDistance, k5);
       tmp.subVectors(camera.position, controls.target).setLength(nd);
       camera.position.copy(controls.target).add(tmp);
       if (Math.abs(nd - wantDistance) < 0.05) wantDistance = null;
+    }
+    if (wantAngles) {
+      _sph.setFromVector3(tmp.subVectors(camera.position, controls.target));
+      _sph.theta = angleLerp(_sph.theta, wantAngles.az, k5);
+      _sph.phi = lerp(_sph.phi, wantAngles.polar, k5);
+      camera.position.copy(controls.target).add(tmp.setFromSpherical(_sph));
+      if (Math.abs(angleDiff(_sph.theta, wantAngles.az)) < 0.01 && Math.abs(_sph.phi - wantAngles.polar) < 0.01) wantAngles = null;
     }
     controls.update();
 
@@ -1137,7 +1167,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const items = [];
     for (const a of actors) {
       a.rig.head.getWorldPosition(projected);
-      projected.y += 0.62;
+      projected.y += 0.42;
       projected.project(camera);
       const behind = projected.z > 1 || !a.rig.root.visible;
       const tx = ((projected.x + 1) / 2) * w, ty = ((1 - projected.y) / 2) * h;
@@ -1172,7 +1202,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       const labelTop = it.y + it.h - a.lh;
       a.ly = a.ly === undefined ? labelTop : a.ly + (labelTop - a.ly) * 0.6;
       // people under the deck read as "behind" the upper floor: dim their labels while it is shown
-      const tucked = upper.visible && a.floor === 0 && a.rig.root.position.z < BLD.deckZ && a.bot.id !== selectedId;
+      const tucked = upper.visible && a.floor === 0 && underDeck(a.rig.root.position.x, a.rig.root.position.z) && a.bot.id !== selectedId;
       a.label.style.transform = `translate(${(a.sx - a.lw / 2).toFixed(1)}px, ${a.ly.toFixed(1)}px)`;
       a.label.style.opacity = a.behind ? "0" : tucked ? "0.45" : "1";
       a.label.style.pointerEvents = a.behind ? "none" : "";
@@ -1188,7 +1218,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       projected.copy(hs.anchor).project(camera);
       const behind = projected.z > 1;
       const x = ((projected.x + 1) / 2) * w, y = ((1 - projected.y) / 2) * h;
-      const tucked = upper.visible && hs.floor === 0 && hs.z < BLD.deckZ;
+      const tucked = upper.visible && hs.floor === 0 && underDeck(hs.x, hs.z);
       hs.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
       hs.el.style.opacity = behind ? "0" : tucked ? "0.5" : "";
       hs.el.style.pointerEvents = behind ? "none" : "";
@@ -1218,7 +1248,14 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     setSelected,
     focusRoom,
     setFloorView,
+    /** widths of the HUD panels covering the stage's left and right edges */
+    setLayout: ({ left = 0, right = 0 }) => {
+      insets.left = left;
+      insets.right = right;
+      resize();
+    },
     rooms: ROOMS,
+    roomNames: ROOM_NAMES,
     dispose: () => {
       disposed = true;
       cancelAnimationFrame(raf);

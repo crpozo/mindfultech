@@ -14,20 +14,24 @@ type Scene = {
   setSelected: (id: string | null) => void;
   focusRoom: (id: string | null) => void;
   setFloorView: (mode: "all" | "ground" | "upper") => void;
+  setLayout: (insets: { left?: number; right?: number }) => void;
   rooms: Room[];
+  roomNames: Record<string, string>;
   dispose: () => void;
 };
 
 const ROOM_ICONS: Record<string, string> = {
-  reception: "🛎️", open: "💻", kitchen: "☕", meeting: "📅", booths: "📞", servers: "🖥️", lounge: "🛋️", training: "🎓", meeting2: "🗣️", lab: "🧪",
+  reception: "🛎️", hall: "🏓", open: "💻", nook: "📖", meeting: "📅", meeting2: "🗣️", utility: "🖨️", servers: "🖥️",
+  lounge: "🛋️", training: "🎓", studio: "✏️", booth: "📞", cafe: "☕", stairs: "🪜",
 };
 
 /**
  * /office-demo — the 3D office of AI employees. The scene (scene/index.js)
  * owns the building, the people and the camera and reports what each person
- * is doing plus office events; this component draws the HUD (brand, room
- * navigator, roster with each bot's current activity) and the side panel:
- * an employee's remote screen and chat, or a clicked object's dashboard.
+ * is doing, where they are, and office events; this component draws the HUD
+ * (brand, the team panel with every agent's live status and room, the room
+ * navigator) and the side panel: an employee's remote screen and chat, or a
+ * clicked object's dashboard.
  */
 export function OfficeDemo() {
   const mountRef = React.useRef<HTMLDivElement>(null);
@@ -39,10 +43,13 @@ export function OfficeDemo() {
   const [hotspot, setHotspot] = React.useState<string | null>(null);
   const [room, setRoom] = React.useState<string | null>(null);
   const [rooms, setRooms] = React.useState<Room[]>([]);
+  const [roomNames, setRoomNames] = React.useState<Record<string, string>>({});
   const [tab, setTab] = React.useState<"screen" | "chat">("screen");
   // what each person is doing right now; null = working at the desk (the
-  // roster then rotates through the role's tasks)
+  // team panel then rotates through the role's tasks)
   const [status, setStatus] = React.useState<Record<string, string | null>>({});
+  // which room each person is in
+  const [roomOf, setRoomOf] = React.useState<Record<string, string>>({});
   const [events, setEvents] = React.useState<OfficeEvent[]>([]);
   const [taskIdx, setTaskIdx] = React.useState(0);
   const [clock, setClock] = React.useState("");
@@ -82,10 +89,12 @@ export function OfficeDemo() {
           },
           onHover: () => {},
           onStatus: (id: string, text: string | null) => setStatus((p) => (p[id] === text ? p : { ...p, [id]: text })),
+          onRoom: (id: string, rm: string) => setRoomOf((p) => (p[id] === rm ? p : { ...p, [id]: rm })),
           onEvent: (e: OfficeEvent) => setEvents((p) => [e, ...p].slice(0, 400)),
         });
         sceneRef.current = scene;
         setRooms(scene.rooms);
+        setRoomNames(scene.roomNames);
         setReady(true);
       } catch (e) {
         console.error(e);
@@ -131,11 +140,28 @@ export function OfficeDemo() {
     sceneRef.current?.focusRoom(next);
     setInteracted(true);
   };
+  const pickBot = (id: string) => {
+    setSelected(selected === id ? null : id);
+    setHotspot(null);
+    setInteracted(true);
+  };
 
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? BOT_BY_ID[selected] : null;
   const hot = hotspot ? HOTSPOT_META[hotspot] : null;
   const panelOpen = !!bot || !!hot;
+  // keep the building centred in the part of the stage the panels leave uncovered
+  React.useEffect(() => {
+    if (!ready) return;
+    const apply = () => {
+      const w = window.innerWidth;
+      sceneRef.current?.setLayout(w > 900 ? { left: 340, right: panelOpen ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, [ready, panelOpen]);
+  const away = BOTS.filter((b) => status[b.id]).length;
 
   return (
     <div className={s.root}>
@@ -174,11 +200,50 @@ export function OfficeDemo() {
         </div>
       </header>
 
+      <aside className={s.team} aria-label="Equipo">
+        <div className={s.teamHead}>
+          <span className={s.dot} />
+          <strong>Equipo</strong>
+          <span>
+            {BOTS.length - away} en su puesto · {away} en movimiento
+          </span>
+        </div>
+        <div className={s.teamList}>
+          {BOTS.map((b, i) => {
+            const rm = roomOf[b.id];
+            return (
+              <button
+                key={b.id}
+                type="button"
+                className={`${s.member} ${selected === b.id ? s.memberActive : ""}`}
+                style={{ ["--c" as string]: b.color }}
+                onClick={() => pickBot(b.id)}
+                title={`${b.name} · ${b.title}`}
+              >
+                <span className={s.avatar}>{b.name[0]}</span>
+                <span className={s.memberBody}>
+                  <span className={s.memberName}>
+                    {b.name} <em>{b.role}</em>
+                  </span>
+                  <span className={s.memberStatus}>{statusOf(b, i)}</span>
+                </span>
+                {rm && (
+                  <span className={s.memberRoom} title={roomNames[rm] ?? rm}>
+                    <i>{ROOM_ICONS[rm] ?? "•"}</i>
+                    <span>{roomNames[rm] ?? rm}</span>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </aside>
+
       {rooms.length > 0 && (
         <nav className={s.nav} aria-label="Salas">
           {[0, 1].map((floor) => (
-            <React.Fragment key={floor}>
-              <div className={s.navFloor}>{floor ? "Piso 1" : "Planta baja"}</div>
+            <div className={s.navRow} key={floor}>
+              <span className={s.navFloor}>{floor ? "Piso 1" : "Planta baja"}</span>
               {rooms
                 .filter((r) => r.floor === floor)
                 .map((r) => (
@@ -187,39 +252,18 @@ export function OfficeDemo() {
                     {r.name}
                   </button>
                 ))}
-            </React.Fragment>
+              {floor === 1 && (
+                <button type="button" className={`${s.navBtn} ${room === null ? s.navBtnActive : ""}`} onClick={() => goRoom(null)}>
+                  <i>🏢</i>Todo el edificio
+                </button>
+              )}
+            </div>
           ))}
-          <button type="button" className={`${s.navBtn} ${room === null ? s.navBtnActive : ""}`} onClick={() => goRoom(null)} style={{ marginTop: 6 }}>
-            <i>🏢</i>Todo el edificio
-          </button>
         </nav>
       )}
 
       <div className={`${s.hint} ${interacted || !ready ? s.hintHidden : ""}`}>
-        Haz clic en una persona o en un objeto con marcador · elige una sala en el menú · arrastra para girar
-      </div>
-
-      <div className={s.roster}>
-        {BOTS.map((b, i) => (
-          <button
-            key={b.id}
-            type="button"
-            className={`${s.card} ${selected === b.id ? s.cardActive : ""}`}
-            style={{ ["--c" as string]: b.color }}
-            onClick={() => {
-              setSelected(selected === b.id ? null : b.id);
-              setHotspot(null);
-              setInteracted(true);
-            }}
-          >
-            <span className={s.avatar}>{b.name[0]}</span>
-            <span>
-              <span className={s.cardName}>{b.name}</span>
-              <span className={s.cardRole}> · {b.role}</span>
-              <div className={s.cardStatus}>{statusOf(b, i)}</div>
-            </span>
-          </button>
-        ))}
+        Haz clic en una persona o en un objeto con marcador · elige una sala abajo · arrastra para girar
       </div>
 
       <aside className={`${s.panel} ${panelOpen ? s.panelOpen : ""}`} style={{ ["--c" as string]: bot?.color ?? hot?.color ?? "#fff" }} aria-hidden={!panelOpen}>
@@ -231,6 +275,7 @@ export function OfficeDemo() {
                 <strong>{bot.name}</strong>
                 <span>
                   {bot.title} · {bot.role}
+                  {roomOf[bot.id] && roomNames[roomOf[bot.id]] ? ` · ${roomNames[roomOf[bot.id]]}` : ""}
                 </span>
               </div>
               <span className={s.pill}>
