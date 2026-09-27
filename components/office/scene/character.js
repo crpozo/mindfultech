@@ -54,7 +54,8 @@ const std = (color, roughness = 0.6, extra = {}) => new THREE.MeshStandardMateri
 const EYE = std("#141418", 0.25);
 const EYE_HI = std("#ffffff", 0.2);
 const TEETH = std("#ffffff", 0.35);
-const MOUTH = std("#b8353b", 0.5);
+const MOUTH = std("#a83a3f", 0.5);
+const BLUSH = new THREE.MeshStandardMaterial({ color: "#f29a9a", roughness: 1, transparent: true, opacity: 0.45, depthWrite: false });
 const GLASS = std("#2a2a30", 0.45, { metalness: 0.4 });
 const WHITE = std("#f7f7f8", 0.6);
 const DARK = std("#26262c", 0.6);
@@ -333,41 +334,47 @@ export function buildCharacter(bot) {
   jaw.scale.set(0.98, 0.85, 0.95);
   for (const s of [-1, 1]) add(head, mesh(sph(0.055, 12, 10), skin, s * 0.19, cy - 0.01, -0.01)).scale.set(0.5, 1, 0.8);
   add(head, mesh(sph(0.02, 10, 8), skin, 0, cy - 0.03, 0.195)).scale.set(0.8, 1.2, 0.7);
+  // big friendly oval eyes with a glint, soft brows, a little blush
   const eyes = [];
   for (const s of [-1, 1]) {
-    const e = add(head, mesh(sph(0.023, 14, 12), EYE, s * 0.072, cy + 0.01, 0.176));
-    e.scale.set(1, 1.1, 0.7);
+    const e = add(head, mesh(sph(0.03, 16, 12), EYE, s * 0.078, cy + 0.008, 0.17));
+    e.scale.set(0.8, 1.2, 0.45);
     e.castShadow = false;
     e.userData.dynamic = true;
     eyes.push(e);
-    const hi = mesh(sph(0.006, 6, 6), EYE_HI, s * 0.072 + 0.007, cy + 0.018, 0.195);
+    const hi = mesh(sph(0.008, 8, 8), EYE_HI, s * 0.078 + 0.009, cy + 0.02, 0.19);
     hi.castShadow = false;
     hi.userData.dynamic = true;
     head.add(hi);
-    const brow = add(head, mesh(rbox(0.085, 0.022, 0.022, 0.01), hair, s * 0.078, cy + 0.072, 0.172));
-    brow.rotation.z = s * 0.22;
+    const brow = add(head, mesh(rbox(0.07, 0.017, 0.02, 0.008), hair, s * 0.08, cy + 0.078, 0.168));
+    brow.rotation.z = -s * 0.12;
     brow.rotation.y = s * 0.35;
     brow.castShadow = false;
+    const cheek = mesh(new THREE.CircleGeometry(0.028, 16), BLUSH, s * 0.118, cy - 0.045, 0.163);
+    cheek.rotation.y = s * 0.55;
+    cheek.castShadow = false;
+    add(head, cheek);
   }
-  // smile with teeth; a laugh opens the mouth wide
+  // a small smile: a strip of teeth over a half-moon of mouth; a laugh opens it into an oval
   const smile = new THREE.Group();
-  smile.position.set(0, cy - 0.095, 0.178);
+  smile.position.set(0, cy - 0.082, 0.184);
   smile.userData.dynamic = true;
   head.add(smile);
-  const smileIn = mesh(rbox(0.1, 0.05, 0.03, 0.02), MOUTH, 0, 0, 0);
+  const smileIn = new THREE.Mesh(new THREE.CircleGeometry(0.036, 20, PI, PI), MOUTH);
+  smileIn.scale.set(1.25, 0.7, 1);
   smileIn.castShadow = false;
-  const smileTeeth = mesh(rbox(0.076, 0.02, 0.012, 0.005), TEETH, 0, 0.012, 0.012);
+  const smileTeeth = mesh(rbox(0.066, 0.011, 0.008, 0.004), TEETH, 0, -0.004, 0.003);
   smileTeeth.castShadow = false;
   smile.add(smileIn, smileTeeth);
   const open = new THREE.Group();
-  open.position.set(0, cy - 0.1, 0.176);
+  open.position.set(0, cy - 0.092, 0.184);
   open.userData.dynamic = true;
   open.visible = false;
   head.add(open);
-  const openIn = mesh(sph(0.05, 16, 12), MOUTH, 0, 0, 0);
-  openIn.scale.set(1.15, 0.85, 0.5);
+  const openIn = new THREE.Mesh(new THREE.CircleGeometry(0.04, 24), MOUTH);
+  openIn.scale.set(1.05, 0.9, 1);
   openIn.castShadow = false;
-  const openTeeth = mesh(rbox(0.076, 0.02, 0.012, 0.005), TEETH, 0, 0.028, 0.02);
+  const openTeeth = mesh(rbox(0.066, 0.011, 0.008, 0.004), TEETH, 0, 0.024, 0.003);
   openTeeth.castShadow = false;
   open.add(openIn, openTeeth);
   if (look.beard) {
@@ -458,7 +465,7 @@ export function buildCharacter(bot) {
         blinkAt = t + 2.5 + Math.random() * 4;
       }
       const closed = t < blinkUntil;
-      for (const e of eyes) e.scale.y = closed ? 0.15 : 1.1;
+      for (const e of eyes) e.scale.y = closed ? 0.15 : 1.2;
     },
   };
   return rig;
@@ -486,40 +493,43 @@ export const POSES = {
     });
   },
   walk(rig, t, p, walkT, mug) {
+    // thigh swings with sin; the knee bends while the leg swings forward (cos > 0) and is
+    // straight when the foot lands, which reads as a walk rather than a march
     const s = Math.sin(walkT), c = Math.cos(walkT);
     rig.rest();
     rig.set({
-      hipsY: HIP_STAND + Math.abs(c) * 0.018,
-      hipLx: s * 0.42,
-      hipRx: -s * 0.42,
-      kneeLx: 0.12 + Math.max(0, s) * 0.8,
-      kneeRx: 0.12 + Math.max(0, -s) * 0.8,
-      shLx: -s * 0.45,
-      shRx: mug ? -0.35 : s * 0.45,
-      elLx: -0.3,
-      elRx: mug ? -1.25 : -0.3,
-      torsoRx: 0.06,
-      torsoRy: s * 0.06,
+      hipsY: HIP_STAND + Math.abs(c) * 0.012,
+      hipLx: s * 0.4,
+      hipRx: -s * 0.4,
+      kneeLx: 0.06 + Math.max(0, c) * 0.85,
+      kneeRx: 0.06 + Math.max(0, -c) * 0.85,
+      shLx: -s * 0.35,
+      shRx: mug ? -0.35 : s * 0.35,
+      elLx: -0.35,
+      elRx: mug ? -1.25 : -0.35,
+      torsoRx: 0.05,
+      torsoRy: s * 0.04,
       headRx: 0.02,
     });
   },
   sitType(rig, t, p, seatY = HIP_SIT) {
+    // upper arms hang, forearms level with the desk, fingers moving
     rig.rest();
     rig.set({
       ...legsFor(seatY),
       hipsY: seatY,
-      hipsZ: -0.2,
-      torsoRx: 0.15,
-      shLx: -0.75 + Math.sin(t * 14 + p) * 0.05,
-      shRx: -0.75 + Math.cos(t * 13 + p) * 0.05,
-      shLz: -0.14, shRz: 0.14,
-      elLx: -0.85 + Math.sin(t * 15 + p) * 0.08,
-      elRx: -0.85 + Math.cos(t * 16 + p) * 0.08,
-      headRx: 0.12 + Math.sin(t * 0.8 + p) * 0.03,
+      hipsZ: -0.18,
+      torsoRx: 0.12,
+      shLx: -0.45 + Math.sin(t * 11 + p) * 0.03,
+      shRx: -0.45 + Math.cos(t * 10 + p) * 0.03,
+      shLz: -0.16, shRz: 0.16,
+      elLx: -1.12 + Math.sin(t * 13 + p) * 0.06,
+      elRx: -1.12 + Math.cos(t * 12 + p) * 0.06,
+      headRx: 0.14 + Math.sin(t * 0.8 + p) * 0.03,
       headRy: Math.sin(t * 0.5 + p) * 0.08,
     });
   },
-  sitIdle(rig, t, p, seatY = HIP_SIT, z = -0.2) {
+  sitIdle(rig, t, p, seatY = HIP_SIT, z = -0.18) {
     rig.rest();
     rig.set({
       ...legsFor(seatY),
@@ -575,37 +585,39 @@ export const POSES = {
     });
   },
   talk(rig, t, p, intensity = 1) {
+    // a relaxed gesture with one hand, slow and small
     POSES.stand(rig, t, p);
-    const g = Math.sin(t * 5.5 + p);
+    const g = Math.sin(t * 3.2 + p);
     rig.set({
-      shRx: -0.7 + g * 0.25 * intensity,
-      elRx: -1.35 + Math.cos(t * 4 + p) * 0.25 * intensity,
-      shRz: 0.3,
-      shRy: -0.3 + g * 0.2,
-      shLx: -0.25 + Math.sin(t * 3 + p) * 0.1,
-      elLx: -0.7,
-      shLz: -0.15,
-      headRx: 0.03 + Math.sin(t * 3.2 + p) * 0.04,
-      headRy: Math.sin(t * 1.7 + p) * 0.05,
+      shRx: -0.55 + g * 0.15 * intensity,
+      elRx: -1.35 + Math.cos(t * 2.6 + p) * 0.18 * intensity,
+      shRz: 0.22,
+      shRy: -0.25 + g * 0.12,
+      shLx: -0.2 + Math.sin(t * 2 + p) * 0.06,
+      elLx: -0.6,
+      shLz: -0.12,
+      headRx: 0.03 + Math.sin(t * 2.4 + p) * 0.03,
+      headRy: Math.sin(t * 1.3 + p) * 0.05,
       torsoRx: 0.04,
     });
   },
   listen(rig, t, p) {
+    // hands loosely together in front, nodding now and then
     POSES.stand(rig, t, p);
     rig.set({
-      shLx: -0.35, shRx: -0.35, elLx: -2.0, elRx: -2.0, shLy: 0.8, shRy: -0.8, shLz: -0.2, shRz: 0.2,
-      headRx: 0.05 + Math.max(0, Math.sin(t * 2.4 + p)) * 0.08,
-      headRz: 0.06,
+      shLx: -0.3, shRx: -0.3, elLx: -1.45, elRx: -1.45, shLy: 0.55, shRy: -0.55, shLz: -0.08, shRz: 0.08,
+      headRx: 0.05 + Math.max(0, Math.sin(t * 2.0 + p)) * 0.07,
+      headRz: 0.05,
     });
   },
   laugh(rig, t, p) {
     POSES.stand(rig, t, p);
-    const b = Math.abs(Math.sin(t * 13 + p));
+    const b = Math.abs(Math.sin(t * 9 + p));
     rig.set({
-      hipsY: HIP_STAND + b * 0.02,
-      torsoRx: -0.2 + b * 0.06,
-      headRx: -0.35,
-      shLx: -0.5, shRx: -0.5, elLx: -1.6, elRx: -1.6, shLz: -0.45 + b * 0.1, shRz: 0.45 - b * 0.1,
+      hipsY: HIP_STAND + b * 0.012,
+      torsoRx: -0.15 + b * 0.05,
+      headRx: -0.28,
+      shLx: -0.4, shRx: -0.4, elLx: -1.5, elRx: -1.5, shLz: -0.3 + b * 0.06, shRz: 0.3 - b * 0.06,
     });
   },
   sitLaugh(rig, t, p, seatY = HIP_SIT, z = -0.2) {
@@ -644,7 +656,7 @@ export const POSES = {
   },
   crossed(rig, t, p) {
     POSES.stand(rig, t, p);
-    rig.set({ shLx: -0.4, shRx: -0.4, elLx: -2.05, elRx: -2.05, shLy: 0.85, shRy: -0.85, shLz: -0.2, shRz: 0.2, headRx: -0.05 + Math.sin(t * 0.5 + p) * 0.03 });
+    rig.set({ shLx: -0.32, shRx: -0.32, elLx: -1.5, elRx: -1.5, shLy: 0.6, shRy: -0.6, shLz: -0.1, shRz: 0.1, headRx: -0.05 + Math.sin(t * 0.5 + p) * 0.03 });
   },
   write(rig, t, p) {
     POSES.stand(rig, t, p);

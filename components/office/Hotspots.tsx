@@ -3,6 +3,24 @@
 import * as React from "react";
 import { BOTS, BOT_BY_ID } from "@/lib/office/bots";
 import s from "./office.module.css";
+import { dailySeries, hourlyToday, lastDays, dayLabel, weekdayShort, isWeekend, sum, avg, fmtInt, fmtK, fmtMoney, Delta, Spark, LineChart, BarChart, Donut, Legend, ChartCard } from "./charts";
+
+type Range = "hoy" | "7d" | "30d";
+const RANGE_LABEL: Record<Range, string> = { hoy: "Hoy", "7d": "7 días", "30d": "30 días" };
+function RangeToggle({ value, onChange }: { value: Range; onChange: (r: Range) => void }) {
+  return (
+    <div className={s.range} role="tablist">
+      {(["hoy", "7d", "30d"] as Range[]).map((r) => (
+        <button key={r} type="button" role="tab" aria-selected={value === r} className={value === r ? s.on : ""} onClick={() => onChange(r)}>
+          {RANGE_LABEL[r]}
+        </button>
+      ))}
+    </div>
+  );
+}
+const hourLabels = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}h`);
+const AREA_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6", "#14b8a6"];
+const AREAS = ["Ventas", "Soporte", "Finanzas", "Marketing", "Operaciones"];
 
 /** An event reported by the scene (see scene/index.js `emit`). */
 export type OfficeEvent = {
@@ -32,7 +50,7 @@ export const HOTSPOT_META: Record<string, { icon: string; title: string; subtitl
   pingpong: { icon: "🏓", title: "Marcador de ping-pong", subtitle: "Ranking del equipo", color: "#c9e8b2" },
   reception: { icon: "🛎️", title: "Recepción", subtitle: "Visitas y agenda del día", color: "#ffe3c2" },
   meeting: { icon: "📅", title: "Agenda de reuniones", subtitle: "Sala Andes y Sala Chimborazo", color: "#d9c6f2" },
-  lounge: { icon: "🛋️", title: "Bienestar del equipo", subtitle: "Pausas, ánimo y energía", color: "#f4d98a" },
+  lounge: { icon: "🛋️", title: "Rendimiento de los agentes", subtitle: "Carga de trabajo, tokens y costo", color: "#f4d98a" },
 };
 
 const PLACE_ES: Record<string, string> = {
@@ -112,42 +130,153 @@ function BoardPanel({ events, status, onOpenBot }: PanelProps) {
   );
 }
 
-/** Live KPIs with sparklines; per-employee productivity from finished cycles. */
+type Metric = {
+  key: string;
+  label: string;
+  color: string;
+  seed: number;
+  opts: Parameters<typeof dailySeries>[2];
+  agg: "sum" | "avg";
+  fmt: (v: number) => string;
+  target?: number;
+  unit: string;
+};
+const METRICS: Metric[] = [
+  { key: "leads", label: "Leads calificados", color: "#3b82f6", seed: 11, opts: { start: 26, drift: 0.008, vol: 0.1, min: 12, max: 80, weekend: 0.72 }, agg: "sum", fmt: fmtInt, target: 35, unit: "leads" },
+  { key: "tickets", label: "Tickets resueltos", color: "#22c55e", seed: 12, opts: { start: 98, drift: 0.006, vol: 0.07, min: 60, max: 220, weekend: 0.78 }, agg: "sum", fmt: fmtInt, target: 120, unit: "tickets" },
+  { key: "revenue", label: "Cobrado", color: "#f59e0b", seed: 13, opts: { start: 9200, drift: 0.007, vol: 0.16, min: 4000, max: 28000, weekend: 0.7, round: -2 }, agg: "sum", fmt: fmtMoney, unit: "USD" },
+  { key: "reach", label: "Alcance en redes", color: "#8b5cf6", seed: 14, opts: { start: 36000, drift: 0.008, vol: 0.09, min: 20000, max: 110000, weekend: 0.95, round: -2 }, agg: "avg", fmt: fmtK, unit: "personas/día" },
+];
+const DEALS = [
+  { company: "Grupo Andino", stage: "Cerrado ganado", amount: 18400, owner: "sofia", daysAgo: 0 },
+  { company: "Farmacias Cruz", stage: "Negociación", amount: 9900, owner: "sofia", daysAgo: 1 },
+  { company: "Hotel Casa Gangotena", stage: "Propuesta enviada", amount: 4100, owner: "sofia", daysAgo: 1 },
+  { company: "Coop. 29 de Octubre", stage: "Cerrado ganado", amount: 6200, owner: "mateo", daysAgo: 2 },
+  { company: "Logística del Pacífico", stage: "Cerrado ganado", amount: 12750, owner: "sofia", daysAgo: 4 },
+  { company: "Universidad del Valle", stage: "Presentación", amount: 15200, owner: "sofia", daysAgo: 6 },
+];
+
+/** Operations dashboard: KPIs vs. the previous period, a metric over time, work by area, lead sources and recent deals. */
 function TvPanel({ events, onOpenBot }: PanelProps) {
-  const tick = useTick(2000);
-  const series = React.useRef<Record<string, number[]>>({});
-  const kpis = [
-    ["Leads hoy", 38, 1, "#3b82f6"],
-    ["Tickets resueltos", 127, 2, "#22c55e"],
-    ["Cobrado ($k)", 12.4, 0.3, "#f59e0b"],
-    ["Alcance (k)", 48.2, 0.6, "#8b5cf6"],
-  ] as const;
-  for (const [label, base, step] of kpis) {
-    const arr = (series.current[label] ??= Array.from({ length: 16 }, (_, i) => base - (16 - i) * step * 0.6));
-    if (arr.length < 16 + tick) arr.push(arr[arr.length - 1] + step * (0.4 + Math.random() * 0.8));
-  }
+  const [range, setRange] = React.useState<Range>("30d");
+  const [metricKey, setMetricKey] = React.useState("leads");
+  const data = React.useMemo(
+    () =>
+      METRICS.map((m) => {
+        const d60 = dailySeries(m.seed, 60, m.opts);
+        const hours = hourlyToday(m.seed + 100, d60[59]);
+        return { ...m, d60, hours };
+      }),
+    []
+  );
+  const days = React.useMemo(() => lastDays(30), []);
+  const nowH = new Date().getHours();
+  const view = (m: (typeof data)[number]) => {
+    if (range === "hoy") {
+      const cur = m.hours.slice(0, nowH + 1);
+      const value = m.agg === "sum" ? sum(cur) : m.d60[59];
+      // today vs. the same weekday last week, scaled to the hours elapsed
+      const prevValue = m.agg === "sum" ? m.d60[52] * ((nowH + 1) / 24) * 1.15 : m.d60[52];
+      return { cur, prev: null as number[] | null, value, prevValue, labels: hourLabels.slice(0, nowH + 1), weekend: undefined as boolean[] | undefined };
+    }
+    const n = range === "7d" ? 7 : 30;
+    const cur = m.d60.slice(60 - n), prev = m.d60.slice(60 - 2 * n, 60 - n);
+    const value = m.agg === "sum" ? sum(cur) : avg(cur);
+    const prevValue = m.agg === "sum" ? sum(prev) : avg(prev);
+    const ds = days.slice(30 - n);
+    return { cur, prev, value, prevValue, labels: ds.map(dayLabel), weekend: ds.map(isWeekend) };
+  };
+  const sel = data.find((m) => m.key === metricKey) ?? data[0];
+  const sv = view(sel);
+  const areaWeek = React.useMemo(() => {
+    const per = AREAS.map((_, k) => dailySeries(41 + k, 7, { start: 14 + k * 3, vol: 0.25, min: 3, max: 40, weekend: 0.6 }));
+    return lastDays(7).map((d, i) => ({ label: weekdayShort(d), values: per.map((p) => p[i]) }));
+  }, []);
+  const sources = [
+    { label: "WhatsApp", value: 412, color: "#25d366" },
+    { label: "Sitio web", value: 293, color: "#3b82f6" },
+    { label: "Email", value: 206, color: "#f59e0b" },
+    { label: "Referidos", value: 119, color: "#8b5cf6" },
+    { label: "Eventos", value: 54, color: "#14b8a6" },
+  ];
   const done = BOTS.map((b) => ({ id: b.id, n: events.filter((e) => e.type === "task" && e.bot === b.id).length }));
   const max = Math.max(1, ...done.map((d) => d.n));
   return (
     <div className={s.dash}>
+      <div className={s.chartHead}>
+        <div>
+          <div className={s.chartTitle}>Resumen · {RANGE_LABEL[range].toLowerCase()}</div>
+          <div className={s.chartSub}>Comparado con el periodo anterior · toca una métrica para verla en el gráfico</div>
+        </div>
+        <RangeToggle value={range} onChange={setRange} />
+      </div>
       <div className={s.dashGrid}>
-        {kpis.map(([label, , , color]) => {
-          const arr = series.current[label].slice(-16);
-          const lo = Math.min(...arr), hi = Math.max(...arr);
-          const pts = arr.map((v, i) => `${(i / 15) * 100},${36 - ((v - lo) / (hi - lo || 1)) * 30}`).join(" ");
-          const v = arr[arr.length - 1];
+        {data.map((m) => {
+          const v = view(m);
           return (
-            <div key={label} className={s.dashTile}>
-              <span>{label}</span>
-              <b>{Number.isInteger(v) ? v : v.toFixed(1)}</b>
-              <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden>
-                <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" />
-              </svg>
-            </div>
+            <button key={m.key} type="button" className={`${s.tile} ${metricKey === m.key ? s.tileOn : ""}`} onClick={() => setMetricKey(m.key)}>
+              <span className={s.tileTop}>
+                {m.label}
+                <Delta now={v.value} prev={v.prevValue} />
+              </span>
+              <b>{m.fmt(v.value)}</b>
+              <small>{m.agg === "avg" ? "promedio diario" : range === "hoy" ? "hasta ahora" : "en el periodo"}</small>
+              <Spark data={v.cur.length > 1 ? v.cur : [0, ...v.cur]} color={m.color} />
+            </button>
           );
         })}
       </div>
-      <div className={s.h}>Ciclos de trabajo completados por empleado</div>
+      <ChartCard
+        title={`${sel.label} · ${range === "hoy" ? "por hora" : "por día"}`}
+        sub={range === "hoy" ? "hoy, hasta la hora actual" : `${sel.unit} · los fines de semana en gris`}
+        right={<Legend items={[{ label: sel.label, color: sel.color }, ...(sv.prev ? [{ label: "Periodo anterior", color: "#9ca3af" }] : [])]} />}
+      >
+        <LineChart
+          series={[{ name: sel.label, color: sel.color, data: sv.cur }, ...(sv.prev ? [{ name: "Periodo anterior", color: "#9ca3af", data: sv.prev, dashed: true, area: false }] : [])]}
+          labels={sv.labels}
+          weekend={sv.weekend}
+          yFormat={sel.key === "revenue" ? fmtK : sel.key === "reach" ? fmtK : fmtInt}
+          target={sel.target && range !== "hoy" ? { value: sel.target, label: `meta ${sel.target}/día` } : undefined}
+        />
+      </ChartCard>
+      <div className={s.grid2}>
+        <ChartCard title="Tareas completadas por área" sub="últimos 7 días" right={undefined}>
+          <BarChart groups={areaWeek} colors={AREA_COLORS} every={1} height={160} />
+          <div style={{ marginTop: 6 }}>
+            <Legend items={AREAS.map((a, k) => ({ label: a, color: AREA_COLORS[k] }))} />
+          </div>
+        </ChartCard>
+        <ChartCard title="Origen de los leads" sub="últimos 30 días">
+          <Donut parts={sources} size={112} />
+        </ChartCard>
+      </div>
+      <ChartCard title="Últimos negocios" sub="pipeline de ventas · HubSpot">
+        <table className={s.tbl}>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Etapa</th>
+              <th className={s.num}>Monto</th>
+              <th>Responsable</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {DEALS.map((d) => (
+              <tr key={d.company} className={s.rowBtn} onClick={() => onOpenBot(d.owner)}>
+                <td>{d.company}</td>
+                <td>
+                  <span className={`${s.tag} ${d.stage === "Cerrado ganado" ? s.tagOk : d.stage === "Negociación" ? s.tagWarn : ""}`}>{d.stage}</span>
+                </td>
+                <td className={s.num}>{fmtMoney(d.amount)}</td>
+                <td>{name(d.owner)}</td>
+                <td>{d.daysAgo === 0 ? "hoy" : d.daysAgo === 1 ? "ayer" : dayLabel(new Date(Date.now() - d.daysAgo * 86400000))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ChartCard>
+      <div className={s.h}>En vivo · ciclos de trabajo completados por empleado</div>
       <div className={s.bars2}>
         {done.map((d) => (
           <button key={d.id} type="button" className={s.bar2} onClick={() => onOpenBot(d.id)}>
@@ -163,18 +292,27 @@ function TvPanel({ events, onOpenBot }: PanelProps) {
 
 function CoffeePanel({ events, onOpenBot }: PanelProps) {
   const cups = events.filter((e) => e.type === "coffee");
-  const byBot = BOTS.map((b) => ({ id: b.id, n: cups.filter((c) => c.bot === b.id).length })).sort((a, b) => b.n - a.n);
+  const nowH = new Date().getHours();
+  const hours = React.useMemo(() => hourlyToday(21, 27, 9.5, 15), []);
+  const liveByHour = hours.map((v, h) => Math.round(v) + cups.filter((c) => new Date(c.t).getHours() === h).length);
+  const today = sum(liveByHour);
+  // the cups poured before you arrived, spread over the team
+  const seeded = Math.round(sum(hours.map((v) => Math.round(v))));
+  const byBot = BOTS.map((b, i) => ({ id: b.id, n: Math.floor((seeded * (((i * 7) % 11) + 3)) / 72) + cups.filter((c) => c.bot === b.id).length })).sort((a, b) => b.n - a.n);
   const last = cups[0];
-  const beans = Math.max(8, 78 - cups.length * 2);
+  const twoWeeks = React.useMemo(() => dailySeries(22, 14, { start: 26, vol: 0.18, min: 6, max: 45, weekend: 0.6 }), []);
+  const beans = Math.max(8, 78 - today * 1.2);
   return (
-    <div className={s.stack}>
+    <div className={s.dash}>
       <div className={s.kpis}>
         <div className={s.kpi}>
-          <b>{cups.length}</b>
-          <span>cafés hoy</span>
+          <b>{today}</b>
+          <span>
+            cafés hoy <Delta now={today} prev={twoWeeks[6] * ((nowH + 1) / 20)} />
+          </span>
         </div>
         <div className={s.kpi}>
-          <b>{beans}%</b>
+          <b>{Math.round(beans)}%</b>
           <span>granos</span>
         </div>
         <div className={s.kpi}>
@@ -182,9 +320,15 @@ function CoffeePanel({ events, onOpenBot }: PanelProps) {
           <span>{last ? `último, ${ago(last.t)}` : "aún nadie"}</span>
         </div>
       </div>
-      <div className={s.h}>Ranking de cafeteros</div>
+      <ChartCard title="Cafés por hora" sub="hoy · el pico de media mañana y el de después del almuerzo">
+        <BarChart groups={liveByHour.slice(6, Math.max(8, nowH + 1)).map((v, i) => ({ label: hourLabels[i + 6], values: [v] }))} colors={["#c47a58"]} every={2} height={140} />
+      </ChartCard>
+      <ChartCard title="Cafés por día" sub="últimas dos semanas" right={<Delta now={sum(twoWeeks.slice(7))} prev={sum(twoWeeks.slice(0, 7))} />}>
+        <Spark data={twoWeeks} color="#c47a58" h={48} />
+      </ChartCard>
+      <div className={s.h}>Ranking de cafeteros · en vivo</div>
       <div className={s.list}>
-        {byBot.map((b, i) => (
+        {byBot.slice(0, 6).map((b, i) => (
           <button key={b.id} type="button" className={s.row2} onClick={() => onOpenBot(b.id)}>
             <span className={s.rank}>{i + 1}</span>
             <Avatar id={b.id} />
@@ -194,7 +338,7 @@ function CoffeePanel({ events, onOpenBot }: PanelProps) {
           </button>
         ))}
       </div>
-      <div className={s.note}>Máquina lista · agua OK · descalcificación en 12 días</div>
+      <div className={s.note}>Máquina lista · agua OK · descalcificación en 12 días · 1.240 cafés este mes</div>
     </div>
   );
 }
@@ -372,23 +516,77 @@ function ServersPanel() {
     ["Base de datos", "postgres-01", 100],
     ["Cola de tareas", "queue", 99.95],
   ] as const;
-  const load = 22 + Math.round(Math.sin(tick * 0.7) * 6 + (tick % 3) * 2);
+  const p50 = React.useMemo(() => dailySeries(31, 24, { start: 92, vol: 0.07, min: 70, max: 130 }), []);
+  const p95 = React.useMemo(() => p50.map((v, i) => Math.round(v * 1.75 + ((i * 37) % 23))), [p50]);
+  const rpm = React.useMemo(() => hourlyToday(32, 42000, 10.5, 16).map((v) => Math.round(v)), []);
+  const nowH = new Date().getHours();
+  const nodes = [
+    { host: "agents-01", cpu: 34, mem: 61 },
+    { host: "agents-02", cpu: 29, mem: 58 },
+    { host: "api-01", cpu: 18, mem: 44 },
+    { host: "postgres-01", cpu: 12, mem: 72 },
+  ].map((n, i) => ({ ...n, cpu: Math.max(4, Math.min(96, n.cpu + Math.round(Math.sin(tick * 0.6 + i) * 5))) }));
+  const load = Math.round(avg(nodes.map((n) => n.cpu)));
   return (
-    <div className={s.stack}>
+    <div className={s.dash}>
       <div className={s.kpis}>
         <div className={s.kpi}>
+          <b>99,98 %</b>
+          <span>uptime 30 días</span>
+        </div>
+        <div className={s.kpi}>
+          <b>{p95[Math.min(23, nowH)]} ms</b>
+          <span>latencia p95 ahora</span>
+        </div>
+        <div className={s.kpi}>
           <b>{load}%</b>
-          <span>CPU</span>
-        </div>
-        <div className={s.kpi}>
-          <b>{(1840 + (tick * 37) % 120).toLocaleString("es-EC")}</b>
-          <span>req/min</span>
-        </div>
-        <div className={s.kpi}>
-          <b>142 ms</b>
-          <span>latencia p95</span>
+          <span>CPU promedio</span>
         </div>
       </div>
+      <ChartCard title="Latencia de los agentes" sub="últimas 24 horas · milisegundos" right={<Legend items={[{ label: "p50", color: "#3b82f6" }, { label: "p95", color: "#f59e0b" }]} />}>
+        <LineChart series={[{ name: "p50", color: "#3b82f6", data: p50 }, { name: "p95", color: "#f59e0b", data: p95, area: false }]} labels={hourLabels} every={4} height={160} yFormat={(v) => `${Math.round(v)}`} target={{ value: 250, label: "SLA 250 ms" }} />
+      </ChartCard>
+      <ChartCard title="Peticiones por hora" sub="hoy">
+        <BarChart groups={rpm.slice(0, Math.max(6, nowH + 1)).map((v, i) => ({ label: hourLabels[i], values: [v] }))} colors={["#7cc0ff"]} every={3} height={130} yFormat={fmtK} />
+      </ChartCard>
+      <ChartCard title="Nodos" sub="carga en vivo">
+        <table className={s.tbl}>
+          <thead>
+            <tr>
+              <th>Host</th>
+              <th>CPU</th>
+              <th>Memoria</th>
+              <th className={s.num}>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {nodes.map((n) => (
+              <tr key={n.host}>
+                <td style={{ fontFamily: "var(--mono)", fontSize: 11 }}>{n.host}</td>
+                <td>
+                  <span className={s.statusLine}>
+                    <span className={s.meter}>
+                      <i style={{ width: `${n.cpu}%`, background: n.cpu > 80 ? "#ef4444" : "#3b82f6" }} />
+                    </span>
+                    {n.cpu}%
+                  </span>
+                </td>
+                <td>
+                  <span className={s.statusLine}>
+                    <span className={s.meter}>
+                      <i style={{ width: `${n.mem}%`, background: "#8b5cf6" }} />
+                    </span>
+                    {n.mem}%
+                  </span>
+                </td>
+                <td className={s.num}>
+                  <span className={`${s.tag} ${s.tagOk}`}>OK</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ChartCard>
       <div className={s.h}>Servicios</div>
       <div className={s.list}>
         {svc.map(([label, host, up]) => (
@@ -402,7 +600,7 @@ function ServersPanel() {
           </div>
         ))}
       </div>
-      <div className={s.note}>Sin incidentes en las últimas 72 h · último despliegue hace 41 min (Nicolás)</div>
+      <div className={s.note}>0 incidentes en 30 días · último: hace 23 días, 4 min de degradación · último despliegue hace 41 min (Nicolás)</div>
     </div>
   );
 }
@@ -471,22 +669,32 @@ function ReceptionPanel({ onOpenBot }: PanelProps) {
     { time: "15:00", who: "Farmacias Cruz", what: "Presentación de propuesta", host: "sofia" },
     { time: "16:30", who: "Cooperativa 29 de Octubre", what: "Onboarding", host: "mateo" },
   ];
+  const days = React.useMemo(() => lastDays(14), []);
+  const visits = React.useMemo(() => dailySeries(51, 14, { start: 8, vol: 0.3, min: 2, max: 18, weekend: 0.5 }), []);
+  const calls = React.useMemo(() => dailySeries(52, 14, { start: 29, vol: 0.2, min: 8, max: 55, weekend: 0.55 }), []);
   return (
-    <div className={s.stack}>
+    <div className={s.dash}>
       <div className={s.kpis}>
         <div className={s.kpi}>
-          <b>9</b>
-          <span>visitantes hoy</span>
+          <b>{visits[13]}</b>
+          <span>
+            visitantes hoy <Delta now={visits[13]} prev={visits[6]} />
+          </span>
         </div>
         <div className={s.kpi}>
-          <b>31</b>
-          <span>llamadas</span>
+          <b>{calls[13]}</b>
+          <span>
+            llamadas <Delta now={calls[13]} prev={calls[6]} />
+          </span>
         </div>
         <div className={s.kpi}>
           <b>3</b>
           <span>paquetes</span>
         </div>
       </div>
+      <ChartCard title="Visitas y llamadas por día" sub="últimas dos semanas" right={<Legend items={[{ label: "Visitas", color: "#e08a5c" }, { label: "Llamadas", color: "#3d4a7a" }]} />}>
+        <BarChart groups={days.map((d, i) => ({ label: dayLabel(d), values: [visits[i], calls[i]] }))} colors={["#e08a5c", "#3d4a7a"]} stacked={false} every={2} height={150} />
+      </ChartCard>
       <div className={s.h}>Agenda de visitas</div>
       <div className={s.list}>
         {agenda.map((a) => {
@@ -508,6 +716,7 @@ function ReceptionPanel({ onOpenBot }: PanelProps) {
   );
 }
 
+const MEET_HIST = dailySeries(61, 14, { start: 5, vol: 0.35, min: 1, max: 11, weekend: 0.4 });
 function MeetingPanel({ events, status, onOpenBot }: PanelProps) {
   const inRoom = BOTS.filter((b) => /Sala Andes|Sala Chimborazo|reunión/.test(status[b.id] ?? ""));
   const meetings = events.filter((e) => e.type === "meeting").slice(0, 6);
@@ -529,6 +738,9 @@ function MeetingPanel({ events, status, onOpenBot }: PanelProps) {
           </button>
         ))}
       </div>
+      <ChartCard title="Reuniones por día" sub="últimas dos semanas · Sala Andes y Sala Chimborazo">
+        <BarChart groups={lastDays(14).map((d, i) => ({ label: dayLabel(d), values: [MEET_HIST[i]] }))} colors={["#6f5a9e"]} every={2} height={120} />
+      </ChartCard>
       <div className={s.h}>Reuniones de hoy</div>
       <div className={s.list}>
         {planned.map((m) => (
@@ -567,42 +779,71 @@ function MeetingPanel({ events, status, onOpenBot }: PanelProps) {
 }
 
 function LoungePanel({ events, status, onOpenBot }: PanelProps) {
-  const breaks = events.filter((e) => e.type === "break");
+  // agents do not rest: what matters is their load, what they consume and what they cost
+  const tasks = events.filter((e) => e.type === "task");
+  const tokens30 = React.useMemo(() => dailySeries(71, 30, { start: 186, drift: 0.004, vol: 0.1, min: 60, max: 420, weekend: 0.72 }), []); // thousands
+  const days = React.useMemo(() => lastDays(30), []);
+  const perAgent = React.useMemo(() => BOTS.map((b, i) => ({ id: b.id, tokens: Math.round(12 + ((i * 37) % 29) + (i === 1 ? 26 : 0)) })), []);
   const rows = BOTS.map((b, i) => {
-    const n = breaks.filter((e) => e.bot === b.id).length;
-    const energy = Math.max(35, Math.min(98, 92 - i * 4 - n * 3 + (status[b.id] == null ? 0 : 6)));
-    const mood = energy > 80 ? "😄" : energy > 60 ? "🙂" : "😌";
-    return { id: b.id, n, energy, mood };
+    const done = 18 + ((i * 7) % 11) + tasks.filter((e) => e.bot === b.id).length;
+    const load = Math.max(22, Math.min(96, 58 + ((i * 13) % 31) + (status[b.id] == null ? 12 : 0)));
+    return { id: b.id, done, load };
   });
+  const PRICE = 0.0042; // USD per thousand tokens, blended
+  const monthTokens = sum(tokens30);
+  const cost30 = monthTokens * PRICE;
+  const cost30prev = sum(dailySeries(72, 30, { start: 182, drift: 0.002, vol: 0.1, min: 60, max: 400, weekend: 0.72 })) * PRICE;
+  const areaCost = [
+    { label: "Soporte", value: cost30 * 0.34, color: "#22c55e" },
+    { label: "Ventas", value: cost30 * 0.27, color: "#3b82f6" },
+    { label: "Marketing", value: cost30 * 0.16, color: "#8b5cf6" },
+    { label: "Finanzas", value: cost30 * 0.13, color: "#f59e0b" },
+    { label: "Operaciones", value: cost30 * 0.1, color: "#14b8a6" },
+  ];
   return (
-    <div className={s.stack}>
+    <div className={s.dash}>
       <div className={s.kpis}>
         <div className={s.kpi}>
-          <b>{breaks.length}</b>
-          <span>pausas hoy</span>
+          <b>{rows.reduce((a, r) => a + r.done, 0)}</b>
+          <span>tareas hoy</span>
         </div>
         <div className={s.kpi}>
-          <b>{Math.round(rows.reduce((a, r) => a + r.energy, 0) / rows.length)}%</b>
-          <span>energía media</span>
+          <b>{fmtInt(tokens30[29])}k</b>
+          <span>
+            tokens hoy <Delta now={tokens30[29]} prev={tokens30[22]} invert />
+          </span>
         </div>
         <div className={s.kpi}>
-          <b>😄</b>
-          <span>ánimo del equipo</span>
+          <b>{fmtMoney(cost30)}</b>
+          <span>
+            costo 30 días <Delta now={cost30} prev={cost30prev} invert />
+          </span>
         </div>
       </div>
-      <div className={s.h}>Energía por persona</div>
+      <ChartCard title="Tokens consumidos por día" sub="últimos 30 días · miles de tokens · los fines de semana en gris">
+        <LineChart series={[{ name: "Tokens (k)", color: "#6f5a9e", data: tokens30 }]} labels={days.map(dayLabel)} weekend={days.map(isWeekend)} height={170} yFormat={(v) => `${Math.round(v)}k`} />
+      </ChartCard>
+      <div className={s.grid2}>
+        <ChartCard title="Tokens por agente" sub="hoy · miles">
+          <BarChart groups={perAgent.map((a) => ({ label: name(a.id).slice(0, 3), values: [a.tokens] }))} colors={["#6f5a9e"]} every={1} height={150} />
+        </ChartCard>
+        <ChartCard title="Costo por área" sub="últimos 30 días">
+          <Donut parts={areaCost} size={108} format={fmtMoney} />
+        </ChartCard>
+      </div>
+      <div className={s.h}>Carga de trabajo por agente · en vivo</div>
       <div className={s.bars2}>
         {rows.map((r) => (
           <button key={r.id} type="button" className={s.bar2} onClick={() => onOpenBot(r.id)}>
             <Avatar id={r.id} size={22} />
-            <i style={{ width: `${r.energy}%`, background: r.energy > 70 ? "#22c55e" : "#f59e0b" }} />
+            <i style={{ width: `${r.load}%`, background: r.load > 85 ? "#f59e0b" : "#22c55e" }} />
             <b>
-              {r.mood} {r.n}
+              {r.load}% · {r.done}
             </b>
           </button>
         ))}
       </div>
-      <div className={s.note}>Los agentes no se cansan, pero las pausas hacen la oficina más humana. Este panel es parte de la demo.</div>
+      <div className={s.note}>Uptime 99,98 % · sin pausas ni vacaciones · un humano aprueba lo que necesita firma · el equivalente humano costaría unas 40 veces más. Cifras simuladas para la demo.</div>
     </div>
   );
 }

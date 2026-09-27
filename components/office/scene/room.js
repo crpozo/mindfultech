@@ -440,7 +440,7 @@ export function buildRoom(scene, bots) {
     { id: "pingpong", name: "Marcador de ping-pong", icon: "🏓", x: -4.0, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },
     { id: "reception", name: "Recepción", icon: "🛎️", x: -8.4, y: 0.6, z: 6.3, w: 1.4, h: 1.1, d: 2.6, floor: 0 },
     { id: "meeting", name: "Agenda de reuniones", icon: "📅", x: -2.9, y: 0.5, z: -3.4, w: 2.8, h: 0.8, d: 1.1, floor: 0 },
-    { id: "lounge", name: "Bienestar del equipo", icon: "🛋️", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
+    { id: "lounge", name: "Rendimiento de los agentes", icon: "📊", x: -7.6, y: UPPER_Y + 0.4, z: z0 + 0.55, w: 2.7, h: 0.9, d: 1.0, floor: 1 },
   ];
 
   return { stations, spots, hotspots, nav0, nav1, upper, dyn, lights, pingpong: pp, materials: M, walls: { W0, W1, WI0, WI1 } };

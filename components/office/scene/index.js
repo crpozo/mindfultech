@@ -662,7 +662,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
             remaining = 0;
           }
         }
-        a.walkT += dt * 8.5 * (speed / WALK);
+        a.walkT += dt * 7.0 * (speed / WALK);
       }
     } else if (a.state === "sitdown") {
       if (t > a.until) {
@@ -979,7 +979,6 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   };
   const onDown = (ev) => {
     downAt = [ev.clientX, ev.clientY];
-    wantAngles = null;
   };
   const onUp = (ev) => {
     if (!downAt) return;
@@ -1032,6 +1031,12 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const aspect = camera.aspect || 1.6;
     return aspect < 1.5 ? REST_DIST * Math.min(1.7, 1.5 / aspect) : REST_DIST;
   };
+  // a wheel zoom or a drag by the user cancels any glide in progress, so the
+  // camera never snaps back to where it was heading
+  controls.addEventListener("start", () => {
+    wantDistance = null;
+    wantAngles = null;
+  });
   const setSelected = (id) => {
     selectedId = id;
     focusActor = actors.find((a) => a.bot.id === id) || null;
@@ -1068,7 +1073,6 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     if (w > 900) camera.setViewOffset(w, h, (insets.right - insets.left) / 2, 24, w, h);
     else camera.setViewOffset(w, h, 0, insets.right ? -40 : 36, w, h);
     camera.updateProjectionMatrix();
-    if (!focusActor && !focusPoint) wantDistance = restDistance();
   };
   resize();
   const ro = new ResizeObserver(resize);

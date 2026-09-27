@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useLang } from "../i18n";
 import { Brain3D } from "./Brain3D";
 
@@ -427,6 +428,30 @@ export function Hero() {
             >
               {es ? "HABLEMOS" : "CONTACT SALES"}
             </a>
+            <Link
+              href="/office-demo/"
+              className="btn-light"
+              style={{
+                textDecoration: "none",
+                fontFamily: MONO,
+                fontSize: 13,
+                fontWeight: 500,
+                letterSpacing: ".12em",
+                background: "#fff",
+                color: "var(--ink)",
+                border: "1.5px solid rgba(79,174,135,.6)",
+                padding: "14.5px 22px",
+                borderRadius: 6,
+                boxShadow: "0 8px 20px -14px rgba(14,13,18,.35)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 9,
+                transition: "background .2s",
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.25)", flex: "none" }} />
+              {es ? "VER LA OFICINA DE GESTIÓN IA" : "SEE THE AI MANAGEMENT OFFICE"}
+            </Link>
           </div>
         </div>
       </div>

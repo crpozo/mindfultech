@@ -1319,3 +1319,14 @@ a:hover {
   padding: 2px 7px;
   border-radius: 4px;
 }
+
+/* AI Management Office section (components/home/AiOffice.tsx) */
+.aio-card { transition: transform .3s ease, box-shadow .3s ease; }
+.aio-card:hover { transform: translateY(-3px); box-shadow: 0 40px 80px -40px rgba(14,13,18,.5) !important; }
+@media (max-width: 1120px) {
+  .aio-roles { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 760px) {
+  .aio-roles { grid-template-columns: repeat(2, 1fr) !important; }
+  .aio-how { grid-template-columns: 1fr !important; }
+}

@@ -153,53 +153,53 @@ export function desk(ctx, seat, bot, i) {
   const { B, M, nav, y } = ctx;
   const f = fwd(seat.yaw), s = side(seat.yaw), yaw = seat.yaw;
   const at = (fw, sd, h = 0) => new THREE.Vector3(seat.x + f.x * fw + s.x * sd, y + h, seat.z + f.z * fw + s.z * sd);
-  const c = at(0.65, 0);
+  const c = at(0.52, 0);
   B.add(rbox(1.4, 0.04, 0.7, 0.01), M.deskWood, mat4(c.x, y + DESK_H - 0.02, c.z, 0, yaw, 0));
   for (const sd of [-0.62, 0.62]) {
-    const p = at(0.65, sd);
+    const p = at(0.52, sd);
     B.add(box(0.05, DESK_H - 0.04, 0.58), M.metal, mat4(p.x, y + (DESK_H - 0.04) / 2, p.z, 0, yaw, 0));
   }
   B.add(box(1.2, 0.05, 0.05), M.metal, mat4(c.x, y + 0.32, c.z, 0, yaw, 0));
-  const d = at(0.98, 0);
+  const d = at(0.85, 0);
   B.add(rbox(1.4, 0.4, 0.03, 0.01), M.divider, mat4(d.x, y + DESK_H + 0.2, d.z, 0, yaw, 0));
   B.add(box(1.42, 0.03, 0.06), M.deskWood, mat4(d.x, y + DESK_H + 0.41, d.z, 0, yaw, 0));
   for (let k = 0; k < 2; k++) {
-    const p = at(0.952, -0.45 + k * 0.16 + (i % 3) * 0.08, DESK_H + 0.22 + (k % 2) * 0.09);
+    const p = at(0.822, -0.45 + k * 0.16 + (i % 3) * 0.08, DESK_H + 0.22 + (k % 2) * 0.09);
     const n = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.1), M.stickies[(i + k) % 3]);
     n.position.copy(p);
     n.rotation.y = yaw + PI + (k ? 0.08 : -0.06);
     ctx.S.add(n);
   }
-  monitor(ctx, at(0.78, 0.02), yaw, DESK_H, bot);
-  const kp = at(0.5, 0.02, DESK_H + 0.012);
+  monitor(ctx, at(0.66, 0.02), yaw, DESK_H, bot);
+  const kp = at(0.36, 0.02, DESK_H + 0.012);
   B.add(box(0.4, 0.022, 0.13), M.keyboard, mat4(kp.x, kp.y, kp.z, 0, yaw, 0));
-  const mo = at(0.5, 0.3, DESK_H + 0.025);
+  const mo = at(0.38, 0.3, DESK_H + 0.025);
   B.add(rbox(0.06, 0.04, 0.1, 0.02), M.white, mat4(mo.x, mo.y, mo.z, 0, yaw, 0));
-  const mg = at(0.55, -0.42, DESK_H + 0.05);
+  const mg = at(0.45, -0.42, DESK_H + 0.05);
   B.add(cyl(0.042, 0.037, 0.1), M.accents[i % M.accents.length], mat4(mg.x, mg.y, mg.z));
   B.add(new THREE.TorusGeometry(0.026, 0.007, 8, 14, PI), M.accents[i % M.accents.length], mat4(mg.x + 0.04, mg.y, mg.z, 0, PI / 2, 0));
-  const nb = at(0.45, -0.24, DESK_H + 0.008);
+  const nb = at(0.34, -0.24, DESK_H + 0.008);
   B.add(rbox(0.16, 0.012, 0.22, 0.004), M.paper, mat4(nb.x, nb.y, nb.z, 0, yaw + 0.15, 0));
-  const ph = at(0.6, 0.38, DESK_H + 0.006);
+  const ph = at(0.5, 0.38, DESK_H + 0.006);
   B.add(rbox(0.07, 0.01, 0.14, 0.004), M.screenBezel, mat4(ph.x, ph.y, ph.z, 0, yaw - 0.3, 0));
-  const lp = at(0.85, 0.52, DESK_H);
+  const lp = at(0.72, 0.52, DESK_H);
   B.add(cyl(0.07, 0.08, 0.02), M.metal, mat4(lp.x, lp.y + 0.01, lp.z));
   B.add(cyl(0.012, 0.012, 0.42, 8), M.metal, mat4(lp.x - s.x * 0.06, lp.y + 0.22, lp.z - s.z * 0.06, 0, yaw, -0.3));
   B.add(new THREE.ConeGeometry(0.075, 0.1, 16, 1, true), M.lamp, mat4(lp.x - s.x * 0.16, lp.y + 0.41, lp.z - s.z * 0.16, 0.4, yaw, 0));
   if (i % 4 === 1 || i % 4 === 3) {
-    const lb = at(0.55, -0.28, DESK_H + 0.008);
+    const lb = at(0.45, -0.28, DESK_H + 0.008);
     B.add(rbox(0.3, 0.014, 0.21, 0.005), M.steel, mat4(lb.x, lb.y, lb.z, 0, yaw - 0.35, 0));
-    const lid = at(0.65, -0.32, DESK_H + 0.11);
+    const lid = at(0.55, -0.32, DESK_H + 0.11);
     B.add(rbox(0.3, 0.2, 0.012, 0.005), M.steel, mat4(lid.x, lid.y, lid.z, -0.25, yaw - 0.35, 0));
     const ls = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.17), M.laptopScreen);
-    ls.position.copy(at(0.647, -0.318, DESK_H + 0.11));
+    ls.position.copy(at(0.547, -0.318, DESK_H + 0.11));
     ls.rotation.set(-0.25, yaw - 0.35 + PI, 0, "YXZ");
     ctx.S.add(ls);
   } else if (i % 4 === 0) {
-    const pp = at(0.85, -0.5);
+    const pp = at(0.72, -0.5);
     plant(ctx, pp.x, pp.z, 0.32, DESK_H, M.potClay);
   } else {
-    const pp = at(0.6, -0.35, DESK_H + 0.006);
+    const pp = at(0.5, -0.35, DESK_H + 0.006);
     B.add(box(0.21, 0.01, 0.3), M.paper, mat4(pp.x, pp.y, pp.z, 0, yaw + 0.3, 0));
     B.add(box(0.21, 0.01, 0.3), M.paper, mat4(pp.x + 0.03, pp.y + 0.01, pp.z + 0.02, 0, yaw - 0.1, 0));
   }
