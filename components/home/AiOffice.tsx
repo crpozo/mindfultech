@@ -122,8 +122,8 @@ export function AiOffice() {
           <img
             src="/office-demo-preview.webp"
             alt={t.alt}
-            width={1800}
-            height={760}
+            width={2000}
+            height={528}
             loading="lazy"
             decoding="async"
             style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 45%" }}
