@@ -1347,7 +1347,11 @@ a:hover {
 }
 
 /* AI Management Office section (components/home/AiOffice.tsx) */
-.aio-head { display: flex; flex-direction: column; align-items: flex-start; }
+.aio-head { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: clamp(40px, 5vw, 96px); align-items: end; }
+.aio-head-copy { display: flex; flex-direction: column; align-items: flex-start; }
+@media (max-width: 900px) {
+  .aio-head { grid-template-columns: 1fr; row-gap: 20px; }
+}
 .aio-card { display: block; position: relative; height: clamp(340px, 54vh, 660px); border-radius: 20px; overflow: hidden; transition: transform .3s ease, box-shadow .3s ease; }
 .aio-card:hover { transform: translateY(-3px); box-shadow: 0 40px 80px -40px rgba(14,13,18,.5) !important; }
 .aio-roles { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; column-gap: 36px; }
