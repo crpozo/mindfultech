@@ -56,7 +56,7 @@ export function AiOffice() {
     <section id="ai-office" style={{ position: "relative", background: "#f4efe3", padding: "var(--section-y) 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
         {/* two columns: the claim on the left, the explanation and the CTA on
-            the right, bottoms aligned — the header used to stack everything in
+            the right, tops aligned — the header used to stack everything in
             the left half and leave the right half of the row empty */}
         <div className="aio-head">
           <div>
