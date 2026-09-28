@@ -5,7 +5,6 @@ import { AiOffice } from "@/components/home/AiOffice";
 import { FullStackLab } from "@/components/home/FullStackLab";
 import { ProcessFlow } from "@/components/home/ProcessFlow";
 import { ClientStories } from "@/components/home/ClientStories";
-import { NewsGrid } from "@/components/home/NewsGrid";
 import { ClientMap } from "@/components/home/ClientMap";
 
 export default function Home() {
@@ -23,7 +22,6 @@ export default function Home() {
         <FullStackLab />
         <ProcessFlow />
         <ClientStories />
-        <NewsGrid />
         <ClientMap />
       </main>
     </div>
