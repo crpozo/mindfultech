@@ -55,24 +55,31 @@ export function AiOffice() {
   return (
     <section id="ai-office" style={{ position: "relative", background: "#f4efe3", padding: "var(--section-y) 0" }}>
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
+        {/* two columns: the claim on the left, the explanation and the CTA on
+            the right, bottoms aligned — the header used to stack everything in
+            the left half and leave the right half of the row empty */}
         <div className="aio-head">
-          <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
-          <h2
-            style={{
-              fontWeight: 500,
-              fontSize: "clamp(34px,3.4vw,54px)",
-              letterSpacing: "-.02em",
-              lineHeight: 1.06,
-              margin: "14px 0 0",
-              color: "var(--ink)",
-              maxWidth: 760,
-            }}
-          >
-            {t.title}
-          </h2>
-          <p style={{ fontSize: 18, lineHeight: 1.55, color: "#4c4a55", margin: "20px 0 0", maxWidth: 680 }}>{t.sub}</p>
+          <div>
+            <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
+            <h2
+              style={{
+                fontWeight: 500,
+                fontSize: "clamp(34px,3.4vw,54px)",
+                letterSpacing: "-.02em",
+                lineHeight: 1.06,
+                margin: "14px 0 0",
+                color: "var(--ink)",
+              }}
+            >
+              {t.title}
+            </h2>
+          </div>
+          <div className="aio-head-copy">
+          <p style={{ fontSize: 18, lineHeight: 1.55, color: "#4c4a55", margin: 0, maxWidth: 560 }}>{t.sub}</p>
           <Link
             href="/office-demo/"
+            target="_blank"
+            rel="noopener"
             className="btn-dark"
             style={{
               textDecoration: "none",
@@ -91,11 +98,15 @@ export function AiOffice() {
           >
             {t.cta}
           </Link>
+          </div>
         </div>
 
-        {/* the office itself; the whole picture opens the demo */}
+        {/* the office itself; the whole picture opens the demo, in a new tab
+            like the button, so the site stays open behind it */}
         <Link
           href="/office-demo/"
+          target="_blank"
+          rel="noopener"
           aria-label={t.cta}
           className="aio-card"
           style={{
