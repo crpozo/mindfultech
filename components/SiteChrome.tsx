@@ -8,9 +8,9 @@ import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 /**
  * Marketing chrome (contact footer, WhatsApp bubble, route loader) shown on
  * every public page — but not on the private tools (/tasks, /finance,
- * /fitness), which are standalone app screens.
+ * /fitness) or the /office-demo client demo, which are standalone screens.
  */
-const PRIVATE = ["/tasks", "/finance", "/fitness"];
+const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo"];
 
 export function SiteChrome() {
   const pathname = usePathname();

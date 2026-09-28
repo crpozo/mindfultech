@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useLang } from "../i18n";
 import { Brain3D } from "./Brain3D";
 
@@ -26,21 +27,17 @@ const MARQUEE: { name: string; img?: string; h?: number; w?: number }[] = [
   { name: "PARC Home Care", img: "/parc-logo-m.webp", h: LOGO_H, w: 86 },
 ];
 
-// Discipline chips floating around the 3D brain (percent coords of the stage).
-// `key` matches BRAIN_REGIONS — clicking one flies the brain to that region
-// and opens the note underneath.
+// Discipline chips around the 3D scene. The scene anchors each one to a 3D
+// region every frame (Brain3D.tsx / heroScene.js); clicking one flies to that
+// region or morphs the swarm into that discipline, and opens the note below.
 const CHIPS: {
   key: string;
   label: { en: string; es: string };
-  x: number;
-  y: number;
   note: { en: string; es: string };
 }[] = [
   {
     key: "ux",
     label: { en: "UX RESEARCH", es: "UX RESEARCH" },
-    x: 15,
-    y: 27,
     note: {
       en: "We listen first: goals, users and constraints. Research-driven prototypes get tested with real people before a line of production code is written.",
       es: "Primero escuchamos: objetivos, usuarios y restricciones. Los prototipos nacen de investigación y se prueban con personas reales antes de escribir código de producción.",
@@ -49,8 +46,6 @@ const CHIPS: {
   {
     key: "agents",
     label: { en: "AI AGENTS", es: "AGENTES DE IA" },
-    x: 85,
-    y: 24,
     note: {
       en: "Agents that do real work in production, like the one running a US clinic's billing cycle end to end, with a human check where it counts.",
       es: "Agentes que hacen trabajo real en producción, como el que corre el ciclo de facturación de una clínica en EE. UU. de inicio a fin, con revisión humana donde importa.",
@@ -59,8 +54,6 @@ const CHIPS: {
   {
     key: "cloud",
     label: { en: "AWS CLOUD", es: "AWS CLOUD" },
-    x: 88,
-    y: 60,
     note: {
       en: "Serverless on AWS: the infrastructure behind custom CRMs, transactional email and integrations, monitored and accounted for after launch.",
       es: "Serverless sobre AWS: la infraestructura detrás de CRMs a medida, email transaccional e integraciones, monitoreada y con responsabilidad después del launch.",
@@ -69,8 +62,6 @@ const CHIPS: {
   {
     key: "code",
     label: { en: "FULL-STACK CODE", es: "CÓDIGO FULL-STACK" },
-    x: 15,
-    y: 66,
     note: {
       en: "Next.js, Python and Odoo, shipped weekly as working software. Automated tests, QA and a security review before every release.",
       es: "Next.js, Python y Odoo, entregados semanalmente como software funcionando. Pruebas automatizadas, QA y revisión de seguridad antes de cada release.",
@@ -79,8 +70,6 @@ const CHIPS: {
   {
     key: "mobile",
     label: { en: "MOBILE APPS", es: "APPS MÓVILES" },
-    x: 50,
-    y: 88,
     note: {
       en: "Apps that reach the stores: EventFlow on the App Store for USFQ, PARC Connect on both stores from a single Flutter codebase.",
       es: "Apps que llegan a las tiendas: EventFlow en el App Store para la USFQ, y PARC Connect en ambas tiendas desde un solo código Flutter.",
@@ -93,6 +82,8 @@ export function Hero() {
   const es = lang === "es";
   const marqRef = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState<string | null>(null);
+  const [hover, setHover] = React.useState<string | null>(null);
+  const chipEls = React.useRef<Record<string, HTMLElement | null>>({});
   const chip = CHIPS.find((c) => c.key === active) ?? null;
 
   React.useEffect(() => {
@@ -208,26 +199,31 @@ export function Hero() {
             aspectRatio: "640 / 520",
           }}
         >
-          <Brain3D focus={active} />
-          {CHIPS.map((c, i) => {
+          <Brain3D focus={active} hover={hover} chipEls={chipEls} />
+          {CHIPS.map((c) => {
             const on = active === c.key;
             return (
               <div
                 key={c.key}
+                ref={(el) => {
+                  chipEls.current[c.key] = el;
+                }}
                 style={{
+                  // the scene sets transform/opacity/z-index every frame
                   position: "absolute",
-                  left: `${c.x}%`,
-                  top: `${c.y}%`,
-                  transform: "translate(-50%,-50%)",
-                  zIndex: on ? 3 : 2,
+                  left: 0,
+                  top: 0,
+                  zIndex: 2,
                   opacity: 0,
-                  animation: `mtChipIn .6s ease ${900 + i * 150}ms forwards`,
+                  willChange: "transform",
                 }}
               >
                 <button
                   type="button"
                   aria-pressed={on}
                   onClick={() => setActive(on ? null : c.key)}
+                  onMouseEnter={() => setHover(c.key)}
+                  onMouseLeave={() => setHover(null)}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -247,10 +243,6 @@ export function Hero() {
                       : "0 12px 28px -14px rgba(14,13,18,.3)",
                     whiteSpace: "nowrap",
                     transition: "background .25s ease, color .25s ease, border-color .25s ease",
-                    /* the bob pauses while open so the note stays put */
-                    animation: on
-                      ? "none"
-                      : `mtChipBob ${3.4 + i * 0.4}s ease-in-out ${-i * 1.1}s infinite`,
                   }}
                 >
                   <span
@@ -295,14 +287,12 @@ export function Hero() {
                   animation: "mtfade .3s ease both",
                 }}
               >
-                {/* notch, nudged toward the chip that opened it so the card
-                    reads as its callout instead of a loose panel */}
                 <span
                   aria-hidden
                   style={{
                     position: "absolute",
                     top: -6,
-                    left: `${Math.min(88, Math.max(12, ((chip.x - 26) / 48) * 100))}%`,
+                    left: "50%",
                     width: 11,
                     height: 11,
                     background: "#fff",
@@ -417,9 +407,8 @@ export function Hero() {
             >
               {es ? "EMPIEZA A CONSTRUIR" : "START BUILDING"}
             </a>
-            <a
-              href="#contact"
-              onClick={openForm}
+            <Link
+              href="/office-demo/"
               className="btn-light"
               style={{
                 textDecoration: "none",
@@ -429,15 +418,19 @@ export function Hero() {
                 letterSpacing: ".12em",
                 background: "#fff",
                 color: "var(--ink)",
-                border: "1.5px solid rgba(14,13,18,.28)",
-                padding: "14.5px 26px",
+                border: "1.5px solid rgba(79,174,135,.6)",
+                padding: "14.5px 22px",
                 borderRadius: 6,
                 boxShadow: "0 8px 20px -14px rgba(14,13,18,.35)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 9,
                 transition: "background .2s",
               }}
             >
-              {es ? "HABLEMOS" : "CONTACT SALES"}
-            </a>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.25)", flex: "none" }} />
+              {es ? "VER LA OFICINA DE GESTIÓN IA" : "SEE THE AI MANAGEMENT OFFICE"}
+            </Link>
           </div>
         </div>
       </div>
