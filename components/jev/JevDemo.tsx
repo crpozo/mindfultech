@@ -103,10 +103,9 @@ const SAMPLES: Sample[] = [
 
 const T = {
   en: {
-    kicker: "DEMO · SIMULATED",
-    title: "A general LLM and Jev, on the same message",
-    sub: "Jev is TypeSafe's System One model: instead of writing a reply, it answers typed questions with probabilities in about 150 ms. Below, the same real-world message goes to both.",
-    note: "This page is a simulation. It makes no API calls: the answers are recorded and the timings are the typical ones (a general LLM streaming a paragraph in 2.5–3.5 s, Jev in ~150 ms). Ask us for a live run on your own data.",
+    kicker: "JEV · DEMO",
+    title: "A super fast AI model",
+    sub: "Typed answers in about 150 ms. Try it.",
     tabs: ["LLM vs Jev", "Lead router"],
     pick: "Pick a message",
     run: "SEND TO BOTH",
@@ -128,10 +127,9 @@ const T = {
     footer: "Built by MindfulTech with TypeSafe's Jev. Simulated for the web; the production version runs the same questions against the live model.",
   },
   es: {
-    kicker: "DEMO · SIMULADA",
-    title: "Un LLM general y Jev, con el mismo mensaje",
-    sub: "Jev es el modelo System One de TypeSafe: en vez de redactar una respuesta, contesta preguntas tipadas con probabilidades en unos 150 ms. Abajo, el mismo mensaje real va a los dos.",
-    note: "Esta página es una simulación. No llama a ninguna API: las respuestas están grabadas y los tiempos son los típicos (un LLM general escribe un párrafo en 2,5–3,5 s, Jev responde en ~150 ms). Pídenos una corrida en vivo con tus propios datos.",
+    kicker: "JEV · DEMO",
+    title: "Un modelo de IA superrápido",
+    sub: "Respuestas tipadas en unos 150 ms. Pruébalo.",
     tabs: ["LLM vs Jev", "Router de leads"],
     pick: "Elige un mensaje",
     run: "ENVIAR A LOS DOS",
@@ -301,7 +299,6 @@ export function JevDemo() {
             <Pill>{t.kicker}</Pill>
             <h1>{t.title}</h1>
             <p className="jev-sub">{t.sub}</p>
-            <p className="jev-note">{t.note}</p>
           </div>
         </section>
         <section className="jev-body">
