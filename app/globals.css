@@ -1892,3 +1892,6 @@ a:hover {
   .jev-row { grid-template-columns: 1fr; gap: 4px; }
 }
 @media (max-width: 640px) { .jev-lanes { grid-template-columns: 1fr 1fr; } }
+.jev-clock { font-family: var(--mono); font-size: 13px; color: #6b6875; font-variant-numeric: tabular-nums; }
+.jev-clock.done { color: #2e6e63; font-weight: 600; }
+.jev-verdict { margin-top: 18px; padding: 14px 18px; border-radius: 10px; background: #0e0d12; color: #fff; font-size: 15px; line-height: 1.5; animation: jevIn .35s ease both; }
