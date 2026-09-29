@@ -13,6 +13,7 @@ import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useLang } from "@/components/i18n";
 import { Pill } from "@/components/internal/Shared";
+import { ImageSearch } from "./ImageSearch";
 
 const MONO = "var(--mono)";
 type Bi = { en: string; es: string };
@@ -103,11 +104,10 @@ const SAMPLES: Sample[] = [
 
 const T = {
   en: {
-    kicker: "DEMO · SIMULATED",
-    title: "A general LLM and Jev, on the same message",
-    sub: "Jev is TypeSafe's System One model: instead of writing a reply, it answers typed questions with probabilities in about 150 ms. Below, the same real-world message goes to both.",
-    note: "This page is a simulation. It makes no API calls: the answers are recorded and the timings are the typical ones (a general LLM streaming a paragraph in 2.5–3.5 s, Jev in ~150 ms). Ask us for a live run on your own data.",
-    tabs: ["LLM vs Jev", "Lead router"],
+    kicker: "JEV · DEMO",
+    title: "A super fast AI model",
+    sub: "Typed answers in about 150 ms. Try it.",
+    tabs: ["LLM vs Jev", "Lead router", "Image search"],
     pick: "Pick a message",
     run: "SEND TO BOTH",
     running: "RUNNING…",
@@ -119,6 +119,7 @@ const T = {
     q: { urgent: "Is this urgent?", intent: "What does the sender want?", team: "Which team should own it?", churn: "Risk of losing the customer" },
     yes: "yes", route: "Route to", escalate: "Escalate to a person",
     latency: "Latency", tokens: "Output", tokensLlm: "≈ {n} words to read", tokensJev: "4 typed answers",
+    faster: "Jev answered {x}× faster, and the code had already routed the message before the LLM finished its first sentence.",
     routerTitle: "The same judgments, running a queue",
     routerSub: "Messages arrive every few seconds. Jev scores each one; the code decides where it goes. Move the threshold: the policy changes without calling the model again.",
     threshold: "Minimum confidence to auto-route",
@@ -128,11 +129,10 @@ const T = {
     footer: "Built by MindfulTech with TypeSafe's Jev. Simulated for the web; the production version runs the same questions against the live model.",
   },
   es: {
-    kicker: "DEMO · SIMULADA",
-    title: "Un LLM general y Jev, con el mismo mensaje",
-    sub: "Jev es el modelo System One de TypeSafe: en vez de redactar una respuesta, contesta preguntas tipadas con probabilidades en unos 150 ms. Abajo, el mismo mensaje real va a los dos.",
-    note: "Esta página es una simulación. No llama a ninguna API: las respuestas están grabadas y los tiempos son los típicos (un LLM general escribe un párrafo en 2,5–3,5 s, Jev responde en ~150 ms). Pídenos una corrida en vivo con tus propios datos.",
-    tabs: ["LLM vs Jev", "Router de leads"],
+    kicker: "JEV · DEMO",
+    title: "Un modelo de IA superrápido",
+    sub: "Respuestas tipadas en unos 150 ms. Pruébalo.",
+    tabs: ["LLM vs Jev", "Router de leads", "Búsqueda de imágenes"],
     pick: "Elige un mensaje",
     run: "ENVIAR A LOS DOS",
     running: "CORRIENDO…",
@@ -144,6 +144,7 @@ const T = {
     q: { urgent: "¿Es urgente?", intent: "¿Qué quiere quien escribe?", team: "¿Qué equipo debe atenderlo?", churn: "Riesgo de perder al cliente" },
     yes: "sí", route: "Enviar a", escalate: "Escalar a una persona",
     latency: "Latencia", tokens: "Salida", tokensLlm: "≈ {n} palabras por leer", tokensJev: "4 respuestas tipadas",
+    faster: "Jev respondió {x} veces más rápido, y el código ya había enrutado el mensaje antes de que el LLM terminara su primera frase.",
     routerTitle: "Los mismos juicios, atendiendo una cola",
     routerSub: "Llegan mensajes cada pocos segundos. Jev puntúa cada uno; el código decide a dónde va. Mueve el umbral: la política cambia sin volver a llamar al modelo.",
     threshold: "Confianza mínima para enrutar solo",
@@ -166,13 +167,17 @@ function Compare({ lang }: { lang: "en" | "es" }) {
   const [llmMs, setLlmMs] = React.useState<number | null>(null);
   const [jevMs, setJevMs] = React.useState<number | null>(null);
   const [jevOn, setJevOn] = React.useState(false);
+  const [clock, setClock] = React.useState(0);
   const timers = React.useRef<number[]>([]);
-  const stop = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+  const raf = React.useRef<number | null>(null);
+  const stop = () => { timers.current.forEach(clearTimeout); timers.current = []; if (raf.current) cancelAnimationFrame(raf.current); raf.current = null; };
   React.useEffect(() => stop, []);
 
   const run = () => {
     stop(); setPhase("running"); setLlmText(""); setLlmMs(null); setJevMs(null); setJevOn(false);
     const t0 = performance.now();
+    const tickClock = () => { setClock(performance.now() - t0); raf.current = requestAnimationFrame(tickClock); };
+    raf.current = requestAnimationFrame(tickClock);
     // Jev: one round trip, ~150 ms
     const jevAt = rnd(130, 190);
     timers.current.push(window.setTimeout(() => { setJevOn(true); setJevMs(Math.round(performance.now() - t0)); }, jevAt));
@@ -184,7 +189,7 @@ function Compare({ lang }: { lang: "en" | "es" }) {
       const cut = Math.round((full.length * i) / steps);
       timers.current.push(window.setTimeout(() => {
         setLlmText(full.slice(0, cut));
-        if (i === steps) { setLlmMs(Math.round(performance.now() - t0)); setPhase("done"); }
+        if (i === steps) { setLlmMs(Math.round(performance.now() - t0)); setPhase("done"); if (raf.current) cancelAnimationFrame(raf.current); raf.current = null; }
       }, at));
     }
   };
@@ -209,7 +214,7 @@ function Compare({ lang }: { lang: "en" | "es" }) {
 
       <div className="jev-cols">
         <div className="jev-col">
-          <div className="jev-colhead"><strong>{t.llmCol}</strong><span>{t.llmHint}</span></div>
+          <div className="jev-colhead"><strong>{t.llmCol}</strong><span className="jev-clock">{phase === "running" ? `${(clock / 1000).toFixed(2)} s` : llmMs != null ? `${(llmMs / 1000).toFixed(2)} s` : t.llmHint}</span></div>
           <div className="jev-stream">{llmText || (phase === "running" ? <em>{t.waitingLlm}</em> : <em>—</em>)}{phase === "running" && llmText && <span className="jev-caret" />}</div>
           <div className="jev-meta">
             <span>{t.latency}: <b>{llmMs != null ? `${(llmMs / 1000).toFixed(2)} s` : phase === "running" ? "…" : "—"}</b></span>
@@ -217,7 +222,7 @@ function Compare({ lang }: { lang: "en" | "es" }) {
           </div>
         </div>
         <div className="jev-col jev-col-jev">
-          <div className="jev-colhead"><strong>{t.jevCol}</strong><span>{t.jevHint}</span></div>
+          <div className="jev-colhead"><strong>{t.jevCol}</strong><span className={`jev-clock${jevOn ? " done" : ""}`}>{jevOn && jevMs != null ? `✓ ${jevMs} ms` : phase === "running" ? `${Math.round(clock)} ms` : t.jevHint}</span></div>
           <div className={`jev-answers${jevOn ? " on" : ""}`}>
             <div className="jev-row"><span className="jev-q">{t.q.urgent}</span><span className="jev-a"><Bar p={sel.jev.urgent} /> <b>{pct(sel.jev.urgent)}</b> {t.yes}</span></div>
             <div className="jev-row"><span className="jev-q">{t.q.intent}</span><span className="jev-a jev-dist">{top.map((o) => <span key={o.label.en}><Bar p={o.p} /> <b>{pct(o.p)}</b> {o.label[lang]}</span>)}</span></div>
@@ -231,6 +236,9 @@ function Compare({ lang }: { lang: "en" | "es" }) {
           </div>
         </div>
       </div>
+      {llmMs != null && jevMs != null && (
+        <div className="jev-verdict">{t.faster.replace("{x}", String(Math.round(llmMs / jevMs)))}</div>
+      )}
     </div>
   );
 }
@@ -301,7 +309,6 @@ export function JevDemo() {
             <Pill>{t.kicker}</Pill>
             <h1>{t.title}</h1>
             <p className="jev-sub">{t.sub}</p>
-            <p className="jev-note">{t.note}</p>
           </div>
         </section>
         <section className="jev-body">
@@ -311,13 +318,15 @@ export function JevDemo() {
                 <button key={label} role="tab" aria-selected={tab === i} type="button" className={`jev-tab${tab === i ? " on" : ""}`} onClick={() => setTab(i)}>{label}</button>
               ))}
             </div>
-            {tab === 0 ? <Compare lang={lang} /> : (
+            {tab === 0 && <Compare lang={lang} />}
+            {tab === 1 && (
               <div>
                 <h2 className="jev-h2">{t.routerTitle}</h2>
                 <p className="jev-sub" style={{ marginBottom: 22 }}>{t.routerSub}</p>
                 <Router lang={lang} />
               </div>
             )}
+            {tab === 2 && <ImageSearch lang={lang} />}
             <p className="jev-footer" style={{ fontFamily: MONO }}>{t.footer}</p>
           </div>
         </section>
