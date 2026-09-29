@@ -13,6 +13,7 @@ import * as React from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useLang } from "@/components/i18n";
 import { Pill } from "@/components/internal/Shared";
+import { ImageSearch } from "./ImageSearch";
 
 const MONO = "var(--mono)";
 type Bi = { en: string; es: string };
@@ -106,7 +107,7 @@ const T = {
     kicker: "JEV · DEMO",
     title: "A super fast AI model",
     sub: "Typed answers in about 150 ms. Try it.",
-    tabs: ["LLM vs Jev", "Lead router"],
+    tabs: ["LLM vs Jev", "Lead router", "Image search"],
     pick: "Pick a message",
     run: "SEND TO BOTH",
     running: "RUNNING…",
@@ -131,7 +132,7 @@ const T = {
     kicker: "JEV · DEMO",
     title: "Un modelo de IA superrápido",
     sub: "Respuestas tipadas en unos 150 ms. Pruébalo.",
-    tabs: ["LLM vs Jev", "Router de leads"],
+    tabs: ["LLM vs Jev", "Router de leads", "Búsqueda de imágenes"],
     pick: "Elige un mensaje",
     run: "ENVIAR A LOS DOS",
     running: "CORRIENDO…",
@@ -317,13 +318,15 @@ export function JevDemo() {
                 <button key={label} role="tab" aria-selected={tab === i} type="button" className={`jev-tab${tab === i ? " on" : ""}`} onClick={() => setTab(i)}>{label}</button>
               ))}
             </div>
-            {tab === 0 ? <Compare lang={lang} /> : (
+            {tab === 0 && <Compare lang={lang} />}
+            {tab === 1 && (
               <div>
                 <h2 className="jev-h2">{t.routerTitle}</h2>
                 <p className="jev-sub" style={{ marginBottom: 22 }}>{t.routerSub}</p>
                 <Router lang={lang} />
               </div>
             )}
+            {tab === 2 && <ImageSearch lang={lang} />}
             <p className="jev-footer" style={{ fontFamily: MONO }}>{t.footer}</p>
           </div>
         </section>
