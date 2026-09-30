@@ -428,7 +428,7 @@ export function whiteboard(ctx, x, h, z, yaw, w = 1.9, hh = 1.3) {
   const { B, M, y } = ctx;
   const f = fwd(yaw);
   B.add(rbox(w, hh, 0.04, 0.01), M.steel, mat4(x, y + h, z, 0, yaw, 0));
-  const wb = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.1, hh - 0.1), new THREE.MeshStandardMaterial({ map: T.whiteboard(), roughness: 0.35 }));
+  const wb = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.1, hh - 0.1), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.whiteboard(), roughness: 0.35 }));
   wb.position.set(x + f.x * 0.025, y + h, z + f.z * 0.025);
   wb.rotation.y = yaw;
   ctx.S.add(wb);
@@ -438,7 +438,7 @@ export function sign(ctx, x, h, z, yaw, lines, bg, fg, w = 1.4, hh = 0.7) {
   const { B, M, y } = ctx;
   const f = fwd(yaw);
   B.add(rbox(w + 0.1, hh + 0.1, 0.06, 0.03), std(bg, 0.8), mat4(x, y + h, z, 0, yaw, 0));
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: T.signText(lines, bg, fg, 512, Math.round((512 * hh) / w)), roughness: 0.8 }));
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(lines, bg, fg, 512, Math.round((512 * hh) / w)), roughness: 0.8 }));
   m.position.set(x + f.x * 0.035, y + h, z + f.z * 0.035);
   m.rotation.y = yaw;
   ctx.S.add(m);
@@ -447,7 +447,7 @@ export function picture(ctx, x, h, z, yaw, seed) {
   const { B, M, y } = ctx;
   const f = fwd(yaw);
   B.add(rbox(0.5, 0.36, 0.03, 0.005), M.chairDark, mat4(x, y + h, z, 0, yaw, 0));
-  const pic = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.3), new THREE.MeshStandardMaterial({ map: T.picture(seed), roughness: 0.8 }));
+  const pic = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.3), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.picture(seed), roughness: 0.8 }));
   pic.position.set(x + f.x * 0.02, y + h, z + f.z * 0.02);
   pic.rotation.y = yaw;
   ctx.S.add(pic);
@@ -471,7 +471,7 @@ export function clock(ctx, x, h, z, yaw) {
 }
 export function stickyWall(ctx, x, h, z, yaw, w = 2.0, hh = 1.4) {
   const f = fwd(yaw);
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: T.stickyWall(), roughness: 0.9 }));
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.stickyWall(), roughness: 0.9 }));
   m.position.set(x + f.x * 0.01, ctx.y + h, z + f.z * 0.01);
   m.rotation.y = yaw;
   ctx.S.add(m);
@@ -660,7 +660,7 @@ export function reception(ctx, x, z) {
   B.add(rbox(2.6, 1.05, 0.7, 0.05), M.navy, mat4(x, y + 0.525, z));
   B.add(rbox(2.7, 0.05, 0.8, 0.02), M.lightWood, mat4(x, y + 1.07, z));
   B.add(box(2.4, 0.04, 0.5), M.lightWood, mat4(x, y + 0.72, z - 0.15));
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.36), new THREE.MeshStandardMaterial({ map: T.signText(["MINDFULTECH"], "#3d4a7a", "#ffffff", 512, 116), roughness: 0.8 }));
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.36), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(["MINDFULTECH"], "#3d4a7a", "#ffffff", 512, 116), roughness: 0.8 }));
   logo.position.set(x, y + 0.62, z + 0.36);
   ctx.S.add(logo);
   B.add(cyl(0.11, 0.13, 0.02, 20), M.screenBezel, mat4(x + 0.7, y + 1.1, z - 0.1));
@@ -886,7 +886,7 @@ export function receptionRound(ctx, x, z, yaw = 0) {
   B.add(box(2 * r, 1.02, 0.06), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
   p = at(0.3, 0, 0.72);
   B.add(box(2 * r - 0.3, 0.04, 0.55), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.2), new THREE.MeshStandardMaterial({ map: T.signText(["BIENVENIDOS"], "#e0b87a", "#2a2320", 512, 114), roughness: 0.8 }));
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.2), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(["BIENVENIDOS"], "#e0b87a", "#2a2320", 512, 114), roughness: 0.8 }));
   p = at(r + 0.012, 0, 0.6);
   logo.position.set(p[0], p[1], p[2]);
   logo.rotation.y = yaw;

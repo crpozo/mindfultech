@@ -82,7 +82,9 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0.35;
 
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.6, 120);
+  // near=2: the orbit never gets closer than 4 units, and a longer near plane
+  // is what the depth buffer needs to stop wall decals fighting their walls
+  const camera = new THREE.PerspectiveCamera(30, 1, 2, 120);
   // seen from the front-left corner, like the reference
   const REST_TARGET = new THREE.Vector3(0.3, 1.4, 1.4);
   const REST_DIR = new THREE.Vector3(-1, 0.95, 1).normalize();
@@ -114,7 +116,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   sun.shadow.camera.top = 17;
   sun.shadow.camera.bottom = -17;
   sun.shadow.bias = -0.0005;
-  sun.shadow.normalBias = 0.03;
+  sun.shadow.normalBias = 0.05;
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
   scene.add(new THREE.HemisphereLight("#dbe7ff", "#7a6a55", 0.9));
