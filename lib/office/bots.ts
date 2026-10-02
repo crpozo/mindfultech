@@ -10,7 +10,7 @@
  */
 import type { Lang } from "./i18n";
 
-export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops";
+export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops" | "procurement";
 
 /** How the character is built (see components/office/scene/character.js). */
 export type Look = {
@@ -359,6 +359,40 @@ const BASE: Bot[] = [
     ],
     quick: ["¿Qué estás haciendo ahora?", "¿Quién viene hoy?", "Dame un resumen de hoy"],
   },
+  {
+    // Compras: la agente que revisa "Seguimiento Proveedores.xlsx" para
+    // Jabonería Wilson. Va al final a propósito: la recepción es bots[10] por
+    // índice en room.js, y este escritorio es el 11.
+    id: "renata",
+    name: "Renata",
+    role: "Compras",
+    title: "AI Procurement Agent",
+    color: "#cdd6f4",
+    accent: "#4f5fb8",
+    look: { skin: "#d9a98a", hair: "#2a1a12", hairStyle: "bob", eyes: "dark", lips: "#b5443c", shirt: "#f4f4f6", shirtStyle: "blouse", sleeves: "long", jacket: "#2f3a7a", pants: "#23242e", shoes: "#111114", shoeStyle: "flats", glasses: true, lanyard: "#4f5fb8" },
+    screen: "procurement",
+    working: [
+      "Revisando Seguimiento Proveedores.xlsx",
+      "Enviando recordatorios del martes a proveedores",
+      "Cruzando fechas de recepción con el ERP",
+      "Esperando confirmación de 14 proveedores",
+    ],
+    kpis: [
+      { label: "OC abiertas", value: "692" },
+      { label: "Líneas atrasadas", value: "1.077" },
+      { label: "Recordatorios hoy", value: "14" },
+    ],
+    replies: [
+      [["hac", "ahora", "trabaj"], "Estoy revisando Seguimiento Proveedores.xlsx: 692 órdenes de compra abiertas, 1.077 líneas atrasadas y 300 en tránsito. Hoy es día de recordatorio (martes y jueves): ya envié 14 correos a proveedores con la OC, el código del artículo y la fecha de recepción comprometida, y estoy esperando sus confirmaciones."],
+      [["resumen", "hoy", "reporte"], "Resumen: la columna de fecha de recepción manda. 1.077 líneas pasaron esa fecha sin material; la mediana de atraso es de 98 días y la peor OC lleva 862. Lo más crítico es material de empaque: 278 líneas, varias de tarrinas y tapas con 10.000 a 20.000 unidades pendientes."],
+      [["pendiente", "falta", "siguiente"], "Pendiente: 9 proveedores no han respondido al recordatorio de la semana pasada; el jueves les escribo de nuevo y, si siguen sin confirmar, te lo escalo con la lista. También tengo 6 OC con fecha de recepción ya vencida que el ERP sigue marcando en tránsito: necesito que alguien confirme si llegaron."],
+      [["proveedor", "oc", "orden", "atras"], "Puedo darte el detalle por OC o por proveedor: qué se pidió, cuántas unidades faltan, el lead time acordado y cuántos días lleva de atraso. Dime el número de OC o el nombre del proveedor."],
+      [["correo", "whatsapp", "notific", "aviso"], "Los recordatorios salen por correo martes y jueves, con copia a Compras. Cuando el proveedor responde, registro la nueva fecha prometida en la hoja y te aviso solo si cambia más de una semana."],
+      [["hola", "buen"], "¡Hola! Soy Renata, llevo el seguimiento de proveedores de Jabonería Wilson: reviso la hoja de órdenes de compra, recuerdo a los proveedores dos veces por semana y registro sus confirmaciones. ¿Qué quieres saber?"],
+      [[], "Anotado. Lo reviso contra la hoja de seguimiento y te confirmo en cuanto tenga la respuesta del proveedor."],
+    ],
+    quick: ["¿Qué estás haciendo ahora?", "¿Qué OC están más atrasadas?", "¿Quién no ha confirmado?"],
+  },
 ];
 
 /* Shared English keyword stems (matched with lowercase `includes`, see `reply`). */
@@ -373,6 +407,30 @@ const Q_PENDING = "What's still pending?";
 
 /** English overlay, by bot id. */
 const EN: Record<string, BotText> = {
+  renata: {
+    role: "Procurement",
+    working: [
+      "Reviewing Seguimiento Proveedores.xlsx",
+      "Sending Tuesday's reminders to suppliers",
+      "Matching receipt dates against the ERP",
+      "Waiting on 14 supplier confirmations",
+    ],
+    kpis: [
+      { label: "Open POs", value: "692" },
+      { label: "Late lines", value: "1,077" },
+      { label: "Reminders today", value: "14" },
+    ],
+    replies: [
+      [K_NOW, "I'm going through Seguimiento Proveedores.xlsx: 692 open purchase orders, 1,077 late lines and 300 in transit. Today is a reminder day (Tuesdays and Thursdays): I've sent 14 emails to suppliers with the PO, the item code and the promised receipt date, and I'm waiting on their confirmations."],
+      [K_SUMMARY, "Summary: the receipt-date column rules. 1,077 lines are past that date with no material; the median delay is 98 days and the worst PO is 862 days late. Packaging is the critical group: 278 lines, several of tubs and caps with 10,000 to 20,000 units pending."],
+      [K_PENDING, "Pending: 9 suppliers haven't answered last week's reminder; I'll write again on Thursday and escalate the list to you if they still don't confirm. I also have 6 POs past their receipt date that the ERP still shows in transit: someone needs to confirm whether they arrived."],
+      [["supplier", "vendor", "po", "order", "late"], "I can give you the detail per PO or per supplier: what was ordered, how many units are missing, the agreed lead time and how many days late it is. Give me the PO number or the supplier's name."],
+      [["email", "whatsapp", "notif", "remind"], "Reminders go out by email on Tuesdays and Thursdays, copying Purchasing. When a supplier replies I record the new promised date in the sheet and only ping you if it moves by more than a week."],
+      [K_HELLO, "Hi! I'm Renata, I run supplier follow-up for Jabonería Wilson: I review the purchase-order sheet, remind suppliers twice a week and log their confirmations. What would you like to know?"],
+      [[], "Noted. I'll check it against the follow-up sheet and confirm as soon as the supplier answers."],
+    ],
+    quick: ["What are you doing right now?", "Which POs are the most late?", "Who hasn't confirmed?"],
+  },
   sofia: {
     role: "Sales",
     working: [

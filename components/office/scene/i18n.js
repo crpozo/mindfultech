@@ -21,7 +21,7 @@ export const T = {
     },
     /** Wall signs; each entry is the list of lines drawn on one sign (same sign sizes in both languages). */
     signs: {
-      logo: ["MINDFULTECH"],
+      logo: ["JABONERÍA WILSON"],
       future: ["CONSTRUIMOS EL FUTURO", "CON CALMA Y PROPÓSITO"],
       calm: ["PENSAR CON CALMA,", "CREAR CON PROPÓSITO"],
       doNow: ["HAZLO", "AHORA"],
@@ -107,7 +107,7 @@ export const T = {
       lounge: "Agent performance",
     },
     signs: {
-      logo: ["MINDFULTECH"],
+      logo: ["JABONERÍA WILSON"],
       future: ["WE BUILD THE FUTURE", "CALMLY, WITH PURPOSE"],
       calm: ["THINK CALMLY,", "CREATE WITH PURPOSE"],
       doNow: ["DO IT", "NOW"],

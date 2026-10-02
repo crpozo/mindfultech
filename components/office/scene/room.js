@@ -335,6 +335,9 @@ export function buildRoom(scene, bots, lang = "es") {
   desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
   stations[stations.length - 2].approach = { x: -0.15, z: -1.2 };
   stations[stations.length - 1].approach = { x: 1.85, z: -1.2 };
+  // third studio desk, in line with the first: procurement (bots[11])
+  desk({ x: -0.15, z: -2.4, yaw: PI / 2 }, bots[11], 11, u);
+  stations[stations.length - 1].approach = { x: -0.15, z: -1.2 };
   F.stickyWall(uw, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
   F.plant(u, 0.3, -5.5, 0.8);
   nav1.blockCircle(0.3, -5.5, 0.18);

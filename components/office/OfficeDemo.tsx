@@ -232,8 +232,8 @@ export function OfficeDemo() {
     {
       title: t("El equipo", "The team"),
       text: t(
-        "«Equipo» muestra a los 11 agentes, qué está haciendo cada uno en este momento y en qué sala está. Un clic sobre cualquiera lo selecciona.",
-        "“Team” lists the 11 agents, what each one is doing right now and which room it is in. Click anyone to select them.",
+        "«Equipo» muestra a los 12 agentes, qué está haciendo cada uno en este momento y en qué sala está. Un clic sobre cualquiera lo selecciona.",
+        "“Team” lists the 12 agents, what each one is doing right now and which room it is in. Click anyone to select them.",
       ),
       target: "team",
       enter: () => {
@@ -433,8 +433,10 @@ export function OfficeDemo() {
 
       <header className={s.top}>
         <Link href="/" className={s.brand}>
-          <Logo size={22} />
-          <strong>MindfulTech</strong>
+          {/* client demo: Jabonería Wilson's mark instead of ours */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/office/wilson-logo.webp" alt="" width={26} height={26} style={{ borderRadius: "50%" }} />
+          <strong>Jabonería Wilson</strong>
           <span>{t("Oficina de empleados IA · demo", "AI Management Office · demo")}</span>
         </Link>
         <div className={s.tools}>

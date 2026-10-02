@@ -839,6 +839,105 @@ function WhatsApp({ bot, lang }: { bot: Bot; lang: Lang }) {
 }
 
 // ------------------------------------------------------------ activity log ----
+/** Seguimiento Proveedores.xlsx (Jabonería Wilson), a handful of real rows:
+    order date, receipt date, PO, description, pending qty, lead time (days),
+    status, days late (negative = still ahead of the receipt date). */
+const PROC_ROWS: [string, string, string, string, number, number, "ATRASADO" | "EN TRANSITO", number][] = [
+  ["06/07/2026", "24/07/2026", "OC070129", "TARRINA PRINT LAVAX ROSADO 235 G", 10000, 60, "ATRASADO", 63],
+  ["17/08/2026", "07/09/2026", "OC071363", "CAJA INSECTICIDA SAPOLIO PACK 360 ML", 4000, 10, "ATRASADO", 18],
+  ["21/09/2026", "21/09/2026", "OC072540", "MATERIAL BRANDING TH", 1, 0, "ATRASADO", 4],
+  ["02/11/2026", "02/11/2026", "OC072592", "TAPA ROJA P/A CLO-AZU SUPER/AK", 12000, 31, "EN TRANSITO", -38],
+  ["05/11/2026", "05/11/2026", "OC072588", "LAMINA LAVAVAJILLA LIQUIDO LAVA GRANADA", 300, 30, "EN TRANSITO", -41],
+  ["12/11/2026", "12/11/2026", "OC072584", "LAMINA BARRA DIAMANTE 250 G", 300, 33, "EN TRANSITO", -48],
+  ["16/11/2026", "16/11/2026", "OC071994", "LAM PD GOL FLORAL CON ENZ 500 G", 4000, 48, "EN TRANSITO", -52],
+  ["23/11/2026", "23/11/2026", "OC072442", "LAMINA SUAVIZANTE GOL PRIMAVERAL 450 ML", 700, 33, "EN TRANSITO", -59],
+  ["27/11/2026", "27/11/2026", "OC071068", "ENVASE PLAST CAFE JAB ESPUM MISTY 250", 10000, 120, "EN TRANSITO", -63],
+  ["14/12/2026", "14/12/2026", "OC071602", "TAPA DOSIFICADOR D28 CAFE 175 MM", 20000, 105, "EN TRANSITO", -80],
+];
+function Procurement({ lang }: { lang: Lang }) {
+  const t = tx(lang);
+  const tick = useTick(1300);
+  const n = tick % (PROC_ROWS.length + 4);
+  const cell = Math.min(n, PROC_ROWS.length) + 1;
+  const date = (d: string) => (lang === "es" ? d : d.split("/").reverse().join("/"));
+  const menu = lang === "es" ? ["Archivo", "Inicio", "Insertar", "Fórmulas", "Datos", "Revisar", "Vista", "Automatizar"] : ["File", "Home", "Insert", "Formulas", "Data", "Review", "View", "Automate"];
+  const headers = lang === "es" ? ["FECHA_PEDIDO", "FECHA_RECEPCIÓN", "OC", "DESCRIPCIÓN", "CANT. PEND.", "LEAD TIME", "ESTATUS", "DÍAS", "SEGUIMIENTO"] : ["ORDER_DATE", "RECEIPT_DATE", "PO", "DESCRIPTION", "PENDING", "LEAD TIME", "STATUS", "DAYS", "FOLLOW-UP"];
+  const formula = lang === "es" ? `fx =SI(HOY()>B${cell};"ATRASADO";"EN TRANSITO")` : `fx =IF(TODAY()>B${cell},"LATE","IN TRANSIT")`;
+  const follow = (r: (typeof PROC_ROWS)[number], i: number) => {
+    if (i > n) return "";
+    if (i === n) return t("Enviando recordatorio…", "Sending reminder…");
+    return r[6] === "ATRASADO" ? t("Recordatorio enviado · mar/jue", "Reminder sent · Tue/Thu") : t("Esperando confirmación", "Awaiting confirmation");
+  };
+  const status = (st: string) => (lang === "es" ? st : st === "ATRASADO" ? "LATE" : "IN TRANSIT");
+  return (
+    <div className={s.sh}>
+      <div className={s.shTop}>
+        <span className={s.shLogo} style={{ background: "#217346" }}>X</span>
+        <div>
+          <div className={s.shTitle}>Seguimiento Proveedores.xlsx · Jabonería Wilson ☆</div>
+          <div className={s.shMenu}>
+            {menu.map((m) => (
+              <span key={m}>{m}</span>
+            ))}
+          </div>
+        </div>
+        <span className={s.tag} style={{ marginLeft: "auto", background: "#e6f4ea", color: "#137333" }}>
+          ● {t("Guardado · OneDrive", "Saved · OneDrive")}
+        </span>
+        <span className={s.btn} style={{ background: "#217346", color: "#fff" }}>
+          {t("Compartir", "Share")}
+        </span>
+      </div>
+      <div className={s.shTools}>
+        <span>↶ ↷</span>
+        <span>Calibri ▾</span>
+        <span>11 ▾</span>
+        <span>B I S</span>
+        <span>{t("Formato condicional ▾", "Conditional formatting ▾")}</span>
+        <span>{t("Filtro", "Filter")} ⏷</span>
+      </div>
+      <div className={s.shFormula}>
+        <span className={s.cell}>G{cell}</span>
+        <span className={s.fx}>{formula}</span>
+      </div>
+      <table className={s.grid}>
+        <thead>
+          <tr>
+            <th style={{ width: 34 }} />
+            {["A", "B", "C", "D", "E", "F", "G", "H", "I"].map((c) => (
+              <th key={c}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>1</th>
+            {headers.map((h) => (
+              <td key={h} style={{ fontWeight: 600, background: "#f1f3f4", whiteSpace: "nowrap" }}>
+                {h}
+              </td>
+            ))}
+          </tr>
+          {PROC_ROWS.map((r, i) => (
+            <tr key={r[2]}>
+              <th>{i + 2}</th>
+              <td>{date(r[0])}</td>
+              <td style={{ fontWeight: 600 }}>{date(r[1])}</td>
+              <td>{r[2]}</td>
+              <td style={{ maxWidth: 230, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r[3]}</td>
+              <td className={s.num}>{r[4].toLocaleString(LOCALE[lang])}</td>
+              <td className={s.num}>{r[5]}</td>
+              <td className={r[6] === "ATRASADO" ? s.warn : s.ok}>{status(r[6])}</td>
+              <td className={s.num}>{r[7]}</td>
+              <td className={i === n ? s.sel : ""}>{follow(r, i)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 const LOG_POOL: Record<Bot["screen"], Pair[]> = {
   sales: [
     { es: "Lead calificado: Hotel Casa Gangotena (score 74)", en: "Lead qualified: Hotel Casa Gangotena (score 74)" },
@@ -884,6 +983,15 @@ const LOG_POOL: Record<Bot["screen"], Pair[]> = {
     { es: "Flujo de caja recalculado", en: "Cash flow recalculated" },
     { es: "Gasto categorizado: software ($129)", en: "Expense categorized: software ($129)" },
     { es: "Reporte mensual exportado a PDF", en: "Monthly report exported to PDF" },
+  ],
+  procurement: [
+    { es: "Hoja leída: 1.377 líneas · 692 OC abiertas", en: "Sheet read: 1,377 lines · 692 open POs" },
+    { es: "Recordatorio enviado · OC070129 (63 días)", en: "Reminder sent · PO070129 (63 days late)" },
+    { es: "Recordatorio enviado · OC071363 (18 días)", en: "Reminder sent · PO071363 (18 days late)" },
+    { es: "Proveedor confirmó nueva fecha · OC072592", en: "Supplier confirmed new date · PO072592" },
+    { es: "Fecha de recepción actualizada en la hoja", en: "Receipt date updated in the sheet" },
+    { es: "ERP: 6 OC vencidas siguen en tránsito · escalado", en: "ERP: 6 overdue POs still in transit · escalated" },
+    { es: "Próximo recordatorio: jueves 08:00", en: "Next reminder: Thursday 08:00" },
   ],
   ops: [
     { es: "Cita confirmada: G. Mora · mañana 16:30", en: "Appointment confirmed: G. Mora · tomorrow 4:30 pm" },
@@ -931,6 +1039,7 @@ const APP: Record<Bot["screen"], { name: string; doc: string; dock: number; lett
   social: { name: "Meta Business Suite", doc: "business.facebook.com/latest/planner", dock: 4, letter: "M", cursor: [[520, 300], [800, 380], [880, 505], [640, 200]], toast: ["#1877f2", "Instagram", { es: "63 comentarios nuevos en tu reel", en: "63 new comments on your reel" }] },
   dev: { name: "Visual Studio Code", doc: "shop — coupon.ts", dock: 6, letter: "</>", cursor: [[500, 200], [560, 260], [420, 470], [720, 480]], toast: ["#24292f", "GitHub", { es: "CI verde en PR #482 ✓", en: "CI green on PR #482 ✓" }] },
   finance: { name: "Google Sheets", doc: "docs.google.com/spreadsheets/d/1kX…/edit", dock: 5, letter: "≣", cursor: [[760, 290], [780, 330], [420, 200], [760, 420]], toast: ["#0f9d58", "Google Sheets", { es: "Camila editó 6 celdas", en: "Camila edited 6 cells" }] },
+  procurement: { name: "Microsoft Excel", doc: "Seguimiento Proveedores.xlsx", dock: 5, letter: "X", cursor: [[760, 300], [860, 340], [420, 220], [860, 460]], toast: ["#217346", "Outlook", { es: "Proveedor respondió: OC072592 confirmada", en: "Supplier replied: PO072592 confirmed" }] },
   ops: { name: "WhatsApp Business", doc: "web.whatsapp.com", dock: 3, letter: "W", cursor: [[640, 500], [560, 380], [200, 300], [840, 500]], toast: ["#25d366", "WhatsApp", { es: "Luis Vega: ¿Pueden mover mi cita?", en: "Luis Vega: Can you move my appointment?" }] },
 };
 
@@ -959,6 +1068,8 @@ function Screen({ bot, lang, big }: { bot: Bot; lang: Lang; big?: boolean }) {
       <VSCode lang={lang} />
     ) : bot.screen === "finance" ? (
       <Sheets lang={lang} />
+    ) : bot.screen === "procurement" ? (
+      <Procurement lang={lang} />
     ) : (
       <WhatsApp bot={bot} lang={lang} />
     );
