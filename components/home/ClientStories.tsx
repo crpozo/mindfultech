@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 
 const MONO = "var(--mono)";
 
@@ -131,32 +132,12 @@ export function ClientStories() {
   return (
     <section id="stories" className="pf-section">
       <div className="pf-head">
-        <h2
-          style={{
-            fontWeight: 500,
-            fontSize: "clamp(32px,3.4vw,52px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.05,
-            margin: 0,
-            color: "#fff",
-          }}
-        >
-          {es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
-        </h2>
-        <p
-          style={{
-            fontSize: 18,
-            lineHeight: 1.5,
-            color: "#8f8ba4",
-            fontWeight: 400,
-            maxWidth: 620,
-            margin: "14px auto 0",
-          }}
-        >
-          {es
-            ? "Siete productos en producción: explóralos uno a uno."
-            : "Seven products in production: explore them one by one."}
-        </p>
+        <SectionHead
+          dark
+          kicker={es ? "PROYECTOS" : "SELECTED WORK"}
+          title={es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
+          sub={es ? "Siete productos en producción: explóralos uno a uno." : "Seven products in production: explore them one by one."}
+        />
       </div>
 
       <div className="pf-carousel">

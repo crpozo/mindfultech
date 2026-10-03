@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 
 const MONO = "var(--mono)";
 
@@ -55,36 +56,15 @@ export function PlatformStats() {
   return (
     <section
       id="platform"
-      style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0 0" }}
+      style={{ position: "relative", background: "#fff", padding: "var(--section-y) 0" }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <h2
-          style={{
-            textAlign: "center",
-            fontWeight: 500,
-            fontSize: "clamp(34px,3.6vw,56px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.05,
-            margin: 0,
-            color: "var(--ink)",
-          }}
-        >
-          {es ? "La diferencia MindfulTech" : "The MindfulTech difference"}
-        </h2>
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 19,
-            lineHeight: 1.5,
-            /* darker muted — #8b8896 was 3.5:1 on white, this is 5.3:1 */
-            color: "#6d6a77",
-            fontWeight: 400,
-            maxWidth: 620,
-            margin: "18px auto 54px",
-          }}
-        >
-          {es ? "Resultados medidos en diseño, ingeniería y automatización con IA." : "Measured results across design, engineering, and AI automation."}
-        </p>
+        <SectionHead
+          kicker={es ? "RESULTADOS" : "RESULTS"}
+          title={es ? "La diferencia MindfulTech" : "The MindfulTech difference"}
+          sub={es ? "Resultados medidos en diseño, ingeniería y automatización con IA." : "Measured results across design, engineering, and AI automation."}
+          style={{ marginBottom: 54 }}
+        />
 
         <div
           className="stack-3"
@@ -93,13 +73,11 @@ export function PlatformStats() {
           {CARDS.map((c) => (
             <div
               key={c.value}
-              className="stat-card"
+              className="stat-card tint-card"
               style={
                 {
-                  position: "relative",
                   background: c.bg,
-                  borderRadius: 8,
-                  padding: "22px 22px 20px",
+                  padding: "24px 24px 22px",
                   minHeight: 230,
                   display: "flex",
                   flexDirection: "column",
@@ -137,7 +115,7 @@ export function PlatformStats() {
               >
                 {c.value}
               </span>
-              <span style={{ marginTop: "auto", fontSize: 13.5, color: c.captionColor }}>
+              <span style={{ marginTop: "auto", fontSize: 15, lineHeight: 1.5, maxWidth: 330, color: c.captionColor }}>
                 {c.caption[lang]}
               </span>
               <Link
@@ -153,13 +131,11 @@ export function PlatformStats() {
                   fontWeight: 500,
                   letterSpacing: ".12em",
                   color: "#0e0d12",
-                  marginTop: 10,
-                  opacity: 0,
-                  transform: "translateY(6px)",
-                  transition: "opacity .35s ease,transform .35s ease",
+                  marginTop: 14,
                 }}
               >
                 {es ? "VER CÓMO" : "LEARN HOW"}
+                <span className="stat-more-arrow" aria-hidden>→</span>
               </Link>
               {c.connector && (
                 <span
@@ -179,14 +155,6 @@ export function PlatformStats() {
           ))}
         </div>
 
-        {/* section rule — four segments on desktop; on a phone the grid
-            collapses to one column, so the segments would stack into four
-            stray lines. `.ps-rule` keeps it a single rule there. */}
-        <div className="ps-rule" style={{ marginTop: 96 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <span key={i} style={{ borderTop: "1px solid rgba(14,13,18,.16)" }} />
-          ))}
-        </div>
       </div>
     </section>
   );

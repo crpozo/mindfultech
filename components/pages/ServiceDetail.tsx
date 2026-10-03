@@ -592,19 +592,17 @@ export function ServiceDetail({ slug }: { slug: string }) {
               {s.why.map((w, i) => (
                 <div
                   key={w.title}
+                  className="tint-card"
                   style={{
-                    position: "relative",
                     background: WHY_COLORS[i][0],
-                    borderRadius: 8,
-                    padding: 24,
-                    minHeight: 210,
+                    padding: "26px 26px 24px",
+                    minHeight: 200,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
                   }}
                 >
-                  <div style={{ fontWeight: 500, fontSize: 21, letterSpacing: "-.01em" }}>{w.title}</div>
-                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: WHY_COLORS[i][1] }}>{w.desc}</div>
+                  <div style={{ fontWeight: 500, fontSize: 22, letterSpacing: "-.01em", lineHeight: 1.2 }}>{w.title}</div>
+                  <div style={{ fontSize: 15, lineHeight: 1.55, color: WHY_COLORS[i][1], marginTop: 12, maxWidth: 360 }}>{w.desc}</div>
                   {i < 2 && (
                     <span
                       style={{
