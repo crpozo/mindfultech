@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 90% at 50% 32%, #d8caab 0%, #cbbc9d 48%, #b7a583 100%);
+  background: radial-gradient(120% 90% at 50% 32%, #eef2f5 0%, #e3e9ed 48%, #d6dfe6 100%);
   color: #0e0d12;
   overflow: hidden;
   font-family: var(--font-outfit), system-ui, sans-serif;
@@ -18,7 +18,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(80% 70% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(72, 52, 20, 0.28) 100%);
+  background: radial-gradient(80% 70% at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(30, 40, 55, 0.2) 100%);
   z-index: 1;
 }
 
@@ -111,7 +111,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #e3d8bf, #cbbc9d);
+  background: linear-gradient(180deg, #f2f5f8, #e3e9ed);
   z-index: 5;
   transition: opacity 0.6s ease;
 }
@@ -273,10 +273,26 @@
   }
 }
 .markerIcon {
-  font-size: 15px;
-  line-height: 1;
+  display: grid;
+  place-items: center;
   width: 18px;
-  text-align: center;
+  height: 18px;
+  color: #2e6e63;
+}
+.markerIcon svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+.marker:hover .markerIcon,
+.markerActive .markerIcon {
+  color: #9be7d6;
+}
+.avatarIcon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  color: #0e0d12;
 }
 .markerName {
   display: none;

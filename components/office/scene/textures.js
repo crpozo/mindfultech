@@ -540,3 +540,129 @@ export function pingpongTop() {
   g.stroke();
   return tex(c, { wrap: false, aniso: 4 });
 }
+
+// ---------------------------------------------------------------- redesign ----
+// Oak, slats, pavers and facades for the warm-industrial look and the campus.
+
+/** Oak herringbone, planks 1:4 laid at 45°; the tile covers 2 m × 2 m, so a
+    plank is about 9 × 35 cm. In the frame where planks are axis-aligned the
+    pattern repeats every 8 plank widths (lattice (5,3)/(−1,1), vertical plank
+    4 widths to the right); rotated 45° that is a square of side 8·W·√2, and
+    two of those fit the tile. */
+export function herringbone() {
+  const S = 1024, c = makeCanvas(S, S), g = c.getContext("2d");
+  const W = S / (16 * Math.SQRT2), L = 4 * W;
+  g.fillStyle = "#7d5233";
+  g.fillRect(0, 0, S, S);
+  g.save();
+  g.translate(S / 2, S / 2);
+  g.rotate(Math.PI / 4);
+  const plank = (x, y, w, h) => {
+    const t = rnd(0.86, 1.14);
+    g.fillStyle = `rgb(${Math.round(198 * t)},${Math.round(152 * t)},${Math.round(104 * t)})`;
+    g.fillRect(x + 1, y + 1, w - 2, h - 2);
+    g.strokeStyle = "rgba(60,35,15,0.16)";
+    g.lineWidth = 1;
+    for (let k = 0; k < 3; k++) {
+      g.beginPath();
+      if (w > h) { const yy = y + 3 + Math.random() * (h - 6); g.moveTo(x + 2, yy); g.lineTo(x + w - 2, yy + rnd(-2, 2)); }
+      else { const xx = x + 3 + Math.random() * (w - 6); g.moveTo(xx, y + 2); g.lineTo(xx + rnd(-2, 2), y + h - 2); }
+      g.stroke();
+    }
+    g.fillStyle = "rgba(255,240,220,0.08)";
+    g.fillRect(x + 1, y + 1, w - 2, 2);
+  };
+  for (let i = -12; i <= 12; i++)
+    for (let j = -44; j <= 44; j++) {
+      const ox = (5 * i - j) * W, oy = (3 * i + j) * W;
+      if (Math.abs(ox) > S || Math.abs(oy) > S) continue;
+      plank(ox, oy, L, W);
+      plank(ox + L, oy, W, L);
+    }
+  g.restore();
+  grain(g, S, S, 5000, 0.07, false);
+  return tex(c, { repeat: [1, 1] });
+}
+
+/** Vertical oak slats on a dark backing, for feature walls; tile = 1 m × 1 m. */
+export function slats() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#2a2320";
+  g.fillRect(0, 0, S, S);
+  const n = 12, pitch = S / n, w = pitch * 0.62;
+  for (let i = 0; i < n; i++) {
+    const x = i * pitch + (pitch - w) / 2, t = rnd(0.9, 1.1);
+    g.fillStyle = `rgb(${Math.round(192 * t)},${Math.round(144 * t)},${Math.round(98 * t)})`;
+    g.fillRect(x, 0, w, S);
+    g.fillStyle = "rgba(255,235,210,0.16)";
+    g.fillRect(x, 0, 3, S);
+    g.fillStyle = "rgba(40,20,10,0.28)";
+    g.fillRect(x + w - 4, 0, 4, S);
+    g.strokeStyle = "rgba(70,40,20,0.14)";
+    g.lineWidth = 1;
+    for (let k = 0; k < 4; k++) {
+      const xx = x + 4 + Math.random() * (w - 8);
+      g.beginPath();
+      g.moveTo(xx, 0);
+      g.lineTo(xx + rnd(-3, 3), S);
+      g.stroke();
+    }
+  }
+  return tex(c, { repeat: [1, 1] });
+}
+
+/** Light concrete pavers for the plaza; tile = 2 m × 2 m (4 × 4 pavers). */
+export function pavers() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#b4afa5";
+  g.fillRect(0, 0, S, S);
+  const n = 4, p = S / n;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) {
+      const t = rnd(0.94, 1.06);
+      g.fillStyle = `rgb(${Math.round(212 * t)},${Math.round(206 * t)},${Math.round(194 * t)})`;
+      g.fillRect(i * p + 2, j * p + 2, p - 4, p - 4);
+    }
+  grain(g, S, S, 6000, 0.08, false);
+  grain(g, S, S, 3000, 0.1, true);
+  return tex(c);
+}
+
+/** Asphalt; tile = 4 m × 4 m. */
+export function asphalt() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#5a5d64";
+  g.fillRect(0, 0, S, S);
+  grain(g, S, S, 5000, 0.12, true);
+  grain(g, S, S, 5000, 0.18, false);
+  return tex(c);
+}
+
+/** One parking bay with white lines; tile = 2.7 m × 5.2 m. */
+export function parkingBay() {
+  const c = makeCanvas(128, 256), g = c.getContext("2d");
+  g.fillStyle = "#5a5d64";
+  g.fillRect(0, 0, 128, 256);
+  grain(g, 128, 256, 1500, 0.15, true);
+  g.fillStyle = "rgba(240,240,236,0.85)";
+  g.fillRect(0, 0, 5, 256);
+  g.fillRect(123, 0, 5, 256);
+  g.fillRect(0, 0, 128, 5);
+  return tex(c);
+}
+
+/** Glass office facade: 4 × 6 window bays, a few lit; tile = 12 m × 21.6 m. */
+export function facade(tone = "#3a4656", lit = 0.28) {
+  const W = 256, H = 384, c = makeCanvas(W, H), g = c.getContext("2d");
+  g.fillStyle = "#1f2328";
+  g.fillRect(0, 0, W, H);
+  const cols = 4, rows = 6, cw = W / cols, rh = H / rows;
+  for (let i = 0; i < cols; i++)
+    for (let j = 0; j < rows; j++) {
+      g.fillStyle = Math.random() < lit ? "#efe6cc" : tone;
+      g.fillRect(i * cw + 4, j * rh + 4, cw - 8, rh - 10);
+      g.fillStyle = "rgba(255,255,255,0.10)";
+      g.fillRect(i * cw + 4, j * rh + 4, cw - 8, 6);
+    }
+  return tex(c);
+}

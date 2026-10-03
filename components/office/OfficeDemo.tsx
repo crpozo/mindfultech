@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { iconSvg } from "@/components/office/icons";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { botsFor, botById, type Bot } from "@/lib/office/bots";
@@ -663,9 +664,7 @@ export function OfficeDemo() {
         {hot && hotspot && (
           <>
             <div className={s.panelHead}>
-              <span className={s.avatar} style={{ fontSize: 20 }}>
-                {hot.icon}
-              </span>
+              <span className={`${s.avatar} ${s.avatarIcon}`} dangerouslySetInnerHTML={{ __html: iconSvg(hotspot) }} />
               <div className={s.panelTitle}>
                 <strong>{hot.title}</strong>
                 <span>{hot.subtitle}</span>
