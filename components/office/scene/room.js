@@ -345,9 +345,9 @@ export function buildRoom(scene, bots, lang = "es") {
   F.highTable(u, 3.12, -4.7, 0.35);
   F.stool(u, 3.12, -5.4);
   F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#e08a5c", "#ffffff", 1.0, 0.7);
-  // cafeteria
-  F.sign(uw, 4.9, 2.25, z0 + 0.14, 0, L.signs.think, "#e08a5c", "#ffffff", 1.3, 0.8);
-  F.tv(uw, 6.3, 1.85, z0 + 0.14, 0, 1.6, 0.9);
+  // cafeteria: the screen alone, centred on the wall panel between the phone
+  // booth sign (ends at x≈3.6) and the counter (starts at x≈6.6)
+  F.tv(uw, 5.15, 1.85, z0 + 0.14, 0, 1.6, 0.9);
   const bar = F.cafeCounter(u, 8.0, -4.6, 0, 2.8);
   for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
   for (const [x, z] of [[5.4, -2.95], [5.4, -1.45], [9.35, -1.6], [8.6, -2.35], [9.35, 1.4], [8.6, 2.15], [6.0, 3.55], [5.25, 2.8], [6.75, 2.8]]) F.stool(u, x, z);
@@ -446,7 +446,7 @@ export function buildRoom(scene, bots, lang = "es") {
   const H = L.hotspots;
   const hotspots = [
     { id: "board", name: H.board, icon: "📋", x: LNG + 0.1, y: UPPER_Y + 1.7, z: -3.6, w: 0.3, h: 1.4, d: 2.3, floor: 1 },
-    { id: "tv", name: H.tv, icon: "📺", x: 6.3, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
+    { id: "tv", name: H.tv, icon: "📺", x: 5.15, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
     { id: "coffee", name: H.coffee, icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
     { id: "printer", name: H.printer, icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
     { id: "shelf", name: H.shelf, icon: "📚", x: 1.5, y: 1.4, z: STAIRS.z1 + 0.22, w: 4.4, h: 2.8, d: 0.44, floor: 0 },

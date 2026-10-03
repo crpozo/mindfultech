@@ -62,7 +62,11 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const roomNames = roomNamesFor(lang);
 
   // ------------------------------------------------------------ renderer ----
-  const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Never below 1.75: on a 1× monitor the mullions, railings and chair legs
+  // are thinner than a pixel at this distance and shimmer as the camera
+  // damps; rendering at 1.75× (then downsampled) steadies them. The adaptive
+  // loop below still drops it on slow machines.
+  const maxDpr = Math.min(Math.max(window.devicePixelRatio || 1, 1.75), 2);
   let dpr = maxDpr;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(dpr);
