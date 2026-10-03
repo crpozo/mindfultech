@@ -815,7 +815,7 @@ function ReceptionPanel({ onOpenBot, lang }: PanelProps) {
           );
         })}
       </div>
-      <div className={s.note}>{t("Atiende Ana · registro con cédula · Wi-Fi de invitados: Wilson-Guest", "Ana at the front desk · sign in with ID · Guest Wi-Fi: Wilson-Guest")}</div>
+      <div className={s.note}>{t("Atiende Ana · registro con cédula · Wi-Fi de invitados: Office-Guest", "Ana at the front desk · sign in with ID · Guest Wi-Fi: Office-Guest")}</div>
     </div>
   );
 }

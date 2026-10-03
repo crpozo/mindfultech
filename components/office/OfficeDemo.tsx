@@ -433,11 +433,9 @@ export function OfficeDemo() {
 
       <header className={s.top}>
         <Link href="/" className={s.brand}>
-          {/* client demo: Jabonería Wilson's mark instead of ours */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/office/wilson-logo.webp" alt="" width={26} height={26} style={{ borderRadius: "50%" }} />
-          <strong>Jabonería Wilson</strong>
-          <span>{t("Oficina de empleados IA · demo", "AI Management Office · demo")}</span>
+          {/* white label: no logo, no company name — the product name only */}
+          <strong>AI Management Office</strong>
+          <span>{t("demo", "demo")}</span>
         </Link>
         <div className={s.tools}>
           <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""} ${tour?.target === "team" ? s.tourGlow : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>

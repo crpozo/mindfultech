@@ -839,7 +839,7 @@ function WhatsApp({ bot, lang }: { bot: Bot; lang: Lang }) {
 }
 
 // ------------------------------------------------------------ activity log ----
-/** Seguimiento Proveedores.xlsx (Jabonería Wilson), a handful of real rows:
+/** Seguimiento Proveedores.xlsx (the client's sheet), a handful of real rows:
     order date, receipt date, PO, description, pending qty, lead time (days),
     status, days late (negative = still ahead of the receipt date). */
 const PROC_ROWS: [string, string, string, string, number, number, "ATRASADO" | "EN TRANSITO", number][] = [
@@ -874,7 +874,7 @@ function Procurement({ lang }: { lang: Lang }) {
       <div className={s.shTop}>
         <span className={s.shLogo} style={{ background: "#217346" }}>X</span>
         <div>
-          <div className={s.shTitle}>Seguimiento Proveedores.xlsx · Jabonería Wilson ☆</div>
+          <div className={s.shTitle}>Seguimiento Proveedores.xlsx ☆</div>
           <div className={s.shMenu}>
             {menu.map((m) => (
               <span key={m}>{m}</span>

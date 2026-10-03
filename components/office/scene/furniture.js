@@ -660,7 +660,7 @@ export function reception(ctx, x, z) {
   B.add(rbox(2.6, 1.05, 0.7, 0.05), M.navy, mat4(x, y + 0.525, z));
   B.add(rbox(2.7, 0.05, 0.8, 0.02), M.lightWood, mat4(x, y + 1.07, z));
   B.add(box(2.4, 0.04, 0.5), M.lightWood, mat4(x, y + 0.72, z - 0.15));
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.36), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(["JABONERÍA WILSON"], "#1b2a7a", "#ffffff", 512, 116), roughness: 0.8 }));
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.36), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(["AI MANAGEMENT OFFICE"], "#3d4a7a", "#ffffff", 512, 116), roughness: 0.8 }));
   logo.position.set(x, y + 0.62, z + 0.36);
   ctx.S.add(logo);
   B.add(cyl(0.11, 0.13, 0.02, 20), M.screenBezel, mat4(x + 0.7, y + 1.1, z - 0.1));

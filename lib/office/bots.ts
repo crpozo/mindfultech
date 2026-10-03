@@ -361,7 +361,7 @@ const BASE: Bot[] = [
   },
   {
     // Compras: la agente que revisa "Seguimiento Proveedores.xlsx" para
-    // Jabonería Wilson. Va al final a propósito: la recepción es bots[10] por
+    // el cliente. Va al final a propósito: la recepción es bots[10] por
     // índice en room.js, y este escritorio es el 11.
     id: "renata",
     name: "Renata",
@@ -388,7 +388,7 @@ const BASE: Bot[] = [
       [["pendiente", "falta", "siguiente"], "Pendiente: 9 proveedores no han respondido al recordatorio de la semana pasada; el jueves les escribo de nuevo y, si siguen sin confirmar, te lo escalo con la lista. También tengo 6 OC con fecha de recepción ya vencida que el ERP sigue marcando en tránsito: necesito que alguien confirme si llegaron."],
       [["proveedor", "oc", "orden", "atras"], "Puedo darte el detalle por OC o por proveedor: qué se pidió, cuántas unidades faltan, el lead time acordado y cuántos días lleva de atraso. Dime el número de OC o el nombre del proveedor."],
       [["correo", "whatsapp", "notific", "aviso"], "Los recordatorios salen por correo martes y jueves, con copia a Compras. Cuando el proveedor responde, registro la nueva fecha prometida en la hoja y te aviso solo si cambia más de una semana."],
-      [["hola", "buen"], "¡Hola! Soy Renata, llevo el seguimiento de proveedores de Jabonería Wilson: reviso la hoja de órdenes de compra, recuerdo a los proveedores dos veces por semana y registro sus confirmaciones. ¿Qué quieres saber?"],
+      [["hola", "buen"], "¡Hola! Soy Renata, llevo el seguimiento de proveedores de la empresa: reviso la hoja de órdenes de compra, recuerdo a los proveedores dos veces por semana y registro sus confirmaciones. ¿Qué quieres saber?"],
       [[], "Anotado. Lo reviso contra la hoja de seguimiento y te confirmo en cuanto tenga la respuesta del proveedor."],
     ],
     quick: ["¿Qué estás haciendo ahora?", "¿Qué OC están más atrasadas?", "¿Quién no ha confirmado?"],
@@ -426,7 +426,7 @@ const EN: Record<string, BotText> = {
       [K_PENDING, "Pending: 9 suppliers haven't answered last week's reminder; I'll write again on Thursday and escalate the list to you if they still don't confirm. I also have 6 POs past their receipt date that the ERP still shows in transit: someone needs to confirm whether they arrived."],
       [["supplier", "vendor", "po", "order", "late"], "I can give you the detail per PO or per supplier: what was ordered, how many units are missing, the agreed lead time and how many days late it is. Give me the PO number or the supplier's name."],
       [["email", "whatsapp", "notif", "remind"], "Reminders go out by email on Tuesdays and Thursdays, copying Purchasing. When a supplier replies I record the new promised date in the sheet and only ping you if it moves by more than a week."],
-      [K_HELLO, "Hi! I'm Renata, I run supplier follow-up for Jabonería Wilson: I review the purchase-order sheet, remind suppliers twice a week and log their confirmations. What would you like to know?"],
+      [K_HELLO, "Hi! I'm Renata, I run supplier follow-up for the company: I review the purchase-order sheet, remind suppliers twice a week and log their confirmations. What would you like to know?"],
       [[], "Noted. I'll check it against the follow-up sheet and confirm as soon as the supplier answers."],
     ],
     quick: ["What are you doing right now?", "Which POs are the most late?", "Who hasn't confirmed?"],
