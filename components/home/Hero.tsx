@@ -398,24 +398,25 @@ export function Hero() {
           >
             {es ? "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada." : "Full-stack software lab, powered by UX research and applied AI."}
           </p>
-          <div style={{ display: "flex", gap: 14, marginTop: 28, flexWrap: "wrap" }}>
+          <div className="hero-ctas" style={{ display: "flex", gap: 14, marginTop: 28, flexWrap: "wrap" }}>
             <a
               href="#contact"
               onClick={openForm}
-              className="btn-dark"
+              className="btn-dark hero-cta"
               style={ctaDark}
             >
               {es ? "EMPIEZA A CONSTRUIR" : "START BUILDING"}
             </a>
             <Link
               href="/office-demo/"
-              className="btn-light"
+              className="btn-light hero-cta"
               style={{
                 textDecoration: "none",
                 fontFamily: MONO,
                 fontSize: 13,
                 fontWeight: 500,
                 letterSpacing: ".12em",
+                whiteSpace: "nowrap",
                 background: "#fff",
                 color: "var(--ink)",
                 border: "1.5px solid rgba(79,174,135,.6)",
@@ -429,7 +430,7 @@ export function Hero() {
               }}
             >
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.25)", flex: "none" }} />
-              {es ? "VER LA OFICINA DE GESTIÓN IA" : "SEE THE AI MANAGEMENT OFFICE"}
+              {es ? "OFICINA DE GESTIÓN IA" : "AI MANAGEMENT OFFICE"}
             </Link>
           </div>
         </div>
