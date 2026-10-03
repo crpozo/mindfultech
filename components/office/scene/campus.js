@@ -49,14 +49,19 @@ export function buildCampus(scene) {
     G.add(m);
     return m;
   };
-  const lawn = std("#8da27c", 1); // olive, not mint: it has to sit under warm pavers
+  const lawn = new THREE.MeshStandardMaterial({ map: T.grass(), roughness: 1 });
+  lawn.map.repeat.set(175, 175);
   flat(700, 700, 0, 0, lawn, GROUND_Y - 0.02);
-  const paversMat = new THREE.MeshStandardMaterial({ map: T.pavers(), roughness: 0.95 });
+  const paverTex = T.pavers();
+  const paversMat = new THREE.MeshStandardMaterial({ map: paverTex, bumpMap: paverTex, bumpScale: 0.6, roughness: 0.95 });
   paversMat.map.repeat.set(24, 21);
   flat(48, 42, -4, 7, paversMat); // plaza: x −28…20, z −14…28
   const walkMat = new THREE.MeshStandardMaterial({ map: T.pavers(), roughness: 0.95, color: "#e2dfd6" });
   walkMat.map.repeat.set(140, 2);
   flat(280, 4, 0, 30, walkMat, GROUND_Y + 0.004); // sidewalk along the road
+  const pathMat = new THREE.MeshStandardMaterial({ map: T.pavers(), roughness: 0.95, color: "#e2dfd6" });
+  pathMat.map.repeat.set(6, 1.5);
+  flat(12, 3, -32, 6.6, pathMat, GROUND_Y + 0.003); // from the parking to the entrance
   const asphalt = new THREE.MeshStandardMaterial({ map: T.asphalt(), roughness: 1 });
   asphalt.map.repeat.set(70, 2.2);
   flat(280, 9, 0, 36.5, asphalt, GROUND_Y - 0.004); // the road
@@ -88,30 +93,98 @@ export function buildCampus(scene) {
     return m;
   };
   add(new THREE.BoxGeometry(x1 - x0 + 0.8, 0.12, z1 - z0 + 0.8), base, 0, GROUND_Y + 0.06, (z0 + z1) / 2, 0, false);
+  // The entrance is on the street side, in front of the turnstiles and the
+  // reception: two broad steps, a black steel canopy on two posts, the name
+  // on its fascia facing the parking.
   const step = std("#cfcac1", 0.9);
-  add(new THREE.BoxGeometry(7, 0.3, 0.9), step, x0 + 3.6, -0.15, z1 + 0.75);
-  add(new THREE.BoxGeometry(7, 0.3, 1.8), step, x0 + 3.6, -0.45, z1 + 1.2);
+  const EZ = 6.6, EW = 5.4;
+  add(new THREE.BoxGeometry(0.9, 0.3, EW), step, x0 - 0.85, -0.15, EZ);
+  add(new THREE.BoxGeometry(1.8, 0.3, EW), step, x0 - 1.3, -0.45, EZ);
+  // a slim canopy: it must not hide the lobby from the rest view
+  const steel = std("#1f2024", 0.5, { metalness: 0.4 });
+  const CW = 3.8, CD = 1.5;
+  add(new THREE.BoxGeometry(CD, 0.1, CW), steel, x0 - CD / 2, 3.0, EZ);
+  add(new THREE.BoxGeometry(0.06, 0.26, CW), steel, x0 - CD + 0.03, 2.98, EZ);
+  for (const dz of [-CW / 2 + 0.1, CW / 2 - 0.1]) add(new THREE.CylinderGeometry(0.035, 0.035, 3.45, 10), steel, x0 - CD + 0.1, GROUND_Y + 1.725, EZ + dz);
+  const fascia = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.2), new THREE.MeshStandardMaterial({ map: T.signText(["AI MANAGEMENT OFFICE"], "#1f2024", "#ffffff", 512, 44), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  fascia.position.set(x0 - CD - 0.005, 2.98, EZ);
+  fascia.rotation.y = -PI / 2;
+  G.add(fascia);
 
   // ------------------------------------------------------------ trees ----
-  const trunkGeo = new THREE.CylinderGeometry(0.11, 0.17, 1, 6);
-  const leafGeo = new THREE.IcosahedronGeometry(1, 1);
-  const trunk = new THREE.InstancedMesh(trunkGeo, std("#5b4332", 0.9), 160);
-  const leaves = new THREE.InstancedMesh(leafGeo, std("#ffffff", 0.95), 320);
-  trunk.castShadow = leaves.castShadow = true;
-  leaves.receiveShadow = true;
-  const greens = ["#447a40", "#5c9450", "#366d3c", "#73a05a", "#4f8446"].map((c) => new THREE.Color(c));
-  const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), SC = new THREE.Vector3();
-  let ti = 0, li = 0;
-  const tree = (x, z, s = 1) => {
-    const h = rnd(1.6, 2.4) * s, r = rnd(1.1, 1.6) * s;
-    M4.compose(V.set(x, GROUND_Y + h / 2, z), Q.identity(), SC.set(1, h, 1));
-    trunk.setMatrixAt(ti++, M4);
-    for (const [dx, dy, dz, rr] of [[0, h + r * 0.75, 0, r], [rnd(-0.5, 0.5) * r, h + r * 1.25, rnd(-0.5, 0.5) * r, r * 0.7]]) {
-      M4.compose(V.set(x + dx, GROUND_Y + dy, z + dz), Q.setFromEuler(new THREE.Euler(rnd(0, 1), rnd(0, 3), 0)), SC.set(rr, rr * 0.9, rr));
-      leaves.setMatrixAt(li, M4);
-      leaves.setColorAt(li, greens[Math.floor(Math.random() * greens.length)]);
-      li++;
+  // Card canopies: a bark-textured trunk with three branches and a cloud of
+  // leaf-cluster cards (alpha-tested, two-sided) scattered through an ellipsoid.
+  // The cards' normals point out of the crown, so it shades like a round
+  // volume rather than a stack of flat pictures. Three crown variants, all
+  // instanced: the whole campus's trees are seven draw calls.
+  const leafTex = T.leafCluster("tree");
+  const leafMat = new THREE.MeshStandardMaterial({ map: leafTex, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 1, metalness: 0 });
+  const leafDepth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: leafTex, alphaTest: 0.45 });
+  const crown = (n, rx, ry, rz, size = [0.95, 1.45]) => {
+    const pos = [], nor = [], uv = [], idx = [];
+    const p = new THREE.Vector3(), nrm = new THREE.Vector3(), R = new THREE.Vector3(), U = new THREE.Vector3(), q = new THREE.Quaternion(), e = new THREE.Euler();
+    for (let i = 0; i < n; i++) {
+      const th = rnd(0, PI * 2), ph = Math.acos(rnd(-1, 1)), rr = Math.cbrt(rnd(0.3, 1));
+      p.set(Math.sin(ph) * Math.cos(th) * rx * rr, Math.cos(ph) * ry * rr, Math.sin(ph) * Math.sin(th) * rz * rr);
+      const s = rnd(size[0], size[1]);
+      e.set(rnd(-0.6, 0.6), rnd(0, PI * 2), rnd(0, PI * 2), "YXZ");
+      q.setFromEuler(e);
+      R.set(s / 2, 0, 0).applyQuaternion(q);
+      U.set(0, s / 2, 0).applyQuaternion(q);
+      nrm.copy(p);
+      nrm.y += ry * 0.35; // lean the normals up: the light comes from above
+      nrm.normalize();
+      const base = pos.length / 3;
+      for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+        pos.push(p.x + R.x * sx + U.x * sy, p.y + R.y * sx + U.y * sy, p.z + R.z * sx + U.z * sy);
+        nor.push(nrm.x, nrm.y, nrm.z);
+        uv.push(sx > 0 ? 1 : 0, sy > 0 ? 1 : 0);
+      }
+      idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
     }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx);
+    return g;
+  };
+  const crowns = [crown(44, 1.5, 1.25, 1.5), crown(60, 1.9, 1.5, 1.9), crown(36, 1.2, 1.45, 1.2)];
+  const crownMeshes = crowns.map((gm) => {
+    const im = new THREE.InstancedMesh(gm, leafMat, 120);
+    im.customDepthMaterial = leafDepth;
+    im.castShadow = im.receiveShadow = true;
+    im.count = 0;
+    return im;
+  });
+  const barkMat = new THREE.MeshStandardMaterial({ map: T.bark(), roughness: 0.95 });
+  barkMat.map.repeat.set(2, 2);
+  const trunkGeo = new THREE.CylinderGeometry(0.08, 0.15, 1, 8);
+  trunkGeo.translate(0, 0.5, 0); // base at the origin, so y-scale is the height
+  const trunk = new THREE.InstancedMesh(trunkGeo, barkMat, 640);
+  trunk.castShadow = true;
+  trunk.count = 0;
+  const tints = ["#ffffff", "#eaf2d8", "#d4e6c2", "#f4efd4", "#d0e0ca", "#ffffff"].map((c) => new THREE.Color(c));
+  const blobGeo = new THREE.PlaneGeometry(1, 1).rotateX(-PI / 2);
+  const blobs = new THREE.InstancedMesh(blobGeo, new THREE.MeshBasicMaterial({ map: T.blob(), transparent: true, opacity: 0.3, depthWrite: false }), 240);
+  blobs.count = 0;
+  blobs.renderOrder = 1;
+  const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), SC = new THREE.Vector3(), E = new THREE.Euler();
+  const tree = (x, z, s = 1) => {
+    const k = Math.floor(Math.random() * 3), h = rnd(1.9, 2.6) * s, sc = s * rnd(0.9, 1.1), yaw = rnd(0, PI * 2);
+    const cm = crownMeshes[k];
+    M4.compose(V.set(x, GROUND_Y + h + (k === 1 ? 1.15 : 1.0) * sc, z), Q.setFromEuler(E.set(0, yaw, 0)), SC.set(sc, sc, sc));
+    cm.setMatrixAt(cm.count, M4);
+    cm.setColorAt(cm.count, tints[Math.floor(Math.random() * tints.length)]);
+    cm.count++;
+    M4.compose(V.set(x, GROUND_Y - 0.05, z), Q.identity(), SC.set(sc, h + 0.7, sc));
+    trunk.setMatrixAt(trunk.count++, M4);
+    for (const a of [yaw + 0.7, yaw + 2.9, yaw + 4.6]) {
+      M4.compose(V.set(x + Math.cos(a) * 0.08, GROUND_Y + h * 0.75, z + Math.sin(a) * 0.08), Q.setFromEuler(E.set(Math.sin(a) * 0.65, 0, -Math.cos(a) * 0.65)), SC.set(sc * 0.42, h * 0.65, sc * 0.42));
+      trunk.setMatrixAt(trunk.count++, M4);
+    }
+    M4.compose(V.set(x, GROUND_Y + 0.012, z), Q.identity(), SC.set(4.4 * sc, 1, 4.4 * sc));
+    blobs.setMatrixAt(blobs.count++, M4);
   };
   // rows along the plaza edges, the road, the parking strip and the back lawn
   for (let x = -26; x <= 18; x += 5.5) tree(x + rnd(-0.6, 0.6), -16 + rnd(-0.8, 0.8));
@@ -125,21 +198,41 @@ export function buildCampus(scene) {
     if (z > 24 || (x < -16 && z > 0 && z < 30)) continue; // not on the road or the parking
     tree(x, z - 4, rnd(0.9, 1.4));
   }
-  trunk.count = ti;
-  leaves.count = li;
-  trunk.instanceMatrix.needsUpdate = leaves.instanceMatrix.needsUpdate = true;
-  if (leaves.instanceColor) leaves.instanceColor.needsUpdate = true;
-  G.add(trunk, leaves);
+  for (const im of [...crownMeshes, trunk, blobs]) {
+    im.instanceMatrix.needsUpdate = true;
+    if (im.instanceColor) im.instanceColor.needsUpdate = true;
+    im.computeBoundingSphere();
+    G.add(im);
+  }
 
   // ------------------------------------------- hedges, planters, benches ----
-  const hedge = std("#4f8b4a", 1);
-  for (const [w, d, x, z] of [[18, 0.7, -17, -13.2], [0.7, 14, 19.4, 1], [10, 0.7, 12, 27.3], [10, 0.7, -16, 27.3]]) add(new THREE.BoxGeometry(w, 0.9, d), hedge, x, GROUND_Y + 0.45, z);
-  const planterMat = std("#2e2f33", 0.8), bush = std("#5d9450", 1);
+  // clipped hedges: boxes in a dense-leaf texture, repeated to their real size
+  const foliageTex = T.foliage();
+  for (const [w, d, x, z] of [[18, 0.7, -17, -13.2], [0.7, 14, 19.4, 1], [10, 0.7, 12, 27.3], [10, 0.7, -16, 27.3]]) {
+    const hm = new THREE.MeshStandardMaterial({ map: foliageTex.clone(), bumpMap: foliageTex, bumpScale: 0.4, roughness: 1 });
+    hm.map.repeat.set(Math.max(w, d), 0.9);
+    hm.map.needsUpdate = true;
+    add(new THREE.BoxGeometry(w, 0.9, d), hm, x, GROUND_Y + 0.45, z);
+  }
+  // planters with shrubs of leaf cards
+  const bushGeo = crown(16, 0.5, 0.4, 0.5, [0.55, 0.8]);
+  const bushTex = T.leafCluster("bush");
+  const bushMat = new THREE.MeshStandardMaterial({ map: bushTex, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 1 });
+  const bushes = new THREE.InstancedMesh(bushGeo, bushMat, 40);
+  bushes.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: bushTex, alphaTest: 0.45 });
+  bushes.castShadow = bushes.receiveShadow = true;
+  bushes.count = 0;
+  const planterMat = std("#2e2f33", 0.8);
   for (const [x, z] of [[-13.5, 12.2], [-13.5, 15.4], [-13.5, 18.6], [-2, 12.2], [6, 12.2], [14, 12.2]]) {
     add(new THREE.BoxGeometry(1.4, 0.6, 0.7), planterMat, x, GROUND_Y + 0.3, z);
-    add(new THREE.IcosahedronGeometry(0.42, 1), bush, x - 0.3, GROUND_Y + 0.85, z);
-    add(new THREE.IcosahedronGeometry(0.36, 1), bush, x + 0.35, GROUND_Y + 0.8, z + 0.05);
+    for (const [dx, dy, dz, sc] of [[-0.32, 0.95, 0, 1], [0.34, 0.9, 0.05, 0.85]]) {
+      M4.compose(V.set(x + dx, GROUND_Y + dy, z + dz), Q.setFromEuler(E.set(0, rnd(0, PI), 0)), SC.set(sc, sc, sc));
+      bushes.setMatrixAt(bushes.count++, M4);
+    }
   }
+  bushes.instanceMatrix.needsUpdate = true;
+  bushes.computeBoundingSphere();
+  G.add(bushes);
   const seat = std("#b88a5a", 0.8), legs = std("#2e2f33", 0.6);
   for (const [x, z, ry] of [[2, 15.5, 0], [10, 15.5, 0], [-18.5, 4, PI / 2]]) {
     add(new THREE.BoxGeometry(1.9, 0.08, 0.5), seat, x, GROUND_Y + 0.46, z, ry);
