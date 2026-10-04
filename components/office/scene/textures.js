@@ -529,7 +529,7 @@ export function stickyWall() {
 /** Ping-pong table top with the centre line. */
 export function pingpongTop() {
   const c = makeCanvas(256, 512), g = c.getContext("2d");
-  g.fillStyle = "#2b6cb0";
+  g.fillStyle = "#2a2e35";
   g.fillRect(0, 0, 256, 512);
   g.strokeStyle = "#ffffff";
   g.lineWidth = 6;
@@ -670,7 +670,7 @@ export function facade(tone = "#3a4656", lit = 0.28) {
 /** Wide straight oak boards (the loft reference); tile = 2 m × 2 m, ten boards of 0.2 m. */
 export function planks() {
   const S = 1024, c = makeCanvas(S, S), g = c.getContext("2d");
-  g.fillStyle = "#8a5f3c";
+  g.fillStyle = "#6e4a2e";
   g.fillRect(0, 0, S, S);
   const rows = 10, ph = S / rows;
   // a board may cross the tile's seam: paint the part that sticks out on the other side too
@@ -684,8 +684,8 @@ export function planks() {
   for (let r = 0; r < rows; r++) {
     let x = -rnd(0, 500);
     while (x < S) {
-      const w = rnd(440, 960), t = rnd(0.86, 1.12), warm = rnd(-7, 7);
-      const col = `rgb(${Math.round(196 * t + warm)},${Math.round(146 * t)},${Math.round(98 * t - warm)})`;
+      const w = rnd(440, 960), t = rnd(0.8, 1.16), warm = rnd(-8, 8);
+      const col = `rgb(${Math.round(172 * t + warm)},${Math.round(124 * t)},${Math.round(82 * t - warm)})`;
       board(x, w, r, (bx, by, bw, bh) => {
         g.fillStyle = col;
         g.fillRect(bx + 2, by + 2, bw - 4, bh - 4);

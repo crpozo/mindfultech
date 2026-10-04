@@ -6,6 +6,7 @@
 // is 0.6 m, so the campus ground sits at y = −0.6.
 import * as THREE from "three";
 import * as T from "./textures.js";
+import * as F from "./furniture.js";
 import { BLD } from "./room.js";
 
 export const GROUND_Y = -0.6;
@@ -13,11 +14,15 @@ const PI = Math.PI;
 const std = (color, roughness = 0.9, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
 const rnd = (a, b) => a + Math.random() * (b - a);
 
-export function buildCampus(scene) {
+export function buildCampus(scene, M) {
   const { x0, x1, z0, z1 } = BLD;
   const G = new THREE.Group();
   G.name = "campus";
   scene.add(G);
+  // the office builders work out here too: one batch, no nav grid to block
+  const PB = new F.Batcher(G);
+  const noNav = { block() {}, blockBox() {}, blockCircle() {}, clear() {} };
+  const ctx = { B: PB, S: G, M, y: GROUND_Y, nav: noNav, dyn: {} };
 
   // ------------------------------------------------------------- sky ----
   // Vertex-colour gradient on an inside-out sphere; drawn first, no depth,
@@ -62,6 +67,11 @@ export function buildCampus(scene) {
   const pathMat = new THREE.MeshStandardMaterial({ map: T.pavers(), roughness: 0.95, color: "#e2dfd6" });
   pathMat.map.repeat.set(6, 1.5);
   flat(12, 3, -32, 6.6, pathMat, GROUND_Y + 0.003); // from the parking to the entrance
+  const pathMat2 = pathMat.clone();
+  pathMat2.map = pathMat.map.clone();
+  pathMat2.map.repeat.set(1.5, 5);
+  pathMat2.map.needsUpdate = true;
+  flat(3, 10, 2, 23, pathMat2, GROUND_Y + 0.003); // from the front lawn to the sidewalk
   const asphalt = new THREE.MeshStandardMaterial({ map: T.asphalt(), roughness: 1 });
   asphalt.map.repeat.set(70, 2.2);
   flat(280, 9, 0, 36.5, asphalt, GROUND_Y - 0.004); // the road
@@ -94,22 +104,11 @@ export function buildCampus(scene) {
   };
   add(new THREE.BoxGeometry(x1 - x0 + 0.8, 0.12, z1 - z0 + 0.8), base, 0, GROUND_Y + 0.06, (z0 + z1) / 2, 0, false);
   // The entrance is on the street side, in front of the turnstiles and the
-  // reception: two broad steps, a black steel canopy on two posts, the name
-  // on its fascia facing the parking.
+  // reception: two broad steps up to the glass doors (no canopy: it hid the lobby).
   const step = std("#cfcac1", 0.9);
   const EZ = 6.6, EW = 5.4;
   add(new THREE.BoxGeometry(0.9, 0.3, EW), step, x0 - 0.85, -0.15, EZ);
   add(new THREE.BoxGeometry(1.8, 0.3, EW), step, x0 - 1.3, -0.45, EZ);
-  // a slim canopy: it must not hide the lobby from the rest view
-  const steel = std("#1f2024", 0.5, { metalness: 0.4 });
-  const CW = 3.8, CD = 1.5;
-  add(new THREE.BoxGeometry(CD, 0.1, CW), steel, x0 - CD / 2, 3.0, EZ);
-  add(new THREE.BoxGeometry(0.06, 0.26, CW), steel, x0 - CD + 0.03, 2.98, EZ);
-  for (const dz of [-CW / 2 + 0.1, CW / 2 - 0.1]) add(new THREE.CylinderGeometry(0.035, 0.035, 3.45, 10), steel, x0 - CD + 0.1, GROUND_Y + 1.725, EZ + dz);
-  const fascia = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.2), new THREE.MeshStandardMaterial({ map: T.signText(["AI MANAGEMENT OFFICE"], "#1f2024", "#ffffff", 512, 44), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
-  fascia.position.set(x0 - CD - 0.005, 2.98, EZ);
-  fascia.rotation.y = -PI / 2;
-  G.add(fascia);
 
   // ------------------------------------------------------------ trees ----
   // Card canopies: a bark-textured trunk with three branches and a cloud of
@@ -198,6 +197,8 @@ export function buildCampus(scene) {
     if (z > 24 || (x < -16 && z > 0 && z < 30)) continue; // not on the road or the parking
     tree(x, z - 4, rnd(0.9, 1.4));
   }
+  // the plaza's lawn beds
+  for (const [x, z, sc] of [[-3.6, 15.6, 0.85], [0.6, 16.4, 1.0], [4.0, 14.9, 0.8], [-20.5, 11.5, 0.9], [-17.5, 14.6, 1.0]]) tree(x, z, sc);
   for (const im of [...crownMeshes, trunk, blobs]) {
     im.instanceMatrix.needsUpdate = true;
     if (im.instanceColor) im.instanceColor.needsUpdate = true;
@@ -223,21 +224,17 @@ export function buildCampus(scene) {
   bushes.castShadow = bushes.receiveShadow = true;
   bushes.count = 0;
   const planterMat = std("#2e2f33", 0.8);
-  for (const [x, z] of [[-13.5, 12.2], [-13.5, 15.4], [-13.5, 18.6], [-2, 12.2], [6, 12.2], [14, 12.2]]) {
-    add(new THREE.BoxGeometry(1.4, 0.6, 0.7), planterMat, x, GROUND_Y + 0.3, z);
+  // long planters flank the entrance steps and the terrace
+  for (const [x, z, ry] of [[-12.4, 2.4, 0], [-12.4, 10.8, 0], [18.6, 9.2, PI / 2], [18.6, 17.4, PI / 2]]) {
+    add(new THREE.BoxGeometry(1.4, 0.6, 0.7), planterMat, x, GROUND_Y + 0.3, z, ry);
     for (const [dx, dy, dz, sc] of [[-0.32, 0.95, 0, 1], [0.34, 0.9, 0.05, 0.85]]) {
-      M4.compose(V.set(x + dx, GROUND_Y + dy, z + dz), Q.setFromEuler(E.set(0, rnd(0, PI), 0)), SC.set(sc, sc, sc));
+      M4.compose(V.set(x + Math.cos(ry) * dx + Math.sin(ry) * dz, GROUND_Y + dy, z - Math.sin(ry) * dx + Math.cos(ry) * dz), Q.setFromEuler(E.set(0, rnd(0, PI), 0)), SC.set(sc, sc, sc));
       bushes.setMatrixAt(bushes.count++, M4);
     }
   }
   bushes.instanceMatrix.needsUpdate = true;
   bushes.computeBoundingSphere();
   G.add(bushes);
-  const seat = std("#b88a5a", 0.8), legs = std("#2e2f33", 0.6);
-  for (const [x, z, ry] of [[2, 15.5, 0], [10, 15.5, 0], [-18.5, 4, PI / 2]]) {
-    add(new THREE.BoxGeometry(1.9, 0.08, 0.5), seat, x, GROUND_Y + 0.46, z, ry);
-    for (const s of [-0.8, 0.8]) add(new THREE.BoxGeometry(0.08, 0.42, 0.44), legs, x + Math.cos(ry) * s, GROUND_Y + 0.21, z - Math.sin(ry) * s, ry);
-  }
 
   // ------------------------------------------------------------- cars ----
   const bodyGeo = new THREE.BoxGeometry(1.85, 0.62, 4.3), cabinGeo = new THREE.BoxGeometry(1.65, 0.6, 2.2), wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.26, 12);
@@ -273,6 +270,53 @@ export function buildCampus(scene) {
     add(new THREE.CylinderGeometry(0.06, 0.09, 5.2, 8), post, x, GROUND_Y + 2.6, 31.3);
     add(new THREE.BoxGeometry(0.5, 0.14, 0.26), head, x, GROUND_Y + 5.2, 31.0);
   }
+
+  // -------------------------------------------------------------- plaza ----
+  // Two lawn beds with trees, oak benches around them, a terrace of round
+  // tables by the right wing, a red ring sculpture, a bike rack with two bikes
+  // by the entrance, a name totem by the walkway and plaza lamps.
+  const curb = std("#bdb8ae", 0.9);
+  const bed = (x, z, w, d) => {
+    const top = lawn.clone();
+    top.map = lawn.map.clone();
+    top.map.repeat.set(w / 4, d / 4);
+    top.map.needsUpdate = true;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.18, d), [curb, curb, top, curb, curb, curb]);
+    m.position.set(x, GROUND_Y + 0.09, z);
+    m.receiveShadow = true;
+    G.add(m);
+  };
+  bed(0.2, 15.6, 11.5, 5.2);
+  bed(-19, 13, 7.5, 7.5);
+  for (const [x, z, ry] of [[-3.6, 12.5, 0], [0.4, 12.5, 0], [4.4, 12.5, 0], [-2, 18.8, 0], [2.6, 18.8, 0], [-14.6, 11.4, PI / 2], [-14.6, 14.6, PI / 2], [-23.4, 13, PI / 2]]) F.oakBench(ctx, x, z, ry, 1.8);
+  // terrace: four round tables with three chairs each
+  for (const [tx, tz] of [[12.2, 11.4], [15.6, 11.4], [12.2, 15.0], [15.6, 15.0]]) {
+    F.roundTable(ctx, tx, tz, 0.42, F.DESK_H, M.darkTable, 0.15);
+    for (const a of [0.3, 2.4, 4.5]) {
+      const cx = tx + Math.cos(a) * 0.82, cz = tz + Math.sin(a) * 0.82;
+      F.simpleChair(ctx, cx, cz, Math.atan2(tx - cx, tz - cz), M.chairBlack);
+    }
+  }
+  // the ring: red steel on a concrete plinth, turned towards the entrance corner
+  PB.add(new THREE.BoxGeometry(1.6, 0.4, 1.6), curb, F.mat4(-7.2, GROUND_Y + 0.2, 19.6));
+  PB.add(new THREE.TorusGeometry(1.5, 0.11, 12, 48), M.redPipe, F.mat4(-7.2, GROUND_Y + 2.0, 19.6, 0, PI / 4, 0));
+  PB.add(new THREE.BoxGeometry(0.16, 0.5, 0.16), M.beam, F.mat4(-7.2, GROUND_Y + 0.6, 19.6));
+  // bike rack: four hoops facing the street, two bikes parked
+  for (const z of [-0.6, 0.2, 1.0, 1.8]) PB.add(new THREE.TorusGeometry(0.38, 0.03, 8, 20, PI), M.steel, F.mat4(-13.6, GROUND_Y + 0.02, z));
+  F.bike(ctx, -13.9, 0.2, 0);
+  F.bike(ctx, -13.3, 1.8, PI);
+  // name totem beside the walkway
+  PB.add(new THREE.BoxGeometry(0.28, 1.6, 2.2), M.beam, F.mat4(-15.5, GROUND_Y + 0.8, 9.6, 0, 0, 0));
+  const totem = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.26), new THREE.MeshStandardMaterial({ map: T.signText(["AI MANAGEMENT OFFICE"], "#1f2024", "#ffffff", 512, 66), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  totem.position.set(-15.645, GROUND_Y + 1.15, 9.6);
+  totem.rotation.y = -PI / 2;
+  G.add(totem);
+  // plaza lamps
+  for (const [x, z] of [[-8.5, 11.2], [7.8, 11.2], [-11.5, 22.5], [9.5, 21.5], [-26, 9.5]]) {
+    add(new THREE.CylinderGeometry(0.05, 0.07, 3.6, 8), post, x, GROUND_Y + 1.8, z);
+    add(new THREE.BoxGeometry(0.42, 0.12, 0.22), head, x, GROUND_Y + 3.6, z);
+  }
+  PB.flush();
 
   // ------------------------------------------------- neighbouring blocks ----
   // Glass offices with black frames and green roofs, like the reference: two

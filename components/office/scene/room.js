@@ -62,7 +62,7 @@ export const underDeck = (x, z) => z < D || (x > BX && z < WZ);
 /** Which room a point is in. */
 export function roomAt(x, z, y) {
   if (y > 1.6 && y < UPPER_Y - 0.05) return "stairs";
-  if (y >= UPPER_Y - 0.05) return x < LNG ? "lounge" : x > BX ? "cafe" : x < -0.8 ? "training" : x < 2.6 ? "studio" : "booth";
+  if (y >= UPPER_Y - 0.05) return x < LNG ? "lounge" : x > BX ? "cafe" : x < -0.8 ? "training" : x > 2.5 && z < -4.6 ? "booth" : "studio";
   if (z >= D) return x < LX ? "reception" : x > BX ? (z < WZ ? "nook" : "open") : "hall";
   return x < LNG ? "meeting2" : x < -0.6 ? "meeting" : x < BX ? "utility" : "servers";
 }
@@ -221,13 +221,13 @@ export function buildRoom(scene, bots, lang = "es") {
       F.simpleChair(g, x, z, Math.atan2(tx - x, tz - z), M.chairBlack);
     }
   }
-  F.plant(g, -3.5, 4.2, 0.9);
-  nav0.blockCircle(-3.5, 4.2, 0.2);
-  F.planter(g, -2.0, 3.5);
-  F.plant(g, -0.4, 5.6, 1.0);
-  nav0.blockCircle(-0.4, 5.6, 0.22);
-  F.plant(g, -1.0, 7.9, 0.9);
-  nav0.blockCircle(-1.0, 7.9, 0.2);
+  F.plant(g, -3.6, 4.5, 0.9);
+  nav0.blockCircle(-3.6, 4.5, 0.2);
+  F.planter(g, -1.6, 2.95);
+  F.plant(g, -1.4, 8.4, 1.0);
+  nav0.blockCircle(-1.4, 8.4, 0.22);
+  F.plant(g, 2.3, 8.4, 0.9);
+  nav0.blockCircle(2.3, 8.4, 0.2);
 
   // ---- open workspace: two rows of desks facing each other across an aisle that opens onto the hall ----
   for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 5.2, yaw: PI }, bots[k], k);
@@ -277,7 +277,6 @@ export function buildRoom(scene, bots, lang = "es") {
     meet2Seats.push({ x: x + Math.sin(yaw) * 0.28, z: z + Math.cos(yaw) * 0.28, yaw, sit: 0.27 });
   }
   F.tv(gw, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
-  F.curtain(gw, -9.7, -8.3, D - 0.16, 2.7);
   F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, L.signs.chimborazo, "#1b1b1f", "#ffffff", 1.4, 0.7);
   F.picture(gw, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
   F.picture(gw, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
@@ -287,7 +286,6 @@ export function buildRoom(scene, bots, lang = "es") {
   light(scene, -7.6, 3.05, -3.0, "#fff1dc", 5, 7);
   // Sala Andes
   F.table(g, -2.9, -3.4, 2.8, 1.1, 0, F.DESK_H, M.darkTable, 0.15);
-  F.curtain(gw, -4.9, -3.4, D - 0.16, 2.7);
   const meetSeats = [];
   for (const x of [-3.8, -2.9, -2.0]) {
     F.simpleChair(g, x, -2.55, PI, M.chairOrange);
@@ -319,7 +317,6 @@ export function buildRoom(scene, bots, lang = "es") {
   F.railingBars(u, BX, x1, WZ);
   F.wall(uw, z0, -1.8, LNG, PART_H, M.slats, true);
   F.wall(uw, z0, -1.8, -0.8, PART_H, M.green, true);
-  F.wall(uw, z0, -1.8, 2.45, PART_H, M.orange, true);
   F.wall(uw, z0, -1.8, BX, PART_H, M.orange, true);
   for (const [a0, a1, mat] of [[x0, LNG, M.slats], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) F.texturedBox(uw, box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03), a1 - a0, floorH);
   B1.add(box(0.1, 0.1, STAIRS.z1 - STAIRS.z0 + 0.1), M.lightWood, mat4(BX + 0.03, UPPER_Y - 0.05, 1.6));
@@ -362,10 +359,8 @@ export function buildRoom(scene, bots, lang = "es") {
   F.stickyWall(uw, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
   F.plant(u, 0.3, -5.5, 0.8);
   nav1.blockCircle(0.3, -5.5, 0.18);
-  // phone booth
-  F.highTable(u, 3.12, -4.7, 0.35);
-  F.stool(u, 3.12, -5.4);
-  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#a8322c", "#fbf4ea", 1.0, 0.7);
+  // phone booth: a black glass-fronted cabin in the studio's back corner
+  F.booth(u, 3.1, -5.25, M.beam);
   // cafeteria: the screen alone, centred on the wall panel between the phone
   // booth sign (ends at x≈3.6) and the counter (starts at x≈6.6)
   F.tv(uw, 5.15, 1.85, z0 + 0.14, 0, 1.6, 0.9);
@@ -378,12 +373,6 @@ export function buildRoom(scene, bots, lang = "es") {
   F.discPendant(u, -7.6, 2.25, -3.6, 0.52, floorH);
   F.discPendant(u, -2.5, 2.3, -3.8, 0.45, floorH);
   F.discPendant(u, 0.85, 2.35, -3.2, 0.42, floorH);
-  // exposed structure along the back wall: three dark beams and a duct, the
-  // industrial ceiling the cutaway can hint at without covering the floor
-  for (const zb of [z0 + 0.5, z0 + 1.4, z0 + 2.3]) B1.add(box(x1 - x0 - 0.3, 0.2, 0.1), M.beam, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.16, zb));
-  B1.add(F.cyl(0.13, 0.13, x1 - x0 - 0.6, 14), M.ductSilver, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.46, z0 + 0.95, 0, 0, PI / 2));
-  B1.add(F.cyl(0.09, 0.09, x1 - x0 - 0.6, 12), M.duct, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.5, z0 + 2.75, 0, 0, PI / 2));
-  B1.add(F.cyl(0.04, 0.04, x1 - x0 - 0.6, 8), M.redPipe, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.66, z0 + 1.85, 0, 0, PI / 2));
   for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
   for (const [x, z] of [[5.4, -2.95], [5.4, -1.45], [9.35, -1.6], [8.6, -2.35], [9.35, 1.4], [8.6, 2.15], [6.0, 3.55], [5.25, 2.8], [6.75, 2.8]]) F.stool(u, x, z);
   F.planter(u, 4.4, 3.55);
@@ -419,7 +408,7 @@ export function buildRoom(scene, bots, lang = "es") {
     tv: [{ x: 5.3, z: -4.3, yaw: PI, floor: 1 }, { x: 6.05, z: -4.3, yaw: PI, floor: 1 }],
     meeting: meetSeats.map((s) => ({ ...s, floor: 0 })),
     meeting2: meet2Seats.map((s) => ({ ...s, floor: 0 })),
-    booth: [{ x: 3.12, z: -3.95, yaw: PI, floor: 1 }],
+    booth: [{ x: 3.1, z: -5.2, yaw: PI, floor: 1 }],
     printer: [{ x: 2.9, z: z0 + 1.1, yaw: PI, floor: 0 }],
     water: [{ x: -0.1, z: -1.35, yaw: PI, floor: 0 }],
     servers: [{ x: 6.9, z: z0 + 1.6, yaw: PI, floor: 0 }],
@@ -483,9 +472,7 @@ export function buildRoom(scene, bots, lang = "es") {
     { id: "board", name: H.board, icon: "📋", x: LNG + 0.1, y: UPPER_Y + 1.7, z: -3.6, w: 0.3, h: 1.4, d: 2.3, floor: 1 },
     { id: "tv", name: H.tv, icon: "📺", x: 5.15, y: UPPER_Y + 1.85, z: z0 + 0.14, w: 1.7, h: 1.0, d: 0.3, floor: 1 },
     { id: "coffee", name: H.coffee, icon: "☕", x: bar.machine[0], y: UPPER_Y + 1.25, z: -4.62, w: 0.6, h: 0.7, d: 0.6, floor: 1 },
-    { id: "printer", name: H.printer, icon: "🖨️", x: 2.9, y: 0.7, z: z0 + 0.4, w: 1.0, h: 1.4, d: 0.6, floor: 0 },
     { id: "shelf", name: H.shelf, icon: "📚", x: 1.5, y: 1.4, z: STAIRS.z1 + 0.22, w: 4.4, h: 2.8, d: 0.44, floor: 0 },
-    { id: "water", name: H.water, icon: "💬", x: -0.1, y: 0.8, z: -2.0, w: 0.5, h: 1.6, d: 0.5, floor: 0 },
     { id: "clock", name: H.clock, icon: "🕒", x: LX - 0.1, y: 1.75, z: 4.95, w: 0.3, h: 0.5, d: 0.5, floor: 0 },
     { id: "servers", name: H.servers, icon: "🖥️", x: 6.8, y: 1.0, z: z0 + 0.6, w: 4.2, h: 2.0, d: 0.9, floor: 0 },
     { id: "pingpong", name: H.pingpong, icon: "🏓", x: -4.0, y: 0.6, z: 7.0, w: 2.8, h: 0.5, d: 1.6, floor: 0 },

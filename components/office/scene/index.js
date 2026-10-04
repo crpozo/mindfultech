@@ -135,10 +135,20 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // --------------------------------------------------------------- room ----
   const room = buildRoom(scene, bots, lang);
-  buildCampus(scene);
+  buildCampus(scene, room.materials);
   const { stations, spots, hotspots, nav0, nav1, upper, dyn } = room;
   const navOf = (floor) => (floor ? nav1 : nav0);
   const floorY = (floor) => (floor ? UPPER_Y : 0);
+  /** height of a body on the stairs at x: the tread top, rising to the next one over the last 40% of each tread */
+  const stairY = (x) => {
+    const sd = (STAIRS.x1 - STAIRS.x0) / 20, sr = UPPER_Y / 20;
+    const u = (x - STAIRS.x0) / sd;
+    if (u <= -1) return 0;
+    if (u >= 20) return UPPER_Y;
+    const k = Math.floor(u), f = u - k;
+    const t = f < 0.6 ? 0 : (f - 0.6) / 0.4;
+    return Math.min(UPPER_Y, sr * (k + 1 + t * t * (3 - 2 * t)));
+  };
 
   // hotspot pick boxes (invisible) + DOM markers
   const pickables = [];
@@ -687,7 +697,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
             const k = remaining / dist;
             root.position.x += dx * k;
             root.position.z += dz * k;
-            if (onStairs) root.position.y += (n.y - root.position.y) * k;
+            if (onStairs) root.position.y = stairY(root.position.x);
             a.targetYaw = Math.atan2(dx, dz);
             remaining = 0;
           }
@@ -1293,8 +1303,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       const x = ((projected.x + 1) / 2) * w, y = ((1 - projected.y) / 2) * h;
       const tucked = upper.visible && hs.floor === 0 && underDeck(hs.x, hs.z);
       hs.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
-      hs.el.style.opacity = behind ? "0" : tucked ? "0.5" : "";
-      hs.el.style.pointerEvents = behind ? "none" : "";
+      hs.el.style.opacity = behind || tucked ? "0" : "";
+      hs.el.style.pointerEvents = behind || tucked ? "none" : "";
     }
 
     // adaptive resolution: drop the pixel ratio when frames run long

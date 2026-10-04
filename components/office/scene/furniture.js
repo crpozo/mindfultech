@@ -134,13 +134,13 @@ export function makeMaterials(bots) {
     black: std("#1e1f24", 0.5, { metalness: 0.3 }),
     glass: new THREE.MeshPhysicalMaterial({ color: "#dfeffc", roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false, clearcoat: 0.4, side: THREE.DoubleSide }),
     glassDark: new THREE.MeshPhysicalMaterial({ color: "#8fb8d8", roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }),
-    deskWood: std("#c98449", 0.55),
-    lightWood: std("#d2a86c", 0.6),
+    deskWood: std("#b4835a", 0.6),
+    lightWood: std("#c49a62", 0.6),
     darkWood: std("#6b4a34", 0.7),
     metal: std("#25262c", 0.45, { metalness: 0.6 }),
     steel: std("#b6bcc4", 0.35, { metalness: 0.85 }),
-    divider: new THREE.MeshStandardMaterial({ map: T.fabric("#b8623f"), roughness: 0.95 }),
-    chairSeat: new THREE.MeshStandardMaterial({ map: T.fabric("#e4e4e8"), roughness: 0.9 }),
+    divider: new THREE.MeshStandardMaterial({ map: T.fabric("#2f3036"), roughness: 0.95 }),
+    chairSeat: new THREE.MeshStandardMaterial({ map: T.fabric("#2b2c33"), roughness: 0.9 }),
     chairBlack: new THREE.MeshStandardMaterial({ map: T.fabric("#2b2c33"), roughness: 0.95 }),
     chairOrange: new THREE.MeshStandardMaterial({ map: T.fabric("#2b2c33"), roughness: 0.95 }),
     chairDark: std("#2b2c33", 0.6),
@@ -682,13 +682,14 @@ export function serverRack(ctx, x, z) {
   }
   nav.blockBox(x, z, 0.6, 0.8, 0, 0.3);
 }
-export function booth(ctx, x, z) {
+export function booth(ctx, x, z, mat) {
   const { B, M, y, nav } = ctx;
+  const wm = mat || M.navy;
   const w = 1.15, d = 1.15, h = 2.3;
-  B.add(box(w, h, 0.06), M.navy, mat4(x, y + h / 2, z - d / 2));
-  B.add(box(0.06, h, d), M.navy, mat4(x - w / 2, y + h / 2, z));
-  B.add(box(0.06, h, d), M.navy, mat4(x + w / 2, y + h / 2, z));
-  B.add(box(w, 0.06, d), M.navy, mat4(x, y + h, z));
+  B.add(box(w, h, 0.06), wm, mat4(x, y + h / 2, z - d / 2));
+  B.add(box(0.06, h, d), wm, mat4(x - w / 2, y + h / 2, z));
+  B.add(box(0.06, h, d), wm, mat4(x + w / 2, y + h / 2, z));
+  B.add(box(w, 0.06, d), wm, mat4(x, y + h, z));
   const g = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.1, h - 0.1), M.glassDark);
   g.position.set(x, y + h / 2, z + d / 2);
   ctx.S.add(g);
@@ -849,11 +850,11 @@ export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
   shape.lineTo(x1, rise);
   shape.closePath();
   const prism = new THREE.ExtrudeGeometry(shape, { depth: sw, bevelEnabled: false });
-  B.add(prism, M.lightWood, mat4(0, y, z0));
+  B.add(prism, M.beam, mat4(0, y, z0));
   for (let k = 0; k < steps; k++) {
     const xt = x0 + dir * (k + 0.5) * sd, yt = (k + 1) * sr;
-    B.add(box(sd + 0.02, 0.035, sw + 0.02), M.white, mat4(xt, y + yt - 0.0175, cz)); // tread
-    B.add(box(0.03, sr, sw), M.slab, mat4(x0 + dir * (k * sd + 0.015), y + yt - sr / 2, cz)); // riser
+    B.add(box(sd + 0.02, 0.035, sw + 0.02), M.oakSmall, mat4(xt, y + yt - 0.0175, cz)); // tread
+    B.add(box(0.03, sr, sw), M.beam, mat4(x0 + dir * (k * sd + 0.015), y + yt - sr / 2, cz)); // riser
   }
   const len = Math.hypot(run, rise), ang = Math.atan2(rise, run) * dir;
   for (const zr of rails) {
