@@ -850,11 +850,12 @@ export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
   shape.lineTo(x1, rise);
   shape.closePath();
   const prism = new THREE.ExtrudeGeometry(shape, { depth: sw, bevelEnabled: false });
-  B.add(prism, M.beam, mat4(0, y - 0.04, z0)); // a touch lower, so its slope never meets the tread tops
+  B.add(prism, M.beam, mat4(0, y - 0.07, z0)); // its slope stays clear of the treads' undersides
   for (let k = 0; k < steps; k++) {
     const xt = x0 + dir * (k + 0.5) * sd, yt = (k + 1) * sr;
     B.add(box(sd + 0.02, 0.035, sw + 0.02), M.oakSmall, mat4(xt, y + yt - 0.0175, cz)); // tread
-    B.add(box(0.03, sr, sw), M.beam, mat4(x0 + dir * (k * sd + 0.015), y + yt - sr / 2, cz)); // riser
+    // riser: from the tread below up to the underside of this tread (never level with a tread top, which z-fights)
+    B.add(box(0.03, sr - 0.04, sw - 0.02), M.beam, mat4(x0 + dir * (k * sd + 0.025), y + yt - 0.035 - (sr - 0.04) / 2, cz));
   }
   const len = Math.hypot(run, rise), ang = Math.atan2(rise, run) * dir;
   for (const zr of rails) {

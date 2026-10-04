@@ -344,7 +344,10 @@
 .tool:hover {
   background: #fff;
 }
-.toolActive {
+/* the active button stays dark under the pointer (.tool:hover outranks a lone class) */
+.toolActive,
+.toolActive:hover,
+.toolActive:focus-visible {
   background: #0e0d12;
   color: #fff;
   border-color: #0e0d12;

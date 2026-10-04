@@ -110,17 +110,6 @@ function prepareTemplate(sex, scene, clips, walkSpeed) {
 }
 
 // -------------------------------------------------------------- atlas ----
-// The Ready Player Me atlas: head (face + scalp) top-left quarter, top of the
-// outfit bottom-left quarter, trousers / shoes in the next column, eyes and
-// mouth to the right, and a flat skin swatch the arms and hands map to.
-const RECT = {
-  head: [0, 0, 0.5, 0.5],
-  top: [0, 0.5, 0.5, 1],
-  pants: [0.5, 0, 0.75, 0.25],
-  shoes: [0.5, 0.25, 0.75, 0.75],
-  swatch: [0.75, 0.75, 0.875, 0.875],
-};
-const inRect = (r, u, v) => u >= r[0] && u < r[2] && v >= r[1] && v < r[3];
 const lum = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
 /** red-dominant, warm hue, not too dark: skin, not hair, brows or lips */
 function skinLike(r, g, b) {
@@ -145,14 +134,49 @@ function prepareAtlas(skinned, dims) {
   base.width = base.height = S;
   base.getContext("2d").drawImage(img, 0, 0, S, S);
   const px = base.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, S, S).data;
-  // the scalp: triangles high on the head (above the eyes, not the face) or round the back
+  // Paint every triangle into a class map by where its vertices sit on the
+  // T-posed body: 2 top, 3 trousers, 4 shoes, 7 skin (arms, hands, neck),
+  // 8 head (face + scalp, told apart by colour below). Edges are stroked too,
+  // so the seams between islands get a class.
+  const CLASS = { top: 2, pants: 3, shoes: 4, skin: 7, head: 8 };
+  const geo = skinned.geometry, pos = geo.attributes.position, uv = geo.attributes.uv, idx = geo.index;
+  const classOf = (i) => {
+    const x = Math.abs(pos.getX(i)), y = pos.getY(i);
+    if (y < dims.foot + 0.02) return CLASS.shoes;
+    if (y > dims.head - 0.06) return CLASS.head;
+    if (x > 0.27) return CLASS.skin; // the arms, out along ±x in the T-pose
+    if (y < dims.hips - 0.02) return CLASS.pants;
+    return CLASS.top;
+  };
   const mask = document.createElement("canvas");
   mask.width = mask.height = S;
   const mg = mask.getContext("2d", { willReadFrequently: true });
   mg.fillStyle = "#000";
   mg.fillRect(0, 0, S, S);
-  mg.fillStyle = "#fff";
-  const geo = skinned.geometry, pos = geo.attributes.position, uv = geo.attributes.uv, idx = geo.index;
+  mg.lineWidth = 2;
+  for (let i = 0; i < idx.count; i += 3) {
+    const a = idx.getX(i), b = idx.getX(i + 1), c = idx.getX(i + 2);
+    const ca = classOf(a), cb = classOf(b), cc = classOf(c);
+    // a triangle that straddles two parts goes with the majority (skin wins over cloth at the sleeve and collar seams)
+    const k = ca === cb || ca === cc ? ca : cb === cc ? cb : Math.max(ca, cb, cc);
+    const g = k * 25;
+    mg.fillStyle = mg.strokeStyle = `rgb(${g},${g},${g})`;
+    mg.beginPath();
+    mg.moveTo(uv.getX(a) * S, uv.getY(a) * S);
+    mg.lineTo(uv.getX(b) * S, uv.getY(b) * S);
+    mg.lineTo(uv.getX(c) * S, uv.getY(c) * S);
+    mg.closePath();
+    mg.fill();
+    mg.stroke();
+  }
+  const mpx = mg.getImageData(0, 0, S, S).data;
+  const cls = new Uint8Array(S * S);
+  for (let i = 0; i < S * S; i++) cls[i] = Math.round(mpx[i * 4] / 25);
+  // the scalp inside the head: triangles high on the skull or round the back (the hairline is told from the colour later)
+  const hair = new Uint8Array(S * S);
+  mg.fillStyle = "#000";
+  mg.fillRect(0, 0, S, S);
+  mg.fillStyle = mg.strokeStyle = "#fff";
   const hairAt = (i) => {
     const y = pos.getY(i), z = pos.getZ(i);
     return (y > dims.eyes + 0.045 && z < 0.06) || (y > dims.head - 0.03 && z < -0.02);
@@ -167,45 +191,37 @@ function prepareAtlas(skinned, dims) {
     mg.closePath();
     mg.fill();
   }
-  const hairPx = mg.getImageData(0, 0, S, S).data;
-  const hair = new Uint8Array(S * S);
-  for (let i = 0; i < S * S; i++) hair[i] = hairPx[i * 4] > 127 ? 1 : 0;
-  // dominant colours per region
+  const hpx = mg.getImageData(0, 0, S, S).data;
+  for (let i = 0; i < S * S; i++) hair[i] = hpx[i * 4] > 127 ? 1 : 0;
+  // dominant colours per class
   const sm = { top: [], pants: [], shoes: [], skin: [], hair: [] };
-  for (let y = 0; y < S; y += 2)
-    for (let x = 0; x < S; x += 2) {
-      const i = (y * S + x) * 4, u = x / S, v = y / S;
-      if (px[i + 3] < 128) continue;
-      const c = [px[i], px[i + 1], px[i + 2]];
-      if (inRect(RECT.top, u, v)) sm.top.push(c);
-      else if (inRect(RECT.pants, u, v)) sm.pants.push(c);
-      else if (inRect(RECT.shoes, u, v)) sm.shoes.push(c);
-      else if (inRect(RECT.head, u, v)) {
-        if (hair[y * S + x]) sm.hair.push(c);
-        else if (skinLike(c[0], c[1], c[2])) sm.skin.push(c);
-      }
+  for (let k = 0; k < S * S; k += 2) {
+    const i = k * 4;
+    if (px[i + 3] < 128) continue;
+    const c = [px[i], px[i + 1], px[i + 2]], t = cls[k];
+    if (t === CLASS.top) sm.top.push(c);
+    else if (t === CLASS.pants) sm.pants.push(c);
+    else if (t === CLASS.shoes) sm.shoes.push(c);
+    else if (t === CLASS.head) {
+      if (hair[k]) sm.hair.push(c);
+      else if (skinLike(c[0], c[1], c[2])) sm.skin.push(c);
     }
+  }
   const dom = { top: median(sm.top), pants: median(sm.pants), shoes: median(sm.shoes), skin: median(sm.skin), hair: [] };
-  // hair: the darker half of the scalp samples (the hairline mixes in skin)
   const skinL = lum(...dom.skin);
   dom.hair = median(sm.hair.filter((c) => lum(...c) < skinL * 0.75));
-  // one class per pixel, decided once: 1 top (print), 2 top, 3 trousers, 4 shoes, 5 swatch, 6 hair, 7 skin
-  const cls = new Uint8Array(S * S);
   const hairL = lum(...dom.hair);
-  for (let y = 0; y < S; y++)
-    for (let x = 0; x < S; x++) {
-      const i = (y * S + x) * 4, u = x / S, v = y / S, k = y * S + x;
-      if (px[i + 3] < 128) continue;
-      if (inRect(RECT.top, u, v)) cls[k] = Math.abs(px[i] - dom.top[0]) + Math.abs(px[i + 1] - dom.top[1]) + Math.abs(px[i + 2] - dom.top[2]) > 150 ? 1 : 2;
-      else if (inRect(RECT.pants, u, v)) cls[k] = 3;
-      else if (inRect(RECT.shoes, u, v)) cls[k] = 4;
-      else if (inRect(RECT.swatch, u, v)) cls[k] = 5;
-      else if (inRect(RECT.head, u, v)) {
-        const l = lum(px[i], px[i + 1], px[i + 2]);
-        if (hair[k] && l < skinL * 0.75) cls[k] = 6;
-        else if (skinLike(px[i], px[i + 1], px[i + 2])) cls[k] = 7;
-      }
+  // final classes for the recolour: 1 top print, 2 top, 3 trousers, 4 shoes, 5 flat skin (arms), 6 hair, 7 face skin
+  for (let k = 0; k < S * S; k++) {
+    const t = cls[k], i = k * 4;
+    if (!t || px[i + 3] < 128) { cls[k] = 0; continue; }
+    if (t === CLASS.top) cls[k] = Math.abs(px[i] - dom.top[0]) + Math.abs(px[i + 1] - dom.top[1]) + Math.abs(px[i + 2] - dom.top[2]) > 150 ? 1 : 2;
+    else if (t === CLASS.skin) cls[k] = 5;
+    else if (t === CLASS.head) {
+      const l = lum(px[i], px[i + 1], px[i + 2]);
+      cls[k] = hair[k] && l < skinL * 0.75 ? 6 : skinLike(px[i], px[i + 1], px[i + 2]) ? 7 : 0;
     }
+  }
   return { S, base, px, hair, dom, cls, hairL, skinL };
 }
 const clamp255 = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
@@ -232,7 +248,7 @@ function makeVariant(atlas, look) {
     if (!t) continue;
     const i = k * 4;
     if (t === 1) { d[i] = top[0]; d[i + 1] = top[1]; d[i + 2] = top[2]; continue; }
-    if (t === 5) { d[i] = skin[0]; d[i + 1] = skin[1]; d[i + 2] = skin[2]; continue; }
+    if (t === 5) { d[i] = clamp255(d[i] * kSkin[0]); d[i + 1] = clamp255(d[i + 1] * kSkin[1]); d[i + 2] = clamp255(d[i + 2] * kSkin[2]); continue; }
     if (t === 6) {
       const l = lum(d[i], d[i + 1], d[i + 2]), f = Math.min(1.6, Math.max(0.6, l / Math.max(8, hairL)));
       d[i] = clamp255(hairC[0] * f); d[i + 1] = clamp255(hairC[1] * f); d[i + 2] = clamp255(hairC[2] * f);
