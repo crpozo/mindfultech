@@ -4,6 +4,7 @@ import * as React from "react";
 import { botsFor, botById } from "@/lib/office/bots";
 import { tx, LOCALE, type Lang } from "@/lib/office/i18n";
 import s from "./office.module.css";
+import { DashChat, type DashFacts } from "./DashChat";
 import { dailySeries, hourlyToday, lastDays, dayLabel, weekdayShort, isWeekend, sum, avg, fmtInt, fmtK, fmtMoney, Delta, Spark, LineChart, BarChart, Donut, Legend, ChartCard } from "./charts";
 
 type Range = "hoy" | "7d" | "30d";
@@ -240,8 +241,24 @@ function TvPanel({ events, onOpenBot, lang }: PanelProps) {
   const max = Math.max(1, ...done.map((d) => d.n));
   const stages = stageLabel(lang);
   const prevLabel = t("Periodo anterior", "Previous period");
+  // the same numbers, for the analyst chat
+  const facts: DashFacts = {
+    rangeDays: range === "hoy" ? 1 : range === "7d" ? 7 : 30,
+    metrics: data.map((m) => {
+      const v = view(m);
+      return { key: m.key, label: m.label, unit: m.unit, agg: m.agg, cur: v.cur, prev: v.prev ?? [], labels: v.labels, value: v.value, prevValue: v.prevValue, target: m.target, fmt: m.fmt };
+    }),
+    deals: DEALS.map((d) => ({ company: d.company, stage: stages[d.stage], won: d.stage === "won", open: d.stage !== "won", amount: d.amount, owner: name(d.owner), daysAgo: d.daysAgo })),
+    sources: sources.map((x) => ({ label: x.label, value: x.value })),
+    cycles: done.map((d) => ({ name: name(d.id), n: d.n })),
+    fmtMoney: (v) => fmtMoney(v, lang),
+    fmtInt: (v) => fmtInt(v, lang),
+  };
   return (
     <div className={s.dash}>
+      <ChartCard title={t("Pregúntale al tablero", "Ask the dashboard")} sub={t("Tomás responde con estos datos", "Tomás answers from this data")}>
+        <DashChat facts={facts} lang={lang} />
+      </ChartCard>
       <div className={s.chartHead}>
         <div>
           <div className={s.chartTitle}>
