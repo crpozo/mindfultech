@@ -331,8 +331,8 @@ export function buildRoom(scene, bots, lang = "es") {
   F.floorLamp(u, -9.5, -1.2);
   F.plant(u, -5.6, -5.5, 0.8);
   nav1.blockCircle(-5.6, -5.5, 0.18);
-  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#a8322c", "#fbf4ea", 1.1, 0.9);
-  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#a8322c", "#fbf4ea", 2.4, 0.9);
+  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#76302c", "#f6ebe3", 1.1, 0.9);
+  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#76302c", "#f6ebe3", 2.4, 0.9);
   // training room
   F.whiteboard(uw, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
   const trainSeats = [];

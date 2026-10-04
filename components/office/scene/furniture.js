@@ -105,7 +105,7 @@ export function makeMaterials(bots) {
     oak: Object.assign(new THREE.MeshStandardMaterial({ map: T.planks(), roughness: 0.6 }), { userData: { tileM: 2 } }),
     oakSmall: new THREE.MeshStandardMaterial({ map: T.planks(), roughness: 0.6 }),
     darkTable: std("#2a2522", 0.5),
-    redPipe: std("#a8322c", 0.55, { metalness: 0.2 }),
+    redPipe: std("#8a3430", 0.55, { metalness: 0.2 }),
     ductSilver: std("#9a9ea5", 0.4, { metalness: 0.75 }),
     curtain: new THREE.MeshStandardMaterial({ map: T.fabric("#2a2f3f"), roughness: 1 }),
     tile: Object.assign(new THREE.MeshStandardMaterial({ map: T.tiles(), roughness: 0.35 }), { userData: { tileM: 1 } }),
@@ -118,13 +118,13 @@ export function makeMaterials(bots) {
     navy: std("#f2f0ea", 0.95),
     green: std("#ebe8e1", 0.95),
     orange: std("#f2f0ea", 0.95),
-    purple: std("#9a3630", 0.9),
-    periwinkle: std("#9a3630", 0.9),
+    purple: std("#76302c", 0.9),
+    periwinkle: std("#76302c", 0.9),
     blackWall: std("#1b1b1f", 0.85),
     slats: Object.assign(new THREE.MeshStandardMaterial({ map: T.slats(), roughness: 0.75 }), { userData: { tileM: 1 } }),
     wallWhite: std("#f2f0ea", 0.95),
     copper: std("#b87333", 0.3, { metalness: 0.85 }),
-    terracotta: std("#9a3630", 0.9),
+    terracotta: std("#76302c", 0.9),
     beam: std("#1f2024", 0.6, { metalness: 0.35 }),
     duct: std("#2f3136", 0.5, { metalness: 0.6 }),
     ringLight: new THREE.MeshStandardMaterial({ color: "#fff7e8", emissive: "#ffe4b8", emissiveIntensity: 2.2, roughness: 0.4 }),
@@ -161,7 +161,7 @@ export function makeMaterials(bots) {
     sofaDark: std("#8f5f38", 0.95),
     sofaBlack: new THREE.MeshStandardMaterial({ map: T.fabric("#2d2f36"), roughness: 0.95 }),
     sofaBlackDark: std("#202127", 0.95),
-    beanbag: new THREE.MeshStandardMaterial({ map: T.fabric("#a8322c"), roughness: 1 }),
+    beanbag: new THREE.MeshStandardMaterial({ map: T.fabric("#76302c"), roughness: 1 }),
     beanbag2: new THREE.MeshStandardMaterial({ map: T.fabric("#2a2b30"), roughness: 1 }),
     rug: new THREE.MeshStandardMaterial({ map: T.rug(), roughness: 1 }),
     lamp: std("#1d1b19", 0.85, { side: THREE.DoubleSide }),
@@ -180,8 +180,8 @@ export function makeMaterials(bots) {
     accents: bots.map((b) => std(b.accent, 0.45)),
     pingpong: new THREE.MeshStandardMaterial({ map: T.pingpongTop(), roughness: 0.6 }),
     net: std("#e8e8ea", 0.9, { transparent: true, opacity: 0.8, side: THREE.DoubleSide }),
-    locker: std("#d8dde3", 0.6, { metalness: 0.2 }),
-    lockerDoor: std("#5a7d9a", 0.6, { metalness: 0.2 }),
+    locker: std("#2a2c31", 0.55, { metalness: 0.35 }),
+    lockerDoor: std("#b4835a", 0.6),
   };
 }
 
@@ -602,8 +602,8 @@ export function fridge(ctx, x, z) {
 }
 export function printer(ctx, x, z, yaw = 0) {
   const { B, M, y, nav } = ctx;
-  B.add(rbox(0.9, 0.75, 0.5, 0.02), M.white, mat4(x, y + 0.375, z, 0, yaw, 0));
-  B.add(box(0.86, 0.02, 0.46), M.chairDark, mat4(x, y + 0.74, z, 0, yaw, 0));
+  B.add(rbox(0.9, 0.75, 0.5, 0.02), M.locker, mat4(x, y + 0.375, z, 0, yaw, 0)); // dark steel cabinet, oak top
+  B.add(box(0.92, 0.03, 0.52), M.oakSmall, mat4(x, y + 0.755, z, 0, yaw, 0));
   B.add(rbox(0.62, 0.34, 0.46, 0.03), M.chairDark, mat4(x, y + 0.93, z, 0, yaw, 0));
   B.add(box(0.4, 0.02, 0.3), M.white, mat4(x, y + 1.11, z, 0, yaw, 0));
   const f = fwd(yaw);
@@ -612,7 +612,7 @@ export function printer(ctx, x, z, yaw = 0) {
 }
 export function waterCooler(ctx, x, z) {
   const { B, M, y, nav } = ctx;
-  B.add(rbox(0.36, 1.0, 0.36, 0.03), M.white, mat4(x, y + 0.5, z));
+  B.add(rbox(0.36, 1.0, 0.36, 0.03), M.steel, mat4(x, y + 0.5, z));
   B.add(box(0.3, 0.2, 0.3), M.chairDark, mat4(x, y + 0.1, z));
   B.add(cyl(0.15, 0.15, 0.42, 20), M.bottle, mat4(x, y + 1.22, z));
   B.add(sph(0.15, 20, 12), M.bottle, mat4(x, y + 1.43, z, 0, 0, 0, 1, 0.6, 1));

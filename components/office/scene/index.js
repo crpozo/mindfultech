@@ -671,7 +671,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         if (t > a.subUntil) nextSub(a);
         const wantBreak =
           (a.invite && t > a.invite.at) ||
-          (t > a.breakAt && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5);
+          (t > a.breakAt && a.bot.id !== "ana" && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5); // the receptionist never leaves her desk
         if (wantBreak) {
           if (a.invite) {
             const inv = a.invite;

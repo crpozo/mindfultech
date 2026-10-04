@@ -327,12 +327,6 @@ export function buildCampus(scene, M) {
   // a bike stands parallel to its hoop, one in every other gap
   F.bike(ctx, -13.6, -0.2, PI / 2);
   F.bike(ctx, -13.6, 1.4, -PI / 2);
-  // name totem beside the walkway
-  PB.add(new THREE.BoxGeometry(0.28, 1.6, 2.2), M.beam, F.mat4(-15.5, GROUND_Y + 0.8, 9.6, 0, 0, 0));
-  const totem = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.26), new THREE.MeshStandardMaterial({ map: T.signText(["AI MANAGEMENT OFFICE"], "#1f2024", "#ffffff", 512, 66), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
-  totem.position.set(-15.645, GROUND_Y + 1.15, 9.6);
-  totem.rotation.y = -PI / 2;
-  G.add(totem);
   // plaza lamps
   for (const [x, z] of [[-8.5, 11.2], [7.8, 11.2], [-11.5, 22.5], [9.5, 21.5], [-26, 9.5]]) {
     add(new THREE.CylinderGeometry(0.05, 0.07, 3.6, 8), post, x, GROUND_Y + 1.8, z);
