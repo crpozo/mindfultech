@@ -26,7 +26,7 @@ export const HIP_CHAIR = 0.575; // four-leg chair, seat at 0.445
 export const HIP_SOFA = 0.61; // sofa / armchair, seat at 0.48
 
 // joint name → [part, property, axis]
-const JOINTS = [
+export const JOINTS = [
   ["hipsY", "hips", "position", "y"],
   ["hipsZ", "hips", "position", "z"],
   ["hipsRx", "hips", "rotation", "x"],
@@ -54,7 +54,7 @@ const JOINTS = [
   ["wristRx", "handR", "rotation", "x"],
 ];
 
-const REST = {
+export const REST = {
   hipsY: HIP_STAND, hipsZ: 0, hipsRx: 0, torsoRx: 0, torsoRy: 0, torsoRz: 0,
   headRx: 0, headRy: 0, headRz: 0,
   shLx: 0, shLy: 0, shLz: -0.06, shRx: 0, shRy: 0, shRz: 0.06, elLx: -0.12, elRx: -0.12,

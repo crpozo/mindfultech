@@ -35,6 +35,7 @@ export class Batcher {
       const m = new THREE.Mesh(merged, mat);
       m.castShadow = true;
       m.receiveShadow = true;
+      if (mat.userData && mat.userData.depth) m.customDepthMaterial = mat.userData.depth; // alpha-tested leaves shadow their holes
       this.parent.add(m);
     }
     this.groups.clear();
@@ -48,6 +49,20 @@ export function mat4(x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = sx, sz = sx) 
   _p.set(x, y, z);
   _s.set(sx, sy, sz);
   return _m.compose(_p, _q, _s).clone();
+}
+/** Like mat4, but yaw is applied after the tilt (Euler YXZ): tilt a thing, then turn it to face a direction. */
+export function mat4yxz(x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = sx, sz = sx) {
+  _e.set(rx, ry, rz, "YXZ");
+  _q.setFromEuler(_e);
+  _p.set(x, y, z);
+  _s.set(sx, sy, sz);
+  return _m.compose(_p, _q, _s).clone();
+}
+/** A leaf material: alpha-tested card texture, two-sided, with a depth material so shadows keep the leaf shapes. */
+export function leafMaterial(map, alphaTest = 0.45) {
+  const m = new THREE.MeshStandardMaterial({ map, alphaTest, side: THREE.DoubleSide, roughness: 1, metalness: 0 });
+  m.userData.depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest });
+  return m;
 }
 export const rbox = (w, h, d, r = 0.03, seg = 2) => new RoundedBoxGeometry(w, h, d, seg, r);
 export const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
@@ -82,17 +97,37 @@ export const side = (yaw) => new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw))
 // ------------------------------------------------------------ materials ----
 export function makeMaterials(bots) {
   return {
-    slab: std("#d9c9b8", 0.9),
+    slab: std("#cfcac1", 0.9),
+    slabDark: std("#26272b", 0.75),
     concrete: new THREE.MeshStandardMaterial({ map: T.concrete(), roughness: 0.85 }),
-    wood: new THREE.MeshStandardMaterial({ map: T.woodFloor(), roughness: 0.6 }),
+    wood: new THREE.MeshStandardMaterial({ map: T.planks(), roughness: 0.55 }),
+    oak: Object.assign(new THREE.MeshStandardMaterial({ map: T.planks(), roughness: 0.6 }), { userData: { tileM: 2 } }),
+    oakSmall: new THREE.MeshStandardMaterial({ map: T.planks(), roughness: 0.6 }),
+    darkTable: std("#2a2522", 0.5),
+    redPipe: std("#a8322c", 0.55, { metalness: 0.2 }),
+    ductSilver: std("#9a9ea5", 0.4, { metalness: 0.75 }),
+    curtain: new THREE.MeshStandardMaterial({ map: T.fabric("#2a2f3f"), roughness: 1 }),
+    tile: Object.assign(new THREE.MeshStandardMaterial({ map: T.tiles(), roughness: 0.35 }), { userData: { tileM: 1 } }),
+    leaf: leafMaterial(T.leafCluster("bush")),
+    bigLeaf: leafMaterial(T.bigLeaf(), 0.5),
+    spokes: new THREE.MeshStandardMaterial({ color: "#9a9ea5", metalness: 0.6, roughness: 0.4, transparent: true, opacity: 0.3 }),
     plaster: new THREE.MeshStandardMaterial({ map: T.plaster(), roughness: 0.95 }),
-    navy: std("#3d4a7a", 0.9),
-    green: std("#8fb996", 0.9),
-    orange: std("#e08a5c", 0.9),
-    purple: std("#6f5a9e", 0.9),
-    periwinkle: std("#6b6fae", 0.9),
+    // the warm-industrial palette: oak, warm white, black steel, copper,
+    // terracotta. The pastel names stay so the room layout reads the same.
+    navy: std("#f2f0ea", 0.95),
+    green: std("#ebe8e1", 0.95),
+    orange: std("#f2f0ea", 0.95),
+    purple: std("#9a3630", 0.9),
+    periwinkle: std("#9a3630", 0.9),
     blackWall: std("#1b1b1f", 0.85),
-    chairOrangeDark: std("#c9683a", 0.95),
+    slats: Object.assign(new THREE.MeshStandardMaterial({ map: T.slats(), roughness: 0.75 }), { userData: { tileM: 1 } }),
+    wallWhite: std("#f2f0ea", 0.95),
+    copper: std("#b87333", 0.3, { metalness: 0.85 }),
+    terracotta: std("#9a3630", 0.9),
+    beam: std("#1f2024", 0.6, { metalness: 0.35 }),
+    duct: std("#2f3136", 0.5, { metalness: 0.6 }),
+    ringLight: new THREE.MeshStandardMaterial({ color: "#fff7e8", emissive: "#ffe4b8", emissiveIntensity: 2.2, roughness: 0.4 }),
+    chairOrangeDark: std("#1f2024", 0.95),
     pouf: new THREE.MeshStandardMaterial({ map: T.fabric("#3a3b44"), roughness: 1 }),
     teal: std("#2f6f68", 0.8),
     frame: std("#f4f2ee", 0.6),
@@ -100,14 +135,14 @@ export function makeMaterials(bots) {
     glass: new THREE.MeshPhysicalMaterial({ color: "#dfeffc", roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false, clearcoat: 0.4, side: THREE.DoubleSide }),
     glassDark: new THREE.MeshPhysicalMaterial({ color: "#8fb8d8", roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }),
     deskWood: std("#c98449", 0.55),
-    lightWood: std("#e0b87a", 0.6),
+    lightWood: std("#d2a86c", 0.6),
     darkWood: std("#6b4a34", 0.7),
     metal: std("#25262c", 0.45, { metalness: 0.6 }),
     steel: std("#b6bcc4", 0.35, { metalness: 0.85 }),
-    divider: new THREE.MeshStandardMaterial({ map: T.fabric("#2f6f68"), roughness: 0.95 }),
+    divider: new THREE.MeshStandardMaterial({ map: T.fabric("#b8623f"), roughness: 0.95 }),
     chairSeat: new THREE.MeshStandardMaterial({ map: T.fabric("#e4e4e8"), roughness: 0.9 }),
     chairBlack: new THREE.MeshStandardMaterial({ map: T.fabric("#2b2c33"), roughness: 0.95 }),
-    chairOrange: new THREE.MeshStandardMaterial({ map: T.fabric("#e0864f"), roughness: 0.95 }),
+    chairOrange: new THREE.MeshStandardMaterial({ map: T.fabric("#2b2c33"), roughness: 0.95 }),
     chairDark: std("#2b2c33", 0.6),
     screenBezel: std("#1b1c21", 0.4, { metalness: 0.4 }),
     keyboard: new THREE.MeshStandardMaterial({ map: T.keyboard(), roughness: 0.7 }),
@@ -119,12 +154,12 @@ export function makeMaterials(bots) {
     potWhite: std("#f1ede7", 0.8),
     potClay: std("#c47a58", 0.9),
     soil: std("#3b2a1e", 1),
-    sofa: new THREE.MeshStandardMaterial({ map: T.fabric("#d9a441"), roughness: 0.95 }),
-    sofaDark: std("#b8862f", 0.95),
+    sofa: new THREE.MeshStandardMaterial({ map: T.fabric("#b07a4a"), roughness: 0.95 }),
+    sofaDark: std("#8f5f38", 0.95),
     sofaBlack: new THREE.MeshStandardMaterial({ map: T.fabric("#2d2f36"), roughness: 0.95 }),
     sofaBlackDark: std("#202127", 0.95),
-    beanbag: new THREE.MeshStandardMaterial({ map: T.fabric("#e26d5c"), roughness: 1 }),
-    beanbag2: new THREE.MeshStandardMaterial({ map: T.fabric("#4f8ad6"), roughness: 1 }),
+    beanbag: new THREE.MeshStandardMaterial({ map: T.fabric("#a8322c"), roughness: 1 }),
+    beanbag2: new THREE.MeshStandardMaterial({ map: T.fabric("#2a2b30"), roughness: 1 }),
     rug: new THREE.MeshStandardMaterial({ map: T.rug(), roughness: 1 }),
     lamp: std("#1d1b19", 0.85, { side: THREE.DoubleSide }),
     bulb: new THREE.MeshStandardMaterial({ color: "#fff3d6", emissive: "#ffd9a0", emissiveIntensity: 2.5 }),
@@ -330,6 +365,7 @@ export function plant(ctx, x, z, size, h = 0, potMat, leafA, leafB) {
   const pm = potMat || M.potWhite, la = leafA || M.plant, lb = leafB || M.plant2;
   B.add(cyl(0.2 * size, 0.15 * size, 0.36 * size, 18), pm, mat4(x, y + h + 0.18 * size, z));
   B.add(cyl(0.18 * size, 0.18 * size, 0.02, 18), M.soil, mat4(x, y + h + 0.36 * size, z));
+  if (size >= 0.7 && !leafA) return bigLeaves(ctx, x, y + h + 0.36 * size, z, size);
   for (let k = 0; k < 7; k++) {
     const a = (k / 7) * PI * 2 + size, r = 0.16 * size;
     B.add(sph(0.2 * size), k % 2 ? la : lb, mat4(x + Math.cos(a) * r, y + h + (0.62 + (k % 3) * 0.08) * size, z + Math.sin(a) * r, 0, 0, 0, 1, 0.75, 1));
@@ -348,6 +384,40 @@ export function tree(ctx, x, z) {
   B.add(sph(0.42, 16, 12), M.plant2, mat4(x, y + 2.35, z, 0, 0, 0, 1, 0.75, 1));
   nav.blockCircle(x, z, 0.4);
 }
+/** Broad split leaves on stems fanning out of a pot top at (x, top, z): each leaf is one alpha-tested card. */
+export function bigLeaves(ctx, x, top, z, size = 0.9, n = 9) {
+  const { B, M } = ctx;
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * PI * 2 + size * 3 + Math.random() * 0.4, tilt = rnd(0.5, 1.0), s = size * rnd(0.5, 0.72), lift = rnd(0.5, 0.95) * size;
+    const bx = x + Math.cos(a) * 0.12 * size, bz = z + Math.sin(a) * 0.12 * size;
+    B.add(cyl(0.007, 0.011, lift, 5), M.plant3, mat4yxz((x + bx) / 2, top + lift / 2, (z + bz) / 2, 0.22, -a + PI / 2, 0));
+    const g = new THREE.PlaneGeometry(s, s * 1.15);
+    g.translate(0, (s * 1.15) / 2, 0);
+    B.add(g, M.bigLeaf, mat4yxz(bx, top + lift, bz, tilt, -a + PI / 2, 0));
+  }
+}
+/** A round shrub of leaf cards around (x, cy, z): card normals point out of the ball so it shades like a volume. */
+export function shrub(ctx, x, cy, z, r = 0.3, n = 12, mat) {
+  const { B, M } = ctx;
+  const nrm = new THREE.Vector3();
+  for (let k = 0; k < n; k++) {
+    const th = rnd(0, PI * 2), ph = Math.acos(rnd(-1, 1)), rr = r * Math.cbrt(rnd(0.3, 1));
+    const px = Math.sin(ph) * Math.cos(th) * rr, py = Math.cos(ph) * rr * 0.8, pz = Math.sin(ph) * Math.sin(th) * rr;
+    const s = r * rnd(1.3, 1.9);
+    const g = new THREE.PlaneGeometry(s, s);
+    nrm.set(px, py + r * 0.4, pz).normalize();
+    const na = g.attributes.normal;
+    for (let i = 0; i < na.count; i++) na.setXYZ(i, nrm.x, nrm.y, nrm.z);
+    const yaw = rnd(0, PI * 2), pitch = rnd(-0.5, 0.5);
+    // the matrix carries the card's facing; the normals above are set in local space, so un-rotate them first
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch, yaw, 0, "YXZ"));
+    const inv = q.clone().invert();
+    const ln = nrm.clone().applyQuaternion(inv);
+    for (let i = 0; i < na.count; i++) na.setXYZ(i, ln.x, ln.y, ln.z);
+    B.add(g, mat || M.leaf, mat4yxz(x + px, cy + py, z + pz, pitch, yaw, 0));
+  }
+}
+const rnd = (a, b) => a + Math.random() * (b - a);
 /** A living wall of plants (the reference's green metal shelf). */
 export function plantWall(ctx, x, z, yaw, len) {
   const { B, M, y, nav } = ctx;
@@ -688,12 +758,33 @@ export function wall(ctx, a0, a1, at, h, mat, vertical = false, thick = 0.15, bl
   const { B, nav, y } = ctx;
   const len = Math.abs(a1 - a0), c = (a0 + a1) / 2;
   if (vertical) {
-    B.add(box(thick, h, len), mat, mat4(at, y + h / 2, c));
+    texturedBox(ctx, box(thick, h, len), mat, mat4(at, y + h / 2, c), len, h);
     if (block) nav.block(at - thick / 2, Math.min(a0, a1), at + thick / 2, Math.max(a0, a1), 0.3);
   } else {
-    B.add(box(len, h, thick), mat, mat4(c, y + h / 2, at));
+    texturedBox(ctx, box(len, h, thick), mat, mat4(c, y + h / 2, at), len, h);
     if (block) nav.block(Math.min(a0, a1), at - thick / 2, Math.max(a0, a1), at + thick / 2, 0.3);
   }
+}
+/** Batches like B.add, unless the material tiles per metre (slats): then the
+    box gets its own mesh and a cloned map repeated to its real size, because a
+    merged box face is always UV 0…1 and the pattern would stretch. */
+export function texturedBox(ctx, geo, mat, m, w, h) {
+  if (!mat.userData || !mat.userData.tileM) return ctx.B.add(geo, mat, m);
+  const mm = mat.clone();
+  mm.map = mat.map.clone();
+  mm.map.repeat.set(w / mat.userData.tileM, h / mat.userData.tileM);
+  const mesh = new THREE.Mesh(geo, mm);
+  mesh.applyMatrix4(m);
+  mesh.castShadow = mesh.receiveShadow = true;
+  ctx.S.add(mesh);
+  return mesh;
+}
+/** Ring pendant: a thin luminous torus on three cables from the ceiling line. */
+export function ringLight(ctx, x, h, z, r = 0.55, from = 3.2, tilt = 0) {
+  const { B, M, y } = ctx;
+  B.add(new THREE.TorusGeometry(r, 0.022, 10, 56), M.ringLight, mat4(x, y + h, z, PI / 2 + tilt, 0, 0));
+  B.add(new THREE.TorusGeometry(r + 0.02, 0.01, 6, 56), M.black, mat4(x, y + h - 0.012, z, PI / 2 + tilt, 0, 0));
+  for (const a of [0.3, 2.4, 4.5]) B.add(cyl(0.004, 0.004, Math.max(0.05, from - h), 4), M.black, mat4(x + Math.cos(a) * r, y + (h + from) / 2, z + Math.sin(a) * r));
 }
 /** Glass partition with black frames and door gaps; gaps = [[a0,a1], ...] along the run. */
 export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false, noStartPost = false) {
@@ -880,10 +971,11 @@ export function receptionRound(ctx, x, z, yaw = 0) {
   const f = fwd(yaw), sd = side(yaw);
   const at = (fw, sw, h) => [x + f.x * fw + sd.x * sw, y + h, z + f.z * fw + sd.z * sw];
   let p;
-  B.add(new THREE.CylinderGeometry(r, r, 1.02, 40, 1, false, -PI / 2, PI), M.lightWood, mat4(x, y + 0.51, z, 0, yaw, 0));
-  B.add(new THREE.CylinderGeometry(r + 0.05, r + 0.05, 0.05, 40, 1, false, -PI / 2, PI), M.deskWood, mat4(x, y + 1.045, z, 0, yaw, 0));
+  B.add(new THREE.CylinderGeometry(r, r, 1.02, 40, 1, false, -PI / 2, PI), M.white, mat4(x, y + 0.51, z, 0, yaw, 0));
+  B.add(new THREE.CylinderGeometry(r + 0.05, r + 0.05, 0.05, 40, 1, false, -PI / 2, PI), M.copper, mat4(x, y + 1.045, z, 0, yaw, 0));
+  B.add(new THREE.CylinderGeometry(r + 0.03, r + 0.03, 0.14, 40, 1, false, -PI / 2, PI), M.copper, mat4(x, y + 0.07, z, 0, yaw, 0));
   p = at(-0.03, 0, 0.51);
-  B.add(box(2 * r, 1.02, 0.06), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  B.add(box(2 * r, 1.02, 0.06), M.white, mat4(p[0], p[1], p[2], 0, yaw, 0));
   p = at(0.3, 0, 0.72);
   B.add(box(2 * r - 0.3, 0.04, 0.55), M.lightWood, mat4(p[0], p[1], p[2], 0, yaw, 0));
   const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.2), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: T.signText(["BIENVENIDOS"], "#e0b87a", "#2a2320", 512, 114), roughness: 0.8 }));
@@ -917,11 +1009,7 @@ export function planter(ctx, x, z, h = 0.9) {
   const { B, M, y, nav } = ctx;
   B.add(cyl(0.3, 0.24, h, 24), M.potClay, mat4(x, y + h / 2, z));
   B.add(cyl(0.27, 0.27, 0.02, 24), M.soil, mat4(x, y + h, z));
-  for (let k = 0; k < 6; k++) {
-    const a = (k / 6) * PI * 2;
-    B.add(sph(0.2, 12, 10), k % 2 ? M.plant : M.plant3, mat4(x + Math.cos(a) * 0.17, y + h + 0.22 + (k % 3) * 0.06, z + Math.sin(a) * 0.17, 0, 0, 0, 1, 0.8, 1));
-  }
-  B.add(sph(0.22, 12, 10), M.plant2, mat4(x, y + h + 0.42, z, 0, 0, 0, 1, 0.8, 1));
+  shrub(ctx, x, y + h + 0.3, z, 0.3, 14);
   nav.blockCircle(x, z, 0.3, 0.22);
 }
 
@@ -995,4 +1083,123 @@ export function laptopDesk(ctx, x, z, yaw) {
   p = at(-0.1, 0, 0);
   simpleChair(ctx, p[0], p[2], yaw, M.chairBlack);
   nav.blockBox(x + f.x * 0.5, z + f.z * 0.5, 1.2, 0.6, yaw, 0.28);
+}
+
+
+// ----------------------------------------------------- the loft pieces ----
+/** Flat disc pendant: black rim and cap, luminous underside, one cable from the ceiling line. */
+export function discPendant(ctx, x, h, z, r = 0.42, from = 3.2) {
+  const { B, M, y } = ctx;
+  B.add(cyl(0.005, 0.005, Math.max(0.05, from - h), 4), M.black, mat4(x, y + (h + from) / 2, z));
+  B.add(cyl(r, r, 0.07, 40, true), M.black, mat4(x, y + h, z));
+  B.add(cyl(r, r, 0.015, 40), M.black, mat4(x, y + h + 0.03, z));
+  B.add(cyl(r - 0.02, r - 0.02, 0.012, 40), M.panel, mat4(x, y + h - 0.03, z));
+}
+/** Small cone pendant (the kitchen's red ones). */
+export function conePendant(ctx, x, h, z, from, mat) {
+  const { B, M, y } = ctx;
+  B.add(cyl(0.004, 0.004, Math.max(0.05, from - h), 4), M.black, mat4(x, y + (h + from) / 2, z));
+  B.add(new THREE.ConeGeometry(0.13, 0.16, 20, 1, true), mat || M.redPipe, mat4(x, y + h, z));
+  B.add(sph(0.03, 8, 6), M.bulb, mat4(x, y + h - 0.05, z));
+}
+/** Solid oak block reception (the loft reference): board-clad block, a red inlay down the front,
+    a thicker top, monitor, keyboard, bell and a plant; the front faces +fwd(yaw). */
+export function receptionBlock(ctx, x, z, yaw = 0) {
+  const { B, M, y, nav } = ctx;
+  const f = fwd(yaw), sd = side(yaw);
+  const at = (fw, sw, h) => [x + f.x * fw + sd.x * sw, y + h, z + f.z * fw + sd.z * sw];
+  const W = 2.6, D = 0.8, H = 1.02;
+  let p = at(0, 0, H / 2);
+  texturedBox(ctx, box(W, H, D), M.oak, mat4(p[0], p[1], p[2], 0, yaw, 0), W, H);
+  p = at(0, 0, H + 0.03);
+  texturedBox(ctx, box(W + 0.08, 0.06, D + 0.08), M.oak, mat4(p[0], p[1], p[2], 0, yaw, 0), W, 0.4);
+  p = at(D / 2 + 0.008, -0.6, H * 0.52);
+  B.add(box(0.016, 0.74, 0.07), M.redPipe, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(0, 0, 0.04);
+  B.add(box(W - 0.12, 0.08, D - 0.12), M.black, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  // the receptionist's side: screen, keyboard, bell, paper
+  p = at(-0.1, 0.5, H + 0.07);
+  B.add(cyl(0.11, 0.13, 0.02, 20), M.screenBezel, mat4(p[0], p[1], p[2]));
+  p = at(-0.1, 0.5, H + 0.15);
+  B.add(box(0.04, 0.16, 0.03), M.screenBezel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(-0.1, 0.5, H + 0.37);
+  B.add(rbox(0.5, 0.32, 0.03, 0.008), M.screenBezel, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.26), M.laptopScreen);
+  p = at(-0.12, 0.5, H + 0.37);
+  scr.position.set(p[0], p[1], p[2]);
+  scr.rotation.y = yaw + PI;
+  ctx.S.add(scr);
+  p = at(-0.3, 0.5, H + 0.07);
+  B.add(box(0.36, 0.02, 0.12), M.keyboard, mat4(p[0], p[1], p[2], 0, yaw, 0));
+  p = at(-0.05, -0.3, H + 0.09);
+  B.add(cyl(0.05, 0.05, 0.06, 12), M.white, mat4(p[0], p[1], p[2]));
+  p = at(-0.2, -0.8, H + 0.07);
+  B.add(rbox(0.16, 0.012, 0.22, 0.004), M.paper, mat4(p[0], p[1], p[2], 0, yaw + 0.3, 0));
+  p = at(0.05, 1.05, H + 0.06);
+  plant(ctx, p[0], p[2], 0.34, H + 0.06, M.potClay);
+  nav.blockBox(x, z, W, D, yaw, 0.3);
+}
+/** Oak slab bench on two oak blocks. */
+export function oakBench(ctx, x, z, yaw, len = 1.6) {
+  const { B, M, y, nav } = ctx;
+  const s = side(yaw);
+  B.add(box(len, 0.1, 0.42), M.oakSmall, mat4(x, y + 0.45, z, 0, yaw, 0));
+  for (const sw of [-len / 2 + 0.14, len / 2 - 0.14]) B.add(box(0.12, 0.4, 0.4), M.oakSmall, mat4(x + s.x * sw, y + 0.2, z + s.z * sw, 0, yaw, 0));
+  nav.blockBox(x, z, len, 0.45, yaw, 0.25);
+}
+/** A bicycle parked along fwd(yaw), red frame. */
+export function bike(ctx, x, z, yaw) {
+  const { B, M, y, nav } = ctx;
+  const f = fwd(yaw), sd = side(yaw);
+  const P = (fw, h, sw = 0) => new THREE.Vector3(x + f.x * fw + sd.x * sw, y + h, z + f.z * fw + sd.z * sw);
+  const UP = new THREE.Vector3(0, 1, 0);
+  const seg = (a, b, r, mat) => {
+    const d = b.clone().sub(a), len = d.length(), q = new THREE.Quaternion().setFromUnitVectors(UP, d.normalize());
+    B.add(cyl(r, r, len, 8), mat, new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(0.5), q, new THREE.Vector3(1, 1, 1)));
+  };
+  for (const fw of [-0.52, 0.52]) {
+    const p = P(fw, 0.34);
+    B.add(new THREE.TorusGeometry(0.32, 0.018, 8, 28), M.black, mat4(p.x, p.y, p.z, 0, yaw + PI / 2, 0));
+    B.add(cyl(0.3, 0.3, 0.006, 24), M.spokes, mat4(p.x, p.y, p.z, PI / 2, yaw + PI / 2, 0));
+  }
+  const bb = P(-0.05, 0.3), seatTop = P(-0.18, 0.86), headTop = P(0.36, 0.9), headBot = P(0.44, 0.58), rear = P(-0.52, 0.34), front = P(0.52, 0.34);
+  seg(bb, seatTop, 0.016, M.redPipe);
+  seg(bb, headBot, 0.016, M.redPipe);
+  seg(seatTop, headTop, 0.016, M.redPipe);
+  seg(headBot, headTop, 0.018, M.redPipe);
+  seg(rear, bb, 0.01, M.redPipe);
+  seg(rear, seatTop, 0.01, M.redPipe);
+  seg(headBot, front, 0.012, M.black);
+  seg(P(0.36, 0.95, -0.24), P(0.36, 0.95, 0.24), 0.012, M.black);
+  const sp = P(-0.18, 0.9);
+  B.add(rbox(0.22, 0.04, 0.09, 0.015), M.black, mat4(sp.x, sp.y, sp.z, 0, yaw, 0));
+  B.add(cyl(0.03, 0.03, 0.03, 10), M.black, mat4(bb.x, bb.y, bb.z, 0, yaw + PI / 2, PI / 2));
+  nav.blockBox(x, z, 0.4, 1.7, yaw, 0.2);
+}
+/** Coat stand with a jacket on it. */
+export function coatRack(ctx, x, z) {
+  const { B, M, y, nav } = ctx;
+  B.add(cyl(0.02, 0.02, 1.75, 8), M.black, mat4(x, y + 0.875, z));
+  B.add(cyl(0.16, 0.18, 0.02, 16), M.black, mat4(x, y + 0.01, z));
+  for (let k = 0; k < 4; k++) {
+    const a = (k * PI) / 2 + 0.4;
+    B.add(cyl(0.008, 0.008, 0.26, 6), M.black, mat4(x + Math.cos(a) * 0.116, y + 1.72, z + Math.sin(a) * 0.116, 0, -a, -1.1));
+  }
+  B.add(rbox(0.3, 0.62, 0.12, 0.04), M.sofaBlackDark, mat4(x + 0.1, y + 1.32, z + 0.08, 0, 0.5, 0));
+  nav.blockCircle(x, z, 0.2);
+}
+/** Pleated curtain along a glass line (a0..a1 at `at`), hanging from a black rail. */
+export function curtain(ctx, a0, a1, at, h, vertical = false, mat) {
+  const { B, M, y } = ctx;
+  const len = Math.abs(a1 - a0), c = (a0 + a1) / 2, m = mat || M.curtain, n = Math.round(len / 0.16);
+  for (let k = 0; k < n; k++) {
+    const t = Math.min(a0, a1) + (k + 0.5) * (len / n), d = k % 2 ? 0.1 : 0.05, off = k % 2 ? 0 : 0.025;
+    if (vertical) B.add(box(d, h, 0.17), m, mat4(at + off, y + h / 2 + 0.05, t));
+    else B.add(box(0.17, h, d), m, mat4(t, y + h / 2 + 0.05, at + off));
+  }
+  B.add(vertical ? box(0.04, 0.04, len) : box(len, 0.04, 0.04), M.black, vertical ? mat4(at, y + h + 0.08, c) : mat4(c, y + h + 0.08, at));
+}
+/** White-tiled back panel (kitchen splashback) centred at (x, h, z), facing +fwd(yaw). */
+export function tilePanel(ctx, x, h, z, yaw, w, hh) {
+  texturedBox(ctx, box(w, hh, 0.06), ctx.M.tile, mat4(x, ctx.y + h, z, 0, yaw, 0), w, hh);
 }

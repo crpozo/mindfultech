@@ -15,6 +15,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { buildRoom, roomsFor, roomNamesFor, STAIRS, UPPER_Y, roomAt, underDeck } from "./room.js";
 import { buildCharacter, POSES, HIP_CHAIR, HIP_SOFA } from "./character.js";
+import { loadAvatars, buildGlbCharacter } from "./rigGlb.js";
+import { buildCampus } from "./campus.js";
+import { iconSvg } from "../icons.js";
 import { scriptsFor, LAUGH_RE, fill } from "./dialogue.js";
 import { textsFor, langOf } from "./i18n.js";
 import { blob as blobTexture } from "./textures.js";
@@ -70,7 +73,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   let dpr = maxDpr;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(dpr);
-  renderer.setClearColor(0x000000, 0);
+  renderer.setClearColor("#e3e9ed", 1); // the fog colour; the sky dome paints over it
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -88,11 +91,13 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // near=2: the orbit never gets closer than 4 units, and a longer near plane
   // is what the depth buffer needs to stop wall decals fighting their walls
-  const camera = new THREE.PerspectiveCamera(30, 1, 2, 120);
+  const camera = new THREE.PerspectiveCamera(30, 1, 2, 360); // far enough for the campus blocks and the sky
   // seen from the front-left corner, like the reference
   const REST_TARGET = new THREE.Vector3(0.3, 1.4, 1.4);
-  const REST_DIR = new THREE.Vector3(-1, 0.95, 1).normalize();
-  const REST_DIST = 40;
+  // a touch flatter and further than before, so the campus and the blocks
+  // behind the back wall are in the frame while the floors stay readable
+  const REST_DIR = new THREE.Vector3(-1, 0.82, 1).normalize();
+  const REST_DIST = 43;
   camera.position.copy(REST_TARGET).addScaledVector(REST_DIR, REST_DIST);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -100,7 +105,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.minDistance = 4;
-  controls.maxDistance = 44;
+  controls.maxDistance = 48;
   controls.minPolarAngle = 0.3;
   controls.maxPolarAngle = 1.35;
   controls.minAzimuthAngle = -PI / 4 - 1.2;
@@ -130,6 +135,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // --------------------------------------------------------------- room ----
   const room = buildRoom(scene, bots, lang);
+  buildCampus(scene);
   const { stations, spots, hotspots, nav0, nav1, upper, dyn } = room;
   const navOf = (floor) => (floor ? nav1 : nav0);
   const floorY = (floor) => (floor ? UPPER_Y : 0);
@@ -146,7 +152,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const el = document.createElement("button");
     el.type = "button";
     el.className = classes.marker;
-    el.innerHTML = `<span class="${classes.markerIcon}">${h.icon}</span><span class="${classes.markerName}">${h.name}</span>`;
+    el.innerHTML = `<span class="${classes.markerIcon}">${iconSvg(h.id)}</span><span class="${classes.markerName}">${h.name}</span>`;
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       onHotspot && onHotspot(h.id);
@@ -168,8 +174,9 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // --------------------------------------------------------- characters ----
   const blobTex = blobTexture();
-  const actors = bots.map((bot, i) => {
-    const rig = buildCharacter(bot);
+  const actors = [];
+  const makeActor = (bot, i, templates) => {
+    const rig = templates ? buildGlbCharacter(bot, templates, i) : buildCharacter(bot);
     const st = stations[i];
     rig.root.position.set(st.seat.x, st.seat.y, st.seat.z);
     rig.root.rotation.y = st.seat.yaw;
@@ -197,9 +204,18 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     });
     overlay.appendChild(el);
     a.label = el;
+    pickables.push(...rig.meshes);
+    actors.push(a);
     return a;
-  });
-  for (const a of actors) pickables.push(...a.rig.meshes);
+  };
+  // the people: Ready Player Me bodies once their files arrive, the built-in rig if they never do
+  const peopleReady = loadAvatars().then(
+    (templates) => bots.forEach((bot, i) => makeActor(bot, i, templates)),
+    (err) => {
+      console.warn("office: avatars unavailable, using the built-in people", err);
+      bots.forEach((bot, i) => makeActor(bot, i, null));
+    }
+  );
 
   const setStatus = (a, text) => {
     if (a.status === text) return;
@@ -655,6 +671,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
           const od = Math.hypot(ox, oz);
           if (od < 0.75 && od > 0.001 && Math.abs(o.rig.root.position.y - root.position.y) < 1 && (ox * dx0 + oz * dz0) / (od * dist0) > 0.6 && o.idx < a.idx) speed *= 0.25;
         }
+        a.walkSpeed = speed;
         // consume the whole step, across several waypoints if the frame is long
         let remaining = speed * dt;
         while (remaining > 0 && a.path.length) {
@@ -724,6 +741,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     posture(a, t, p);
     const laughing = t < a.laughUntil;
     r.mouth(laughing || a.mouthOpen ? "open" : "smile");
+    // the motion-capture bodies play a clip under the pose: walking, talking (the speaker, standing) or idling
+    if (r.motion) r.motion(a.state === "walk" ? "walk" : a.conv && a.conv.speaker === a && !laughing ? "talk" : "idle", a.state === "walk" ? (a.walkSpeed || WALK) / WALK : 1);
     r.update(dt, t, a.state === "walk" ? 16 : 9);
     const hips = r.parts.hips;
     a.blob.position.set(root.position.x + Math.sin(a.yaw) * hips.position.z, root.position.y + 0.04, root.position.z + Math.cos(a.yaw) * hips.position.z);
@@ -1300,6 +1319,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   }
 
   return {
+    /** resolves once the people are in the scene (their bodies load after the room) */
+    whenReady: peopleReady,
     setSelected,
     focusRoom,
     setFloorView,

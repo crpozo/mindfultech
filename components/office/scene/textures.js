@@ -120,13 +120,13 @@ export function fabric(color) {
 /** Patterned rug in warm tones. */
 export function rug() {
   const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
-  g.fillStyle = "#c9a27a";
+  g.fillStyle = "#d9d7d1";
   g.fillRect(0, 0, S, S);
-  g.fillStyle = "#a8734f";
+  g.fillStyle = "#bfbdb6";
   g.fillRect(28, 28, S - 56, S - 56);
-  g.fillStyle = "#e3c8a6";
+  g.fillStyle = "#e4e2dc";
   g.fillRect(52, 52, S - 104, S - 104);
-  g.fillStyle = "#b9805a";
+  g.fillStyle = "#cfccc4";
   for (let y = 80; y < S - 80; y += 48)
     for (let x = 80; x < S - 80; x += 48) {
       g.beginPath();
@@ -137,7 +137,7 @@ export function rug() {
       g.closePath();
       g.fill();
     }
-  g.strokeStyle = "#7a4b32";
+  g.strokeStyle = "#a8a59d";
   g.lineWidth = 4;
   g.strokeRect(40, 40, S - 80, S - 80);
   grain(g, S, S, 4000, 0.1, false);
@@ -539,4 +539,360 @@ export function pingpongTop() {
   g.lineTo(128, 512);
   g.stroke();
   return tex(c, { wrap: false, aniso: 4 });
+}
+
+// ---------------------------------------------------------------- redesign ----
+// Oak, slats, pavers and facades for the warm-industrial look and the campus.
+
+/** Oak herringbone, planks 1:4 laid at 45°; the tile covers 2 m × 2 m, so a
+    plank is about 9 × 35 cm. In the frame where planks are axis-aligned the
+    pattern repeats every 8 plank widths (lattice (5,3)/(−1,1), vertical plank
+    4 widths to the right); rotated 45° that is a square of side 8·W·√2, and
+    two of those fit the tile. */
+export function herringbone() {
+  const S = 1024, c = makeCanvas(S, S), g = c.getContext("2d");
+  const W = S / (16 * Math.SQRT2), L = 4 * W;
+  g.fillStyle = "#7d5233";
+  g.fillRect(0, 0, S, S);
+  g.save();
+  g.translate(S / 2, S / 2);
+  g.rotate(Math.PI / 4);
+  const plank = (x, y, w, h) => {
+    const t = rnd(0.86, 1.14);
+    g.fillStyle = `rgb(${Math.round(198 * t)},${Math.round(152 * t)},${Math.round(104 * t)})`;
+    g.fillRect(x + 1, y + 1, w - 2, h - 2);
+    g.strokeStyle = "rgba(60,35,15,0.16)";
+    g.lineWidth = 1;
+    for (let k = 0; k < 3; k++) {
+      g.beginPath();
+      if (w > h) { const yy = y + 3 + Math.random() * (h - 6); g.moveTo(x + 2, yy); g.lineTo(x + w - 2, yy + rnd(-2, 2)); }
+      else { const xx = x + 3 + Math.random() * (w - 6); g.moveTo(xx, y + 2); g.lineTo(xx + rnd(-2, 2), y + h - 2); }
+      g.stroke();
+    }
+    g.fillStyle = "rgba(255,240,220,0.08)";
+    g.fillRect(x + 1, y + 1, w - 2, 2);
+  };
+  for (let i = -12; i <= 12; i++)
+    for (let j = -44; j <= 44; j++) {
+      const ox = (5 * i - j) * W, oy = (3 * i + j) * W;
+      if (Math.abs(ox) > S || Math.abs(oy) > S) continue;
+      plank(ox, oy, L, W);
+      plank(ox + L, oy, W, L);
+    }
+  g.restore();
+  grain(g, S, S, 5000, 0.07, false);
+  return tex(c, { repeat: [1, 1] });
+}
+
+/** Vertical oak slats on a dark backing, for feature walls; tile = 1 m × 1 m. */
+export function slats() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#2a2320";
+  g.fillRect(0, 0, S, S);
+  const n = 12, pitch = S / n, w = pitch * 0.62;
+  for (let i = 0; i < n; i++) {
+    const x = i * pitch + (pitch - w) / 2, t = rnd(0.9, 1.1);
+    g.fillStyle = `rgb(${Math.round(192 * t)},${Math.round(144 * t)},${Math.round(98 * t)})`;
+    g.fillRect(x, 0, w, S);
+    g.fillStyle = "rgba(255,235,210,0.16)";
+    g.fillRect(x, 0, 3, S);
+    g.fillStyle = "rgba(40,20,10,0.28)";
+    g.fillRect(x + w - 4, 0, 4, S);
+    g.strokeStyle = "rgba(70,40,20,0.14)";
+    g.lineWidth = 1;
+    for (let k = 0; k < 4; k++) {
+      const xx = x + 4 + Math.random() * (w - 8);
+      g.beginPath();
+      g.moveTo(xx, 0);
+      g.lineTo(xx + rnd(-3, 3), S);
+      g.stroke();
+    }
+  }
+  return tex(c, { repeat: [1, 1] });
+}
+
+/** Light concrete pavers for the plaza; tile = 2 m × 2 m (4 × 4 pavers). */
+export function pavers() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#b4afa5";
+  g.fillRect(0, 0, S, S);
+  const n = 4, p = S / n;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) {
+      const t = rnd(0.94, 1.06);
+      g.fillStyle = `rgb(${Math.round(212 * t)},${Math.round(206 * t)},${Math.round(194 * t)})`;
+      g.fillRect(i * p + 2, j * p + 2, p - 4, p - 4);
+    }
+  grain(g, S, S, 6000, 0.08, false);
+  grain(g, S, S, 3000, 0.1, true);
+  return tex(c);
+}
+
+/** Asphalt; tile = 4 m × 4 m. */
+export function asphalt() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#5a5d64";
+  g.fillRect(0, 0, S, S);
+  grain(g, S, S, 5000, 0.12, true);
+  grain(g, S, S, 5000, 0.18, false);
+  return tex(c);
+}
+
+/** One parking bay with white lines; tile = 2.7 m × 5.2 m. */
+export function parkingBay() {
+  const c = makeCanvas(128, 256), g = c.getContext("2d");
+  g.fillStyle = "#5a5d64";
+  g.fillRect(0, 0, 128, 256);
+  grain(g, 128, 256, 1500, 0.15, true);
+  g.fillStyle = "rgba(240,240,236,0.85)";
+  g.fillRect(0, 0, 5, 256);
+  g.fillRect(123, 0, 5, 256);
+  g.fillRect(0, 0, 128, 5);
+  return tex(c);
+}
+
+/** Glass office facade: 4 × 6 window bays, a few lit; tile = 12 m × 21.6 m. */
+export function facade(tone = "#3a4656", lit = 0.28) {
+  const W = 256, H = 384, c = makeCanvas(W, H), g = c.getContext("2d");
+  g.fillStyle = "#1f2328";
+  g.fillRect(0, 0, W, H);
+  const cols = 4, rows = 6, cw = W / cols, rh = H / rows;
+  for (let i = 0; i < cols; i++)
+    for (let j = 0; j < rows; j++) {
+      g.fillStyle = Math.random() < lit ? "#efe6cc" : tone;
+      g.fillRect(i * cw + 4, j * rh + 4, cw - 8, rh - 10);
+      g.fillStyle = "rgba(255,255,255,0.10)";
+      g.fillRect(i * cw + 4, j * rh + 4, cw - 8, 6);
+    }
+  return tex(c);
+}
+
+/** Wide straight oak boards (the loft reference); tile = 2 m × 2 m, ten boards of 0.2 m. */
+export function planks() {
+  const S = 1024, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#8a5f3c";
+  g.fillRect(0, 0, S, S);
+  const rows = 10, ph = S / rows;
+  // a board may cross the tile's seam: paint the part that sticks out on the other side too
+  const board = (x, w, r, fill) => {
+    for (const ox of [0, -S, S]) {
+      const bx = x + ox;
+      if (bx >= S || bx + w <= 0) continue;
+      fill(bx, r * ph, w, ph);
+    }
+  };
+  for (let r = 0; r < rows; r++) {
+    let x = -rnd(0, 500);
+    while (x < S) {
+      const w = rnd(440, 960), t = rnd(0.86, 1.12), warm = rnd(-7, 7);
+      const col = `rgb(${Math.round(196 * t + warm)},${Math.round(146 * t)},${Math.round(98 * t - warm)})`;
+      board(x, w, r, (bx, by, bw, bh) => {
+        g.fillStyle = col;
+        g.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
+        g.strokeStyle = "rgba(70,40,18,0.13)";
+        g.lineWidth = 1;
+        for (let k = 0; k < 10; k++) {
+          const yy = by + 4 + Math.random() * (bh - 8);
+          g.beginPath();
+          g.moveTo(bx + 3, yy);
+          g.bezierCurveTo(bx + bw * 0.3, yy + rnd(-4, 4), bx + bw * 0.6, yy + rnd(-4, 4), bx + bw - 3, yy + rnd(-2, 2));
+          g.stroke();
+        }
+        if (Math.random() < 0.3) {
+          const kx = bx + rnd(60, bw - 60), ky = by + rnd(20, bh - 20);
+          g.fillStyle = "rgba(60,32,14,0.35)";
+          g.beginPath();
+          g.ellipse(kx, ky, rnd(6, 11), rnd(3, 5), rnd(0, 3), 0, Math.PI * 2);
+          g.fill();
+          g.strokeStyle = "rgba(60,32,14,0.25)";
+          g.beginPath();
+          g.ellipse(kx, ky, rnd(14, 20), rnd(6, 9), 0, 0, Math.PI * 2);
+          g.stroke();
+        }
+        g.fillStyle = "rgba(255,240,220,0.09)";
+        g.fillRect(bx + 2, by + 2, bw - 4, 2);
+        g.fillStyle = "rgba(30,15,5,0.45)";
+        g.fillRect(bx + bw - 3, by, 3, bh);
+      });
+      x += w;
+    }
+  }
+  g.fillStyle = "rgba(25,12,4,0.5)";
+  for (let r = 0; r < rows; r++) g.fillRect(0, r * ph - 1, S, 2);
+  grain(g, S, S, 7000, 0.06, false);
+  return tex(c, { repeat: [1, 1] });
+}
+
+/** Lawn: short grass strokes over a mottled base; tile = 4 m × 4 m. */
+export function grass() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#67804a";
+  g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 70; i++) {
+    const r = rnd(30, 90), light = Math.random() < 0.5;
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, r);
+    gr.addColorStop(0, light ? "rgba(140,170,95,0.35)" : "rgba(60,85,40,0.35)");
+    gr.addColorStop(1, "rgba(0,0,0,0)");
+    g.save();
+    g.translate(Math.random() * S, Math.random() * S);
+    g.fillStyle = gr;
+    g.fillRect(-r, -r, 2 * r, 2 * r);
+    g.restore();
+  }
+  const cols = ["#86a95a", "#5e7d3f", "#749650", "#9ab86a", "#4e6b36"];
+  g.lineWidth = 1.2;
+  for (let i = 0; i < 14000; i++) {
+    const x = Math.random() * S, y = Math.random() * S, a = rnd(-0.6, 0.6) - Math.PI / 2, l = rnd(2, 6);
+    g.strokeStyle = cols[(Math.random() * cols.length) | 0];
+    g.globalAlpha = rnd(0.35, 0.9);
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+    g.stroke();
+  }
+  g.globalAlpha = 1;
+  return tex(c);
+}
+
+/** Tree bark: ridges and dark fissures; tile = 0.5 m around × 1 m up. */
+export function bark() {
+  const W = 256, H = 512, c = makeCanvas(W, H), g = c.getContext("2d");
+  g.fillStyle = "#5c4a3a";
+  g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 70; i++) {
+    const x = Math.random() * W, w = rnd(6, 22), t = rnd(0.75, 1.2);
+    g.fillStyle = `rgba(${Math.round(110 * t)},${Math.round(90 * t)},${Math.round(70 * t)},0.8)`;
+    g.fillRect(x, 0, w, H);
+    if (x + w > W) g.fillRect(x - W, 0, w, H);
+  }
+  g.strokeStyle = "rgba(25,15,8,0.75)";
+  for (let i = 0; i < 40; i++) {
+    let x = Math.random() * W;
+    g.lineWidth = rnd(1, 3.5);
+    g.beginPath();
+    g.moveTo(x, -10);
+    for (let y = 0; y <= H + 10; y += 24) {
+      x += rnd(-5, 5);
+      g.lineTo(x, y);
+    }
+    g.stroke();
+  }
+  grain(g, W, H, 3000, 0.12, true);
+  grain(g, W, H, 3000, 0.2, false);
+  return tex(c);
+}
+
+/** A cluster of leaves on a transparent background, for canopy and shrub cards (256 px ≈ 1.2 m). */
+export function leafCluster(kind = "tree") {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.clearRect(0, 0, S, S);
+  const tree = kind === "tree";
+  const cols = tree ? ["#2f6b31", "#3f7f3a", "#4e9144", "#63a34f", "#79b45c"] : ["#2b5e2f", "#3a7a3a", "#4d8f45", "#5f9f50", "#6fae58"];
+  const n = tree ? 150 : 120, R = S * 0.46;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * R * 0.92;
+    const x = S / 2 + Math.cos(a) * d, y = S / 2 + Math.sin(a) * d;
+    const rx = tree ? rnd(9, 15) : rnd(8, 13), ry = tree ? rnd(5, 8) : rnd(5, 8), rot = rnd(0, Math.PI);
+    g.fillStyle = cols[(Math.random() * cols.length) | 0];
+    g.beginPath();
+    g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "rgba(255,255,220,0.14)";
+    g.beginPath();
+    g.ellipse(x - 2, y - 2, rx * 0.6, ry * 0.5, rot, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "rgba(10,30,10,0.35)";
+    g.lineWidth = 0.8;
+    g.beginPath();
+    g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+    g.stroke();
+  }
+  return tex(c, { wrap: false });
+}
+
+/** One broad split leaf with a stem (monstera-like) on a transparent background, for indoor plants. */
+export function bigLeaf() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.clearRect(0, 0, S, S);
+  g.translate(S / 2, S * 0.97);
+  const grd = g.createLinearGradient(0, -S * 0.9, 0, 0);
+  grd.addColorStop(0, "#56a04c");
+  grd.addColorStop(1, "#2d6a33");
+  g.fillStyle = grd;
+  g.beginPath();
+  g.moveTo(0, -8);
+  g.bezierCurveTo(-70, -18, -115, -95, -95, -155);
+  g.bezierCurveTo(-85, -205, -40, -230, 0, -238);
+  g.bezierCurveTo(40, -230, 85, -205, 95, -155);
+  g.bezierCurveTo(115, -95, 70, -18, 0, -8);
+  g.fill();
+  g.globalCompositeOperation = "destination-out";
+  for (const sd of [-1, 1])
+    for (const [y, l] of [[-62, 52], [-112, 66], [-162, 52]]) {
+      g.beginPath();
+      g.ellipse(sd * (l + 34), y, l, 8, sd * 0.35, 0, Math.PI * 2);
+      g.fill();
+    }
+  g.globalCompositeOperation = "source-over";
+  g.strokeStyle = "rgba(205,238,185,0.55)";
+  g.lineWidth = 3;
+  g.beginPath();
+  g.moveTo(0, -4);
+  g.lineTo(0, -226);
+  g.stroke();
+  g.lineWidth = 1.4;
+  for (const sd of [-1, 1])
+    for (const y of [-40, -88, -138, -188]) {
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(sd * 70, y - 44);
+      g.stroke();
+    }
+  g.strokeStyle = "#3f7a3a";
+  g.lineWidth = 4;
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.lineTo(0, -10);
+  g.stroke();
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  return tex(c, { wrap: false });
+}
+
+/** Dense small leaves, no transparency, for clipped hedges; tile = 1 m × 1 m. */
+export function foliage() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#24481f";
+  g.fillRect(0, 0, S, S);
+  const cols = ["#2f6b2b", "#3c7d33", "#4a8f3c", "#5b9d47", "#2a5c27"];
+  for (let i = 0; i < 2600; i++) {
+    const x = Math.random() * S, y = Math.random() * S, rx = rnd(5, 9), ry = rnd(3, 5), rot = rnd(0, Math.PI);
+    g.fillStyle = cols[(Math.random() * cols.length) | 0];
+    for (const [ox, oy] of [[0, 0], [S, 0], [-S, 0], [0, S], [0, -S]]) {
+      g.beginPath();
+      g.ellipse(x + ox, y + oy, rx, ry, rot, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = "rgba(255,255,210,0.12)";
+    g.beginPath();
+    g.ellipse(x - 1, y - 1, rx * 0.5, ry * 0.5, rot, 0, Math.PI * 2);
+    g.fill();
+  }
+  return tex(c);
+}
+
+/** White square tiles with grey grout; tile = 1 m × 1 m (8 × 8 tiles). */
+export function tiles() {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext("2d");
+  g.fillStyle = "#b9b6ae";
+  g.fillRect(0, 0, S, S);
+  const n = 8, p = S / n;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) {
+      const t = rnd(0.96, 1.02);
+      g.fillStyle = `rgb(${Math.round(242 * t)},${Math.round(240 * t)},${Math.round(234 * t)})`;
+      g.fillRect(i * p + 2, j * p + 2, p - 4, p - 4);
+      g.fillStyle = "rgba(255,255,255,0.35)";
+      g.fillRect(i * p + 2, j * p + 2, p - 4, 3);
+    }
+  return tex(c);
 }

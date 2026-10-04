@@ -114,8 +114,12 @@ export function buildRoom(scene, bots, lang = "es") {
 
   // =============================================================== shell ====
   B0.add(box(x1 - x0 + 0.6, 0.6, z1 - z0 + 0.6), M.slab, mat4(0, -0.3, (z0 + z1) / 2));
-  const groundFloor = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M.concrete);
-  M.concrete.map.repeat.set(10, 7.4);
+  // oak herringbone everywhere on the ground floor (the back strip and the
+  // block repeat it a centimetre higher through woodPlane, same tile)
+  const gfMat = M.wood.clone();
+  gfMat.map = M.wood.map.clone();
+  gfMat.map.repeat.set((x1 - x0) / 2, (z1 - z0) / 2);
+  const groundFloor = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), gfMat);
   groundFloor.rotation.x = -PI / 2;
   groundFloor.position.set(0, 0.004, (z0 + z1) / 2);
   groundFloor.receiveShadow = true;
@@ -125,16 +129,24 @@ export function buildRoom(scene, bots, lang = "es") {
   woodPlane(scene, x1 - BX, WZ - D, (BX + x1) / 2, 0.016, (D + WZ) / 2);
   const under = new THREE.Mesh(new THREE.PlaneGeometry(34, 28), new THREE.MeshBasicMaterial({ map: T.blob(), transparent: true, depthWrite: false }));
   under.rotation.x = -PI / 2;
-  under.position.set(0.8, -0.75, 1.6);
+  under.position.set(0.8, -0.594, 1.6); // on the campus paving, a soft ambient shadow around the plinth
   scene.add(under);
   // mezzanine slabs (back strip + the block's roof) with wood on top
   const slabY = floorH + BLD.slabT / 2;
-  B1.add(box(x1 - x0 + 0.3, BLD.slabT, D - z0), M.slab, mat4(0, slabY, (z0 + D) / 2));
-  B1.add(box(x1 - BX + 0.15, BLD.slabT, WZ - D), M.slab, mat4((BX + x1) / 2 + 0.075, slabY, (D + WZ) / 2));
+  B1.add(box(x1 - x0 + 0.3, BLD.slabT, D - z0), M.slabDark, mat4(0, slabY, (z0 + D) / 2));
+  B1.add(box(x1 - BX + 0.15, BLD.slabT, WZ - D), M.slabDark, mat4((BX + x1) / 2 + 0.075, slabY, (D + WZ) / 2));
   woodPlane(upper, x1 - x0, D - z0, 0, UPPER_Y + 0.012, (z0 + D) / 2);
   woodPlane(upper, x1 - BX, WZ - D, (BX + x1) / 2, UPPER_Y + 0.012, (D + WZ) / 2);
   // ceiling light panels belong to the deck, so they vanish with it
-  for (const [x, z] of [[-7.6, -2.9], [-7.6, -4.6], [-2.9, -2.9], [-2.9, -4.6], [1.6, -2.9], [1.6, -4.6], [6.9, -2.9], [6.9, -4.6], [6.9, 0.6], [6.9, 2.6]]) F.ceilingPanel({ ...u, y: 0 }, x, floorH - 0.03, z);
+  // the industrial ceiling under the mezzanine: black slab, dark ducts and a
+  // red pipe running the length of the back strip, disc pendants over the tables
+  // (they belong to the upper batch so they vanish with the deck in the ground-floor view, instead of crossing the rooms seen from above)
+  const ductY = floorH - 0.3;
+  B1.add(F.cyl(0.15, 0.15, BX - x0 - 0.4, 14), M.duct, mat4((x0 + BX) / 2, ductY, -4.9, 0, 0, PI / 2));
+  B1.add(F.cyl(0.1, 0.1, BX - x0 - 0.4, 12), M.duct, mat4((x0 + BX) / 2, ductY + 0.04, -1.25, 0, 0, PI / 2));
+  B1.add(F.cyl(0.04, 0.04, BX - x0 - 0.4, 8), M.redPipe, mat4((x0 + BX) / 2, floorH - 0.12, -2.3, 0, 0, PI / 2));
+  B1.add(F.cyl(0.1, 0.1, WZ - D - 0.4, 12), M.duct, mat4(9.2, ductY, (D + WZ) / 2, PI / 2, 0, 0));
+  for (const [x, z, r] of [[-7.6, -3.0, 0.4], [-2.9, -3.4, 0.4], [1.6, -3.4, 0.34], [6.9, -3.3, 0.34], [7.0, 1.65, 0.32]]) F.discPendant(g, x, 2.5, z, r, floorH - 0.02);
 
   // exterior walls: plaster back and left (as far as the mezzanine), navy behind the servers and the cafe sign, glass on the right
   const H2 = floorH * 2 + BLD.slabT;
@@ -169,17 +181,24 @@ export function buildRoom(scene, bots, lang = "es") {
   };
 
   // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
-  F.wall(gw, 4.4, 7.8, LX, floorH, M.blackWall, true, 0.15);
+  F.wall(gw, 4.4, 7.8, LX, floorH, M.slats, true, 0.15);
   F.glassWall(gw, D, 4.4, LX, floorH, [[-0.2, 0.9]], true);
   F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, L.signs.logo, "#1b1b1f", "#ffffff", 1.9, 0.42);
   F.clock(gw, LX - 0.09, 1.75, 4.95, -PI / 2);
-  F.receptionRound(g, -7.9, 6.3, -PI / 2);
+  // the entrance: glazed on the street side with a door gap in front of the
+  // turnstiles; the oak block desk faces it, two disc pendants above
+  F.glassWall(gw, 4.0, z1, x0, floorH, [[5.9, 7.3]], true);
+  F.discPendant(g, -7.9, 2.6, 5.6, 0.34, floorH);
+  F.discPendant(g, -7.7, 2.75, 7.0, 0.26, floorH);
+  F.receptionBlock(g, -7.9, 6.3, -PI / 2);
   stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: bots[10] });
   nav0.clear(-7.25, 6.3, 0.15);
   F.planter(g, -7.9, 4.55);
   F.planter(g, -7.9, 8.05);
-  for (const z of [5.0, 5.75, 6.5, 7.25, 8.0]) F.turnstile(g, -9.75, z, PI / 2);
-  F.bench(g, -9.5, 2.3, PI / 2, 1.6);
+  for (const z of [5.0, 5.75, 6.5, 7.25, 8.0]) F.turnstile(g, -9.3, z, PI / 2);
+  F.oakBench(g, -9.5, 2.3, PI / 2, 1.6);
+  F.bike(g, -6.98, 1.3, 0);
+  F.coatRack(g, -7.0, 3.9);
   F.plant(g, -9.4, 0.3, 0.9);
   nav0.blockCircle(-9.4, 0.3, 0.2);
   light(scene, -8.2, 2.9, 6.3, "#ffd7a6", 3.5, 7);
@@ -225,7 +244,7 @@ export function buildRoom(scene, bots, lang = "es") {
   // ---- the periwinkle block: arched faces, reading nook inside ----
   F.archWall(gw, D, WZ, BX, floorH, [{ x: 0.2, w: 1.1, h: 2.1, sill: 0.85 }, { x: 3.15, w: 1.3, h: 2.3 }], M.periwinkle, true);
   F.archWall(gw, BX, x1, WZ, floorH, [{ x: 5.6, w: 1.1, h: 2.1, sill: 0.85 }, { x: 8.4, w: 1.1, h: 2.1, sill: 0.85 }], M.periwinkle);
-  F.sign(gw, 7.0, 2.9, WZ + 0.09, 0, L.signs.future, "#6b6fae", "#ffffff", 3.6, 0.62);
+  F.sign(gw, 7.0, 2.9, WZ + 0.09, 0, L.signs.future, "#2a2320", "#f3e6d4", 3.6, 0.62);
   F.wall(gw, BX, x1, D, floorH, M.navy);
   const rugN = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.4), M.rug);
   rugN.rotation.x = -PI / 2;
@@ -243,11 +262,11 @@ export function buildRoom(scene, bots, lang = "es") {
 
   // ---- under the mezzanine ----
   F.glassWall(gw, x0, BX, D, floorH, [[-8.1, -7.0], [-2.5, -1.2], [1.9, 3.0]]);
-  F.wall(gw, z0, D, LNG, floorH, M.navy, true);
+  F.wall(gw, z0, D, LNG, floorH, M.wallWhite, true);
   F.wall(gw, z0, D, -0.6, floorH, M.green, true);
   F.wall(gw, z0, -2.2, BX, floorH, M.navy, true);
   F.wall(gw, -0.6, D, BX, floorH, M.navy, true);
-  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.6, M.green], [-0.6, BX, M.orange]]) BW0.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, floorH / 2, z0 + 0.03));
+  for (const [a0, a1, mat] of [[x0, LNG, M.wallWhite], [LNG, -0.6, M.green], [-0.6, BX, M.orange]]) F.texturedBox(gw, box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, floorH / 2, z0 + 0.03), a1 - a0, floorH);
   // Sala Chimborazo
   F.roundTable(g, -7.6, -3.0, 0.85, F.DESK_H, M.lightWood, 0.15);
   const meet2Seats = [];
@@ -258,7 +277,8 @@ export function buildRoom(scene, bots, lang = "es") {
     meet2Seats.push({ x: x + Math.sin(yaw) * 0.28, z: z + Math.cos(yaw) * 0.28, yaw, sit: 0.27 });
   }
   F.tv(gw, -7.6, 2.0, z0 + 0.09, 0, 1.5, 0.86);
-  F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, L.signs.chimborazo, "#3d4a7a", "#ffffff", 1.4, 0.7);
+  F.curtain(gw, -9.7, -8.3, D - 0.16, 2.7);
+  F.sign(gw, LNG - 0.09, 2.6, -3.0, -PI / 2, L.signs.chimborazo, "#1b1b1f", "#ffffff", 1.4, 0.7);
   F.picture(gw, LNG - 0.09, 2.1, -4.4, -PI / 2, 1);
   F.picture(gw, LNG - 0.09, 2.1, -5.0, -PI / 2, 2);
   F.floorLamp(g, -9.5, -1.0);
@@ -266,7 +286,8 @@ export function buildRoom(scene, bots, lang = "es") {
   nav0.blockCircle(-5.7, -5.4, 0.2);
   light(scene, -7.6, 3.05, -3.0, "#fff1dc", 5, 7);
   // Sala Andes
-  F.table(g, -2.9, -3.4, 2.8, 1.1, 0, F.DESK_H, M.lightWood, 0.15);
+  F.table(g, -2.9, -3.4, 2.8, 1.1, 0, F.DESK_H, M.darkTable, 0.15);
+  F.curtain(gw, -4.9, -3.4, D - 0.16, 2.7);
   const meetSeats = [];
   for (const x of [-3.8, -2.9, -2.0]) {
     F.simpleChair(g, x, -2.55, PI, M.chairOrange);
@@ -276,7 +297,7 @@ export function buildRoom(scene, bots, lang = "es") {
   }
   F.tv(gw, -2.9, 2.0, z0 + 0.09, 0, 1.6, 0.9);
   F.whiteboard(gw, LNG + 0.09, 1.75, -3.4, PI / 2, 2.0, 1.3);
-  F.sign(gw, -4.6, 2.6, z0 + 0.12, 0, L.signs.andes, "#8fb996", "#1e2a24", 1.3, 0.45);
+  F.sign(gw, -4.6, 2.6, z0 + 0.12, 0, L.signs.andes, "#c9a06a", "#2a2320", 1.3, 0.45);
   F.plant(g, -1.0, -5.4, 0.9);
   nav0.blockCircle(-1.0, -5.4, 0.2);
   light(scene, -2.9, 3.05, -3.2, "#fff1dc", 5, 7);
@@ -296,11 +317,11 @@ export function buildRoom(scene, bots, lang = "es") {
   F.railingBars(u, x0, BX, D);
   F.railingBars(u, D, WZ, BX, true, [[STAIRS.z0, STAIRS.z1]]);
   F.railingBars(u, BX, x1, WZ);
-  F.wall(uw, z0, -1.8, LNG, PART_H, M.navy, true);
+  F.wall(uw, z0, -1.8, LNG, PART_H, M.slats, true);
   F.wall(uw, z0, -1.8, -0.8, PART_H, M.green, true);
   F.wall(uw, z0, -1.8, 2.45, PART_H, M.orange, true);
   F.wall(uw, z0, -1.8, BX, PART_H, M.orange, true);
-  for (const [a0, a1, mat] of [[x0, LNG, M.navy], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) BW1.add(box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03));
+  for (const [a0, a1, mat] of [[x0, LNG, M.slats], [LNG, -0.8, M.green], [-0.8, BX, M.orange]]) F.texturedBox(uw, box(a1 - a0, floorH, 0.05), mat, mat4((a0 + a1) / 2, UPPER_Y + floorH / 2, z0 + 0.03), a1 - a0, floorH);
   B1.add(box(0.1, 0.1, STAIRS.z1 - STAIRS.z0 + 0.1), M.lightWood, mat4(BX + 0.03, UPPER_Y - 0.05, 1.6));
   // lounge
   F.sofa(u, -7.6, z0 + 0.55, 0, 2.7, M.sofaBlack, M.sofaBlackDark);
@@ -316,8 +337,8 @@ export function buildRoom(scene, bots, lang = "es") {
   F.floorLamp(u, -9.5, -1.2);
   F.plant(u, -5.6, -5.5, 0.8);
   nav1.blockCircle(-5.6, -5.5, 0.18);
-  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#e08a5c", "#ffffff", 1.1, 0.9);
-  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#e08a5c", "#ffffff", 2.4, 0.9);
+  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#a8322c", "#fbf4ea", 1.1, 0.9);
+  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#a8322c", "#fbf4ea", 2.4, 0.9);
   // training room
   F.whiteboard(uw, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
   const trainSeats = [];
@@ -329,7 +350,7 @@ export function buildRoom(scene, bots, lang = "es") {
   F.floorLamp(u, -4.6, -5.5);
   F.plant(u, -1.2, -5.5, 0.9);
   nav1.blockCircle(-1.2, -5.5, 0.2);
-  F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, L.signs.everyDay, "#8fb996", "#1e2a24", 1.8, 0.8);
+  F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, L.signs.everyDay, "#c9a06a", "#2a2320", 1.8, 0.8);
   // studio: two desks face to face
   desk({ x: -0.15, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
   desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
@@ -344,11 +365,25 @@ export function buildRoom(scene, bots, lang = "es") {
   // phone booth
   F.highTable(u, 3.12, -4.7, 0.35);
   F.stool(u, 3.12, -5.4);
-  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#e08a5c", "#ffffff", 1.0, 0.7);
+  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#a8322c", "#fbf4ea", 1.0, 0.7);
   // cafeteria: the screen alone, centred on the wall panel between the phone
   // booth sign (ends at x≈3.6) and the counter (starts at x≈6.6)
   F.tv(uw, 5.15, 1.85, z0 + 0.14, 0, 1.6, 0.9);
   const bar = F.cafeCounter(u, 8.0, -4.6, 0, 2.8);
+  F.tilePanel(u, 8.0, 1.6, -5.0, 0, 2.9, 1.3);
+  for (const x of [7.2, 8.0, 8.8]) F.conePendant(u, x, 2.0, -4.6, floorH);
+  F.discPendant(u, 7.0, 2.1, -1.9, 0.5, floorH);
+  F.discPendant(u, 8.6, 2.2, 1.4, 0.4, floorH);
+  F.discPendant(u, 6.0, 2.3, 2.8, 0.4, floorH);
+  F.discPendant(u, -7.6, 2.25, -3.6, 0.52, floorH);
+  F.discPendant(u, -2.5, 2.3, -3.8, 0.45, floorH);
+  F.discPendant(u, 0.85, 2.35, -3.2, 0.42, floorH);
+  // exposed structure along the back wall: three dark beams and a duct, the
+  // industrial ceiling the cutaway can hint at without covering the floor
+  for (const zb of [z0 + 0.5, z0 + 1.4, z0 + 2.3]) B1.add(box(x1 - x0 - 0.3, 0.2, 0.1), M.beam, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.16, zb));
+  B1.add(F.cyl(0.13, 0.13, x1 - x0 - 0.6, 14), M.ductSilver, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.46, z0 + 0.95, 0, 0, PI / 2));
+  B1.add(F.cyl(0.09, 0.09, x1 - x0 - 0.6, 12), M.duct, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.5, z0 + 2.75, 0, 0, PI / 2));
+  B1.add(F.cyl(0.04, 0.04, x1 - x0 - 0.6, 8), M.redPipe, mat4((x0 + x1) / 2, UPPER_Y + floorH - 0.66, z0 + 1.85, 0, 0, PI / 2));
   for (const [x, z] of [[5.4, -2.2], [8.6, -1.6], [8.6, 1.4], [6.0, 2.8]]) F.highTable(u, x, z, 0.4);
   for (const [x, z] of [[5.4, -2.95], [5.4, -1.45], [9.35, -1.6], [8.6, -2.35], [9.35, 1.4], [8.6, 2.15], [6.0, 3.55], [5.25, 2.8], [6.75, 2.8]]) F.stool(u, x, z);
   F.planter(u, 4.4, 3.55);
