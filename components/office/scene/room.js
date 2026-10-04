@@ -226,8 +226,6 @@ export function buildRoom(scene, bots, lang = "es") {
   F.planter(g, -1.6, 2.95);
   F.plant(g, -1.4, 8.4, 1.0);
   nav0.blockCircle(-1.4, 8.4, 0.22);
-  F.plant(g, 2.3, 8.4, 0.9);
-  nav0.blockCircle(2.3, 8.4, 0.2);
 
   // ---- open workspace: two rows of desks facing each other across an aisle that opens onto the hall ----
   for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 5.2, yaw: PI }, bots[k], k);
@@ -248,7 +246,7 @@ export function buildRoom(scene, bots, lang = "es") {
   F.wall(gw, BX, x1, D, floorH, M.navy);
   const rugN = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.4), M.rug);
   rugN.rotation.x = -PI / 2;
-  rugN.position.set(7.0, 0.03, 1.65);
+  rugN.position.set(7.0, 0.022, 1.65); // under the table foot (its top is at 0.03), above the wood (0.016)
   rugN.receiveShadow = true;
   scene.add(rugN);
   F.sofa(g, 7.4, 0.6, -PI / 2 + 0.45, 0.95, M.chairOrange, M.chairOrangeDark);
@@ -328,7 +326,7 @@ export function buildRoom(scene, bots, lang = "es") {
   F.pouf(u, -6.2, -2.6);
   const rugM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.4), M.rug);
   rugM.rotation.x = -PI / 2;
-  rugM.position.set(-7.7, UPPER_Y + 0.03, -3.9);
+  rugM.position.set(-7.7, UPPER_Y + 0.022, -3.9);
   rugM.receiveShadow = true;
   upper.add(rugM);
   F.floorLamp(u, -9.5, -1.2);

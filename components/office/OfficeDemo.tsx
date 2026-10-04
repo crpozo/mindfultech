@@ -10,6 +10,7 @@ import { tx, LOCALE } from "@/lib/office/i18n";
 import { BotScreen } from "./BotScreen";
 import { BotChat } from "./BotChat";
 import { HotspotPanel, hotspotMeta, type OfficeEvent } from "./Hotspots";
+import { AgentFace } from "./AgentFace";
 import s from "./office.module.css";
 
 type Room = { id: string; name: string; floor: number };
@@ -51,6 +52,9 @@ const IconFs = ({ on }: { on?: boolean }) => (
   </svg>
 );
 
+/** the hotspot panels that are dashboards, in the order the menu lists them */
+const DASHBOARDS = ["tv", "board", "servers", "lounge", "reception", "meeting", "clock", "pingpong", "shelf", "coffee"];
+
 export function OfficeDemo() {
   // the demo follows the site language (EN by default) and has its own toggle
   const { lang, setLang } = useLang();
@@ -80,6 +84,8 @@ export function OfficeDemo() {
   const [teamOpen, setTeamOpen] = React.useState(false);
   const [roomsOpen, setRoomsOpen] = React.useState(false);
   const roomsRef = React.useRef<HTMLDivElement>(null);
+  const [dashOpen, setDashOpen] = React.useState(false);
+  const dashRef = React.useRef<HTMLDivElement>(null);
   // Sims-style view filter: walls full / cut low / hidden, and the mezzanine shown or hidden
   const [viewOpen, setViewOpen] = React.useState(false);
   const viewRef = React.useRef<HTMLDivElement>(null);
@@ -149,8 +155,6 @@ export function OfficeDemo() {
         sceneRef.current = scene;
         setRooms(scene.rooms);
         setRoomNames(scene.roomNames);
-        if (scene.whenReady) await scene.whenReady;
-        if (disposed) return;
         setReady(true);
       } catch (e) {
         console.error(e);
@@ -198,14 +202,15 @@ export function OfficeDemo() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   React.useEffect(() => {
-    if (!roomsOpen && !viewOpen) return;
+    if (!roomsOpen && !viewOpen && !dashOpen) return;
     const onDown = (e: PointerEvent) => {
       if (roomsRef.current && !roomsRef.current.contains(e.target as Node)) setRoomsOpen(false);
+      if (dashRef.current && !dashRef.current.contains(e.target as Node)) setDashOpen(false);
       if (viewRef.current && !viewRef.current.contains(e.target as Node)) setViewOpen(false);
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
-  }, [roomsOpen, viewOpen]);
+  }, [roomsOpen, viewOpen, dashOpen]);
   React.useEffect(() => {
     if (!ready) return;
     sceneRef.current?.setWalls(walls);
@@ -475,6 +480,30 @@ export function OfficeDemo() {
               </div>
             )}
           </div>
+          <div className={s.menuWrap} ref={dashRef}>
+            <button type="button" className={`${s.tool} ${dashOpen || (hotspot && DASHBOARDS.includes(hotspot)) ? s.toolActive : ""}`} onClick={() => setDashOpen((v) => !v)} aria-expanded={dashOpen} aria-haspopup="menu">
+              <i>📊</i>
+              <span className={s.toolLabel}>Dashboards</span>
+              <span className={s.caret}>▾</span>
+            </button>
+            {dashOpen && (
+              <div className={s.menu} role="menu" aria-label="Dashboards">
+                <div className={s.menuFloor}>{t("Pantallas con datos del equipo", "Screens with the team's data")}</div>
+                {DASHBOARDS.map((id) => {
+                  const m = hotspotMeta(lang)[id];
+                  return (
+                    <button key={id} type="button" role="menuitem" className={`${s.menuItem} ${hotspot === id ? s.menuItemActive : ""}`} onClick={() => { setDashOpen(false); setSelected(null); setHotspot(id); setInteracted(true); }}>
+                      <span className={s.menuIcon} dangerouslySetInnerHTML={{ __html: iconSvg(id) }} />
+                      <span className={s.menuText}>
+                        <b>{m.title}</b>
+                        <small>{m.subtitle}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <div className={s.menuWrap} ref={viewRef}>
             <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""} ${tour?.target === "view" ? s.tourGlow : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
               <i>👁️</i>
@@ -557,7 +586,9 @@ export function OfficeDemo() {
                 onClick={() => pickBot(b.id)}
                 title={`${b.name} · ${b.title}`}
               >
-                <span className={s.avatar}>{b.name[0]}</span>
+                <span className={s.avatar}>
+                  <AgentFace id={b.id} look={b.look} mood={status[b.id] ? "idle" : "working"} size={36} />
+                </span>
                 <span className={s.memberBody}>
                   <span className={s.memberName}>
                     {b.name} <em>{b.role}</em>
@@ -624,7 +655,9 @@ export function OfficeDemo() {
         {bot && (
           <>
             <div className={s.panelHead}>
-              <span className={s.avatar}>{bot.name[0]}</span>
+              <span className={s.avatar}>
+                <AgentFace id={bot.id} look={bot.look} mood={tab === "chat" ? "idle" : status[bot.id] ? "idle" : "working"} size={44} />
+              </span>
               <div className={s.panelTitle}>
                 <strong>{bot.name}</strong>
                 <span>

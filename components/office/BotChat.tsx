@@ -3,6 +3,7 @@
 import * as React from "react";
 import { type Bot, reply } from "@/lib/office/bots";
 import { type Lang, LOCALE, tx } from "@/lib/office/i18n";
+import { AgentFace, type FaceMood } from "./AgentFace";
 import s from "./office.module.css";
 
 type Msg = { from: "bot" | "user"; text: string; at: string };
@@ -15,6 +16,8 @@ export function BotChat({ bot, lang }: { bot: Bot; lang: Lang }) {
   const [msgs, setMsgs] = React.useState<Msg[]>([]);
   const [input, setInput] = React.useState("");
   const [typing, setTyping] = React.useState(false);
+  const [mood, setMood] = React.useState<FaceMood>("idle");
+  const moodTimer = React.useRef<number | null>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const timer = React.useRef<number | null>(null);
@@ -27,11 +30,24 @@ export function BotChat({ bot, lang }: { bot: Bot; lang: Lang }) {
       setTyping(false);
       setMsgs([{ from: "bot", text: reply(bot, lang === "es" ? "hola" : "hello"), at: stamp(lang) }]);
     }, 700);
+    setMood("typing");
     return () => {
       window.clearTimeout(id);
       if (timer.current) window.clearTimeout(timer.current);
+      if (moodTimer.current) window.clearTimeout(moodTimer.current);
     };
   }, [bot, lang]);
+  // the face follows the conversation: thinks, then types, then answers you
+  React.useEffect(() => {
+    if (moodTimer.current) window.clearTimeout(moodTimer.current);
+    if (typing) {
+      setMood("thinking");
+      moodTimer.current = window.setTimeout(() => setMood("typing"), 500);
+    } else if (msgs.length) {
+      setMood("talking");
+      moodTimer.current = window.setTimeout(() => setMood("idle"), 1600);
+    }
+  }, [typing, msgs.length]);
 
   React.useEffect(() => {
     const el = listRef.current;
@@ -50,8 +66,15 @@ export function BotChat({ bot, lang }: { bot: Bot; lang: Lang }) {
     }, 900 + Math.min(1600, msg.length * 25));
   };
 
+  const caption = mood === "thinking" ? t("está pensando…", "is thinking…") : mood === "typing" ? t("está escribiendo…", "is typing…") : mood === "talking" ? t("te respondió", "answered you") : t("en línea", "online");
   return (
     <div className={s.chat}>
+      <div className={s.chatFace}>
+        <AgentFace id={bot.id} look={bot.look} mood={mood} size={64} />
+        <span>
+          <b>{bot.name}</b> {caption}
+        </span>
+      </div>
       <div className={s.messages} ref={listRef}>
         {msgs.map((m, i) => (
           <div key={i} className={`${s.msg} ${m.from === "bot" ? s.msgBot : s.msgUser}`}>

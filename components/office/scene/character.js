@@ -640,9 +640,10 @@ export function buildCharacter(bot) {
   phone.visible = false;
   AR.hand.add(phone);
   const paddle = new THREE.Group();
-  paddle.rotation.x = -PI / 2;
+  paddle.rotation.x = PI - 0.6; // the blade continues the forearm out of the fist, tipped up a little
   paddle.position.y = -0.06;
-  paddle.add(mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 12), std("#c0392b", 0.8), 0, 0.15, 0).rotateX(PI / 2));
+  const blade = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 12), std("#c0392b", 0.8), 0, 0.15, 0).rotateX(PI / 2);
+  paddle.add(blade);
   paddle.add(mesh(box(0.03, 0.12, 0.02), std("#c9a24a", 0.8), 0, 0.035, 0));
   paddle.visible = false;
   AR.hand.add(paddle);
@@ -771,7 +772,7 @@ export function buildCharacter(bot) {
 
   const parts = {
     hips, torso, head, shL: AL.sh, shR: AR.sh, elL: AL.el, elR: AR.el, handL: AL.hand, handR: AR.hand,
-    hipL: L.hip, hipR: Rg.hip, kneeL: L.knee, kneeR: Rg.knee,
+    hipL: L.hip, hipR: Rg.hip, kneeL: L.knee, kneeR: Rg.knee, blade,
   };
   const cur = { ...REST };
   const target = { ...REST };
@@ -971,6 +972,7 @@ export const POSES = {
       shLx: 0.1, shRx: 0.1, elLx: -1.19, elRx: -1.19, shLy: 0.9, shRy: -0.9, shLz: -0.05, shRz: 0.05,
       headRx: 0.05 + Math.max(0, Math.sin(t * 2.0 + p)) * 0.07,
       headRz: 0.05,
+      clipArms: 1, // on the motion-capture bodies the clip's relaxed arms read better than folded hands
     });
   },
   laugh(rig, t, p) {
@@ -1015,12 +1017,12 @@ export const POSES = {
   },
   holdMug(rig, t, p) {
     POSES.stand(rig, t, p);
-    rig.set({ shRx: -0.05, elRx: -1.3, shRz: 0.05, shRy: -0.15, shLx: -0.15, elLx: -0.6 });
+    rig.set({ shRx: -0.05, elRx: -1.3, shRz: 0.05, shRy: -0.15, shLx: -0.15, elLx: -0.6, clipArms: 1 });
   },
   crossed(rig, t, p) {
     // arms folded, each hand tucked under the other upper arm
     POSES.stand(rig, t, p);
-    rig.set({ shLx: 0.2, shRx: 0.15, elLx: -1.7, elRx: -1.62, shLy: 0.9, shRy: -0.9, shLz: 0, shRz: 0, headRx: -0.05 + Math.sin(t * 0.5 + p) * 0.03 });
+    rig.set({ shLx: 0.2, shRx: 0.15, elLx: -1.7, elRx: -1.62, shLy: 0.9, shRy: -0.9, shLz: 0, shRz: 0, headRx: -0.05 + Math.sin(t * 0.5 + p) * 0.03, clipArms: 1 });
   },
   write(rig, t, p) {
     POSES.stand(rig, t, p);
@@ -1066,7 +1068,7 @@ export const POSES = {
   },
   ready(rig, t, p) {
     POSES.stand(rig, t, p);
-    rig.set({ shRx: -0.6, shRz: 0.4, shRy: -0.5, elRx: -1.1, shLx: -0.35, elLx: -0.8, torsoRx: 0.12, headRx: 0.12, hipsY: HIP_STAND - 0.01, kneeLx: 0.3, kneeRx: 0.3, hipLx: -0.2, hipRx: -0.2 });
+    rig.set({ shRx: -0.3, shRz: 0.3, shRy: -0.4, elRx: -1.5, shLx: -0.35, elLx: -0.9, torsoRx: 0.12, headRx: 0.12, hipsY: HIP_STAND - 0.01, kneeLx: 0.3, kneeRx: 0.3, hipLx: -0.2, hipRx: -0.2 });
   },
   wave(rig, t, p) {
     POSES.stand(rig, t, p);

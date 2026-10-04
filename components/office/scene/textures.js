@@ -652,19 +652,33 @@ export function parkingBay() {
 }
 
 /** Glass office facade: 4 × 6 window bays, a few lit; tile = 12 m × 21.6 m. */
+const facadeCache = new Map();
 export function facade(tone = "#3a4656", lit = 0.28) {
-  const W = 256, H = 384, c = makeCanvas(W, H), g = c.getContext("2d");
+  const key = tone + lit;
+  if (facadeCache.has(key)) return facadeCache.get(key);
+  const t = facadeTex(tone, lit);
+  facadeCache.set(key, t);
+  return t;
+}
+/** { map, glow }: the glow map lights the same windows that are lit by day, for the night. */
+function facadeTex(tone, lit) {
+  const W = 256, H = 384, c = makeCanvas(W, H), g = c.getContext("2d"), c2 = makeCanvas(W, H), g2 = c2.getContext("2d");
   g.fillStyle = "#1f2328";
   g.fillRect(0, 0, W, H);
+  g2.fillStyle = "#000000";
+  g2.fillRect(0, 0, W, H);
   const cols = 4, rows = 6, cw = W / cols, rh = H / rows;
   for (let i = 0; i < cols; i++)
     for (let j = 0; j < rows; j++) {
-      g.fillStyle = Math.random() < lit ? "#efe6cc" : tone;
+      const on = Math.random() < lit;
+      g.fillStyle = on ? "#efe6cc" : tone;
       g.fillRect(i * cw + 4, j * rh + 4, cw - 8, rh - 10);
       g.fillStyle = "rgba(255,255,255,0.10)";
       g.fillRect(i * cw + 4, j * rh + 4, cw - 8, 6);
+      g2.fillStyle = on ? "#ffd98a" : "#141a2a";
+      g2.fillRect(i * cw + 4, j * rh + 4, cw - 8, rh - 10);
     }
-  return tex(c);
+  return { map: tex(c), glow: tex(c2) };
 }
 
 /** Wide straight oak boards (the loft reference); tile = 2 m × 2 m, ten boards of 0.2 m. */
@@ -741,7 +755,7 @@ export function grass() {
   }
   const cols = ["#86a95a", "#5e7d3f", "#749650", "#9ab86a", "#4e6b36"];
   g.lineWidth = 1.2;
-  for (let i = 0; i < 14000; i++) {
+  for (let i = 0; i < 7000; i++) {
     const x = Math.random() * S, y = Math.random() * S, a = rnd(-0.6, 0.6) - Math.PI / 2, l = rnd(2, 6);
     g.strokeStyle = cols[(Math.random() * cols.length) | 0];
     g.globalAlpha = rnd(0.35, 0.9);
@@ -864,10 +878,16 @@ export function foliage() {
   g.fillStyle = "#24481f";
   g.fillRect(0, 0, S, S);
   const cols = ["#2f6b2b", "#3c7d33", "#4a8f3c", "#5b9d47", "#2a5c27"];
-  for (let i = 0; i < 2600; i++) {
+  for (let i = 0; i < 2200; i++) {
     const x = Math.random() * S, y = Math.random() * S, rx = rnd(5, 9), ry = rnd(3, 5), rot = rnd(0, Math.PI);
     g.fillStyle = cols[(Math.random() * cols.length) | 0];
-    for (const [ox, oy] of [[0, 0], [S, 0], [-S, 0], [0, S], [0, -S]]) {
+    // only leaves near an edge need a mirrored copy for the tile to wrap
+    const offs = [[0, 0]];
+    if (x < 10) offs.push([S, 0]);
+    if (x > S - 10) offs.push([-S, 0]);
+    if (y < 10) offs.push([0, S]);
+    if (y > S - 10) offs.push([0, -S]);
+    for (const [ox, oy] of offs) {
       g.beginPath();
       g.ellipse(x + ox, y + oy, rx, ry, rot, 0, Math.PI * 2);
       g.fill();

@@ -27,23 +27,40 @@ export function buildCampus(scene, M) {
   // ------------------------------------------------------------- sky ----
   // Vertex-colour gradient on an inside-out sphere; drawn first, no depth,
   // and exempt from the fog that softens everything else.
-  {
-    const geo = new THREE.SphereGeometry(230, 32, 18);
-    const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
-    const top = new THREE.Color("#8fb4da"), mid = new THREE.Color("#d5e3ee"), low = new THREE.Color("#e9edef");
-    const c = new THREE.Color();
+  // Three palettes (day, dusk, night) blended per vertex by the time of day.
+  const skyGeo = new THREE.SphereGeometry(230, 32, 18);
+  const skyCol = new THREE.BufferAttribute(new Float32Array(skyGeo.attributes.position.count * 3), 3);
+  skyGeo.setAttribute("color", skyCol);
+  const PAL = {
+    day: ["#8fb4da", "#d5e3ee", "#e9edef"],
+    dusk: ["#3d4a7c", "#e89a6a", "#ffd2a6"],
+    night: ["#05081a", "#111a38", "#283048"],
+  };
+  const horizon = new THREE.Color("#e3e9ed");
+  const paintSky = (night, dusk) => {
+    const w = { day: (1 - night) * (1 - dusk), dusk, night: night * (1 - dusk) };
+    const mix = (k) => {
+      const c = new THREE.Color(0, 0, 0);
+      for (const name of ["day", "dusk", "night"]) c.add(new THREE.Color(PAL[name][k]).multiplyScalar(w[name]));
+      return c;
+    };
+    const top = mix(0), mid = mix(1), low = mix(2), c = new THREE.Color(), pos = skyGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const t = pos.getY(i) / 230;
       if (t > 0.12) c.copy(mid).lerp(top, Math.min(1, (t - 0.12) / 0.6));
       else c.copy(low).lerp(mid, Math.max(0, (t + 0.1) / 0.22));
-      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+      skyCol.setXYZ(i, c.r, c.g, c.b);
     }
-    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    const sky = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
-    sky.renderOrder = -10;
-    G.add(sky);
-  }
+    skyCol.needsUpdate = true;
+    horizon.copy(low).lerp(mid, 0.35);
+    return horizon;
+  };
+  const sky = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
+  sky.renderOrder = -10;
+  G.add(sky);
   scene.fog = new THREE.Fog("#e3e9ed", 70, 190);
+  paintSky(0, 0);
+  const facades = [];
 
   // ---------------------------------------------------------- ground ----
   const flat = (w, d, x, z, mat, y = GROUND_Y, shadow = true) => {
@@ -325,8 +342,12 @@ export function buildCampus(scene, M) {
   // the right of the camera's rest view so they never cover the office.
   const roofGreen = std("#6f9a5a", 1), parapet = std("#1f2328", 0.7), core = std("#2a2d33", 0.7);
   const block = (x, z, w, d, h, tone, lit) => {
-    const mat = new THREE.MeshStandardMaterial({ map: T.facade(tone, lit), roughness: 0.35, metalness: 0.2 });
+    const f = T.facade(tone, lit);
+    const mat = new THREE.MeshStandardMaterial({ map: f.map.clone(), emissiveMap: f.glow.clone(), emissive: "#ffffff", emissiveIntensity: 0, roughness: 0.35, metalness: 0.2 });
     mat.map.repeat.set(Math.max(1, Math.round(w / 12)), Math.max(1, Math.round(h / 21.6)));
+    mat.emissiveMap.repeat.copy(mat.map.repeat);
+    mat.map.needsUpdate = mat.emissiveMap.needsUpdate = true;
+    facades.push(mat);
     add(new THREE.BoxGeometry(w, h, d), mat, x, GROUND_Y + h / 2, z);
     add(new THREE.BoxGeometry(w + 0.4, 0.5, d + 0.4), parapet, x, GROUND_Y + h + 0.25, z, 0, false);
     add(new THREE.BoxGeometry(w - 1.6, 0.4, d - 1.6), roofGreen, x, GROUND_Y + h + 0.5, z, 0, false);
@@ -344,5 +365,14 @@ export function buildCampus(scene, M) {
   block(112, 24, 22, 18, 30, "#2c3744", 0.35);
   block(-96, -10, 20, 26, 13, "#3a4656", 0.25);
   block(70, 60, 26, 20, 16, "#33404f", 0.3);
-  return G;
+
+  /** night and dusk in 0…1: repaints the sky and fog, lights the lamps and the neighbours' windows; returns the horizon colour */
+  const setTime = (night, dusk) => {
+    const hz = paintSky(night, dusk);
+    scene.fog.color.copy(hz);
+    head.emissiveIntensity = 0.4 + 3.2 * night;
+    for (const m of facades) m.emissiveIntensity = 1.3 * night;
+    return hz;
+  };
+  return { group: G, setTime };
 }

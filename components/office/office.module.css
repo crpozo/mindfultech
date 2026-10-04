@@ -713,27 +713,37 @@
 .tabs {
   display: flex;
   gap: 4px;
-  padding: 10px 12px 0;
+  margin: 10px 12px 0;
+  padding: 4px;
+  border-radius: 14px;
+  background: #e9eaee;
+  border: 1px solid rgba(14, 13, 18, 0.08);
 }
 .tab {
   flex: 1;
   padding: 9px 12px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
   font: inherit;
   font-size: 13px;
-  font-weight: 500;
-  color: #6b7280;
+  font-weight: 600;
+  color: #3b3f4a;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition: background 0.15s, color 0.15s;
 }
-.tabActive {
+.tab:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+.tabActive,
+.tabActive:hover {
   background: #0e0d12;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(14, 13, 18, 0.2);
 }
 .tab .live {
   width: 7px;
@@ -2138,4 +2148,115 @@
   .tourShift {
     top: 102px;
   }
+}
+
+/* ---- dashboards menu rows ---- */
+.menuIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #eef2f1;
+  color: #2e6e63;
+  flex: 0 0 auto;
+}
+.menuIcon svg {
+  width: 17px;
+  height: 17px;
+}
+.menuText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+.menuText small {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+/* ---- animated agent face ---- */
+.face {
+  display: block;
+  border-radius: 50%;
+  overflow: hidden;
+  background: inherit;
+}
+.face * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.faceHead {
+  transform-origin: 50px 90px;
+  animation: faceBreathe 4.6s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.facePupils {
+  transition: transform 0.35s ease;
+}
+.faceBrows path {
+  transition: transform 0.35s ease;
+}
+.faceLid {
+  transform: scaleY(0);
+  animation: faceBlink var(--blink, 5s) ease-in-out infinite;
+}
+@keyframes faceBlink {
+  0%, 93%, 100% { transform: scaleY(0); }
+  95.5% { transform: scaleY(1); }
+}
+@keyframes faceBreathe {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(0.8px) rotate(0.6deg); }
+}
+/* working: eyes on the screen, a nod now and then */
+.face_working .facePupils { transform: translate(-1.3px, 1.8px); }
+.face_working .faceHead { animation: faceNod 6s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+@keyframes faceNod {
+  0%, 84%, 100% { transform: translateY(0) rotate(0deg); }
+  88% { transform: translateY(1.4px) rotate(-1.5deg); }
+  92% { transform: translateY(-0.4px) rotate(0.8deg); }
+  96% { transform: translateY(1px) rotate(-0.6deg); }
+}
+/* thinking: eyes up, one brow raised, head tilted */
+.face_thinking .facePupils { transform: translate(1.6px, -2px); }
+.face_thinking .faceBrowR { transform: translateY(-2.2px) rotate(-8deg); }
+.face_thinking .faceHead { animation: none; transform: rotate(-5deg); }
+/* typing: eyes down, a quick small bob */
+.face_typing .facePupils { transform: translate(0, 2.4px); }
+.face_typing .faceHead { animation: faceType 0.46s ease-in-out infinite; }
+@keyframes faceType {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(0.9px); }
+}
+/* talking: looking at you, mouth moving, brows a little up */
+.face_talking .facePupils { transform: translate(0, 0); }
+.face_talking .faceBrows path { transform: translateY(-1px); }
+.faceTalk { animation: faceTalk 0.32s ease-in-out infinite alternate; }
+@keyframes faceTalk {
+  from { transform: scaleY(0.25) scaleX(0.9); }
+  to { transform: scaleY(1) scaleX(1); }
+}
+.chatFace {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 6px;
+  color: #6b7280;
+  font-size: 12px;
+}
+.chatFace > svg {
+  background: var(--c, #e9eaee);
+  flex: 0 0 auto;
+}
+.chatFace b {
+  color: #0e0d12;
+  font-weight: 600;
 }

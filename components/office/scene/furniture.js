@@ -36,6 +36,7 @@ export class Batcher {
       m.castShadow = true;
       m.receiveShadow = true;
       if (mat.userData && mat.userData.depth) m.customDepthMaterial = mat.userData.depth; // alpha-tested leaves shadow their holes
+      if (mat.userData && mat.userData.noShadow) m.castShadow = false; // glass
       this.parent.add(m);
     }
     this.groups.clear();
@@ -132,7 +133,7 @@ export function makeMaterials(bots) {
     teal: std("#2f6f68", 0.8),
     frame: std("#f4f2ee", 0.6),
     black: std("#1e1f24", 0.5, { metalness: 0.3 }),
-    glass: new THREE.MeshPhysicalMaterial({ color: "#dfeffc", roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false, clearcoat: 0.4, side: THREE.DoubleSide }),
+    glass: Object.assign(new THREE.MeshPhysicalMaterial({ color: "#dfeffc", roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false, clearcoat: 0.4, side: THREE.DoubleSide }), { userData: { noShadow: true } }),
     glassDark: new THREE.MeshPhysicalMaterial({ color: "#8fb8d8", roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }),
     deskWood: std("#b4835a", 0.6),
     lightWood: std("#c49a62", 0.6),
@@ -802,10 +803,7 @@ export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false, noSta
   for (const [s0, s1] of segs) {
     const len = s1 - s0, c = (s0 + s1) / 2;
     const [px, py, pz] = P(c, h / 2);
-    const glass = new THREE.Mesh(new THREE.PlaneGeometry(len, h - 0.1), M.glass);
-    glass.position.set(px, py, pz);
-    glass.rotation.y = vertical ? PI / 2 : 0;
-    ctx.S.add(glass);
+    B.add(new THREE.PlaneGeometry(len, h - 0.1), M.glass, mat4(px, py, pz, 0, vertical ? PI / 2 : 0, 0)); // one mesh per floor, not one per pane
     const geo = (w, hh, d) => (vertical ? box(d, hh, w) : box(w, hh, d));
     B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, 0.03)));
     B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, h - 0.03)));
@@ -850,7 +848,7 @@ export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
   shape.lineTo(x1, rise);
   shape.closePath();
   const prism = new THREE.ExtrudeGeometry(shape, { depth: sw, bevelEnabled: false });
-  B.add(prism, M.beam, mat4(0, y, z0));
+  B.add(prism, M.beam, mat4(0, y - 0.04, z0)); // a touch lower, so its slope never meets the tread tops
   for (let k = 0; k < steps; k++) {
     const xt = x0 + dir * (k + 0.5) * sd, yt = (k + 1) * sr;
     B.add(box(sd + 0.02, 0.035, sw + 0.02), M.oakSmall, mat4(xt, y + yt - 0.0175, cz)); // tread

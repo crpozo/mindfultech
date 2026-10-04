@@ -69,7 +69,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   // are thinner than a pixel at this distance and shimmer as the camera
   // damps; rendering at 1.75× (then downsampled) steadies them. The adaptive
   // loop below still drops it on slow machines.
-  const maxDpr = Math.min(Math.max(window.devicePixelRatio || 1, 1.75), 2);
+  const lowPower = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches) || (navigator.hardwareConcurrency || 8) <= 4;
+  const maxDpr = lowPower ? 1.25 : Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2);
   let dpr = maxDpr;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(dpr);
@@ -117,7 +118,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const sun = new THREE.DirectionalLight("#fff1d6", 2.4);
   sun.position.set(-10, 18, 9);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(lowPower ? 1024 : 1536, lowPower ? 1024 : 1536);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 60;
   sun.shadow.camera.left = -17;
@@ -128,15 +129,56 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   sun.shadow.normalBias = 0.05;
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
-  scene.add(new THREE.HemisphereLight("#dbe7ff", "#7a6a55", 0.9));
+  const hemi = new THREE.HemisphereLight("#dbe7ff", "#7a6a55", 0.9);
+  scene.add(hemi);
   const fillLight = new THREE.DirectionalLight("#ffffff", 0.45);
   fillLight.position.set(-12, 8, 14);
   scene.add(fillLight);
 
   // --------------------------------------------------------------- room ----
   const room = buildRoom(scene, bots, lang);
-  buildCampus(scene, room.materials);
+  const campus = buildCampus(scene, room.materials);
+
+  // ---- time of day: the viewer's clock (Quito: sun up ~6:10, down ~18:20 all year) ----
+  // window.__OFFICE_HOUR = 22 forces an hour, for testing
+  const Mat = room.materials;
+  const baseLights = room.lights.map((l) => l.intensity);
+  const baseGlow = { panel: Mat.panel.emissiveIntensity, bulb: Mat.bulb.emissiveIntensity, shade: Mat.lampShade.emissiveIntensity, laptop: Mat.laptopScreen.emissiveIntensity };
+  const smooth = (a, b, x) => {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+  const _c1 = new THREE.Color(), _c2 = new THREE.Color();
+  const applyTime = (h) => {
+    const day = smooth(5.7, 7.0, h) * (1 - smooth(17.9, 19.1, h));
+    const night = 1 - day;
+    const dusk = Math.max(smooth(17.3, 18.3, h) * (1 - smooth(18.3, 19.4, h)), smooth(5.4, 6.2, h) * (1 - smooth(6.2, 7.3, h)));
+    sun.intensity = (0.1 + 2.3 * day) * (1 - 0.3 * dusk);
+    sun.color.copy(_c1.set("#9fb4ff").lerp(_c2.set("#fff1d6"), day)).lerp(_c2.set("#ff9a4a"), dusk * 0.9);
+    sun.position.set(-10, 6 + 12 * day * (1 - 0.5 * dusk), 9);
+    hemi.intensity = 0.18 + 0.72 * day;
+    hemi.color.copy(_c1.set("#243258").lerp(_c2.set("#dbe7ff"), day)).lerp(_c2.set("#f0b48a"), dusk * 0.5);
+    hemi.groundColor.copy(_c1.set("#111118").lerp(_c2.set("#7a6a55"), day));
+    fillLight.intensity = 0.04 + 0.41 * day;
+    scene.environmentIntensity = 0.1 + 0.25 * day;
+    renderer.toneMappingExposure = 1.05 - 0.14 * night;
+    room.lights.forEach((l, i) => (l.intensity = baseLights[i] * (1 + 1.2 * night)));
+    Mat.panel.emissiveIntensity = baseGlow.panel * (1 + 1.4 * night);
+    Mat.bulb.emissiveIntensity = baseGlow.bulb * (1 + 0.8 * night);
+    Mat.lampShade.emissiveIntensity = baseGlow.shade * (1 + 3 * night);
+    Mat.laptopScreen.emissiveIntensity = baseGlow.laptop * (1 + 0.8 * night);
+    const horizon = campus.setTime(night, dusk);
+    renderer.setClearColor(horizon, 1);
+  };
+  const hourNow = () => {
+    if (typeof window.__OFFICE_HOUR === "number") return window.__OFFICE_HOUR;
+    const d = new Date();
+    return d.getHours() + d.getMinutes() / 60;
+  };
+  applyTime(hourNow());
+  const timeTimer = window.setInterval(() => applyTime(hourNow()), 60000);
   const { stations, spots, hotspots, nav0, nav1, upper, dyn } = room;
+  let disposed = false;
   const navOf = (floor) => (floor ? nav1 : nav0);
   const floorY = (floor) => (floor ? UPPER_Y : 0);
   /** height of a body on the stairs at x: the tread top, rising to the next one over the last 40% of each tread */
@@ -219,11 +261,29 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     return a;
   };
   // the people: Ready Player Me bodies once their files arrive, the built-in rig if they never do
+  const timing = { start: performance.now() };
+  const staggered = (templates) =>
+    new Promise((resolve) => {
+      let i = 0;
+      const step = () => {
+        if (disposed) return resolve();
+        makeActor(bots[i], i, templates);
+        if (++i < bots.length) requestAnimationFrame(step);
+        else {
+          timing.people = Math.round(performance.now() - timing.start);
+          resolve();
+        }
+      };
+      requestAnimationFrame(step);
+    });
   const peopleReady = loadAvatars().then(
-    (templates) => bots.forEach((bot, i) => makeActor(bot, i, templates)),
+    (templates) => {
+      timing.avatarsLoaded = Math.round(performance.now() - timing.start);
+      return staggered(templates);
+    },
     (err) => {
       console.warn("office: avatars unavailable, using the built-in people", err);
-      bots.forEach((bot, i) => makeActor(bot, i, null));
+      return staggered(null);
     }
   );
 
@@ -572,12 +632,12 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       const g = c.game;
       if (!g || g.kind !== "pingpong" || g.phase !== "rally") continue;
       const from = g.toward === 1 ? c.people[0] : c.people[1], to = g.toward === 1 ? c.people[1] : c.people[0];
-      from.rig.parts.elR.getWorldPosition(_h1);
-      to.rig.parts.elR.getWorldPosition(_h2);
+      (from.rig.parts.blade || from.rig.parts.elR).getWorldPosition(_h1);
+      (to.rig.parts.blade || to.rig.parts.elR).getWorldPosition(_h2);
       const k = clamp((simT - g.hitAt) / 0.75, 0, 1);
       const ball = room.pingpong.ball;
       ball.position.lerpVectors(_h1, _h2, k);
-      ball.position.y = lerp(_h1.y, _h2.y, k) + Math.sin(k * PI) * 0.35 - 0.15;
+      ball.position.y = lerp(_h1.y, _h2.y, k) + Math.sin(k * PI) * 0.3;
     }
   };
 
@@ -1132,7 +1192,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   ro.observe(mount);
 
   // --------------------------------------------------------------- loop ----
-  let simT = 0, last = performance.now(), raf = 0, disposed = false;
+  let simT = 0, last = performance.now(), raf = 0;
+  timing.room = Math.round(performance.now() - timing.start);
   let screenTick = 0, tvTick = 0, clockTick = 0, ledTick = 0, measureTick = 0;
   let frames = 0, frameMs = 0;
   const tmp = new THREE.Vector3();
@@ -1316,11 +1377,11 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     // adaptive resolution: drop the pixel ratio when frames run long
     frames++;
     frameMs += rawDt * 1000;
-    if (frames >= 90) {
+    if (frames >= 60) {
       const avg = frameMs / frames;
       frames = 0;
       frameMs = 0;
-      if (avg > 26 && dpr > 1) {
+      if (avg > 22 && dpr > 1) {
         dpr = Math.max(1, dpr - 0.25);
         renderer.setPixelRatio(dpr);
         resize();
@@ -1334,6 +1395,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     window.__OFFICE_DEBUG.info = renderer.info;
     window.__OFFICE_DEBUG.actors = actors;
     window.__OFFICE_DEBUG.nav = { nav0, nav1 };
+    window.__OFFICE_DEBUG.timing = timing;
   }
 
   return {
@@ -1355,6 +1417,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     roomNames,
     dispose: () => {
       disposed = true;
+      window.clearInterval(timeTimer);
       cancelAnimationFrame(raf);
       ro.disconnect();
       renderer.domElement.removeEventListener("pointermove", onMove);

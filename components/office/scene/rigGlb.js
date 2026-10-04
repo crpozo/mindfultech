@@ -189,7 +189,24 @@ function prepareAtlas(skinned, dims) {
   // hair: the darker half of the scalp samples (the hairline mixes in skin)
   const skinL = lum(...dom.skin);
   dom.hair = median(sm.hair.filter((c) => lum(...c) < skinL * 0.75));
-  return { S, base, px, hair, dom };
+  // one class per pixel, decided once: 1 top (print), 2 top, 3 trousers, 4 shoes, 5 swatch, 6 hair, 7 skin
+  const cls = new Uint8Array(S * S);
+  const hairL = lum(...dom.hair);
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      const i = (y * S + x) * 4, u = x / S, v = y / S, k = y * S + x;
+      if (px[i + 3] < 128) continue;
+      if (inRect(RECT.top, u, v)) cls[k] = Math.abs(px[i] - dom.top[0]) + Math.abs(px[i + 1] - dom.top[1]) + Math.abs(px[i + 2] - dom.top[2]) > 150 ? 1 : 2;
+      else if (inRect(RECT.pants, u, v)) cls[k] = 3;
+      else if (inRect(RECT.shoes, u, v)) cls[k] = 4;
+      else if (inRect(RECT.swatch, u, v)) cls[k] = 5;
+      else if (inRect(RECT.head, u, v)) {
+        const l = lum(px[i], px[i + 1], px[i + 2]);
+        if (hair[k] && l < skinL * 0.75) cls[k] = 6;
+        else if (skinLike(px[i], px[i + 1], px[i + 2])) cls[k] = 7;
+      }
+    }
+  return { S, base, px, hair, dom, cls, hairL, skinL };
 }
 const clamp255 = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
 const hex = (c) => {
@@ -198,7 +215,7 @@ const hex = (c) => {
 };
 /** A person's own atlas: the template recoloured for their look. */
 function makeVariant(atlas, look) {
-  const { S, px, hair, dom } = atlas;
+  const { S, px, dom, cls, hairL } = atlas;
   const c = document.createElement("canvas");
   c.width = c.height = S;
   const g = c.getContext("2d");
@@ -206,32 +223,25 @@ function makeVariant(atlas, look) {
   d.set(px);
   const top = hex(look.jacket || look.shirt), pants = hex(look.pants), shoes = hex(look.shoes), skin = hex(look.skin), hairC = hex(look.hair);
   const kSkin = [0, 1, 2].map((k) => skin[k] / Math.max(1, dom.skin[k]));
-  const kHair = [0, 1, 2].map((k) => hairC[k] / Math.max(8, dom.hair[k]));
-  const hairL = lum(...dom.hair), skinL = lum(...dom.skin);
-  const tint = (i, from, to) => {
-    const mul = lum(...from) > 128;
-    for (let k = 0; k < 3; k++) d[i + k] = clamp255(mul ? (to[k] * d[i + k]) / Math.max(1, from[k]) : to[k] + (d[i + k] - from[k]));
-  };
-  const dist = (i, c0) => Math.abs(d[i] - c0[0]) + Math.abs(d[i + 1] - c0[1]) + Math.abs(d[i + 2] - c0[2]);
-  for (let y = 0; y < S; y++)
-    for (let x = 0; x < S; x++) {
-      const i = (y * S + x) * 4, u = x / S, v = y / S;
-      if (d[i + 3] < 128) continue;
-      if (inRect(RECT.top, u, v)) {
-        if (dist(i, dom.top) > 150) { d[i] = top[0]; d[i + 1] = top[1]; d[i + 2] = top[2]; } // the printed logo goes
-        else tint(i, dom.top, top);
-      } else if (inRect(RECT.pants, u, v)) tint(i, dom.pants, pants);
-      else if (inRect(RECT.shoes, u, v)) tint(i, dom.shoes, shoes);
-      else if (inRect(RECT.swatch, u, v)) { d[i] = skin[0]; d[i + 1] = skin[1]; d[i + 2] = skin[2]; }
-      else if (inRect(RECT.head, u, v)) {
-        const r = d[i], gg = d[i + 1], b = d[i + 2], l = lum(r, gg, b);
-        if (hair[y * S + x] && l < skinL * 0.75) {
-          // keep the hair's own light and dark, scaled to the new colour
-          const k = Math.min(1.6, Math.max(0.6, l / Math.max(8, hairL)));
-          for (let q = 0; q < 3; q++) d[i + q] = clamp255(hairC[q] * k);
-        } else if (skinLike(r, gg, b)) for (let q = 0; q < 3; q++) d[i + q] = clamp255(d[i + q] * kSkin[q]);
-      }
+  // light sources keep their shading by ratio, dark ones by difference
+  const mode = (from) => (lum(...from) > 128 ? 1 : 0);
+  const mTop = mode(dom.top), mPants = mode(dom.pants), mShoes = mode(dom.shoes);
+  const n = S * S;
+  for (let k = 0; k < n; k++) {
+    const t = cls[k];
+    if (!t) continue;
+    const i = k * 4;
+    if (t === 1) { d[i] = top[0]; d[i + 1] = top[1]; d[i + 2] = top[2]; continue; }
+    if (t === 5) { d[i] = skin[0]; d[i + 1] = skin[1]; d[i + 2] = skin[2]; continue; }
+    if (t === 6) {
+      const l = lum(d[i], d[i + 1], d[i + 2]), f = Math.min(1.6, Math.max(0.6, l / Math.max(8, hairL)));
+      d[i] = clamp255(hairC[0] * f); d[i + 1] = clamp255(hairC[1] * f); d[i + 2] = clamp255(hairC[2] * f);
+      continue;
     }
+    if (t === 7) { d[i] = clamp255(d[i] * kSkin[0]); d[i + 1] = clamp255(d[i + 1] * kSkin[1]); d[i + 2] = clamp255(d[i + 2] * kSkin[2]); continue; }
+    const from = t === 2 ? dom.top : t === 3 ? dom.pants : dom.shoes, to = t === 2 ? top : t === 3 ? pants : shoes, mul = t === 2 ? mTop : t === 3 ? mPants : mShoes;
+    for (let q = 0; q < 3; q++) d[i + q] = clamp255(mul ? (to[q] * d[i + q]) / Math.max(1, from[q]) : to[q] + (d[i + q] - from[q]));
+  }
   g.putImageData(out, 0, 0);
   const tex = new THREE.CanvasTexture(c);
   tex.flipY = false;
@@ -297,16 +307,19 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
   const hips = bones.Hips;
   const hipsRest = { q0: hips.quaternion.clone(), Rp: tpl.restWorld.get(hips.parent.name) || IDENT.clone() };
   hipsRest.RpInv = hipsRest.Rp.clone().invert();
-  // fingers of the prop hand (the body's left): a curl in the hand's rest frame, blended in when holding
-  const grip = [];
-  for (const f of FINGERS)
-    for (let k = 1; k <= 3; k++) {
-      const b = bones["LeftHand" + f + k];
-      if (!b) continue;
-      const Pp = tpl.restWorld.get(b.parent.name), PpInv = Pp.clone().invert();
-      const D = new THREE.Quaternion().setFromAxisAngle(Z, -(k === 1 ? 0.9 : 1.1));
-      grip.push({ bone: b, q: PpInv.clone().multiply(D).multiply(Pp).multiply(b.quaternion) });
-    }
+  // fingers: a curl in each hand's rest frame — a light one at rest so the hands
+  // never splay flat, the full fist on the prop hand (the body's left) when holding
+  const grip = [], curl = [];
+  for (const side of ["Left", "Right"])
+    for (const f of FINGERS)
+      for (let k = 1; k <= 3; k++) {
+        const b = bones[side + "Hand" + f + k];
+        if (!b) continue;
+        const Pp = tpl.restWorld.get(b.parent.name), PpInv = Pp.clone().invert();
+        const D = new THREE.Quaternion().setFromAxisAngle(Z, (side === "Left" ? -1 : 1) * (k === 1 ? 0.9 : 1.1));
+        const q = PpInv.clone().multiply(D).multiply(Pp).multiply(b.quaternion);
+        (side === "Left" ? grip : curl).push({ bone: b, q });
+      }
 
   // ---- clips ----
   const mixer = new THREE.AnimationMixer(model);
@@ -335,10 +348,12 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
   const phone = new THREE.Group();
   phone.position.set(0, -0.03, 0.018);
   phone.add(mesh(new THREE.BoxGeometry(0.065, 0.13, 0.01), PROP_MAT.phone, 0, 0.045, 0), mesh(new THREE.BoxGeometry(0.055, 0.11, 0.004), PROP_MAT.screen, 0, 0.045, 0.006));
+  // the blade continues the forearm out of the fist and tips up a little (shakehand grip)
   const paddle = new THREE.Group();
-  paddle.rotation.x = -PI / 2;
+  paddle.rotation.x = PI - 0.6;
   paddle.position.y = -0.06;
-  paddle.add(mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 12), PROP_MAT.paddle, 0, 0.15, 0).rotateX(PI / 2), mesh(new THREE.BoxGeometry(0.03, 0.12, 0.02), PROP_MAT.handle, 0, 0.035, 0));
+  const blade = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 12), PROP_MAT.paddle, 0, 0.15, 0).rotateX(PI / 2);
+  paddle.add(blade, mesh(new THREE.BoxGeometry(0.03, 0.12, 0.02), PROP_MAT.handle, 0, 0.035, 0));
   for (const p of [mug, phone, paddle]) {
     p.visible = false;
     p.scale.setScalar(1 / scale);
@@ -393,7 +408,7 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
 
   const rig = {
     root,
-    parts: { hips, elR: bones.LeftForeArm, elL: bones.RightForeArm, head: bones.Head, torso: bones.Spine1 },
+    parts: { hips, elR: bones.LeftForeArm, elL: bones.RightForeArm, head: bones.Head, torso: bones.Spine1, blade },
     meshes: [proxy],
     ring,
     head: bones.Head,
@@ -404,6 +419,7 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
     cur,
     rest() {
       Object.assign(target, REST);
+      target.clipArms = 0;
     },
     set(o) {
       Object.assign(target, o);
@@ -444,7 +460,7 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
       w.all += (seated - w.all) * kw;
       for (const gname of ["armL", "armR", "legs"]) {
         const propArm = gname === "armR" && held;
-        const allowed = mode === "idle" || propArm;
+        const allowed = propArm || (mode === "idle" && !(target.clipArms && gname !== "legs"));
         const want = Math.max(seated, allowed && isSet(gname) ? 1 : 0);
         w[gname] += (want - w[gname]) * kw;
       }
@@ -479,9 +495,9 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
         _q2.copy(hipsRest.RpInv).multiply(_q).multiply(hipsRest.Rp);
         hips.quaternion.premultiply(_q2);
       }
-      // grip
-      const gw = held ? 1 : 0;
-      if (gw) for (const f of grip) f.bone.quaternion.slerp(f.q, gw);
+      // hands: resting curl, fist around a prop
+      for (const f of grip) f.bone.quaternion.slerp(f.q, held ? 1 : 0.3);
+      for (const f of curl) f.bone.quaternion.slerp(f.q, 0.3);
     },
   };
   return rig;
