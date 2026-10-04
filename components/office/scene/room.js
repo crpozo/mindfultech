@@ -140,12 +140,13 @@ export function buildRoom(scene, bots, lang = "es") {
   // ceiling light panels belong to the deck, so they vanish with it
   // the industrial ceiling under the mezzanine: black slab, dark ducts and a
   // red pipe running the length of the back strip, disc pendants over the tables
+  // (they belong to the upper batch so they vanish with the deck in the ground-floor view, instead of crossing the rooms seen from above)
   const ductY = floorH - 0.3;
-  B0.add(F.cyl(0.17, 0.17, BX - x0 - 0.4, 14), M.duct, mat4((x0 + BX) / 2, ductY, -4.9, 0, 0, PI / 2));
-  B0.add(F.cyl(0.11, 0.11, BX - x0 - 0.4, 12), M.duct, mat4((x0 + BX) / 2, ductY + 0.04, -1.25, 0, 0, PI / 2));
-  B0.add(F.cyl(0.04, 0.04, BX - x0 - 0.4, 8), M.redPipe, mat4((x0 + BX) / 2, floorH - 0.12, -2.3, 0, 0, PI / 2));
-  B0.add(F.cyl(0.11, 0.11, WZ - D - 0.4, 12), M.duct, mat4(9.2, ductY, (D + WZ) / 2, PI / 2, 0, 0));
-  for (const [x, z, r] of [[-7.6, -3.0, 0.5], [-2.9, -3.4, 0.5], [1.6, -3.4, 0.4], [6.9, -3.3, 0.4], [7.0, 1.65, 0.38]]) F.discPendant(g, x, 2.45, z, r, floorH - 0.02);
+  B1.add(F.cyl(0.15, 0.15, BX - x0 - 0.4, 14), M.duct, mat4((x0 + BX) / 2, ductY, -4.9, 0, 0, PI / 2));
+  B1.add(F.cyl(0.1, 0.1, BX - x0 - 0.4, 12), M.duct, mat4((x0 + BX) / 2, ductY + 0.04, -1.25, 0, 0, PI / 2));
+  B1.add(F.cyl(0.04, 0.04, BX - x0 - 0.4, 8), M.redPipe, mat4((x0 + BX) / 2, floorH - 0.12, -2.3, 0, 0, PI / 2));
+  B1.add(F.cyl(0.1, 0.1, WZ - D - 0.4, 12), M.duct, mat4(9.2, ductY, (D + WZ) / 2, PI / 2, 0, 0));
+  for (const [x, z, r] of [[-7.6, -3.0, 0.4], [-2.9, -3.4, 0.4], [1.6, -3.4, 0.34], [6.9, -3.3, 0.34], [7.0, 1.65, 0.32]]) F.discPendant(g, x, 2.5, z, r, floorH - 0.02);
 
   // exterior walls: plaster back and left (as far as the mezzanine), navy behind the servers and the cafe sign, glass on the right
   const H2 = floorH * 2 + BLD.slabT;
@@ -187,8 +188,8 @@ export function buildRoom(scene, bots, lang = "es") {
   // the entrance: glazed on the street side with a door gap in front of the
   // turnstiles; the oak block desk faces it, two disc pendants above
   F.glassWall(gw, 4.0, z1, x0, floorH, [[5.9, 7.3]], true);
-  F.discPendant(g, -7.9, 2.35, 5.7, 0.5, floorH);
-  F.discPendant(g, -7.7, 2.55, 7.0, 0.36, floorH);
+  F.discPendant(g, -7.9, 2.6, 5.6, 0.34, floorH);
+  F.discPendant(g, -7.7, 2.75, 7.0, 0.26, floorH);
   F.receptionBlock(g, -7.9, 6.3, -PI / 2);
   stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: bots[10] });
   nav0.clear(-7.25, 6.3, 0.15);
@@ -336,8 +337,8 @@ export function buildRoom(scene, bots, lang = "es") {
   F.floorLamp(u, -9.5, -1.2);
   F.plant(u, -5.6, -5.5, 0.8);
   nav1.blockCircle(-5.6, -5.5, 0.18);
-  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#b8623f", "#fbf4ea", 1.1, 0.9);
-  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#b8623f", "#fbf4ea", 2.4, 0.9);
+  F.sign(uw, LNG - 0.09, 2.1, -4.0, -PI / 2, L.signs.doNow, "#a8322c", "#fbf4ea", 1.1, 0.9);
+  F.sign(uw, -7.5, 2.35, z0 + 0.12, 0, L.signs.calm, "#a8322c", "#fbf4ea", 2.4, 0.9);
   // training room
   F.whiteboard(uw, LNG + 0.1, 1.7, -3.6, PI / 2, 2.2, 1.35);
   const trainSeats = [];
@@ -364,7 +365,7 @@ export function buildRoom(scene, bots, lang = "es") {
   // phone booth
   F.highTable(u, 3.12, -4.7, 0.35);
   F.stool(u, 3.12, -5.4);
-  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#b8623f", "#fbf4ea", 1.0, 0.7);
+  F.sign(uw, 3.12, 2.3, z0 + 0.12, 0, L.signs.intention, "#a8322c", "#fbf4ea", 1.0, 0.7);
   // cafeteria: the screen alone, centred on the wall panel between the phone
   // booth sign (ends at x≈3.6) and the counter (starts at x≈6.6)
   F.tv(uw, 5.15, 1.85, z0 + 0.14, 0, 1.6, 0.9);

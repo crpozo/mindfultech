@@ -15,6 +15,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { buildRoom, roomsFor, roomNamesFor, STAIRS, UPPER_Y, roomAt, underDeck } from "./room.js";
 import { buildCharacter, POSES, HIP_CHAIR, HIP_SOFA } from "./character.js";
+import { loadAvatars, buildGlbCharacter } from "./rigGlb.js";
 import { buildCampus } from "./campus.js";
 import { iconSvg } from "../icons.js";
 import { scriptsFor, LAUGH_RE, fill } from "./dialogue.js";
@@ -173,8 +174,9 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // --------------------------------------------------------- characters ----
   const blobTex = blobTexture();
-  const actors = bots.map((bot, i) => {
-    const rig = buildCharacter(bot);
+  const actors = [];
+  const makeActor = (bot, i, templates) => {
+    const rig = templates ? buildGlbCharacter(bot, templates, i) : buildCharacter(bot);
     const st = stations[i];
     rig.root.position.set(st.seat.x, st.seat.y, st.seat.z);
     rig.root.rotation.y = st.seat.yaw;
@@ -202,9 +204,18 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     });
     overlay.appendChild(el);
     a.label = el;
+    pickables.push(...rig.meshes);
+    actors.push(a);
     return a;
-  });
-  for (const a of actors) pickables.push(...a.rig.meshes);
+  };
+  // the people: Ready Player Me bodies once their files arrive, the built-in rig if they never do
+  const peopleReady = loadAvatars().then(
+    (templates) => bots.forEach((bot, i) => makeActor(bot, i, templates)),
+    (err) => {
+      console.warn("office: avatars unavailable, using the built-in people", err);
+      bots.forEach((bot, i) => makeActor(bot, i, null));
+    }
+  );
 
   const setStatus = (a, text) => {
     if (a.status === text) return;
@@ -660,6 +671,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
           const od = Math.hypot(ox, oz);
           if (od < 0.75 && od > 0.001 && Math.abs(o.rig.root.position.y - root.position.y) < 1 && (ox * dx0 + oz * dz0) / (od * dist0) > 0.6 && o.idx < a.idx) speed *= 0.25;
         }
+        a.walkSpeed = speed;
         // consume the whole step, across several waypoints if the frame is long
         let remaining = speed * dt;
         while (remaining > 0 && a.path.length) {
@@ -729,6 +741,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     posture(a, t, p);
     const laughing = t < a.laughUntil;
     r.mouth(laughing || a.mouthOpen ? "open" : "smile");
+    // the motion-capture bodies play a clip under the pose: walking, talking (the speaker, standing) or idling
+    if (r.motion) r.motion(a.state === "walk" ? "walk" : a.conv && a.conv.speaker === a && !laughing ? "talk" : "idle", a.state === "walk" ? (a.walkSpeed || WALK) / WALK : 1);
     r.update(dt, t, a.state === "walk" ? 16 : 9);
     const hips = r.parts.hips;
     a.blob.position.set(root.position.x + Math.sin(a.yaw) * hips.position.z, root.position.y + 0.04, root.position.z + Math.cos(a.yaw) * hips.position.z);
@@ -1305,6 +1319,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   }
 
   return {
+    /** resolves once the people are in the scene (their bodies load after the room) */
+    whenReady: peopleReady,
     setSelected,
     focusRoom,
     setFloorView,

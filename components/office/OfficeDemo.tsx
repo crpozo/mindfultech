@@ -17,6 +17,7 @@ type WallMode = "full" | "low" | "none";
 type Scene = {
   setSelected: (id: string | null) => void;
   focusRoom: (id: string | null) => void;
+  whenReady?: Promise<unknown>;
   setFloorView: (mode: "all" | "ground" | "upper") => void;
   setLayout: (insets: { left?: number; right?: number }) => void;
   setWalls: (mode: WallMode) => void;
@@ -148,6 +149,8 @@ export function OfficeDemo() {
         sceneRef.current = scene;
         setRooms(scene.rooms);
         setRoomNames(scene.roomNames);
+        if (scene.whenReady) await scene.whenReady;
+        if (disposed) return;
         setReady(true);
       } catch (e) {
         console.error(e);
