@@ -1116,9 +1116,15 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const resize = () => {
     const w = mount.clientWidth || 1, h = mount.clientHeight || 1;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    const aspect = w / h;
+    camera.aspect = aspect;
+    // portrait phones: the orbit's longest distance cannot fit the building in a
+    // narrow frame, so the lens widens instead (13 m half-width at 48 m)
+    camera.fov = aspect < 1 ? Math.min(62, THREE.MathUtils.radToDeg(2 * Math.atan(13 / (48 * aspect)))) : 30;
     if (w > 900) camera.setViewOffset(w, h, (insets.right - insets.left) / 2, 24, w, h);
-    else camera.setViewOffset(w, h, 0, insets.right ? -40 : 36, w, h);
+    // small screens: with the bottom sheet open the subject rises into the strip
+    // left above it; otherwise the building sits a little lower, clear of the HUD rows
+    else camera.setViewOffset(w, h, 0, insets.right ? Math.round(h * 0.34) : -Math.round(h * (aspect < 1 ? 0.03 : 0.05)), w, h);
     camera.updateProjectionMatrix();
   };
   resize();
@@ -1318,6 +1324,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         dpr = Math.max(1, dpr - 0.25);
         renderer.setPixelRatio(dpr);
         resize();
+        // resizing clears the drawing buffer: draw again now, or the page shows a blank frame
+        renderer.render(scene, camera);
       }
     }
   };

@@ -303,8 +303,9 @@ export function buildCampus(scene, M) {
   PB.add(new THREE.BoxGeometry(0.16, 0.5, 0.16), M.beam, F.mat4(-7.2, GROUND_Y + 0.6, 19.6));
   // bike rack: four hoops facing the street, two bikes parked
   for (const z of [-0.6, 0.2, 1.0, 1.8]) PB.add(new THREE.TorusGeometry(0.38, 0.03, 8, 20, PI), M.steel, F.mat4(-13.6, GROUND_Y + 0.02, z));
-  F.bike(ctx, -13.9, 0.2, 0);
-  F.bike(ctx, -13.3, 1.8, PI);
+  // a bike stands parallel to its hoop, one in every other gap
+  F.bike(ctx, -13.6, -0.2, PI / 2);
+  F.bike(ctx, -13.6, 1.4, -PI / 2);
   // name totem beside the walkway
   PB.add(new THREE.BoxGeometry(0.28, 1.6, 2.2), M.beam, F.mat4(-15.5, GROUND_Y + 0.8, 9.6, 0, 0, 0));
   const totem = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.26), new THREE.MeshStandardMaterial({ map: T.signText(["AI MANAGEMENT OFFICE"], "#1f2024", "#ffffff", 512, 66), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));

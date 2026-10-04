@@ -2097,3 +2097,45 @@
   background: #0e0d12;
   color: #fff;
 }
+
+/* ---- phones: the top bar in two rows ---- */
+@media (max-width: 720px) {
+  .top {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    row-gap: 6px;
+    padding: 8px 8px 0;
+  }
+  .brand {
+    white-space: nowrap;
+    flex: 0 0 auto;
+    order: 0;
+  }
+  .brand strong {
+    font-size: 13px;
+  }
+  .tools {
+    flex: 1 1 100%;
+    order: 2;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 2px 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tools::-webkit-scrollbar {
+    display: none;
+  }
+  .tool {
+    flex: 0 0 auto;
+  }
+  .hint {
+    top: 104px;
+  }
+  .tour,
+  .tourShift {
+    top: 102px;
+  }
+}
