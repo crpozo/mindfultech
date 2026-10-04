@@ -133,6 +133,8 @@ export function makeMaterials(bots) {
     teal: std("#2f6f68", 0.8),
     frame: std("#f4f2ee", 0.6),
     black: std("#1e1f24", 0.5, { metalness: 0.3 }),
+    // thin steel (railing bars, glass posts, cables): no shadows, their sub-texel shadows shimmer on the treads and floors
+    blackThin: Object.assign(std("#1e1f24", 0.5, { metalness: 0.3 }), { userData: { noShadow: true } }),
     glass: Object.assign(new THREE.MeshPhysicalMaterial({ color: "#dfeffc", roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false, clearcoat: 0.4, side: THREE.DoubleSide }), { userData: { noShadow: true } }),
     glassDark: new THREE.MeshPhysicalMaterial({ color: "#8fb8d8", roughness: 0.05, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }),
     deskWood: std("#b4835a", 0.6),
@@ -805,19 +807,19 @@ export function glassWall(ctx, a0, a1, at, h, gaps = [], vertical = false, noSta
     const [px, py, pz] = P(c, h / 2);
     B.add(new THREE.PlaneGeometry(len, h - 0.1), M.glass, mat4(px, py, pz, 0, vertical ? PI / 2 : 0, 0)); // one mesh per floor, not one per pane
     const geo = (w, hh, d) => (vertical ? box(d, hh, w) : box(w, hh, d));
-    B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, 0.03)));
-    B.add(geo(len, 0.06, 0.08), M.black, mat4(...P(c, h - 0.03)));
+    B.add(geo(len, 0.06, 0.08), M.blackThin, mat4(...P(c, 0.03)));
+    B.add(geo(len, 0.06, 0.08), M.blackThin, mat4(...P(c, h - 0.03)));
     const n = Math.max(1, Math.round(len / 1.2));
-    for (let k = noStartPost && s0 === Math.min(a0, a1) ? 1 : 0; k <= n; k++) B.add(geo(0.05, h, 0.08), M.black, mat4(...P(s0 + (k * len) / n, h / 2)));
+    for (let k = noStartPost && s0 === Math.min(a0, a1) ? 1 : 0; k <= n; k++) B.add(geo(0.05, h, 0.08), M.blackThin, mat4(...P(s0 + (k * len) / n, h / 2)));
     if (vertical) nav.block(at - 0.05, s0, at + 0.05, s1, 0.28);
     else nav.block(s0, at - 0.05, s1, at + 0.05, 0.28);
   }
   // door frames at the gaps
   for (const [g0, g1] of gaps) {
     const geo = (w, hh, d) => (vertical ? box(d, hh, w) : box(w, hh, d));
-    B.add(geo(0.06, h, 0.1), M.black, mat4(...P(g0, h / 2)));
-    B.add(geo(0.06, h, 0.1), M.black, mat4(...P(g1, h / 2)));
-    B.add(geo(g1 - g0, 0.06, 0.1), M.black, mat4(...P((g0 + g1) / 2, h - 0.03)));
+    B.add(geo(0.06, h, 0.1), M.blackThin, mat4(...P(g0, h / 2)));
+    B.add(geo(0.06, h, 0.1), M.blackThin, mat4(...P(g1, h / 2)));
+    B.add(geo(g1 - g0, 0.06, 0.1), M.blackThin, mat4(...P((g0 + g1) / 2, h - 0.03)));
   }
 }
 /** Glass balustrade along the upper-floor edge, with a gap for the stairs. */
@@ -829,10 +831,10 @@ export function railing(ctx, x0, x1, z, gap) {
     const g = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.95), M.glass);
     g.position.set(c, y + 0.55, z);
     ctx.S.add(g);
-    B.add(box(len, 0.05, 0.08), M.black, mat4(c, y + 1.03, z));
-    B.add(box(len, 0.04, 0.06), M.black, mat4(c, y + 0.06, z));
+    B.add(box(len, 0.05, 0.08), M.blackThin, mat4(c, y + 1.03, z));
+    B.add(box(len, 0.04, 0.06), M.blackThin, mat4(c, y + 0.06, z));
     const n = Math.max(1, Math.round(len / 1.0));
-    for (let k = 0; k <= n; k++) B.add(box(0.04, 1.0, 0.06), M.black, mat4(s0 + (k * len) / n, y + 0.52, z));
+    for (let k = 0; k <= n; k++) B.add(box(0.04, 1.0, 0.06), M.blackThin, mat4(s0 + (k * len) / n, y + 0.52, z));
     nav.block(s0, z - 0.05, s1, z + 0.05, 0.28);
   }
 }
@@ -857,10 +859,10 @@ export function stairs(ctx, x0, x1, z0, z1, rise, steps = 20, rails = [z1]) {
   const len = Math.hypot(run, rise), ang = Math.atan2(rise, run) * dir;
   for (const zr of rails) {
     const zz = zr + (zr > cz ? 0.02 : -0.02);
-    B.add(box(0.04, 1.0, 0.04), M.black, mat4(x0 + dir * 0.1, y + 0.6, zz));
-    B.add(box(0.04, 1.0, 0.04), M.black, mat4(x1 - dir * 0.1, y + rise + 0.5, zz));
-    B.add(box(len, 0.05, 0.05), M.black, mat4((x0 + x1) / 2, y + rise / 2 + 1.05, zz, 0, 0, ang));
-    for (let k = 1; k < steps; k += 3) B.add(box(0.03, 1.0, 0.03), M.black, mat4(x0 + dir * k * sd, y + k * sr + 0.5, zz));
+    B.add(box(0.04, 1.0, 0.04), M.blackThin, mat4(x0 + dir * 0.1, y + 0.6, zz));
+    B.add(box(0.04, 1.0, 0.04), M.blackThin, mat4(x1 - dir * 0.1, y + rise + 0.5, zz));
+    B.add(box(len, 0.05, 0.05), M.blackThin, mat4((x0 + x1) / 2, y + rise / 2 + 1.05, zz, 0, 0, ang));
+    for (let k = 1; k < steps; k += 3) B.add(box(0.03, 1.0, 0.03), M.blackThin, mat4(x0 + dir * k * sd, y + k * sr + 0.5, zz));
   }
   nav.block(Math.min(x0, x1) - 0.1, z0, Math.max(x0, x1) + 0.1, z1, 0.3);
 }
@@ -954,10 +956,10 @@ export function railingBars(ctx, a0, a1, at, vertical = false, gaps = []) {
   const geo = (w, hh, d) => (vertical ? box(d, hh, w) : box(w, hh, d));
   for (const [s0, s1] of segs) {
     const len = s1 - s0, c = (s0 + s1) / 2;
-    B.add(geo(len, 0.05, 0.06), M.black, mat4(...P(c, 1.02)));
-    B.add(geo(len, 0.03, 0.04), M.black, mat4(...P(c, 0.1)));
+    B.add(geo(len, 0.05, 0.06), M.blackThin, mat4(...P(c, 1.02)));
+    B.add(geo(len, 0.03, 0.04), M.blackThin, mat4(...P(c, 0.1)));
     const n = Math.max(1, Math.round(len / 0.45));
-    for (let k = 0; k <= n; k++) B.add(geo(0.03, 1.0, 0.03), M.black, mat4(...P(s0 + (k * len) / n, 0.52)));
+    for (let k = 0; k <= n; k++) B.add(geo(0.03, 1.0, 0.03), M.blackThin, mat4(...P(s0 + (k * len) / n, 0.52)));
     if (vertical) nav.block(at - 0.04, s0, at + 0.04, s1, 0.28);
     else nav.block(s0, at - 0.04, s1, at + 0.04, 0.28);
   }
@@ -1089,7 +1091,7 @@ export function laptopDesk(ctx, x, z, yaw) {
 /** Flat disc pendant: black rim and cap, luminous underside, one cable from the ceiling line. */
 export function discPendant(ctx, x, h, z, r = 0.42, from = 3.2) {
   const { B, M, y } = ctx;
-  B.add(cyl(0.005, 0.005, Math.max(0.05, from - h), 4), M.black, mat4(x, y + (h + from) / 2, z));
+  B.add(cyl(0.005, 0.005, Math.max(0.05, from - h), 4), M.blackThin, mat4(x, y + (h + from) / 2, z));
   B.add(cyl(r, r, 0.07, 40, true), M.black, mat4(x, y + h, z));
   B.add(cyl(r, r, 0.015, 40), M.black, mat4(x, y + h + 0.03, z));
   B.add(cyl(r - 0.02, r - 0.02, 0.012, 40), M.panel, mat4(x, y + h - 0.03, z));
@@ -1097,7 +1099,7 @@ export function discPendant(ctx, x, h, z, r = 0.42, from = 3.2) {
 /** Small cone pendant (the kitchen's red ones). */
 export function conePendant(ctx, x, h, z, from, mat) {
   const { B, M, y } = ctx;
-  B.add(cyl(0.004, 0.004, Math.max(0.05, from - h), 4), M.black, mat4(x, y + (h + from) / 2, z));
+  B.add(cyl(0.004, 0.004, Math.max(0.05, from - h), 4), M.blackThin, mat4(x, y + (h + from) / 2, z));
   B.add(new THREE.ConeGeometry(0.13, 0.16, 20, 1, true), mat || M.redPipe, mat4(x, y + h, z));
   B.add(sph(0.03, 8, 6), M.bulb, mat4(x, y + h - 0.05, z));
 }

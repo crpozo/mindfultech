@@ -205,7 +205,8 @@ export function buildCampus(scene, M) {
   // rows along the plaza edges, the road, the parking strip and the back lawn
   for (let x = -26; x <= 18; x += 5.5) tree(x + rnd(-0.6, 0.6), -16 + rnd(-0.8, 0.8));
   for (let z = -12; z <= 26; z += 6) tree(22.5 + rnd(-0.6, 0.6), z + rnd(-0.6, 0.6));
-  for (let x = -60; x <= 60; x += 7) if (Math.abs(x + 2) > 4 && Math.abs(x + 27.5) > 4) tree(x + rnd(-0.8, 0.8), 28.5, 0.9);
+  // nothing tall in front of the building: the view corridor from the plaza stays open
+  for (let x = -60; x <= 60; x += 7) if (Math.abs(x + 2) > 4 && Math.abs(x + 27.5) > 4 && Math.abs(x) > 18) tree(x + rnd(-0.8, 0.8), 28.5, 0.9);
   for (let x = -60; x <= 60; x += 9) tree(x + rnd(-1, 1), 45 + rnd(-1, 1), 1.1);
   for (let z = 0; z <= 28; z += 7) tree(-49 + rnd(-0.6, 0.6), z + rnd(-0.6, 0.6));
   for (let i = 0; i < 40; i++) {
@@ -214,8 +215,6 @@ export function buildCampus(scene, M) {
     if (z > 24 || (x < -16 && z > 0 && z < 30)) continue; // not on the road or the parking
     tree(x, z - 4, rnd(0.9, 1.4));
   }
-  // the plaza's lawn beds
-  for (const [x, z, sc] of [[-3.6, 15.6, 0.85], [0.6, 16.4, 1.0], [4.0, 14.9, 0.8], [-20.5, 11.5, 0.9], [-17.5, 14.6, 1.0]]) tree(x, z, sc);
   for (const im of [...crownMeshes, trunk, blobs]) {
     im.instanceMatrix.needsUpdate = true;
     if (im.instanceColor) im.instanceColor.needsUpdate = true;
@@ -248,6 +247,11 @@ export function buildCampus(scene, M) {
       M4.compose(V.set(x + Math.cos(ry) * dx + Math.sin(ry) * dz, GROUND_Y + dy, z - Math.sin(ry) * dx + Math.cos(ry) * dz), Q.setFromEuler(E.set(0, rnd(0, PI), 0)), SC.set(sc, sc, sc));
       bushes.setMatrixAt(bushes.count++, M4);
     }
+  }
+  // low shrubs in the lawn beds (trees there hid the office from a low camera)
+  for (const [x, z, sc] of [[-4.6, 15.2, 1.5], [-1.4, 16.3, 1.3], [1.6, 15.0, 1.4], [4.6, 16.2, 1.3], [-20.6, 11.4, 1.5], [-17.4, 14.4, 1.4], [-20.2, 15.2, 1.2]]) {
+    M4.compose(V.set(x, GROUND_Y + 0.18 + 0.35 * sc, z), Q.setFromEuler(E.set(0, rnd(0, PI), 0)), SC.set(sc, sc, sc));
+    bushes.setMatrixAt(bushes.count++, M4);
   }
   bushes.instanceMatrix.needsUpdate = true;
   bushes.computeBoundingSphere();

@@ -16,6 +16,20 @@ export const ICONS = {
   pingpong: wrap('<ellipse cx="13.5" cy="9" rx="5.6" ry="6.4" transform="rotate(-30 13.5 9)"/><path d="M9.8 14.6L5.2 20"/><circle cx="5.2" cy="7.4" r="1.6"/>'),
   reception: wrap('<path d="M5 17a7 7 0 0 1 14 0z"/><path d="M12 10V7.8"/><circle cx="12" cy="6.6" r="1.1"/><path d="M3.5 19.5h17"/>'),
   meeting: wrap('<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14" r="0.9" fill="currentColor"/><circle cx="12" cy="14" r="0.9" fill="currentColor"/><circle cx="15.5" cy="14" r="0.9" fill="currentColor"/>'),
+  // HUD and room icons
+  team: wrap('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9" r="2.6"/><path d="M15.5 14.2a5 5 0 0 1 5 5.3"/>'),
+  rooms: wrap('<rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M9.5 20.5v-4h5v4"/><path d="M8 7.5h2M14 7.5h2M8 11.5h2M14 11.5h2"/>'),
+  dashboards: wrap('<rect x="3.5" y="4" width="17" height="13" rx="2"/><path d="M8 13.5v-3M12 13.5V8M16 13.5v-5"/><path d="M9 21h6"/>'),
+  view: wrap('<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+  tour: wrap('<circle cx="12" cy="12" r="8.5"/><path d="M15.2 8.8l-1.8 4.6-4.6 1.8 1.8-4.6z"/>'),
+  open: wrap('<rect x="6" y="5" width="12" height="8" rx="1.2"/><path d="M3.5 16h17"/><path d="M5.5 16v4M18.5 16v4"/>'),
+  nook: wrap('<path d="M12 7c-2-1.6-4.5-2-8-2v13c3.5 0 6 .4 8 2 2-1.6 4.5-2 8-2V5c-3.5 0-6 .4-8 2z"/><path d="M12 7v13"/>'),
+  meeting2: wrap('<path d="M5 5h9a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H9.5L6 16.5V13.5H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M18 10.5h1a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-.5v3l-3.5-3H13"/>'),
+  sofa: wrap('<path d="M5 11V8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5V11"/><path d="M3.5 13.5A1.5 1.5 0 0 1 5 12h14a1.5 1.5 0 0 1 1.5 1.5V17h-17z"/><path d="M5.5 17v2.5M18.5 17v2.5"/>'),
+  training: wrap('<path d="M2.5 9.5L12 5l9.5 4.5L12 14z"/><path d="M6.5 11.5v4.5c0 1.2 2.5 2.5 5.5 2.5s5.5-1.3 5.5-2.5v-4.5"/><path d="M21.5 9.5v5"/>'),
+  studio: wrap('<path d="M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10z"/><path d="M13.5 7.5l3 3"/>'),
+  booth: wrap('<path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/>'),
+  stairs: wrap('<path d="M3.5 20h5v-4.5h4V11h4V6.5h4"/>'),
   lounge: wrap('<path d="M4 20h16"/><rect x="6" y="11" width="3" height="7" rx="0.8"/><rect x="11" y="6" width="3" height="12" rx="0.8"/><rect x="16" y="14" width="3" height="4" rx="0.8"/>'),
 };
 

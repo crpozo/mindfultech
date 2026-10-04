@@ -465,10 +465,13 @@ export function buildGlbCharacter(bot, templates, seed = 0) {
         w[gname] += (want - w[gname]) * kw;
       }
       mixer.update(dt);
+      // the walk clip rounds the upper back and neck forward (~13° more than idle): straighten it while it plays
+      const wf = actions.walk.getEffectiveWeight();
       // bones: the clip's local rotation, then the pose in the parent's rest frame
       for (const j of joints) {
         const sh = j.share || 1;
-        _e.set((j.rx ? cur[j.rx] : 0) * sh, (j.ry ? cur[j.ry] : 0) * sh, (j.rz ? cur[j.rz] : 0) * sh);
+        const fix = wf && j.add ? (j.group === "head" ? -0.17 : -0.1) * wf : 0;
+        _e.set(((j.rx ? cur[j.rx] : 0) + fix) * sh, (j.ry ? cur[j.ry] : 0) * sh, (j.rz ? cur[j.rz] : 0) * sh);
         _q.setFromEuler(_e);
         const bq = j.bone.quaternion; // holds the clip's value now
         if (j.add) {

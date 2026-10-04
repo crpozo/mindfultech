@@ -195,7 +195,6 @@ export function buildRoom(scene, bots, lang = "es") {
   nav0.clear(-7.25, 6.3, 0.15);
   F.planter(g, -7.9, 4.55);
   F.planter(g, -7.9, 8.05);
-  for (const z of [5.0, 5.75, 6.5, 7.25, 8.0]) F.turnstile(g, -9.3, z, PI / 2);
   F.oakBench(g, -9.5, 2.3, PI / 2, 1.6);
   F.bike(g, -6.98, 1.3, 0);
   F.coatRack(g, -7.0, 3.9);

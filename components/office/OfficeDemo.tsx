@@ -28,10 +28,13 @@ type Scene = {
   dispose: () => void;
 };
 
-const ROOM_ICONS: Record<string, string> = {
-  reception: "🛎️", hall: "🏓", open: "💻", nook: "📖", meeting: "📅", meeting2: "🗣️", utility: "🖨️", servers: "🖥️",
-  lounge: "🛋️", training: "🎓", studio: "✏️", booth: "📞", cafe: "☕", stairs: "🪜",
+/** room id → line icon id (icons.js) */
+const ROOM_ICON_ID: Record<string, string> = {
+  reception: "reception", hall: "pingpong", open: "open", nook: "nook", meeting: "meeting", meeting2: "meeting2", utility: "printer", servers: "servers",
+  lounge: "sofa", training: "training", studio: "studio", booth: "booth", cafe: "coffee", stairs: "stairs",
 };
+/** one of the line icons, inline */
+const Ico = ({ id }: { id: string }) => <i className={s.ico} dangerouslySetInnerHTML={{ __html: iconSvg(id) }} aria-hidden />;
 
 /**
  * /office-demo — the 3D office of AI employees. The scene (scene/index.js)
@@ -396,6 +399,7 @@ export function OfficeDemo() {
     setSelected(selected === id ? null : id);
     setHotspot(null);
     setInteracted(true);
+    if (window.innerWidth < 900) setTeamOpen(false);
     // on narrower screens the person's panel needs the room the team list takes
     if (window.innerWidth < 1280) setTeamOpen(false);
   };
@@ -448,20 +452,20 @@ export function OfficeDemo() {
         </Link>
         <div className={s.tools}>
           <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""} ${tour?.target === "team" ? s.tourGlow : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
-            <i>👥</i>
+            <Ico id="team" />
             {t("Equipo", "Team")}
             <b>{BOTS.length}</b>
           </button>
           <div className={s.menuWrap} ref={roomsRef}>
             <button type="button" className={`${s.tool} ${roomsOpen ? s.toolActive : ""} ${tour?.target === "rooms" ? s.tourGlow : ""}`} onClick={() => setRoomsOpen((v) => !v)} aria-expanded={roomsOpen} aria-haspopup="menu">
-              <i>{currentRoom ? ROOM_ICONS[currentRoom.id] ?? "•" : "🏢"}</i>
+              <Ico id={currentRoom ? ROOM_ICON_ID[currentRoom.id] ?? "rooms" : "rooms"} />
               <span className={s.toolLabel}>{currentRoom ? currentRoom.name : t("Salas", "Rooms")}</span>
               <em>▾</em>
             </button>
             {roomsOpen && rooms.length > 0 && (
               <div className={s.menu} role="menu" aria-label={t("Salas", "Rooms")}>
                 <button type="button" role="menuitem" className={`${s.menuItem} ${room === null ? s.menuItemActive : ""}`} onClick={() => goRoom(null)}>
-                  <i>🏢</i>
+                  <Ico id="rooms" />
                   {t("Todo el edificio", "Whole building")}
                 </button>
                 {[0, 1].map((floor) => (
@@ -471,7 +475,7 @@ export function OfficeDemo() {
                       .filter((r) => r.floor === floor)
                       .map((r) => (
                         <button key={r.id} type="button" role="menuitem" className={`${s.menuItem} ${room === r.id ? s.menuItemActive : ""}`} onClick={() => goRoom(r.id)}>
-                          <i>{ROOM_ICONS[r.id] ?? "•"}</i>
+                          <Ico id={ROOM_ICON_ID[r.id] ?? "rooms"} />
                           {r.name}
                         </button>
                       ))}
@@ -482,9 +486,9 @@ export function OfficeDemo() {
           </div>
           <div className={s.menuWrap} ref={dashRef}>
             <button type="button" className={`${s.tool} ${dashOpen || (hotspot && DASHBOARDS.includes(hotspot)) ? s.toolActive : ""}`} onClick={() => setDashOpen((v) => !v)} aria-expanded={dashOpen} aria-haspopup="menu">
-              <i>📊</i>
+              <Ico id="dashboards" />
               <span className={s.toolLabel}>Dashboards</span>
-              <span className={s.caret}>▾</span>
+              <em>▾</em>
             </button>
             {dashOpen && (
               <div className={s.menu} role="menu" aria-label="Dashboards">
@@ -506,7 +510,7 @@ export function OfficeDemo() {
           </div>
           <div className={s.menuWrap} ref={viewRef}>
             <button type="button" className={`${s.tool} ${viewOpen || walls !== "full" || hideUpper ? s.toolActive : ""} ${tour?.target === "view" ? s.tourGlow : ""}`} onClick={() => setViewOpen((v) => !v)} aria-expanded={viewOpen} aria-haspopup="menu">
-              <i>👁️</i>
+              <Ico id="view" />
               <span className={s.toolLabel}>{t("Vista", "View")}</span>
               <em>▾</em>
             </button>
@@ -534,7 +538,7 @@ export function OfficeDemo() {
             )}
           </div>
           <button type="button" className={`${s.tool} ${tourStep !== null ? s.toolActive : ""}`} onClick={() => setTourStep(0)} title={t("Tour guiado", "Guided tour")}>
-            <i>🎓</i>
+            <Ico id="tour" />
             <span className={s.toolLabel}>Tour</span>
           </button>
           {fsOk && (
@@ -597,7 +601,7 @@ export function OfficeDemo() {
                 </span>
                 {rm && (
                   <span className={s.memberRoom} title={roomNames[rm] ?? rm}>
-                    <i>{ROOM_ICONS[rm] ?? "•"}</i>
+                    <Ico id={ROOM_ICON_ID[rm] ?? "rooms"} />
                     <span>{roomNames[rm] ?? rm}</span>
                   </span>
                 )}
@@ -647,7 +651,7 @@ export function OfficeDemo() {
         </div>
       )}
 
-      <div className={`${s.hint} ${interacted || !ready || tourStep !== null ? s.hintHidden : ""}`}>
+      <div className={`${s.hint} ${interacted || !ready || tourStep !== null || roomsOpen || viewOpen || dashOpen || teamOpen ? s.hintHidden : ""}`}>
         {t("Haz clic en una persona o en un objeto con marcador · «Salas» recorre la oficina · arrastra para girar", "Click a person or an object with a marker · “Rooms” moves around the office · drag to rotate")}
       </div>
 

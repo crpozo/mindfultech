@@ -126,7 +126,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   sun.shadow.camera.top = 17;
   sun.shadow.camera.bottom = -17;
   sun.shadow.bias = -0.0005;
-  sun.shadow.normalBias = 0.05;
+  sun.shadow.normalBias = 0.07;
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
   const hemi = new THREE.HemisphereLight("#dbe7ff", "#7a6a55", 0.9);
@@ -155,7 +155,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const dusk = Math.max(smooth(17.3, 18.3, h) * (1 - smooth(18.3, 19.4, h)), smooth(5.4, 6.2, h) * (1 - smooth(6.2, 7.3, h)));
     sun.intensity = (0.1 + 2.3 * day) * (1 - 0.3 * dusk);
     sun.color.copy(_c1.set("#9fb4ff").lerp(_c2.set("#fff1d6"), day)).lerp(_c2.set("#ff9a4a"), dusk * 0.9);
-    sun.position.set(-10, 6 + 12 * day * (1 - 0.5 * dusk), 9);
+    sun.position.set(-10, 18 - 4 * dusk, 9); // never grazing: low light smears shadow acne across floors and treads
     hemi.intensity = 0.18 + 0.72 * day;
     hemi.color.copy(_c1.set("#243258").lerp(_c2.set("#dbe7ff"), day)).lerp(_c2.set("#f0b48a"), dusk * 0.5);
     hemi.groundColor.copy(_c1.set("#111118").lerp(_c2.set("#7a6a55"), day));

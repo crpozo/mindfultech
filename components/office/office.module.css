@@ -2260,3 +2260,34 @@
   color: #0e0d12;
   font-weight: 600;
 }
+
+/* ---- line icons in the HUD ---- */
+.ico {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-style: normal;
+  flex: 0 0 auto;
+  color: inherit;
+}
+.ico svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+.menuItem .ico {
+  width: 20px;
+  color: #2e6e63;
+}
+.menuItemActive .ico {
+  color: inherit;
+}
+.memberRoom .ico {
+  width: 14px;
+  height: 14px;
+}
+.memberRoom .ico svg {
+  width: 13px;
+  height: 13px;
+}
