@@ -59,7 +59,7 @@ const PROJECTS: Project[] = [
   },
   {
     brand: "ThemedMotion · Netherlands",
-    img: "/art/panel-themedmotion.webp",
+    img: "/art/themedmotion-wide.webp",
     href: "/work#themedmotion",
     accent: "#e5893f",
     title: { en: "An immersive 3D portfolio for an animatronics studio", es: "Un portafolio 3D inmersivo para un estudio de animatrónicos" },
