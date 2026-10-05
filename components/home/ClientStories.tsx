@@ -9,253 +9,132 @@ const MONO = "var(--mono)";
 type Bi = { en: string; es: string };
 type Project = {
   brand: string;
+  /** wide cover for the preview */
   img: string;
   href: string;
-  /* drives the card's tint, ring and CTA — picked from each cover's artwork */
+  /* drives the selected row's rule, the brand colour and the preview glow */
   accent: string;
   title: Bi;
   meta: Bi;
+  desc: Bi;
 };
 
-// One card per project; hovering expands a card and reveals its story while the
-// others recede to a vertical label.
+// The list on the left, the selected project on the right.
 const PROJECTS: Project[] = [
   {
+    brand: "Helixona",
+    img: "/art/helixona-hero.webp",
+    href: "/work#healthcare",
+    accent: "#dba64a",
+    title: { en: "An AI agent that runs medical billing", es: "Un agente de IA que factura en salud" },
+    meta: { en: "HEALTHCARE · AI AGENT · 24/7", es: "SALUD · AGENTE DE IA · 24/7" },
+    desc: {
+      en: "Claims, coding and follow-ups handled end to end inside the clinic's tools. A person signs off only where it matters.",
+      es: "Reclamos, codificación y seguimientos de punta a punta dentro de las herramientas de la clínica. Una persona firma solo donde importa.",
+    },
+  },
+  {
     brand: "USFQ",
-    img: "/art/panel-usfq.webp",
+    img: "/art/eventflow-wide.webp",
     href: "/work#usfq",
     accent: "#e2566b",
     title: { en: "EventFlow, shipped on the App Store", es: "EventFlow, publicada en el App Store" },
     meta: { en: "EVENTS · iOS · AI SURVEYS", es: "EVENTOS · iOS · ENCUESTAS IA" },
-  },
-  {
-    brand: "Helixona",
-    img: "/art/panel-helixona.webp",
-    href: "/work#healthcare",
-    accent: "#dba64a",
-    title: { en: "An AI agent that runs medical billing", es: "Un agente de IA que factura en salud" },
-    meta: { en: "HEALTHCARE · AI AGENT", es: "SALUD · AGENTE DE IA" },
+    desc: {
+      en: "Registration, check-in and AI-read surveys for university events, in one app students actually open.",
+      es: "Inscripción, check-in y encuestas leídas por IA para eventos universitarios, en una app que los estudiantes sí abren.",
+    },
   },
   {
     brand: "Western Fence Supply",
-    img: "/art/panel-wfs.webp",
+    img: "/art/wfs-hero.webp",
     href: "/work#fence",
     accent: "#6a9ede",
     title: { en: "Excel → Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega" },
     meta: { en: "CRM · LOGISTICS", es: "CRM · LOGÍSTICA" },
+    desc: {
+      en: "Quotes, inventory and deliveries moved out of spreadsheets into Odoo, with routes planned for every truck.",
+      es: "Cotizaciones, inventario y entregas pasaron de hojas de cálculo a Odoo, con rutas planificadas para cada camión.",
+    },
   },
   {
     brand: "CarCompraCorp",
-    img: "/art/panel-carcompra.webp",
+    img: "/art/leads.webp",
     href: "/work#carcompra",
     accent: "#52c98d",
     title: { en: "Leads from Meta, answered by AI", es: "Leads de Meta, respondidos por IA" },
     meta: { en: "WHATSAPP · INSTAGRAM · AI", es: "WHATSAPP · INSTAGRAM · IA" },
+    desc: {
+      en: "Every ad lead gets an answer on WhatsApp in seconds, qualified and handed to a seller with the context ready.",
+      es: "Cada lead de anuncios recibe respuesta por WhatsApp en segundos, calificado y entregado a un vendedor con el contexto listo.",
+    },
   },
   {
     brand: "PARC Home Care",
-    img: "/art/panel-parc.webp",
+    img: "/art/homecare.webp",
     href: "/work#parc",
     accent: "#63aee8",
     title: { en: "PARC Connect, home care in your pocket", es: "PARC Connect, cuidado en tu bolsillo" },
     meta: { en: "FLUTTER · iOS + ANDROID", es: "FLUTTER · iOS + ANDROID" },
-  },
-  {
-    brand: "ThemedMotion",
-    img: "/art/panel-themedmotion.webp",
-    href: "/work#themedmotion",
-    accent: "#e5893f",
-    title: { en: "An interactive 3D portfolio on the web", es: "Un portafolio 3D interactivo en la web" },
-    meta: { en: "WEBGL · THREE.JS", es: "WEBGL · THREE.JS" },
-  },
-  {
-    brand: "CarCompra",
-    img: "/art/panel-carcrm.webp",
-    href: "/work#carcompra-crm",
-    accent: "#5cc9c2",
-    title: { en: "A seller CRM wired to Meta & ads", es: "Un CRM de vendedores conectado a Meta" },
-    meta: { en: "CUSTOM CRM · AWS", es: "CRM A MEDIDA · AWS" },
+    desc: {
+      en: "Families see visits, notes and caregivers in one place; the agency runs scheduling from the same app.",
+      es: "Las familias ven visitas, notas y cuidadores en un solo lugar; la agencia programa desde la misma app.",
+    },
   },
 ];
-
-/* keep in sync with the .pf-strip gap in globals.css */
-const GAP = 14;
+const TOTAL = 7;
 
 export function ClientStories() {
   const { lang } = useLang();
   const es = lang === "es";
-
-  // carousel: four cards per view, arrows step one card at a time
-  const trackRef = React.useRef<HTMLDivElement>(null);
-  const [atStart, setAtStart] = React.useState(true);
-  const [atEnd, setAtEnd] = React.useState(false);
-  const [idx, setIdx] = React.useState(0);
-
-  const sync = React.useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    setAtStart(el.scrollLeft <= 2);
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
-    // which card is under the left edge — drives the dots on phones
-    const card = el.querySelector<HTMLElement>(".pf-panel");
-    const w = card ? card.offsetWidth + GAP : el.clientWidth;
-    setIdx(Math.min(PROJECTS.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
-  }, []);
-
-  React.useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    sync();
-    el.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", sync);
-    return () => {
-      el.removeEventListener("scroll", sync);
-      window.removeEventListener("resize", sync);
-    };
-  }, [sync]);
-
-  const step = (dir: 1 | -1) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>(".pf-panel");
-    el.scrollBy({ left: dir * (card ? card.offsetWidth + GAP : el.clientWidth / 4), behavior: "smooth" });
-  };
-
-  const goTo = (i: number) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>(".pf-panel");
-    el.scrollTo({ left: i * ((card?.offsetWidth ?? el.clientWidth) + GAP), behavior: "smooth" });
-  };
-
+  const [sel, setSel] = React.useState(0);
+  const p = PROJECTS[sel];
   return (
     <section id="stories" className="pf-section">
-      <div className="pf-head">
-        <h2
-          style={{
-            fontWeight: 500,
-            fontSize: "clamp(32px,3.4vw,52px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.05,
-            margin: 0,
-            color: "#fff",
-          }}
-        >
-          {es ? "Proyectos construidos por MindfulTech" : "Projects built by MindfulTech"}
-        </h2>
-        <p
-          style={{
-            fontSize: 18,
-            lineHeight: 1.5,
-            color: "#8f8ba4",
-            fontWeight: 400,
-            maxWidth: 620,
-            margin: "14px auto 0",
-          }}
-        >
-          {es
-            ? "Siete productos en producción: explóralos uno a uno."
-            : "Seven products in production: explore them one by one."}
-        </p>
-      </div>
-
-      <div className="pf-carousel">
-        <div className="pf-strip" ref={trackRef}>
-        {PROJECTS.map((p) => (
-          <Link
-            key={p.href}
-            href={p.href}
-            /* seven cards, one destination: without this Next prefetches the
-               same /work payload once per card, mid-scroll */
-            prefetch={false}
-            className="pf-panel"
-            /* no aria-label — the visible content (brand, title, meta, CTA)
-               already names the link */
-            style={{ "--pf": p.accent } as React.CSSProperties}
-          >
-            <span className="pf-media" aria-hidden>
+      <div className="pj-wrap">
+        <div className="pj-head">
+          <span className="pj-kicker">{es ? "PROYECTOS" : "PROJECTS"}</span>
+          <h2 className="pj-title">{es ? "Construidos por MindfulTech" : "Built by MindfulTech"}</h2>
+        </div>
+        <div className="pj-grid">
+          <div className="pj-list" role="tablist" aria-label={es ? "Proyectos" : "Projects"}>
+            {PROJECTS.map((x, i) => (
+              <button
+                key={x.href}
+                type="button"
+                role="tab"
+                aria-selected={i === sel}
+                className={`pj-row ${i === sel ? "pj-row-on" : ""}`}
+                style={{ "--pj": x.accent } as React.CSSProperties}
+                onClick={() => setSel(i)}
+                onMouseEnter={() => setSel(i)}
+                onFocus={() => setSel(i)}
+              >
+                <span className="pj-row-brand">{x.brand.toUpperCase()}</span>
+                <span className="pj-row-title">{x.title[lang]}</span>
+                <span className="pj-row-n">{String(i + 1).padStart(2, "0")}</span>
+              </button>
+            ))}
+            <Link href="/work" className="pj-all">
+              {es ? `TODOS LOS ${TOTAL} PROYECTOS` : `ALL ${TOTAL} PROJECTS`} <span aria-hidden>→</span>
+            </Link>
+          </div>
+          <div className="pj-preview" style={{ "--pj": p.accent } as React.CSSProperties} role="tabpanel">
+            <Link href={p.href} prefetch={false} className="pj-media" aria-label={p.title[lang]}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                decoding="async"
-                loading="lazy"
-                width={760}
-                height={1351}
-                className="pf-img"
-                src={p.img}
-                alt=""
-              />
-            </span>
-            <div className="pf-reveal">
-              <div className="pf-eyebrow">{p.brand}</div>
-              <div className="pf-card-title">{p.title[lang]}</div>
-              <div className="pf-meta">{p.meta[lang]}</div>
-              {/* not an <a> — the whole card is already the link */}
-              <span className="pf-cta">
-                {es ? "VER EL CASO" : "VIEW CASE STUDY"}
-                <span className="pf-cta-arrow" aria-hidden>→</span>
-              </span>
+              <img key={p.img} className="pj-img" src={p.img} alt="" decoding="async" loading="lazy" width={1200} height={675} />
+            </Link>
+            <div className="pj-foot">
+              <div className="pj-foot-text">
+                <div className="pj-meta">{p.meta[lang]}</div>
+                <p className="pj-desc">{p.desc[lang]}</p>
+              </div>
+              <Link href={p.href} prefetch={false} className="pj-cta">
+                {es ? "VER EL CASO" : "CASE STUDY"} <span aria-hidden>→</span>
+              </Link>
             </div>
-          </Link>
-        ))}
+          </div>
         </div>
-
-        <button
-          type="button"
-          className="pf-nav pf-prev"
-          onClick={() => step(-1)}
-          disabled={atStart}
-          aria-label={es ? "Proyectos anteriores" : "Previous projects"}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 5l-7 7 7 7" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className="pf-nav pf-next"
-          onClick={() => step(1)}
-          disabled={atEnd}
-          aria-label={es ? "Siguientes proyectos" : "Next projects"}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-
-        {/* phone-only position indicator — CSS hides it on wider screens.
-            role="group", not tablist: the buttons scroll a carousel, they
-            don't control tab panels */}
-        <div className="pf-dots" role="group" aria-label={es ? "Proyecto" : "Project"}>
-          {PROJECTS.map((p, i) => (
-            <button
-              key={p.href}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-current={i === idx}
-              aria-label={p.brand}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "center", padding: "44px 24px 0" }}>
-        <Link
-          href="/work"
-          className="btn-white"
-          style={{
-            textDecoration: "none",
-            fontFamily: MONO,
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: ".12em",
-            background: "#fff",
-            color: "#0d0a1f",
-            padding: "15px 24px",
-            borderRadius: 6,
-          }}
-        >
-          {es ? "VER TODOS LOS CASOS" : "VIEW ALL WORK"}
-        </Link>
       </div>
     </section>
   );
