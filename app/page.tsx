@@ -3,7 +3,6 @@ import { Hero } from "@/components/home/Hero";
 import { PlatformStats } from "@/components/home/PlatformStats";
 import { AiOffice } from "@/components/home/AiOffice";
 import { FullStackLab } from "@/components/home/FullStackLab";
-import { ProcessFlow } from "@/components/home/ProcessFlow";
 import { ClientStories } from "@/components/home/ClientStories";
 import { ClientMap } from "@/components/home/ClientMap";
 
@@ -19,7 +18,6 @@ export default function Home() {
         </div>
         <PlatformStats />
         <FullStackLab />
-        <ProcessFlow />
         <ClientStories />
         {/* our own product, apart from the services: it follows the projects we built */}
         <AiOffice />

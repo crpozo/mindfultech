@@ -399,13 +399,8 @@ export function Hero() {
             {es ? "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada." : "Full-stack software lab, powered by UX research and applied AI."}
           </p>
           <div className="hero-ctas" style={{ display: "flex", gap: 14, marginTop: 28, flexWrap: "wrap" }}>
-            <a
-              href="#contact"
-              onClick={openForm}
-              className="btn-dark hero-cta"
-              style={ctaDark}
-            >
-              {es ? "EMPIEZA A CONSTRUIR" : "START BUILDING"}
+            <a href="#stories" className="btn-dark hero-cta" style={ctaDark}>
+              {es ? "NUESTROS PROYECTOS" : "OUR PROJECTS"}
             </a>
             <Link
               href="/office-demo/"
