@@ -35,7 +35,7 @@ const PROJECTS: Project[] = [
   },
   {
     brand: "USFQ",
-    img: "/art/eventflow-wide.webp",
+    img: "/art/eventflow-login-wide.webp",
     href: "/work#usfq",
     accent: "#e2566b",
     title: { en: "EventFlow, shipped on the App Store", es: "EventFlow, publicada en el App Store" },
