@@ -58,20 +58,20 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    brand: "CarCompraCorp",
-    img: "/art/leads.webp",
-    href: "/work#carcompra",
-    accent: "#52c98d",
-    title: { en: "Leads from Meta, answered by AI", es: "Leads de Meta, respondidos por IA" },
-    meta: { en: "WHATSAPP · INSTAGRAM · AI", es: "WHATSAPP · INSTAGRAM · IA" },
+    brand: "ThemedMotion · Netherlands",
+    img: "/art/panel-themedmotion.webp",
+    href: "/work#themedmotion",
+    accent: "#e5893f",
+    title: { en: "An immersive 3D portfolio for an animatronics studio", es: "Un portafolio 3D inmersivo para un estudio de animatrónicos" },
+    meta: { en: "WEB · 3D · ANIMATRONICS", es: "WEB · 3D · ANIMATRÓNICOS" },
     desc: {
-      en: "Every ad lead gets an answer on WhatsApp in seconds, qualified and handed to a seller with the context ready.",
-      es: "Cada lead de anuncios recibe respuesta por WhatsApp en segundos, calificado y entregado a un vendedor con el contexto listo.",
+      en: "For P&P Projects in the Netherlands: an interactive 3D figure and scroll storytelling across their process, built with React Three Fiber and GSAP.",
+      es: "Para P&P Projects en Países Bajos: una figura 3D interactiva y narrativa por scroll a lo largo de su proceso, con React Three Fiber y GSAP.",
     },
   },
   {
     brand: "PARC Home Care",
-    img: "/art/homecare.webp",
+    img: "/art/parc-login.webp",
     href: "/work#parc",
     accent: "#63aee8",
     title: { en: "PARC Connect, home care in your pocket", es: "PARC Connect, cuidado en tu bolsillo" },
@@ -81,8 +81,19 @@ const PROJECTS: Project[] = [
       es: "Las familias ven visitas, notas y cuidadores en un solo lugar; la agencia programa desde la misma app.",
     },
   },
+  {
+    brand: "The Internet Coaches · California",
+    img: "/art/internet-coaches.webp",
+    href: "/work",
+    accent: "#2e8b57",
+    title: { en: "AI dashboard for car dealerships", es: "Dashboard con IA para concesionarios" },
+    meta: { en: "AUTOMOTIVE · AI · ANALYTICS", es: "AUTOMOTRIZ · IA · ANALÍTICA" },
+    desc: {
+      en: "Internet lead performance across every store in one place: engagement, appointments and closing rate against goals, with AI flagging the stores that need attention.",
+      es: "El rendimiento de los leads de internet de todas las tiendas en un solo lugar: contacto, citas y tasa de cierre contra metas, con IA señalando las tiendas que necesitan atención.",
+    },
+  },
 ];
-const TOTAL = 7;
 
 export function ClientStories() {
   const { lang } = useLang();
@@ -116,7 +127,7 @@ export function ClientStories() {
               </button>
             ))}
             <Link href="/work" className="pj-all">
-              {es ? `TODOS LOS ${TOTAL} PROYECTOS` : `ALL ${TOTAL} PROJECTS`} <span aria-hidden>→</span>
+              {es ? "MÁS PROYECTOS" : "MORE PROJECTS"} <span aria-hidden>→</span>
             </Link>
           </div>
           <div className="pj-preview" style={{ "--pj": p.accent } as React.CSSProperties} role="tabpanel">
