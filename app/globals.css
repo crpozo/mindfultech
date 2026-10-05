@@ -77,16 +77,70 @@ a:hover {
   background: #eff0f4 !important;
 }
 
-/* Stat cards: bg shift + reveal "LEARN HOW" on hover */
+/* Kicker: the small mono label above a section or page title. One style for
+   the whole site — the inner pages' Pill renders this too. The deep green is
+   5.5:1 on the tint; the accent itself was 1.9:1 there. */
+.kicker {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #2e6e63;
+  background: var(--accent-tint);
+  padding: 7px 13px;
+  border-radius: 999px;
+}
+.kicker-dark {
+  color: var(--accent-light);
+  background: rgba(105, 199, 185, 0.12);
+}
+
+/* Tinted value tiles (home stats, services "why", company values, service
+   detail). The hue comes inline per card; this gives every tile one surface:
+   a softer radius, a hairline edge and a light sweep from the top-left, so the
+   flat pastel reads as a card rather than a swatch. No overflow:hidden on
+   purpose — the home tiles hang a connector nub outside their box. */
+.tint-card {
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid rgba(14, 13, 18, 0.06);
+}
+.tint-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 58%);
+  pointer-events: none;
+}
+.tint-card > * {
+  position: relative;
+}
+
+/* Stat cards: bg shift on hover. "LEARN HOW" is always visible and only
+   brightens — a link that exists solely on hover is one nobody finds. */
 .stat-card {
   transition: background 0.4s ease;
 }
 .stat-card:hover {
   background: var(--hover) !important;
 }
+.stat-card .stat-more {
+  opacity: 0.72;
+  transition: opacity 0.25s ease;
+}
 .stat-card:hover .stat-more {
-  opacity: 1 !important;
-  transform: translateY(0px) !important;
+  opacity: 1;
+}
+.stat-more-arrow {
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.stat-card:hover .stat-more-arrow {
+  transform: translateX(4px);
 }
 
 /* Dark carousel first card hover reveals the gradient wash */
@@ -519,7 +573,9 @@ a:hover {
    tint, the ring on hover, the eyebrow and the CTA. */
 .pf-section {
   position: relative;
-  background: #0d0a1f;
+  /* same accent glow as the process section, centred here, so the two dark
+     blocks read as one lit space with a seam rather than two flat slabs */
+  background: radial-gradient(60% 45% at 50% 0%, rgba(105, 199, 185, 0.09), transparent 70%), #0d0a1f;
   padding: var(--section-y) 0;
   /* the process section above is the same #0d0a1f: without a seam the two
      read as one long dark block and the padding between them disappears */
@@ -1208,12 +1264,7 @@ a:hover {
 }
 .fit-res-ask { background: rgba(42,120,214,.09); border-left-color: #2a78d6; color: #26405e; }
 
-/* home — the rule under the stat cards. Four segments on desktop, one clean
-   line on a phone (the collapsed grid would otherwise stack four of them). */
-.ps-rule { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
 @media (max-width: 900px) {
-  .ps-rule { grid-template-columns: 1fr; gap: 0; margin-top: 56px !important; }
-  .ps-rule span:not(:first-child) { display: none; }
   /* the nubs bridge card to card in a row — stacked, they're just specks */
   .stat-connector { display: none; }
   /* the full-stack lab diagrams need width to read — drop them on phones */

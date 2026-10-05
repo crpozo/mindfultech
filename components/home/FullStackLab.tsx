@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 
 const MONO = "var(--mono)";
 
@@ -172,32 +173,12 @@ export function FullStackLab() {
       }}
     >
       <div style={{ maxWidth: 1560, margin: "0 auto", padding: "0 48px" }}>
-        <h2
-          style={{
-            textAlign: "center",
-            fontWeight: 500,
-            fontSize: "clamp(38px,4vw,64px)",
-            letterSpacing: "-.02em",
-            lineHeight: 1.05,
-            margin: 0,
-            color: "var(--ink)",
-          }}
-        >
-          {es ? "Laboratorio full-stack" : "Full-stack lab"}
-        </h2>
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 20,
-            lineHeight: 1.5,
-            color: "#64616e",
-            fontWeight: 400,
-            maxWidth: 640,
-            margin: "20px auto 56px",
-          }}
-        >
-          {es ? "Impulsamos cada paso del viaje del producto, de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey, from first research session to production AI."}
-        </p>
+        <SectionHead
+          kicker={es ? "QUÉ HACEMOS" : "WHAT WE DO"}
+          title={es ? "Laboratorio full-stack" : "Full-stack lab"}
+          sub={es ? "Impulsamos cada paso del viaje del producto, de la primera sesión de investigación a la IA en producción." : "Powering every step of the product journey, from first research session to production AI."}
+          style={{ marginBottom: 56 }}
+        />
 
         {/* tabs */}
         <div

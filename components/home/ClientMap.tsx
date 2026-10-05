@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useLang } from "../i18n";
+import { SectionHead } from "./SectionHead";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 
-const MONO = "var(--mono)";
 
 type Bi = { en: string; es: string };
 type Site = {
@@ -244,43 +244,12 @@ export function ClientMap() {
       }}
     >
       <div className="pad-x" style={{ maxWidth: 1460, margin: "0 auto", padding: "0 48px" }}>
-        <div style={{ textAlign: "center", maxWidth: 640, margin: "0 auto 46px" }}>
-          <span
-            style={{
-              display: "inline-block",
-              fontFamily: MONO,
-              fontSize: 11,
-              letterSpacing: ".16em",
-              /* deeper green than --accent-deep — that one is 3.2:1 on the
-                 tint, this reads 5.5:1 */
-              color: "#2e6e63",
-              background: "var(--accent-tint)",
-              padding: "7px 13px",
-              borderRadius: 999,
-            }}
-          >
-            {es ? "DÓNDE TRABAJAMOS" : "WHERE WE WORK"}
-          </span>
-          <h2
-            style={{
-              fontWeight: 500,
-              fontSize: "clamp(32px,3.4vw,52px)",
-              letterSpacing: "-.02em",
-              lineHeight: 1.06,
-              margin: "20px 0 0",
-              color: "var(--ink)",
-            }}
-          >
-            {es
-              ? "MindfulTech ayuda a empresas de todo el mundo"
-              : "MindfulTech helps companies worldwide"}
-          </h2>
-          <p style={{ fontSize: 18, lineHeight: 1.5, color: "#6b6875", margin: "14px 0 0" }}>
-            {es
-              ? "Desde Ecuador, para equipos en América y Europa."
-              : "From Ecuador, for teams across the Americas and Europe."}
-          </p>
-        </div>
+        <SectionHead
+          kicker={es ? "DÓNDE TRABAJAMOS" : "WHERE WE WORK"}
+          title={es ? "MindfulTech ayuda a empresas de todo el mundo" : "MindfulTech helps companies worldwide"}
+          sub={es ? "Desde Ecuador, para equipos en América y Europa." : "From Ecuador, for teams across the Americas and Europe."}
+          style={{ marginBottom: 46 }}
+        />
 
         <div className="map-grid">
           <div className="map-canvas">
