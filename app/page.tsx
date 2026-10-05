@@ -18,10 +18,11 @@ export default function Home() {
           <Hero />
         </div>
         <PlatformStats />
-        <AiOffice />
         <FullStackLab />
         <ProcessFlow />
         <ClientStories />
+        {/* our own product, apart from the services: it follows the projects we built */}
+        <AiOffice />
         <ClientMap />
       </main>
     </div>

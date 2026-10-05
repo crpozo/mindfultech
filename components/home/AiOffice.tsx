@@ -14,9 +14,10 @@ const MONO = "var(--mono)";
  */
 const T = {
   en: {
-    tag: "AI MANAGEMENT OFFICE",
+    tag: "AI AS A SERVICE · OUR NEW PRODUCT",
+    badge: "New",
     title: "An office where every employee is an AI agent",
-    sub: "We set one up for your company: one agent per role, connected to the tools you already use. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person. The office below is the demo, running.",
+    sub: "This is not one of our services: it is a product we built, sold as a monthly subscription. We set up an AI Management Office for your company: one agent per role, connected to the tools you already use. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person. The office below is the demo, running.",
     cta: "OPEN THE LIVE DEMO",
     alt: "The 3D office with the AI employees at their desks",
     lead: "One agent per role",
@@ -31,9 +32,10 @@ const T = {
     ],
   },
   es: {
-    tag: "OFICINA DE GESTIÓN CON IA",
+    tag: "IA COMO SERVICIO · NUESTRO NUEVO PRODUCTO",
+    badge: "Nuevo",
     title: "Una oficina donde cada empleado es un agente de IA",
-    sub: "La montamos para tu empresa: un agente por rol, conectado a las herramientas que ya usas. Abres la oficina, ves qué está haciendo cada agente, le preguntas y apruebas lo que necesita una persona. La oficina de abajo es la demo, funcionando.",
+    sub: "No es uno de nuestros servicios: es un producto que construimos y se contrata por suscripción mensual. Montamos una AI Management Office para tu empresa: un agente por rol, conectado a las herramientas que ya usas. Abres la oficina, ves qué está haciendo cada agente, le preguntas y apruebas lo que necesita una persona. La oficina de abajo es la demo, funcionando.",
     cta: "ABRIR LA DEMO EN VIVO",
     alt: "La oficina 3D con los empleados IA en sus escritorios",
     lead: "Un agente por rol",
@@ -60,7 +62,10 @@ export function AiOffice() {
             the left half and leave the right half of the row empty */}
         <div className="aio-head">
           <div>
-            <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: ".12em", background: "#0e0d12", color: "#fff", borderRadius: 999, padding: "4px 10px" }}>{t.badge.toUpperCase()}</span>
+              <span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 500, letterSpacing: ".16em", color: "#6b6fae" }}>{t.tag}</span>
+            </span>
             <h2
               style={{
                 fontWeight: 500,
