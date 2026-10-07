@@ -5,6 +5,7 @@ import { useLang } from "../i18n";
 import {
   type TasksState,
   type Task,
+  type Person,
   type Project,
   type Status,
   STATUSES,
@@ -109,7 +110,7 @@ export function TasksApp() {
   const es = lang === "es";
   const [unlocked, setUnlockedS] = React.useState(false);
   const [ready, setReady] = React.useState(false);
-  const [state, setState] = React.useState<TasksState>(() => ({ version: 1, projects: [], tasks: [] }));
+  const [state, setState] = React.useState<TasksState>(() => ({ version: 1, projects: [], tasks: [], people: [] }));
   const loadedRef = React.useRef(false);
   const stateRef = React.useRef(state);
   stateRef.current = state;
@@ -118,6 +119,8 @@ export function TasksApp() {
   const [filter, setFilter] = React.useState<string>("all"); // "all" | projectId | "none"
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [manageOpen, setManageOpen] = React.useState(false);
+  const [peopleOpen, setPeopleOpen] = React.useState(false);
+  const [who, setWho] = React.useState<string>("all"); // "all" | personId | "nobody"
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [dragId, setDragId] = React.useState<string | null>(null);
   const [dragOver, setDragOver] = React.useState<Status | null>(null);
@@ -249,6 +252,25 @@ export function TasksApp() {
     return p.id;
   };
 
+  const people = state.people ?? [];
+  const addPerson = (name: string) => {
+    const n = name.trim();
+    if (!n) return null;
+    const color = PROJECT_COLORS[(people.length + 3) % PROJECT_COLORS.length];
+    const person: Person = { id: uid(), name: n, color };
+    mutate((s) => ({ ...s, people: [...(s.people ?? []), person] }));
+    return person.id;
+  };
+  const patchPerson = (id: string, patch: Partial<Person>) =>
+    mutate((s) => ({ ...s, people: (s.people ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  const deletePerson = (id: string) =>
+    mutate((s) => ({
+      ...s,
+      people: (s.people ?? []).filter((x) => x.id !== id),
+      tasks: s.tasks.map((t) => (t.assigneeId === id ? { ...t, assigneeId: null } : t)),
+    }));
+  const peopleById = React.useMemo(() => new Map(people.map((x) => [x.id, x])), [people]);
+
   const patchProject = (id: string, patch: Partial<Project>) =>
     mutate((s) => ({ ...s, projects: s.projects.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
 
@@ -311,8 +333,13 @@ export function TasksApp() {
     let ts = state.tasks;
     if (filter === "none") ts = ts.filter((t) => !t.projectId);
     else if (filter !== "all") ts = ts.filter((t) => t.projectId === filter);
+    if (who === "nobody") ts = ts.filter((t) => !t.assigneeId);
+    else if (who !== "all") ts = ts.filter((t) => t.assigneeId === who);
     return ts;
-  }, [state.tasks, filter]);
+  }, [state.tasks, filter, who]);
+  React.useEffect(() => {
+    if (who !== "all" && who !== "nobody" && !peopleById.has(who)) setWho("all");
+  }, [who, peopleById]);
 
   const editing = editingId ? state.tasks.find((t) => t.id === editingId) || null : null;
 
@@ -346,6 +373,9 @@ export function TasksApp() {
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
             <button onClick={() => setManageOpen(true)} style={ghostBtn} title={es ? "Proyectos" : "Projects"}>
               {es ? "Proyectos" : "Projects"}
+            </button>
+            <button onClick={() => setPeopleOpen(true)} style={ghostBtn} title={es ? "Personas" : "People"}>
+              {es ? "Personas" : "People"}
             </button>
             <button onClick={() => setMenuOpen((v) => !v)} style={{ ...ghostBtn, padding: "8px 11px" }} aria-label="Menu">
               ⋯
@@ -406,6 +436,16 @@ export function TasksApp() {
           <button onClick={() => setManageOpen(true)} style={{ ...ghostBtn, padding: "6px 10px", fontSize: 12 }}>
             + {es ? "Proyecto" : "Project"}
           </button>
+          {people.length > 0 && (
+            <>
+              <span style={{ width: 1, height: 22, background: "rgba(14,13,18,.1)", margin: "0 4px" }} />
+              <FilterChip label={es ? "Cualquiera" : "Anyone"} active={who === "all"} onClick={() => setWho("all")} />
+              {people.map((x) => (
+                <FilterChip key={x.id} label={x.name} active={who === x.id} onClick={() => setWho(x.id)} count={state.tasks.filter((t) => t.assigneeId === x.id && t.status !== "done").length} lead={<Avatar person={x} size={16} />} />
+              ))}
+              {state.tasks.some((t) => !t.assigneeId) && <FilterChip label={es ? "Sin asignar" : "Unassigned"} active={who === "nobody"} onClick={() => setWho("nobody")} />}
+            </>
+          )}
         </div>
       </header>
 
@@ -469,6 +509,7 @@ export function TasksApp() {
                       key={t.id}
                       task={t}
                       project={t.projectId ? projectsById.get(t.projectId) || null : null}
+                      assignee={t.assigneeId ? peopleById.get(t.assigneeId) || null : null}
                       showProject={filter === "all" || filter === "none"}
                       onOpen={() => setEditingId(t.id)}
                       onToggle={() => patchTask(t.id, { status: t.status === "done" ? "todo" : "done" })}
@@ -514,8 +555,14 @@ export function TasksApp() {
           onDelete={() => deleteTask(editing.id)}
           onClose={() => setEditingId(null)}
           onNudge={(d) => nudgeTask(editing.id, d)}
+          people={people}
+          onAddPerson={addPerson}
           es={es}
         />
+      )}
+
+      {peopleOpen && (
+        <ManagePeople people={people} tasks={state.tasks} onAdd={addPerson} onPatch={patchPerson} onDelete={deletePerson} onClose={() => setPeopleOpen(false)} es={es} />
       )}
 
       {manageOpen && (
@@ -534,10 +581,92 @@ export function TasksApp() {
 }
 
 /* ---------------------------------------------------------------- filter chip */
+/** Initials in the person's colour. */
+function Avatar({ person, size = 24 }: { person: Person; size?: number }) {
+  const initials = person.name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <span
+      aria-hidden
+      style={{
+        display: "inline-grid",
+        placeItems: "center",
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: person.color,
+        color: fgOn(person.color),
+        fontSize: Math.round(size * 0.42),
+        fontWeight: 600,
+        letterSpacing: ".02em",
+        flex: "none",
+      }}
+    >
+      {initials}
+    </span>
+  );
+}
+
+function ManagePeople({
+  people,
+  tasks,
+  onAdd,
+  onPatch,
+  onDelete,
+  onClose,
+  es,
+}: {
+  people: Person[];
+  tasks: Task[];
+  onAdd: (name: string) => string | null;
+  onPatch: (id: string, patch: Partial<Person>) => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+  es: boolean;
+}) {
+  const [newName, setNewName] = React.useState("");
+  const inputStyle: React.CSSProperties = { flex: 1, fontFamily: "inherit", fontSize: 14, padding: "8px 10px", borderRadius: 8, border: "1.5px solid rgba(14,13,18,.12)", outline: "none", color: "var(--ink)" };
+  return (
+    <Modal onClose={onClose} label={es ? "Personas" : "People"}>
+      <h2 style={{ fontSize: 18, fontWeight: 500, margin: "0 0 4px" }}>{es ? "Personas" : "People"}</h2>
+      <p style={{ margin: "0 0 14px", fontSize: 13, color: "#6c6a75" }}>{es ? "A quién se le asignan las tareas. Las tareas de una persona eliminada quedan sin asignar." : "Who tasks get assigned to. A deleted person's tasks become unassigned."}</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: "50vh", overflowY: "auto" }}>
+        {people.map((x) => {
+          const count = tasks.filter((t) => t.assigneeId === x.id && t.status !== "done").length;
+          return (
+            <div key={x.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Avatar person={x} size={30} />
+              <input type="color" value={x.color} onChange={(e) => onPatch(x.id, { color: e.target.value })} aria-label={(es ? "Color de " : "Color for ") + x.name} style={{ width: 26, height: 26, padding: 0, border: "none", background: "none", cursor: "pointer", flex: "none" }} />
+              <input value={x.name} onChange={(e) => onPatch(x.id, { name: e.target.value })} onBlur={(e) => { if (!e.target.value.trim()) onPatch(x.id, { name: es ? "Persona" : "Person" }); }} aria-label={es ? "Nombre" : "Name"} style={inputStyle} />
+              <span style={{ fontFamily: MONO, fontSize: 11, color: "#74727d", flex: "none", width: 64, textAlign: "right" }}>{count} {es ? "abiertas" : "open"}</span>
+              <button onClick={() => { if (confirm(es ? `¿Eliminar a ${x.name}?` : `Delete ${x.name}?`)) onDelete(x.id); }} style={{ background: "none", border: "none", color: "#c0392b", fontSize: 16, cursor: "pointer", flex: "none" }} aria-label={es ? "Eliminar persona" : "Delete person"}>✕</button>
+            </div>
+          );
+        })}
+        {people.length === 0 && <p style={{ margin: 0, fontSize: 13, color: "#8b8896" }}>{es ? "Todavía no hay personas." : "No people yet."}</p>}
+      </div>
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (onAdd(newName)) setNewName(""); }}
+        style={{ display: "flex", gap: 8, marginTop: 14 }}
+      >
+        <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={es ? "Nueva persona" : "New person"} aria-label={es ? "Nueva persona" : "New person"} style={inputStyle} />
+        <button type="submit" disabled={!newName.trim()} style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: ".1em", background: "#0e0d12", color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", cursor: "pointer" }}>
+          {es ? "AÑADIR" : "ADD"}
+        </button>
+      </form>
+    </Modal>
+  );
+}
+
 function FilterChip({
   label,
   color,
   icon,
+  lead,
   active,
   onClick,
   count,
@@ -545,9 +674,11 @@ function FilterChip({
   label: string;
   color?: string;
   icon?: IconId;
+  /** a ready-made leading element (a person's avatar) instead of the project icon */
+  lead?: React.ReactNode;
   active: boolean;
   onClick: () => void;
-  count: number;
+  count?: number;
 }) {
   return (
     <button
@@ -568,9 +699,10 @@ function FilterChip({
         maxWidth: 200,
       }}
     >
+      {lead}
       {color && <ProjectIcon id={icon} size={15} color={active ? "#fff" : inkable(color)} />}
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
-      <span style={{ fontFamily: MONO, fontSize: 10.5, opacity: active ? 0.7 : 0.5 }}>{count}</span>
+      {count !== undefined && <span style={{ fontFamily: MONO, fontSize: 10.5, opacity: active ? 0.7 : 0.5 }}>{count}</span>}
     </button>
   );
 }
@@ -579,6 +711,7 @@ function FilterChip({
 function TaskCard({
   task,
   project,
+  assignee,
   showProject,
   onOpen,
   onToggle,
@@ -591,6 +724,7 @@ function TaskCard({
 }: {
   task: Task;
   project: Project | null;
+  assignee: Person | null;
   showProject: boolean;
   onOpen: () => void;
   onToggle: () => void;
@@ -698,6 +832,11 @@ function TaskCard({
           </div>
         )}
       </div>
+      {assignee && (
+        <span title={assignee.name} style={{ flex: "none", marginTop: 1 }}>
+          <Avatar person={assignee} size={24} />
+        </span>
+      )}
     </div>
   );
 }
@@ -783,6 +922,8 @@ function TaskEditor({
   onDelete,
   onClose,
   onNudge,
+  people,
+  onAddPerson,
   es,
 }: {
   task: Task;
@@ -791,6 +932,8 @@ function TaskEditor({
   onDelete: () => void;
   onClose: () => void;
   onNudge: (dir: -1 | 1) => void;
+  people: Person[];
+  onAddPerson: (name: string) => string | null;
   es: boolean;
 }) {
   // never leave a blank card behind
@@ -867,6 +1010,40 @@ function TaskEditor({
                 {p.name}
               </option>
             ))}
+          </select>
+        </Field>
+
+        <Field label={es ? "Asignada a" : "Assigned to"}>
+          <select
+            value={task.assigneeId ?? ""}
+            onChange={(e) => {
+              if (e.target.value === "__new__") {
+                const name = prompt(es ? "Nombre de la persona" : "Person's name");
+                const id = name ? onAddPerson(name) : null;
+                if (id) onPatch({ assigneeId: id });
+                return;
+              }
+              onPatch({ assigneeId: e.target.value || null });
+            }}
+            aria-label={es ? "Asignada a" : "Assigned to"}
+            style={{
+              width: "100%",
+              fontFamily: "inherit",
+              fontSize: 14,
+              padding: "10px 12px",
+              borderRadius: 8,
+              border: "1.5px solid rgba(14,13,18,.14)",
+              background: "#fff",
+              color: "var(--ink)",
+            }}
+          >
+            <option value="">{es ? "Nadie" : "Nobody"}</option>
+            {people.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.name}
+              </option>
+            ))}
+            <option value="__new__">{es ? "+ Nueva persona…" : "+ New person…"}</option>
           </select>
         </Field>
 

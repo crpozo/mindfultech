@@ -37,9 +37,18 @@ export const ICON_IDS = [
 export type IconId = (typeof ICON_IDS)[number];
 const ICON_SET = new Set<string>(ICON_IDS);
 
+/** Somebody tasks can be assigned to. */
+export interface Person {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface Task {
   id: string;
   projectId: string | null;
+  /** who it is assigned to (a Person id), if anyone */
+  assigneeId?: string | null;
   title: string;
   notes: string;
   status: Status;
@@ -53,6 +62,7 @@ export interface TasksState {
   version: number;
   projects: Project[];
   tasks: Task[];
+  people?: Person[];
   /** the last weekly sweep, kept so it can be undone */
   lastSweep?: { at: number; tasks: Task[] };
 }
@@ -101,13 +111,14 @@ export function uid(): string {
   return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
 }
 
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 
 export function seedState(): TasksState {
   return {
     version: STATE_VERSION,
     projects: SEED_PROJECTS.map((p) => ({ ...p, id: uid() })),
     tasks: [],
+    people: [],
   };
 }
 
@@ -139,7 +150,7 @@ function migrate(s: TasksState): TasksState {
     tasks = tasks.map((t) => (t.status === "done" && t.completedAt == null ? { ...t, completedAt: now } : t));
   }
 
-  return { ...s, version: STATE_VERSION, projects, tasks };
+  return { ...s, version: STATE_VERSION, projects, tasks, people: Array.isArray(s.people) ? s.people : [] };
 }
 
 /** Local Monday 00:00 of the week containing `d`. */
@@ -239,11 +250,16 @@ export function parseImport(text: string): TasksState | null {
         icon: typeof p.icon === "string" && ICON_SET.has(p.icon) ? (p.icon as IconId) : undefined,
       }));
     const projIds = new Set(projects.map((p) => p.id));
+    const people: Person[] = (Array.isArray(s.people) ? s.people : [])
+      .filter((x) => x && typeof x.name === "string")
+      .map((x) => ({ id: freshId(x.id), name: x.name, color: typeof x.color === "string" && HEX_COLOR.test(x.color) ? x.color : PROJECT_COLORS[0] }));
+    const peopleIds = new Set(people.map((x) => x.id));
     const tasks: Task[] = s.tasks
       .filter((t) => t && typeof t.title === "string")
       .map((t, i) => ({
         id: freshId(t.id),
         projectId: typeof t.projectId === "string" && projIds.has(t.projectId) ? t.projectId : null,
+        assigneeId: typeof t.assigneeId === "string" && peopleIds.has(t.assigneeId) ? t.assigneeId : null,
         title: t.title,
         notes: typeof t.notes === "string" ? t.notes : "",
         status: t.status === "doing" || t.status === "done" ? t.status : "todo",
@@ -251,7 +267,7 @@ export function parseImport(text: string): TasksState | null {
         completedAt: typeof t.completedAt === "number" ? t.completedAt : undefined,
         order: typeof t.order === "number" ? t.order : i,
       }));
-    return { version: STATE_VERSION, projects, tasks };
+    return { version: STATE_VERSION, projects, tasks, people };
   } catch {
     return null;
   }
