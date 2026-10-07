@@ -572,9 +572,6 @@ export function SiteHeader({
               <Link href="/work" style={linkStyle(active === "work")}>
                 {es ? "Proyectos" : "Work"}
               </Link>
-              <Link href="/#research" style={linkStyle(active === "process")}>
-                {es ? "Proceso" : "Process"}
-              </Link>
               <Link href="/blog" style={linkStyle(active === "blog")}>
                 Blog
               </Link>
@@ -738,7 +735,6 @@ export function SiteHeader({
               {[
                 { label: es ? "Servicios" : "Services", href: "/services", key: "services" },
                 { label: es ? "Proyectos" : "Work", href: "/work", key: "work" },
-                { label: es ? "Proceso" : "Process", href: "/#research", key: "process" },
                 { label: "Blog", href: "/blog", key: "blog" },
                 { label: es ? "Compañía" : "Company", href: "/company", key: "company" },
               ].map((l) => (
