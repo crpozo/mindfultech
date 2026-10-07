@@ -121,6 +121,8 @@ export function TasksApp() {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [dragId, setDragId] = React.useState<string | null>(null);
   const [dragOver, setDragOver] = React.useState<Status | null>(null);
+  /** the card the pointer is over while dragging, and whether the drop lands before or after it */
+  const [dropAt, setDropAt] = React.useState<{ id: string; after: boolean } | null>(null);
 
   // ---- boot: unlock + load ----
   React.useEffect(() => {
@@ -208,6 +210,29 @@ export function TasksApp() {
         return next;
       }),
     }));
+
+  /** Put task `id` into `status` at `index` (0 = top; omitted = bottom) and renumber that column. */
+  const moveTask = (id: string, status: Status, index?: number) =>
+    mutate((s) => {
+      const moving = s.tasks.find((t) => t.id === id);
+      if (!moving) return s;
+      const col = s.tasks.filter((t) => t.status === status && t.id !== id).sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
+      const at = index === undefined ? col.length : Math.max(0, Math.min(col.length, index));
+      const moved: Task = { ...moving, status, completedAt: status !== moving.status ? (status === "done" ? Date.now() : undefined) : moving.completedAt };
+      col.splice(at, 0, moved);
+      const orders = new Map(col.map((t, i) => [t.id, i]));
+      return { ...s, tasks: s.tasks.map((t) => (orders.has(t.id) ? { ...(t.id === id ? moved : t), order: orders.get(t.id)! } : t)) };
+    });
+  /** one step up or down inside the task's own column */
+  const nudgeTask = (id: string, dir: -1 | 1) => {
+    const t = stateRef.current.tasks.find((x) => x.id === id);
+    if (!t) return;
+    const col = stateRef.current.tasks.filter((x) => x.status === t.status).sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
+    const i = col.findIndex((x) => x.id === id);
+    const j = i + dir;
+    if (j < 0 || j >= col.length) return;
+    moveTask(id, t.status, j);
+  };
 
   const deleteTask = (id: string) => {
     mutate((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
@@ -417,9 +442,10 @@ export function TasksApp() {
                 onDragLeave={() => setDragOver((s) => (s === col.id ? null : s))}
                 onDrop={(e) => {
                   e.preventDefault();
-                  if (dragId) patchTask(dragId, { status: col.id });
+                  if (dragId) moveTask(dragId, col.id);
                   setDragId(null);
                   setDragOver(null);
+                  setDropAt(null);
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 4px 12px" }}>
@@ -438,7 +464,7 @@ export function TasksApp() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {colTasks.map((t) => (
+                  {colTasks.map((t, i) => (
                     <TaskCard
                       key={t.id}
                       task={t}
@@ -447,7 +473,20 @@ export function TasksApp() {
                       onOpen={() => setEditingId(t.id)}
                       onToggle={() => patchTask(t.id, { status: t.status === "done" ? "todo" : "done" })}
                       onDragStart={() => setDragId(t.id)}
-                      onDragEnd={() => { setDragId(null); setDragOver(null); }}
+                      onDragEnd={() => { setDragId(null); setDragOver(null); setDropAt(null); }}
+                      dropHint={dropAt && dropAt.id === t.id && dragId !== t.id ? (dropAt.after ? "after" : "before") : null}
+                      onDragOverCard={(after) => { if (dragId && dragId !== t.id) setDropAt({ id: t.id, after }); }}
+                      onDropOnCard={(after) => {
+                        if (dragId && dragId !== t.id) {
+                          // index among the column's cards once the dragged one is taken out
+                          const others = colTasks.filter((x) => x.id !== dragId);
+                          const k = others.findIndex((x) => x.id === t.id);
+                          moveTask(dragId, col.id, k + (after ? 1 : 0));
+                        }
+                        setDragId(null);
+                        setDragOver(null);
+                        setDropAt(null);
+                      }}
                       es={es}
                     />
                   ))}
@@ -474,6 +513,7 @@ export function TasksApp() {
           onPatch={(patch) => patchTask(editing.id, patch)}
           onDelete={() => deleteTask(editing.id)}
           onClose={() => setEditingId(null)}
+          onNudge={(d) => nudgeTask(editing.id, d)}
           es={es}
         />
       )}
@@ -544,6 +584,9 @@ function TaskCard({
   onToggle,
   onDragStart,
   onDragEnd,
+  dropHint,
+  onDragOverCard,
+  onDropOnCard,
   es,
 }: {
   task: Task;
@@ -553,12 +596,19 @@ function TaskCard({
   onToggle: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
+  dropHint: "before" | "after" | null;
+  onDragOverCard: (after: boolean) => void;
+  onDropOnCard: (after: boolean) => void;
   es: boolean;
 }) {
   const done = task.status === "done";
+  const afterHalf = (e: React.DragEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return e.clientY > r.top + r.height / 2;
+  };
   return (
     <div
-      className="tk-card"
+      className={`tk-card${dropHint ? ` tk-drop-${dropHint}` : ""}`}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = "move";
@@ -566,6 +616,15 @@ function TaskCard({
         onDragStart();
       }}
       onDragEnd={onDragEnd}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOverCard(afterHalf(e));
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation(); // the column's drop would append it at the end
+        onDropOnCard(afterHalf(e));
+      }}
       style={{
         display: "flex",
         alignItems: "flex-start",
@@ -723,6 +782,7 @@ function TaskEditor({
   onPatch,
   onDelete,
   onClose,
+  onNudge,
   es,
 }: {
   task: Task;
@@ -730,6 +790,7 @@ function TaskEditor({
   onPatch: (patch: Partial<Task>) => void;
   onDelete: () => void;
   onClose: () => void;
+  onNudge: (dir: -1 | 1) => void;
   es: boolean;
 }) {
   // never leave a blank card behind
@@ -832,6 +893,22 @@ function TaskEditor({
           />
         </Field>
 
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: "#6c6a75" }}>{es ? "Posición en la columna" : "Position in the column"}</span>
+          <span style={{ marginLeft: "auto", display: "inline-flex", gap: 6 }}>
+            {([-1, 1] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => onNudge(d)}
+                aria-label={d < 0 ? (es ? "Subir" : "Move up") : es ? "Bajar" : "Move down"}
+                style={{ width: 36, height: 32, borderRadius: 8, border: "1.5px solid rgba(14,13,18,.14)", background: "#fff", cursor: "pointer", fontSize: 14 }}
+              >
+                {d < 0 ? "↑" : "↓"}
+              </button>
+            ))}
+          </span>
+        </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
           <button
             onClick={() => {

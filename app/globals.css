@@ -1960,3 +1960,11 @@ a:hover {
   .pj-row-title { font-size: 16px; }
   .pj-desc { font-size: 16px; }
 }
+
+/* ---- tasks: drop position while dragging inside a column ---- */
+.tk-card { position: relative; }
+.tk-drop-before::before, .tk-drop-after::after {
+  content: ""; position: absolute; left: 6px; right: 6px; height: 3px; border-radius: 2px; background: var(--accent, #2e6e63);
+}
+.tk-drop-before::before { top: -6px; }
+.tk-drop-after::after { bottom: -6px; }
