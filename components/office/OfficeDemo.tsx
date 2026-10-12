@@ -412,7 +412,7 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
 
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? botById(lang, selected) ?? null : null;
-  const hot = hotspot ? hotspotMeta(lang)[hotspot] : null;
+  const hot = hotspot ? hotspotMeta(lang, brand.key)[hotspot] : null;
   const panelOpen = !!bot || !!hot;
   React.useEffect(() => {
     if (!panelOpen) setPanelMax(false);
@@ -501,7 +501,7 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
               <div className={s.menu} role="menu" aria-label="Dashboards">
                 <div className={s.menuFloor}>{t("Pantallas con datos del equipo", "Screens with the team's data")}</div>
                 {[...brand.dashboards, ...DASHBOARDS].map((id) => {
-                  const m = hotspotMeta(lang)[id];
+                  const m = hotspotMeta(lang, brand.key)[id];
                   return (
                     <button key={id} type="button" role="menuitem" className={`${s.menuItem} ${hotspot === id ? s.menuItemActive : ""}`} onClick={() => { setDashOpen(false); setSelected(null); setHotspot(id); setInteracted(true); }}>
                       <span className={s.menuIcon} dangerouslySetInnerHTML={{ __html: iconSvg(id) }} />
@@ -746,7 +746,7 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
               </button>
             </div>
             <div className={s.panelBody}>
-              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} lang={lang} analyst={brand.analyst} />
+              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} lang={lang} analyst={brand.analyst} brandKey={brand.key} />
             </div>
           </>
         )}

@@ -66,7 +66,7 @@ export const USFQ_BRAND: OfficeBrand = {
   home: "/office-usfq/",
   botsFor: usfqBotsFor,
   signs: { logo: ["USFQ NEXT"], welcome: ["BIENVENIDOS"] },
-  dashboards: ["next"],
+  dashboards: [], // the office's main screen (tv) is the donations dashboard itself
   tourBot: "andrade",
   tourScreen: {
     es: "Seleccionamos a Alejandro Andrade, director de USFQ NEXT. Su panel muestra sus indicadores y su pantalla en vivo: el tablero de donaciones por vertical, donantes y proyectos. Es como mirar por encima de su hombro.",
