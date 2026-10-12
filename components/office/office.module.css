@@ -2439,7 +2439,7 @@
 .nxScroll { max-height: 420px; overflow: auto; }
 .nxScroll .nxTbl td:first-child, .nxScroll .nxTbl th:first-child { width: 46%; }
 .nxScroll .nxTbl td.num { width: auto; }
-.nxDonors { max-height: 300px; overflow: auto; }
+.nxDonors { overflow: visible; }
 .nxSource { font-size: 11px; color: #8b8896; padding: 0 4px 6px; }
 .panelMax .nx {
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -2458,3 +2458,28 @@
 .panelMax .nx7 { grid-column: span 7; }
 .panelMax .nx12 { grid-column: 1 / -1; }
 .panelMax .nxScroll { max-height: 380px; }
+
+/* the ask strip and the row heights of the USFQ NEXT grid */
+.nxAsk {
+  background: #fff;
+  border: 1px solid rgba(14, 13, 18, 0.07);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.nxAsk .dashChat { gap: 8px; }
+.nxAsk .chatFace { padding: 0; }
+.nxAsk .dashMessages { max-height: 220px; }
+.nxAsk .quick { margin: 0; }
+.panelMax .nxAsk .dashChat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-areas: "face quick" "msgs msgs" "input input";
+  column-gap: 18px;
+  align-items: center;
+}
+.panelMax .nxAsk .chatFace { grid-area: face; }
+.panelMax .nxAsk .quick { grid-area: quick; justify-content: flex-end; }
+.panelMax .nxAsk .dashMessages { grid-area: msgs; }
+.panelMax .nxAsk .composer { grid-area: input; }
+.panelMax .nx .chartCard { height: 100%; box-sizing: border-box; }
+.panelMax .nx { align-items: stretch; }

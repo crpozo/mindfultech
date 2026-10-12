@@ -110,13 +110,12 @@ function NextChat({ lang, analyst }: { lang: Lang; analyst: string }) {
   return (
     <div className={s.dashChat}>
       <div className={s.chatFace}>
-        {bot && <AgentFace id={bot.id} look={bot.look} mood={mood} size={44} />}
+        {bot && <AgentFace id={bot.id} look={bot.look} mood={mood} size={40} />}
         <span>
-          <b>{bot?.name ?? "USFQ NEXT"}</b> · USFQ NEXT · {caption}
+          <b>{t("Pregúntale a", "Ask")} {bot?.name ?? "USFQ NEXT"}</b> · {caption}
         </span>
       </div>
-      <div className={`${s.messages} ${s.dashMessages}`} ref={listRef}>
-        {msgs.length === 0 && <div className={s.dashHint}>{t("Respondo con los datos consolidados de donaciones 2024–2026 y el reporte de proyectos de vinculación.", "I answer from the consolidated 2024–2026 donation data and the engagement projects report.")}</div>}
+      <div className={`${s.messages} ${s.dashMessages}`} ref={listRef} hidden={msgs.length === 0 && !busy}>
         {msgs.map((m, i) => (
           <div key={i} className={`${s.msg} ${m.from === "bot" ? s.msgBot : s.msgUser}`}>
             {m.text}
@@ -216,12 +215,12 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
         </div>
       </div>
 
-      {/* row 2: ask, verticals, donor mix */}
-      <div className={s.nx5}>
-        <ChartCard title={t("Pregúntale a Alejandro", "Ask Alejandro")} sub={t("responde con los datos de este tablero", "answers from this dashboard's data")}>
-          <NextChat lang={lang} analyst={analyst} />
-        </ChartCard>
+      {/* row 2: ask Alejandro, one compact strip */}
+      <div className={`${s.nx12} ${s.nxAsk}`}>
+        <NextChat lang={lang} analyst={analyst} />
       </div>
+
+      {/* row 3: verticals, donor mix, months */}
       <div className={s.nx4}>
         <ChartCard title={t("Por vertical", "By vertical")} sub={t("las seis verticales de USFQ NEXT", "USFQ NEXT's six verticals")}>
           <VerticalBars lang={lang} />
@@ -230,24 +229,24 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
       <div className={s.nx3}>
         <ChartCard title={t("Tipo de donante", "Donor type")} sub={t("monto neto", "net amount")}>
           <div className={s.nxDonut}>
-            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={104} format={(v) => money0(v, lang)} lang={lang} />
+            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={96} format={(v) => money0(v, lang)} lang={lang} />
             <div className={s.nxDonutNote}>{t("Donación media por persona", "Average gift per individual")}: <b>{money0((per?.amount ?? 0) / Math.max(1, per?.donors ?? 1), lang)}</b></div>
           </div>
         </ChartCard>
       </div>
-
-      {/* row 3: the months and the donors */}
-      <div className={s.nx7}>
+      <div className={s.nx5}>
         <ChartCard title={t("Donaciones por mes", "Donations by month")} sub={t("valor neto · los picos son convenios y fondos grandes", "net value · spikes are agreements and large funds")}>
-          <MonthlyChart lang={lang} height={170} />
+          <MonthlyChart lang={lang} height={150} />
         </ChartCard>
       </div>
+
+      {/* row 4: donors and projects */}
       <div className={s.nx5}>
         <ChartCard title={t("Mayores donantes", "Top donors")} sub={t("neto acumulado 2024–2026", "net total 2024–2026")}>
           <div className={s.nxDonors}>
           <table className={`${s.tbl} ${s.nxTbl}`}>
             <tbody>
-              {NEXT.topDonors.slice(0, 10).map((d) => (
+              {NEXT.topDonors.slice(0, 8).map((d) => (
                 <tr key={d.name}>
                   <td title={d.name}>
                     <span className={s.nxCell}>{d.name}</span>
@@ -262,8 +261,7 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
         </ChartCard>
       </div>
 
-      {/* row 4: projects */}
-      <div className={s.nx5}>
+      <div className={s.nx7}>
         <ChartCard title={t("Proyectos que más reciben", "Projects receiving the most")} sub={t("destino registrado y su vertical", "registered destination and its vertical")}>
           <table className={`${s.tbl} ${s.nxTbl}`}>
             <tbody>
@@ -283,7 +281,7 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
           </table>
         </ChartCard>
       </div>
-      <div className={s.nx7}>
+      <div className={s.nx12}>
         <ChartCard
           title={t("Proyectos de vinculación 2026", "2026 engagement projects")}
           sub={t(`${outreach.length} candidatos para donantes`, `${outreach.length} candidates for donors`)}
