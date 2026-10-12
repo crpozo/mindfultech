@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import type { Bot } from "@/lib/office/bots";
+import { NextScreen } from "./NextDashboard";
 import { LOCALE, tx, type Lang } from "@/lib/office/i18n";
 import s from "./screen.module.css";
 
@@ -939,6 +940,14 @@ function Procurement({ lang }: { lang: Lang }) {
 }
 
 const LOG_POOL: Record<Bot["screen"], Pair[]> = {
+  next: [
+    { es: "Donación registrada: Worldwide Veterinary Service · Clínicas móviles", en: "Donation recorded: Worldwide Veterinary Service · Mobile clinics" },
+    { es: "Donante clasificado en Sustainability & Environment", en: "Donor classified under Sustainability & Environment" },
+    { es: "Reporte de fin de año enviado a 12 donantes", en: "Year-end report sent to 12 donors" },
+    { es: "Proyecto de vinculación marcado con potencial alto: Rural Vet", en: "Engagement project flagged high potential: Rural Vet" },
+    { es: "Recibo CAF America conciliado", en: "CAF America receipt reconciled" },
+    { es: "Tablero actualizado: $1.086.054 acumulados", en: "Dashboard updated: $1,086,054 to date" },
+  ],
   sales: [
     { es: "Lead calificado: Hotel Casa Gangotena (score 74)", en: "Lead qualified: Hotel Casa Gangotena (score 74)" },
     { es: "Email de seguimiento enviado a Grupo Andino", en: "Follow-up email sent to Grupo Andino" },
@@ -1040,6 +1049,7 @@ const APP: Record<Bot["screen"], { name: string; doc: string; dock: number; lett
   dev: { name: "Visual Studio Code", doc: "shop — coupon.ts", dock: 6, letter: "</>", cursor: [[500, 200], [560, 260], [420, 470], [720, 480]], toast: ["#24292f", "GitHub", { es: "CI verde en PR #482 ✓", en: "CI green on PR #482 ✓" }] },
   finance: { name: "Google Sheets", doc: "docs.google.com/spreadsheets/d/1kX…/edit", dock: 5, letter: "≣", cursor: [[760, 290], [780, 330], [420, 200], [760, 420]], toast: ["#0f9d58", "Google Sheets", { es: "Camila editó 6 celdas", en: "Camila edited 6 cells" }] },
   procurement: { name: "Microsoft Excel", doc: "Seguimiento Proveedores.xlsx", dock: 5, letter: "X", cursor: [[760, 300], [860, 340], [420, 220], [860, 460]], toast: ["#217346", "Outlook", { es: "Proveedor respondió: OC072592 confirmada", en: "Supplier replied: PO072592 confirmed" }] },
+  next: { name: "USFQ NEXT · Dashboard", doc: "next.usfq.edu.ec/dashboard/donaciones", dock: 5, letter: "N", cursor: [[520, 300], [760, 420], [300, 220], [880, 505]], toast: ["#e11b22", "USFQ NEXT", { es: "Nueva donación registrada · Tandayapa", en: "New donation recorded · Tandayapa" }] },
   ops: { name: "WhatsApp Business", doc: "web.whatsapp.com", dock: 3, letter: "W", cursor: [[640, 500], [560, 380], [200, 300], [840, 500]], toast: ["#25d366", "WhatsApp", { es: "Luis Vega: ¿Pueden mover mi cita?", en: "Luis Vega: Can you move my appointment?" }] },
 };
 
@@ -1070,6 +1080,8 @@ function Screen({ bot, lang, big }: { bot: Bot; lang: Lang; big?: boolean }) {
       <Sheets lang={lang} />
     ) : bot.screen === "procurement" ? (
       <Procurement lang={lang} />
+    ) : bot.screen === "next" ? (
+      <NextScreen lang={lang} />
     ) : (
       <WhatsApp bot={bot} lang={lang} />
     );

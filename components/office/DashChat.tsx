@@ -116,9 +116,9 @@ export function answer(q0: string, f: DashFacts, lang: Lang): string {
 }
 
 /** Ask the dashboard: Tomás (Data) answers from the numbers on screen. */
-export function DashChat({ facts, lang }: { facts: DashFacts; lang: Lang }) {
+export function DashChat({ facts, lang, analyst = "tomas" }: { facts: DashFacts; lang: Lang; analyst?: string }) {
   const t = tx(lang);
-  const bot = botById(lang, "tomas");
+  const bot = botById(lang, analyst) ?? botById(lang, "tomas");
   const [msgs, setMsgs] = React.useState<Msg[]>([]);
   const [input, setInput] = React.useState("");
   const [mood, setMood] = React.useState<FaceMood>("idle");
@@ -159,7 +159,7 @@ export function DashChat({ facts, lang }: { facts: DashFacts; lang: Lang }) {
       <div className={s.chatFace}>
         {bot && <AgentFace id={bot.id} look={bot.look} mood={mood} size={44} />}
         <span>
-          <b>{bot?.name ?? "Tomás"}</b> · {t("Datos", "Data")} · {caption}
+          <b>{bot?.name ?? "Tomás"}</b> · {bot?.role ?? t("Datos", "Data")} · {caption}
         </span>
       </div>
       <div className={`${s.messages} ${s.dashMessages}`} ref={listRef}>

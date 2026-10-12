@@ -73,8 +73,9 @@ export function roomAt(x, z, y) {
  * @param lang "es" | "en" — the language of the wall signs and hotspot names
  * @returns everything the simulation needs: stations, spots, nav grids, hotspots…
  */
-export function buildRoom(scene, bots, lang = "es") {
+export function buildRoom(scene, bots, lang = "es", signs = null) {
   const L = textsFor(lang);
+  if (signs) L.signs = { ...L.signs, ...signs }; // a brand's own sign texts (the logo wall, the welcome)
   const M = F.makeMaterials(bots);
   const upper = new THREE.Group();
   scene.add(upper);

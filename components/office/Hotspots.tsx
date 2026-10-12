@@ -5,6 +5,7 @@ import { botsFor, botById } from "@/lib/office/bots";
 import { tx, LOCALE, type Lang } from "@/lib/office/i18n";
 import s from "./office.module.css";
 import { DashChat, type DashFacts } from "./DashChat";
+import { NextPanel } from "./NextDashboard";
 import { dailySeries, hourlyToday, lastDays, dayLabel, weekdayShort, isWeekend, sum, avg, fmtInt, fmtK, fmtMoney, Delta, Spark, LineChart, BarChart, Donut, Legend, ChartCard } from "./charts";
 
 type Range = "hoy" | "7d" | "30d";
@@ -49,6 +50,7 @@ export type HotspotMeta = { icon: string; title: string; subtitle: string; color
 export function hotspotMeta(lang: Lang): Record<string, HotspotMeta> {
   const t = tx(lang);
   return {
+    next: { icon: "🎓", title: "USFQ NEXT", subtitle: t("Donaciones por vertical, donantes y proyectos", "Donations by vertical, donors and projects"), color: "#ffd0d6" },
     board: { icon: "📋", title: t("Tablero de tareas", "Task board"), subtitle: t("Qué está haciendo cada empleado IA", "What each AI employee is working on"), color: "#d9f2e6" },
     tv: { icon: "📺", title: t("Dashboard de operaciones", "Operations dashboard"), subtitle: t("Métricas del equipo en vivo", "Live team metrics"), color: "#d6e6ff" },
     coffee: { icon: "☕", title: t("Cafetera", "Coffee machine"), subtitle: t("Consumo del equipo hoy", "Team consumption today"), color: "#ffe3c2" },
@@ -79,7 +81,7 @@ const PLACE: Record<Lang, Record<string, string>> = {
 };
 const placeName = (lang: Lang, place?: string) => PLACE[lang][place ?? ""] ?? place ?? "";
 const roomName = (lang: Lang, room: "andes" | "chimborazo") => (lang === "es" ? (room === "andes" ? "Sala Andes" : "Sala Chimborazo") : room === "andes" ? "Andes Room" : "Chimborazo Room");
-const botName = (lang: Lang, id?: string) => (id ? botById(lang, id)?.name ?? "" : "");
+const botName = (lang: Lang, id?: string) => (id ? botById(lang, id)?.name ?? id[0].toUpperCase() + id.slice(1) : "");
 const hhmm = (t: number, lang: Lang) => new Date(t).toLocaleTimeString(LOCALE[lang], { hour: "2-digit", minute: "2-digit" });
 const ago = (t: number, lang: Lang) => {
   const m = Math.round((Date.now() - t) / 60000);
@@ -107,7 +109,7 @@ function useTick(ms: number) {
 }
 
 // ------------------------------------------------------------- panels ----
-type PanelProps = { events: OfficeEvent[]; status: Record<string, string | null>; onOpenBot: (id: string) => void; lang: Lang };
+type PanelProps = { events: OfficeEvent[]; status: Record<string, string | null>; onOpenBot: (id: string) => void; lang: Lang; analyst?: string };
 
 /** Kanban of what everybody is on; a bot's card moves to "Hecho" each time it finishes a work cycle. */
 function BoardPanel({ events, status, onOpenBot, lang }: PanelProps) {
@@ -190,7 +192,7 @@ const DEALS: { company: string; stage: Stage; amount: number; owner: string; day
 ];
 
 /** Operations dashboard: KPIs vs. the previous period, a metric over time, work by area, lead sources and recent deals. */
-function TvPanel({ events, onOpenBot, lang }: PanelProps) {
+function TvPanel({ events, onOpenBot, lang, analyst }: PanelProps) {
   const t = tx(lang);
   const name = (id?: string) => botName(lang, id);
   const bots = botsFor(lang);
@@ -257,7 +259,7 @@ function TvPanel({ events, onOpenBot, lang }: PanelProps) {
   return (
     <div className={s.dash}>
       <ChartCard title={t("Pregúntale al tablero", "Ask the dashboard")} sub={t("Tomás responde con estos datos", "Tomás answers from this data")}>
-        <DashChat facts={facts} lang={lang} />
+        <DashChat facts={facts} lang={lang} analyst={analyst} />
       </ChartCard>
       <div className={s.chartHead}>
         <div>
@@ -983,6 +985,7 @@ function LoungePanel({ events, status, onOpenBot, lang }: PanelProps) {
 
 export function HotspotPanel({ id, ...rest }: { id: string } & PanelProps) {
   switch (id) {
+    case "next": return <NextPanel lang={rest.lang} analyst={rest.analyst ?? "andrade"} />;
     case "board": return <BoardPanel {...rest} />;
     case "tv": return <TvPanel {...rest} />;
     case "coffee": return <CoffeePanel {...rest} />;

@@ -2333,3 +2333,68 @@
 .dots i:nth-child(3) {
   animation-delay: 0.3s;
 }
+
+/* ---- brand logo and the USFQ directory ---- */
+.brandLogo {
+  display: block;
+  height: 22px;
+  width: auto;
+  margin-right: 2px;
+}
+.dir {
+  margin-top: 6px;
+  border-top: 1px solid rgba(14, 13, 18, 0.08);
+  padding-top: 8px;
+}
+.dirHead {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 6px 10px;
+}
+.dirGroup {
+  padding: 2px 6px;
+}
+.dirGroup summary {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 6px;
+  border-radius: 8px;
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.dirGroup summary::-webkit-details-marker {
+  display: none;
+}
+.dirGroup summary:hover {
+  background: rgba(14, 13, 18, 0.04);
+}
+.dirGroup summary span {
+  color: #6b7280;
+  font-size: 11.5px;
+}
+.dirGroup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.dirGroup li {
+  font-size: 12.5px;
+  display: flex;
+  flex-direction: column;
+}
+.dirGroup li span {
+  color: #6b7280;
+  font-size: 11.5px;
+}
+
+/* a dashboard card that takes the full width when the maximised panel flows in two columns */
+.dashSpan { column-span: all; }
+.dashScroll { overflow-x: auto; }

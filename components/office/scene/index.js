@@ -53,7 +53,7 @@ const CONTEXT = { coffee: "coffee", kitchen: "coffee", meeting: "meeting", meeti
  *   speech bubbles) or emits (statuses, event lines, room names) is built in
  *   this language. Bot names and roles come already localized in `bots`.
  */
-export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot, onRoom, lang = "es" }) {
+export function createOffice({ mount, overlay, classes, bots, onSelect, onHover, onStatus, onEvent, onHotspot, onRoom, lang = "es", signs }) {
   // --------------------------------------------------------------- text ----
   lang = langOf(lang);
   const L = textsFor(lang);
@@ -136,7 +136,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   scene.add(fillLight);
 
   // --------------------------------------------------------------- room ----
-  const room = buildRoom(scene, bots, lang);
+  const room = buildRoom(scene, bots, lang, signs || null);
   const campus = buildCampus(scene, room.materials);
 
   // ---- time of day: the viewer's clock (Quito: sun up ~6:10, down ~18:20 all year) ----
@@ -372,7 +372,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
 
   // ----------------------------------------------------------- outings ----
   const pickMates = (a, n, slack = 0) => {
-    const c = actors.filter((o) => o !== a && o.state === "work" && !o.invite && !o.hostReq && !o.visitorPending && o.bot.id !== "ana");
+    const c = actors.filter((o) => o !== a && o.state === "work" && !o.invite && !o.hostReq && !o.visitorPending && o.idx !== 10); // 10 = the receptionist
     const out = [];
     while (c.length && out.length < n && awayCount() + out.length + 2 <= MAX_AWAY + slack) out.push(c.splice(Math.floor(Math.random() * c.length), 1)[0]);
     return out;
@@ -390,8 +390,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const order = [...OUTINGS].sort(() => Math.random() - 0.5);
     const tries = [OUTINGS[start], ...order];
     for (const [kind, , party] of tries) {
-      if (a.bot.id === "ana" && kind !== "coffee" && kind !== "water" && kind !== "printer" && kind !== "visit") continue; // the front desk stays close
-      if (kind === "servers" && !["nicolas", "tomas", "andres"].includes(a.bot.id) && Math.random() < 0.7) continue;
+      if (a.idx === 10 && kind !== "coffee" && kind !== "water" && kind !== "printer" && kind !== "visit") continue; // the front desk stays close
+      if (kind === "servers" && ![3, 5, 9].includes(a.idx) && Math.random() < 0.7) continue; // the technical desks
       if (kind === "visit") {
         const hosts = actors.filter((o) => o !== a && o.state === "work" && !o.visitorPending && !o.hostReq && o.breakAt - simT > 10 && o.st.visit.length);
         if (!hosts.length) continue;
@@ -671,7 +671,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         if (t > a.subUntil) nextSub(a);
         const wantBreak =
           (a.invite && t > a.invite.at) ||
-          (t > a.breakAt && a.bot.id !== "ana" && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5); // the receptionist never leaves her desk
+          (t > a.breakAt && a.idx !== 10 && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5); // the receptionist never leaves her desk
         if (wantBreak) {
           if (a.invite) {
             const inv = a.invite;

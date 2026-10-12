@@ -10,7 +10,7 @@
  */
 import type { Lang } from "./i18n";
 
-export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops" | "procurement";
+export type ScreenKind = "sales" | "support" | "social" | "dev" | "finance" | "ops" | "procurement" | "next";
 
 /** How the character is built (see components/office/scene/character.js). */
 export type Look = {
@@ -659,7 +659,14 @@ const EN: Record<string, BotText> = {
 const cache = new Map<Lang, Bot[]>();
 
 /** The bots with their text in `lang`. Memoized per language. */
+/** Another brand's roster (lib/office/brands.ts) replaces the default one for every consumer. */
+let roster: ((lang: Lang) => Bot[]) | null = null;
+export function setRoster(fn: ((lang: Lang) => Bot[]) | null) {
+  roster = fn;
+}
+
 export function botsFor(lang: Lang): Bot[] {
+  if (roster) return roster(lang);
   const hit = cache.get(lang);
   if (hit) return hit;
   const bots = lang === "es" ? BASE : BASE.map((b) => ({ ...b, ...(EN[b.id] ?? {}) }));

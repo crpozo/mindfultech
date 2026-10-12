@@ -4,7 +4,8 @@ import * as React from "react";
 import { iconSvg } from "@/components/office/icons";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { botsFor, botById, type Bot } from "@/lib/office/bots";
+import { botById, setRoster, type Bot } from "@/lib/office/bots";
+import { BRANDS, type BrandKey } from "@/lib/office/brands";
 import { useLang, type Lang } from "@/components/i18n";
 import { tx, LOCALE } from "@/lib/office/i18n";
 import { BotScreen } from "./BotScreen";
@@ -58,11 +59,15 @@ const IconFs = ({ on }: { on?: boolean }) => (
 /** the hotspot panels that are dashboards, in the order the menu lists them */
 const DASHBOARDS = ["tv", "board", "servers", "lounge", "reception", "meeting", "clock", "pingpong", "shelf", "coffee"];
 
-export function OfficeDemo() {
+export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
+  const brand = BRANDS[brandKey];
   // the demo follows the site language (EN by default) and has its own toggle
   const { lang, setLang } = useLang();
   const t = tx(lang);
-  const BOTS = React.useMemo(() => botsFor(lang), [lang]);
+  // every consumer of botsFor()/botById() (panels, chats) sees this brand's people
+  setRoster(brand.key === "mt" ? null : brand.botsFor);
+  React.useEffect(() => () => setRoster(null), []);
+  const BOTS = React.useMemo(() => brand.botsFor(lang), [lang, brand]);
   const mountRef = React.useRef<HTMLDivElement>(null);
   const overlayRef = React.useRef<HTMLDivElement>(null);
   const sceneRef = React.useRef<Scene | null>(null);
@@ -140,6 +145,7 @@ export function OfficeDemo() {
           },
           bots: BOTS,
           lang,
+          signs: brand.signs,
           onSelect: (id: string | null) => {
             setSelected(id);
             if (id) setHotspot(null);
@@ -222,11 +228,11 @@ export function OfficeDemo() {
 
   const WA =
     "https://wa.me/593958731994?text=" +
-    encodeURIComponent(t("Hola, vi la demo de la oficina de gestión con IA y quiero saber más.", "Hi, I saw the AI Management Office demo and I would like to know more."));
+    encodeURIComponent(brand.wa[lang]);
   const TOUR: { title: string; text: string; target?: "team" | "rooms" | "view"; enter: () => void }[] = [
     {
-      title: t("Bienvenido a tu oficina de gestión con IA", "Welcome to your AI Management Office"),
-      text: t(
+      title: brand.intro.title[lang],
+      text: brand.intro.text[lang] || t(
         "Cada persona que ves es un empleado de IA con un rol real: ventas, soporte, finanzas, marketing, operaciones. Trabajan las 24 horas con tus herramientas y aquí puedes ver, preguntar y auditar todo lo que hacen. Este tour te muestra cómo funciona.",
         "Everyone you see is an AI employee with a real role: sales, support, finance, marketing, operations. They work around the clock inside your tools, and here you can watch, ask and audit everything they do. This tour shows how it works.",
       ),
@@ -256,7 +262,7 @@ export function OfficeDemo() {
     },
     {
       title: t("La pantalla en vivo de un agente", "An agent's live screen"),
-      text: t(
+      text: brand.tourScreen[lang] || t(
         "Seleccionamos a Mateo, de Soporte. Su panel muestra sus indicadores y su escritorio real en vivo: aquí está respondiendo tickets en Zendesk. Es como conectarte a su computador y mirar por encima de su hombro.",
         "We selected Mateo, from Support. His panel shows his metrics and his real desktop, live: here he is answering tickets in Zendesk. It is like connecting to his computer and looking over his shoulder.",
       ),
@@ -264,7 +270,7 @@ export function OfficeDemo() {
         if (window.innerWidth < 1280) setTeamOpen(false);
         setHotspot(null);
         setTab("screen");
-        setSelected("mateo");
+        setSelected(brand.tourBot);
       },
     },
     {
@@ -275,7 +281,7 @@ export function OfficeDemo() {
       ),
       enter: () => {
         setHotspot(null);
-        setSelected("mateo");
+        setSelected(brand.tourBot);
         setTab("chat");
       },
     },
@@ -445,10 +451,11 @@ export function OfficeDemo() {
       )}
 
       <header className={s.top}>
-        <Link href="/" className={s.brand}>
-          {/* white label: no logo, no company name — the product name only */}
-          <strong>AI Management Office</strong>
-          <span>{t("demo", "demo")}</span>
+        <Link href={brand.home} className={s.brand}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {brand.logo && <img className={s.brandLogo} src={brand.logo.src} width={brand.logo.w} height={brand.logo.h} alt={brand.logo.alt} />}
+          <strong>{brand.name}</strong>
+          <span>{brand.tag[lang]}</span>
         </Link>
         <div className={s.tools}>
           <button type="button" className={`${s.tool} ${teamOpen ? s.toolActive : ""} ${tour?.target === "team" ? s.tourGlow : ""}`} onClick={() => setTeamOpen((v) => !v)} aria-expanded={teamOpen}>
@@ -485,7 +492,7 @@ export function OfficeDemo() {
             )}
           </div>
           <div className={s.menuWrap} ref={dashRef}>
-            <button type="button" className={`${s.tool} ${dashOpen || (hotspot && DASHBOARDS.includes(hotspot)) ? s.toolActive : ""}`} onClick={() => setDashOpen((v) => !v)} aria-expanded={dashOpen} aria-haspopup="menu">
+            <button type="button" className={`${s.tool} ${dashOpen || (hotspot && [...brand.dashboards, ...DASHBOARDS].includes(hotspot)) ? s.toolActive : ""}`} onClick={() => setDashOpen((v) => !v)} aria-expanded={dashOpen} aria-haspopup="menu">
               <Ico id="dashboards" />
               <span className={s.toolLabel}>Dashboards</span>
               <em>▾</em>
@@ -493,7 +500,7 @@ export function OfficeDemo() {
             {dashOpen && (
               <div className={s.menu} role="menu" aria-label="Dashboards">
                 <div className={s.menuFloor}>{t("Pantallas con datos del equipo", "Screens with the team's data")}</div>
-                {DASHBOARDS.map((id) => {
+                {[...brand.dashboards, ...DASHBOARDS].map((id) => {
                   const m = hotspotMeta(lang)[id];
                   return (
                     <button key={id} type="button" role="menuitem" className={`${s.menuItem} ${hotspot === id ? s.menuItemActive : ""}`} onClick={() => { setDashOpen(false); setSelected(null); setHotspot(id); setInteracted(true); }}>
@@ -579,6 +586,9 @@ export function OfficeDemo() {
           </button>
         </div>
         <div className={s.teamList}>
+          {brand.directory && (
+            <div className={s.dirHead}>{t("Agentes en la oficina", "Agents in the office")}</div>
+          )}
           {BOTS.map((b, i) => {
             const rm = roomOf[b.id];
             return (
@@ -608,6 +618,25 @@ export function OfficeDemo() {
               </button>
             );
           })}
+        {brand.directory && (
+            <div className={s.dir}>
+              <div className={s.dirHead}>{t("Directorio USFQ 2026", "USFQ 2026 directory")}</div>
+              {brand.directory.map((g) => (
+                <details key={g.head + g.group.es} className={s.dirGroup}>
+                  <summary>
+                    <b>{g.group[lang]}</b> <span>{g.head} · {g.people.length}</span>
+                  </summary>
+                  <ul>
+                    {g.people.map((p) => (
+                      <li key={p.name + (typeof p.role === "string" ? p.role : p.role.es)}>
+                        <b>{p.name}</b> <span>{typeof p.role === "string" ? p.role : p.role[lang]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ))}
+            </div>
+          )}
         </div>
       </aside>
       )}
@@ -717,7 +746,7 @@ export function OfficeDemo() {
               </button>
             </div>
             <div className={s.panelBody}>
-              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} lang={lang} />
+              <HotspotPanel id={hotspot} events={events} status={status} onOpenBot={(id) => setSelected(id)} lang={lang} analyst={brand.analyst} />
             </div>
           </>
         )}
