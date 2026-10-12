@@ -158,13 +158,17 @@ function NextChat({ lang, analyst }: { lang: Lang; analyst: string }) {
 function VerticalBars({ lang }: { lang: Lang }) {
   const vs = sortedVerticals();
   const max = vs[0].amount;
+  const total = NEXT.total;
   return (
-    <div className={s.bars2}>
+    <div className={s.vbars}>
       {vs.map((v) => (
-        <div key={v.name} className={s.bar2} style={{ cursor: "default" }} title={`${v.movements} ${lang === "es" ? "movimientos" : "movements"}`}>
-          <span style={{ width: 150, fontSize: 12, color: "#3b3f4a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{VSHORT[v.name]?.[lang] ?? v.name}</span>
-          <i style={{ width: `${(v.amount / max) * 100}%`, background: v.color }} />
-          <b style={{ minWidth: 70, textAlign: "right" }}>{money0(v.amount, lang)}</b>
+        <div key={v.name} className={s.vbar} title={`${v.name} · ${v.movements} ${lang === "es" ? "movimientos" : "movements"}`}>
+          <span className={s.vbarLabel}>{VSHORT[v.name]?.[lang] ?? v.name}</span>
+          <span className={s.vbarTrack}>
+            <i style={{ width: `${Math.max(1.5, (v.amount / max) * 100)}%`, background: v.color }} />
+          </span>
+          <b className={s.vbarValue}>{money0(v.amount, lang)}</b>
+          <small className={s.vbarPct}>{pct(v.amount, total)}%</small>
         </div>
       ))}
     </div>
@@ -229,14 +233,14 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
       <div className={s.nx3}>
         <ChartCard title={t("Tipo de donante", "Donor type")} sub={t("monto neto", "net amount")}>
           <div className={s.nxDonut}>
-            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={96} format={(v) => money0(v, lang)} lang={lang} />
+            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={104} format={(v) => money0(v, lang)} centerLabel={`$${(NEXT.total / 1e6).toFixed(2)}M`} lang={lang} />
             <div className={s.nxDonutNote}>{t("Donación media por persona", "Average gift per individual")}: <b>{money0((per?.amount ?? 0) / Math.max(1, per?.donors ?? 1), lang)}</b></div>
           </div>
         </ChartCard>
       </div>
       <div className={s.nx5}>
         <ChartCard title={t("Donaciones por mes", "Donations by month")} sub={t("valor neto · los picos son convenios y fondos grandes", "net value · spikes are agreements and large funds")}>
-          <MonthlyChart lang={lang} height={150} />
+          <MonthlyChart lang={lang} height={176} />
         </ChartCard>
       </div>
 

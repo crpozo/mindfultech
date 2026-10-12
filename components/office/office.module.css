@@ -2488,3 +2488,19 @@
 .panelMax .nxAsk .composer { grid-area: input; }
 .panelMax .nx .chartCard { height: 100%; box-sizing: border-box; }
 .panelMax .nx { align-items: stretch; }
+
+/* ---- aligned horizontal bars (USFQ NEXT verticals) ---- */
+.vbars { display: flex; flex-direction: column; gap: 9px; }
+.vbar {
+  display: grid;
+  grid-template-columns: minmax(0, 11ch) minmax(0, 1fr) auto 3.2em;
+  align-items: center;
+  column-gap: 10px;
+  font-size: 12.5px;
+}
+.vbarLabel { color: #3b3f4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vbarTrack { display: block; height: 10px; border-radius: 999px; background: #eef0f3; overflow: hidden; }
+.vbarTrack i { display: block; height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+.vbarValue { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vbarPct { color: #6b7280; font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+.panelMax .vbar { grid-template-columns: minmax(0, 15ch) minmax(0, 1fr) auto 3.2em; }

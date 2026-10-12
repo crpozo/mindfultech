@@ -195,8 +195,9 @@ export function LineChart({
         </g>
       ))}
       {labels.map((lb, i) =>
-        i % step === 0 || i === n - 1 ? (
-          <text key={i} x={x(i)} y={H - 8} fontSize="10" textAnchor={i === n - 1 ? "end" : i === 0 ? "start" : "middle"} fill="#6b7280">
+        // every n-th label plus the last one; a step label too close to the last is dropped so they never collide
+        i === n - 1 || (i % step === 0 && n - 1 - i >= step) ? (
+          <text key={i} x={x(i)} y={H - 7} fontSize="10.5" textAnchor={i === n - 1 ? "end" : i === 0 ? "start" : "middle"} fill="#6b7280">
             {lb}
           </text>
         ) : null
@@ -290,15 +291,21 @@ export function Donut({
   parts,
   size = 120,
   format,
+  centerLabel,
   lang = "es",
 }: {
   parts: { label: string; value: number; color: string }[];
   size?: number;
   format?: (v: number) => string;
+  /** what to print in the hole instead of the formatted total (a compact figure fits better) */
+  centerLabel?: string;
   lang?: Lang;
 }) {
   const fmt = format ?? ((v: number) => fmtInt(v, lang));
   const total = Math.max(1, sum(parts.map((p) => p.value)));
+  const center = centerLabel ?? fmt(total);
+  // the hole is 72 units wide: shrink the figure until it fits (≈0.58 em per character)
+  const centerSize = Math.min(17, Math.floor(64 / (0.58 * Math.max(1, center.length))));
   const r = 44, c = 2 * Math.PI * r;
   let acc = 0;
   return (
@@ -323,8 +330,8 @@ export function Donut({
           acc += frac;
           return el;
         })}
-        <text x="60" y="57" fontSize="17" fontWeight="600" textAnchor="middle" fill="#111827">
-          {fmt(total)}
+        <text x="60" y="57" fontSize={centerSize} fontWeight="600" textAnchor="middle" fill="#111827">
+          {center}
         </text>
         <text x="60" y="72" fontSize="9.5" textAnchor="middle" fill="#6b7280">
           total
