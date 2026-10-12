@@ -19,6 +19,7 @@ type Seed = {
   accent: string;
   look: Look;
   screen: Bot["screen"];
+  lead?: boolean;
   working: Txt[];
   kpis: { label: Txt; value: string }[];
   replies: [string[], Txt][];
@@ -62,10 +63,10 @@ const SEEDS: Seed[] = [
   },
   {
     id: "velasco", name: "Alexandra Velasco", role: T("VP Comercial y Desarrollo", "Commercial & Development VP"), title: T("Agente de desarrollo institucional", "Institutional development agent"),
-    color: "#f7c4b6", accent: RED,
+    color: "#f7c4b6", accent: RED, lead: true,
     look: { skin: "#f3cdb0", hair: "#d9b46a", hairStyle: "long", eyes: "blue", lips: "#c0443f", shirt: "#f7f7f8", shirtStyle: "blouse", sleeves: "long", jacket: DARK, pants: DARK, shoes: "#111114", shoeStyle: "heels" },
     screen: "sales",
-    working: [T("Siguiendo a los aliados corporativos del trimestre", "Following up on this quarter's corporate allies"), T("Preparando la propuesta para una fundación internacional", "Preparing a proposal for an international foundation"), T("Revisando el pipeline de convenios", "Reviewing the agreements pipeline")],
+    working: [T("En llamada con un aliado corporativo", "On a call with a corporate ally"), T("Siguiendo a los aliados corporativos del trimestre", "Following up on this quarter's corporate allies"), T("Preparando la propuesta para una fundación internacional", "Preparing a proposal for an international foundation"), T("Revisando el pipeline de convenios", "Reviewing the agreements pipeline")],
     kpis: [{ label: T("Convenios activos", "Active agreements"), value: "200+" }, { label: T("Aliados nuevos 2026", "New allies 2026"), value: "14" }, { label: T("Reuniones esta semana", "Meetings this week"), value: "9" }],
     replies: [
       [["hac", "ahora", "trabaj", "doing"], T("Estoy dando seguimiento a cuatro aliados corporativos y preparando la propuesta para una fundación que quiere financiar becas; USFQ NEXT me pasa los proyectos con mayor potencial.", "I am following up on four corporate allies and preparing a proposal for a foundation that wants to fund scholarships; USFQ NEXT hands me the projects with the most potential.")],
@@ -119,10 +120,10 @@ const SEEDS: Seed[] = [
   },
   {
     id: "quiroga", name: "Diego Quiroga", role: T("Rector", "Rector"), title: T("Rectorado · agente del rector", "Rector's office · the rector's agent"),
-    color: "#e9e4d6", accent: "#8a7a5a",
+    color: "#e9e4d6", accent: "#8a7a5a", lead: true,
     look: { skin: "#f1cdb5", hair: "#9a9aa0", hairStyle: "short", eyes: "blue", shirt: "#f7f7f8", shirtStyle: "collar", sleeves: "long", jacket: "#1b1b1f", pants: "#1b1b1f", shoes: "#111114", shoeStyle: "flats", glasses: true },
     screen: "finance",
-    working: [T("Leyendo el tablero institucional", "Reading the institutional dashboard"), T("Preparando el consejo universitario", "Preparing the university council"), T("Revisando los indicadores de las cinco vicepresidencias", "Reviewing the five vice-presidencies' indicators")],
+    working: [T("En llamada con una vicepresidencia", "On a call with a vice-presidency"), T("Preparando el consejo universitario", "Preparing the university council"), T("Revisando los indicadores de las cinco vicepresidencias", "Reviewing the five vice-presidencies' indicators")],
     kpis: [{ label: T("Vicepresidencias", "Vice-presidencies"), value: "5" }, { label: T("Profesores", "Faculty"), value: "800+" }, { label: T("Alumni", "Alumni"), value: "30,000+" }],
     replies: [
       [["hac", "ahora", "trabaj", "doing"], T("Estoy revisando el tablero institucional con los indicadores de las cinco vicepresidencias antes del consejo universitario de la tarde.", "I am reviewing the institutional dashboard with the five vice-presidencies' indicators before this afternoon's university council.")],
@@ -218,6 +219,7 @@ export function usfqBotsFor(lang: Lang): Bot[] {
     accent: b.accent,
     look: b.look,
     screen: b.screen,
+    lead: b.lead,
     working: b.working.map(L),
     kpis: b.kpis.map((k) => ({ label: L(k.label), value: k.value })),
     replies: b.replies.map(([k, r]) => [k, L(r)] as [string[], string]),

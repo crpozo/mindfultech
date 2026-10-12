@@ -46,6 +46,8 @@ export type Bot = {
   accent: string;
   look: Look;
   screen: ScreenKind;
+  /** leads rather than types: short desk stints on the phone or thinking, and most of the day visiting desks, running meetings and briefings */
+  lead?: boolean;
   /** what the roster shows while the bot is at its desk */
   working: string[];
   kpis: { label: string; value: string }[];

@@ -2398,3 +2398,63 @@
 /* a dashboard card that takes the full width when the maximised panel flows in two columns */
 .dashSpan { column-span: all; }
 .dashScroll { overflow-x: auto; }
+
+/* ---- USFQ NEXT dashboard: one grid, two layouts ---- */
+.nx {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  align-content: start;
+}
+.nx > * { min-width: 0; }
+.nxKpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.nxKpi {
+  background: #f4f5f7;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nxKpi b { font-size: 24px; letter-spacing: -0.02em; line-height: 1.1; }
+.nxKpi span { font-size: 12px; color: #6b7280; line-height: 1.35; }
+.nxDonut { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.nxDonutNote { font-size: 12px; color: #6b7280; text-align: center; }
+.nxDonutNote b { color: #0e0d12; }
+.nxTbl { table-layout: fixed; width: 100%; }
+.nxTbl td { vertical-align: top; padding-top: 9px; padding-bottom: 9px; overflow: hidden; }
+.nxTbl td:first-child, .nxTbl th:first-child { width: 58%; }
+.nxTbl td.num { width: 24%; }
+.nxTbl thead th { position: sticky; top: 0; background: #fff; z-index: 1; }
+.nxCell { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.nxTbl small { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6b7280; margin-top: 2px; }
+.nxTbl small i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.nxScroll { max-height: 420px; overflow: auto; }
+.nxScroll .nxTbl td:first-child, .nxScroll .nxTbl th:first-child { width: 46%; }
+.nxScroll .nxTbl td.num { width: auto; }
+.nxDonors { max-height: 300px; overflow: auto; }
+.nxSource { font-size: 11px; color: #8b8896; padding: 0 4px 6px; }
+.panelMax .nx {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+  flex: none;
+  overflow: visible;
+  columns: auto;
+  display: grid;
+  align-items: start;
+}
+.panelMax .nx > * { margin-bottom: 0; break-inside: auto; }
+.panelMax .nxKpis { grid-template-columns: repeat(4, 1fr); }
+.panelMax .nx3 { grid-column: span 3; }
+.panelMax .nx4 { grid-column: span 4; }
+.panelMax .nx5 { grid-column: span 5; }
+.panelMax .nx7 { grid-column: span 7; }
+.panelMax .nx12 { grid-column: 1 / -1; }
+.panelMax .nxScroll { max-height: 380px; }

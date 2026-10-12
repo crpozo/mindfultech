@@ -59,7 +59,7 @@ export const MT_BRAND: OfficeBrand = {
 
 export const USFQ_BRAND: OfficeBrand = {
   key: "usfq",
-  name: "USFQ · AI Office",
+  name: "AI Office",
   tag: { es: "USFQ NEXT", en: "USFQ NEXT" },
   logo: { src: "/usfq/usfq-logo.svg", w: 76, h: 24, alt: "USFQ" },
   accent: "#e11b22",

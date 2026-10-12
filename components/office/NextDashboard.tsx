@@ -195,93 +195,86 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
   const high = NEXT.outreach.filter((p) => p.impact === "Alto" && p.appeal === "Alto").length;
   const badge = (v: string) => <span className={`${s.tag} ${v === "Alto" ? s.tagOk : v === "Medio" ? s.tagWarn : ""}`}>{v}</span>;
   return (
-    <div className={s.dash}>
-      <ChartCard title={t("Pregúntale a USFQ NEXT", "Ask USFQ NEXT")} sub={t("Alejandro responde con los datos del tablero", "Alejandro answers from the dashboard's data")}>
-        <NextChat lang={lang} analyst={analyst} />
-      </ChartCard>
-
-      <div className={s.kpis}>
-        <div className={s.kpi}>
+    <div className={s.nx}>
+      {/* row 1: the numbers */}
+      <div className={`${s.nx12} ${s.nxKpis}`}>
+        <div className={s.nxKpi}>
           <b>{money0(NEXT.total, lang)}</b>
           <span>{t("recaudado · sep 2024 – ago 2026", "raised · Sep 2024 – Aug 2026")}</span>
         </div>
-        <div className={s.kpi}>
+        <div className={s.nxKpi}>
           <b>{NEXT.donorCount}</b>
-          <span>{t("donantes", "donors")} · {org?.donors} {t("organizaciones", "organisations")} · {per?.donors} {t("personas", "individuals")}</span>
+          <span>{t("donantes", "donors")} · {org?.donors} {t("organizaciones", "organisations")}, {per?.donors} {t("personas", "individuals")}</span>
         </div>
-        <div className={s.kpi}>
+        <div className={s.nxKpi}>
+          <b>{pct(org?.amount ?? 0, NEXT.total)}%</b>
+          <span>{t("viene de empresas y fundaciones", "comes from companies and foundations")}</span>
+        </div>
+        <div className={s.nxKpi}>
           <b>{NEXT.outreach.length}</b>
-          <span>{t("proyectos de vinculación con potencial", "engagement projects with potential")} · {high} {t("de impacto alto", "high impact")}</span>
+          <span>{t("proyectos con potencial de donación", "projects with donation potential")} · {high} {t("de impacto alto", "high impact")}</span>
         </div>
       </div>
 
-      <div className={s.dashGrid}>
-        <ChartCard title={t("Por vertical", "By vertical")} sub={t("las seis verticales de donación de USFQ NEXT", "USFQ NEXT's six giving verticals")}>
+      {/* row 2: ask, verticals, donor mix */}
+      <div className={s.nx5}>
+        <ChartCard title={t("Pregúntale a Alejandro", "Ask Alejandro")} sub={t("responde con los datos de este tablero", "answers from this dashboard's data")}>
+          <NextChat lang={lang} analyst={analyst} />
+        </ChartCard>
+      </div>
+      <div className={s.nx4}>
+        <ChartCard title={t("Por vertical", "By vertical")} sub={t("las seis verticales de USFQ NEXT", "USFQ NEXT's six verticals")}>
           <VerticalBars lang={lang} />
         </ChartCard>
-        <ChartCard title={t("Organizaciones vs. personas", "Organisations vs. individuals")} sub={t("monto neto por tipo de donante", "net amount by donor type")}>
-          <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
-            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={112} format={(v) => money0(v, lang)} lang={lang} />
-            <div style={{ fontSize: 13, color: "#3b3f4a", lineHeight: 1.6, minWidth: 0, flex: "1 1 160px" }}>
-              <div>
-                <b>{pct(org?.amount ?? 0, NEXT.total)}%</b> {t("empresas y fundaciones", "companies and foundations")}
-              </div>
-              <div>
-                <b>{pct(per?.amount ?? 0, NEXT.total)}%</b> {t("personas", "individuals")}
-              </div>
-              <div style={{ color: "#6b7280", fontSize: 12, marginTop: 6 }}>{t("Donación media por persona", "Average gift per individual")}: {money0((per?.amount ?? 0) / Math.max(1, per?.donors ?? 1), lang)}</div>
-            </div>
+      </div>
+      <div className={s.nx3}>
+        <ChartCard title={t("Tipo de donante", "Donor type")} sub={t("monto neto", "net amount")}>
+          <div className={s.nxDonut}>
+            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={104} format={(v) => money0(v, lang)} lang={lang} />
+            <div className={s.nxDonutNote}>{t("Donación media por persona", "Average gift per individual")}: <b>{money0((per?.amount ?? 0) / Math.max(1, per?.donors ?? 1), lang)}</b></div>
           </div>
         </ChartCard>
       </div>
 
-      <div className={s.dashSpan}>
-        <ChartCard title={t("Donaciones por mes", "Donations by month")} sub={t("valor neto registrado · los picos son convenios y fondos grandes", "net value recorded · spikes are agreements and large funds")}>
-          <MonthlyChart lang={lang} />
+      {/* row 3: the months and the donors */}
+      <div className={s.nx7}>
+        <ChartCard title={t("Donaciones por mes", "Donations by month")} sub={t("valor neto · los picos son convenios y fondos grandes", "net value · spikes are agreements and large funds")}>
+          <MonthlyChart lang={lang} height={170} />
         </ChartCard>
       </div>
-
-      <div className={s.dashGrid}>
+      <div className={s.nx5}>
         <ChartCard title={t("Mayores donantes", "Top donors")} sub={t("neto acumulado 2024–2026", "net total 2024–2026")}>
-          <table className={s.tbl}>
-            <thead>
-              <tr>
-                <th>{t("Donante", "Donor")}</th>
-                <th>{t("Tipo", "Type")}</th>
-                <th className={s.num}>{t("Monto", "Amount")}</th>
-              </tr>
-            </thead>
+          <div className={s.nxDonors}>
+          <table className={`${s.tbl} ${s.nxTbl}`}>
             <tbody>
               {NEXT.topDonors.slice(0, 10).map((d) => (
                 <tr key={d.name}>
-                  <td title={d.name}>{d.name.length > 34 ? d.name.slice(0, 32) + "…" : d.name}</td>
-                  <td>
-                    <span className={s.tag}>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")}</span>
+                  <td title={d.name}>
+                    <span className={s.nxCell}>{d.name}</span>
+                    <small>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")}</small>
                   </td>
                   <td className={s.num}>{money0(d.amount, lang)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </ChartCard>
-        <ChartCard title={t("Proyectos que más reciben", "Projects receiving the most")} sub={t("destino registrado · vertical", "registered destination · vertical")}>
-          <table className={s.tbl}>
-            <thead>
-              <tr>
-                <th>{t("Proyecto", "Project")}</th>
-                <th>{t("Vertical", "Vertical")}</th>
-                <th className={s.num}>{t("Monto", "Amount")}</th>
-              </tr>
-            </thead>
+      </div>
+
+      {/* row 4: projects */}
+      <div className={s.nx5}>
+        <ChartCard title={t("Proyectos que más reciben", "Projects receiving the most")} sub={t("destino registrado y su vertical", "registered destination and its vertical")}>
+          <table className={`${s.tbl} ${s.nxTbl}`}>
             <tbody>
-              {NEXT.topProjects.slice(0, 10).map((p) => (
+              {NEXT.topProjects.slice(0, 8).map((p) => (
                 <tr key={p.name}>
-                  <td title={`${p.name} · ${p.area}`}>{p.name.length > 30 ? p.name.slice(0, 28) + "…" : p.name}</td>
-                  <td>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
-                      <i style={{ width: 8, height: 8, borderRadius: 2, background: VCOLORS[p.vertical] }} />
+                  <td title={`${p.name} · ${p.area}`}>
+                    <span className={s.nxCell}>{p.name}</span>
+                    <small>
+                      <i style={{ background: VCOLORS[p.vertical] }} />
                       {VSHORT[NEXT.verticals[p.vertical].name]?.[lang]}
-                    </span>
+                    </small>
                   </td>
                   <td className={s.num}>{money0(p.amount, lang)}</td>
                 </tr>
@@ -290,51 +283,48 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
           </table>
         </ChartCard>
       </div>
-
-      <div className={s.dashSpan}>
-      <ChartCard
-        title={t("Proyectos de vinculación 2026", "2026 engagement projects")}
-        sub={t("Vecinos USFQ y zonas rurales · candidatos para donantes", "Vecinos USFQ and rural areas · candidates for donors")}
-        right={
-          <div className={s.range} role="tablist">
-            {places.map(([k, label]) => (
-              <button key={k} type="button" role="tab" aria-selected={where === k} className={where === k ? s.on : ""} onClick={() => setWhere(k)}>
-                {label}
-              </button>
-            ))}
+      <div className={s.nx7}>
+        <ChartCard
+          title={t("Proyectos de vinculación 2026", "2026 engagement projects")}
+          sub={t(`${outreach.length} candidatos para donantes`, `${outreach.length} candidates for donors`)}
+          right={
+            <div className={s.range} role="tablist">
+              {places.map(([k, label]) => (
+                <button key={k} type="button" role="tab" aria-selected={where === k} className={where === k ? s.on : ""} onClick={() => setWhere(k)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          }
+        >
+          <div className={s.nxScroll}>
+            <table className={`${s.tbl} ${s.nxTbl}`}>
+              <thead>
+                <tr>
+                  <th>{t("Proyecto", "Project")}</th>
+                  <th>{t("Sede", "Site")}</th>
+                  <th>{t("Fondos", "Funding")}</th>
+                  <th>{t("Impacto", "Impact")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {outreach.map((p) => (
+                  <tr key={p.name}>
+                    <td title={p.name}>
+                      <span className={s.nxCell}>{p.name}</span>
+                      <small>{p.lead}</small>
+                    </td>
+                    <td>{p.where.replace("Participación abierta en cualquiera de los proyectos Vecinos", t("Abierto", "Open")).replace("No; sin embargo, se desarrolla en zonas rurales", t("Rural", "Rural")).replace("Vecinos ", "")}</td>
+                    <td>{p.funding.startsWith("Grants") ? "Grants USFQ" : t("Sin fondos", "Unfunded")}</td>
+                    <td>{badge(p.impact)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        }
-      >
-        <div className={s.dashScroll}>
-        <table className={s.tbl}>
-          <thead>
-            <tr>
-              <th>{t("Proyecto", "Project")}</th>
-              <th>{t("Sede", "Site")}</th>
-              <th>{t("Líder", "Lead")}</th>
-              <th>{t("Fondos", "Funding")}</th>
-              <th>{t("Impacto", "Impact")}</th>
-              <th>{t("Atractivo", "Appeal")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {outreach.slice(0, 24).map((p) => (
-              <tr key={p.name}>
-                <td title={p.name}>{p.name.length > 46 ? p.name.slice(0, 44) + "…" : p.name}</td>
-                <td>{p.where.replace("Participación abierta en cualquiera de los proyectos Vecinos", t("Abierto", "Open")).replace("No; sin embargo, se desarrolla en zonas rurales", t("Rural", "Rural")).replace("Vecinos ", "")}</td>
-                <td>{p.lead}</td>
-                <td>{p.funding.startsWith("Grants") ? "Grants USFQ" : t("Sin fondos", "Unfunded")}</td>
-                <td>{badge(p.impact)}</td>
-                <td>{badge(p.appeal)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-        {outreach.length > 24 && <div style={{ fontSize: 12, color: "#6b7280", marginTop: 8 }}>{t(`y ${outreach.length - 24} más`, `and ${outreach.length - 24} more`)}</div>}
-      </ChartCard>
+        </ChartCard>
       </div>
-      <div style={{ fontSize: 11.5, color: "#8b8896", padding: "0 4px 8px" }}>{t("Fuente: ", "Source: ")}{NEXT.generatedFrom}.</div>
+      <div className={`${s.nx12} ${s.nxSource}`}>{t("Fuente: ", "Source: ")}{NEXT.generatedFrom}.</div>
     </div>
   );
 }

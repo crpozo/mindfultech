@@ -46,6 +46,8 @@ const OUTINGS = (typeof window !== "undefined" && window.__OFFICE_DEBUG && windo
   ["coffee", 22, 2], ["visit", 12, 0], ["meeting", 9, 4], ["lounge", 9, 2], ["pingpong", 8, 2], ["meeting2", 7, 3], ["training", 6, 4],
   ["booth", 6, 0], ["kitchen", 7, 2], ["nook", 6, 2], ["tv", 4, 2], ["printer", 4, 0], ["water", 4, 0], ["servers", 4, 0], ["beanbag", 4, 0],
 ];
+// leaders (bot.lead) spend the day directing: visiting desks, running the meeting rooms and briefings
+const LEAD_OUTINGS = [["visit", 16, 0], ["meeting", 12, 4], ["meeting2", 9, 3], ["training", 9, 4], ["coffee", 4, 2], ["lounge", 3, 2]];
 const CONTEXT = { coffee: "coffee", kitchen: "coffee", meeting: "meeting", meeting2: "meeting", training: "training", lounge: "lounge", nook: "lounge", tv: "tv", water: "water", pingpong: "pingpong" };
 
 /**
@@ -240,7 +242,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const a = {
       bot, rig, st, idx: i, blob, floor: st.floor,
       state: "work", sub: "type", subUntil: rnd(4, 12),
-      breakAt: rnd(8, 45), until: 0, arrivedAt: 0,
+      breakAt: bot.lead ? rnd(4, 14) : rnd(8, 45), until: 0, arrivedAt: 0,
       path: [], dest: null, place: "desk", spot: null, partner: null, conv: null,
       yaw: st.seat.yaw, targetYaw: st.seat.yaw, walkT: 0, phase: Math.random() * 20,
       mug: false, laughUntil: 0, mouthOpen: false, hostReq: null, invite: null, visitorPending: null,
@@ -378,17 +380,18 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     return out;
   };
   const chooseOuting = (a) => {
-    const total = OUTINGS.reduce((s, o) => s + o[1], 0);
+    const POOL = a.bot.lead ? LEAD_OUTINGS : OUTINGS;
+    const total = POOL.reduce((s, o) => s + o[1], 0);
     let r = Math.random() * total, start = 0;
-    for (let i = 0; i < OUTINGS.length; i++) {
-      r -= OUTINGS[i][1];
+    for (let i = 0; i < POOL.length; i++) {
+      r -= POOL[i][1];
       if (r <= 0) {
         start = i;
         break;
       }
     }
-    const order = [...OUTINGS].sort(() => Math.random() - 0.5);
-    const tries = [OUTINGS[start], ...order];
+    const order = [...POOL].sort(() => Math.random() - 0.5);
+    const tries = [POOL[start], ...order];
     for (const [kind, , party] of tries) {
       if (a.idx === 10 && kind !== "coffee" && kind !== "water" && kind !== "printer" && kind !== "visit") continue; // the front desk stays close
       if (kind === "servers" && ![3, 5, 9].includes(a.idx) && Math.random() < 0.7) continue; // the technical desks
@@ -684,7 +687,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
               startOuting(a);
             }
           } else if (chooseOuting(a)) startOuting(a);
-          else a.breakAt = t + rnd(8, 15);
+          else a.breakAt = t + (a.bot.lead ? rnd(3, 6) : rnd(8, 15));
         }
       }
     } else if (a.state === "standup") {
@@ -769,7 +772,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         a.state = "work";
         a.sub = "type";
         a.subUntil = t + rnd(8, 16);
-        a.breakAt = t + rnd(30, 75);
+        a.breakAt = t + (a.bot.lead ? rnd(8, 22) : rnd(30, 75));
         a.partner = null;
         setStatus(a, null);
       }
@@ -828,9 +831,17 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const t = simT;
     if (a.sub !== "type") {
       a.sub = "type";
-      a.subUntil = t + rnd(8, 18);
+      a.subUntil = t + (a.bot.lead ? rnd(2, 4) : rnd(8, 18));
       setStatus(a, null);
       emit({ type: "task", bot: a.bot.id });
+      return;
+    }
+    if (a.bot.lead) {
+      // the rector and the VPs do not sit typing: calls, reading and leaning back between visits
+      const pick = Math.random();
+      a.sub = pick < 0.5 ? "phone" : pick < 0.8 ? "think" : "lean";
+      a.subUntil = t + rnd(5, 9);
+      setStatus(a, a.sub === "phone" ? S.phone : a.sub === "think" ? S.thinking : S.breather);
       return;
     }
     const r = Math.random();
