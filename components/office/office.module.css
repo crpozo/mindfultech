@@ -2504,3 +2504,18 @@
 .vbarValue { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .vbarPct { color: #6b7280; font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
 .panelMax .vbar { grid-template-columns: minmax(0, 15ch) minmax(0, 1fr) auto 3.2em; }
+
+/* the donor-type card is narrow: donut on top, legend as aligned rows below */
+.nxDonut .donut { flex-direction: column; gap: 12px; width: 100%; }
+.nxDonut .legendCol { width: 100%; gap: 8px; }
+.nxDonut .legendRow {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  column-gap: 8px;
+  align-items: center;
+  font-size: 12.5px;
+}
+.nxDonut .legendRow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nxDonut .legendRow b { font-variant-numeric: tabular-nums; }
+.nxDonut .legendRow small { font-variant-numeric: tabular-nums; color: #6b7280; }
+.nxDonutNote { width: 100%; text-align: left; padding-top: 4px; border-top: 1px solid rgba(14, 13, 18, 0.06); }
