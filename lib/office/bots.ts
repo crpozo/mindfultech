@@ -48,6 +48,8 @@ export type Bot = {
   screen: ScreenKind;
   /** leads rather than types: short desk stints on the phone or thinking, and most of the day visiting desks, running meetings and briefings */
   lead?: boolean;
+  /** desk index in the 3D office (0–5 open workspace, 6–7 hall, 8/9/11 studio, 10 reception); defaults to the roster position */
+  seat?: number;
   /** what the roster shows while the bot is at its desk */
   working: string[];
   kpis: { label: string; value: string }[];

@@ -6,7 +6,7 @@
  */
 import type { Lang } from "./i18n";
 import { botsFor, type Bot } from "./bots";
-import { usfqBotsFor, USFQ_DIRECTORY } from "./usfqBots";
+import { usfqBotsFor } from "./usfqBots";
 
 type Txt = { es: string; en: string };
 
@@ -30,7 +30,7 @@ export type OfficeBrand = {
   wa: Txt;
   /** who answers the dashboard chats */
   analyst: string;
-  directory?: typeof USFQ_DIRECTORY;
+  directory?: { group: Txt; head: string; people: { name: string; role: Txt | string }[] }[];
 };
 
 export const MT_BRAND: OfficeBrand = {
@@ -75,13 +75,12 @@ export const USFQ_BRAND: OfficeBrand = {
   intro: {
     title: { es: "Bienvenido a la oficina de IA de la USFQ", en: "Welcome to USFQ's AI office" },
     text: {
-      es: "Cada persona que ves es un agente de IA con el rol de alguien del organigrama: el Rectorado, las cinco vicepresidencias, Legal, el Ombudsman, Admisiones, Comunicación, Vinculación y USFQ NEXT. Trabajan las 24 horas y aquí puedes ver, preguntar y auditar lo que hacen.",
-      en: "Everyone you see is an AI agent with the role of someone on the organisation chart: the Rector's office, the five vice-presidencies, Legal, the Ombudsman, Admissions, Communications, Engagement and USFQ NEXT. They work around the clock and here you can watch, ask and audit what they do.",
+      es: "Cada persona que ves es un agente de IA con el rol de alguien de la Vicepresidencia Comercial y de Desarrollo: Alexandra Velasco y sus direcciones (Comercial, Admisiones, Becas, Comunicación, Educación Continua, IDEA, Programas Internacionales y USFQ NEXT). Trabajan las 24 horas y aquí puedes ver, preguntar y auditar lo que hacen.",
+      en: "Everyone you see is an AI agent with the role of someone in the Commercial & Development vice-presidency: Alexandra Velasco and her offices (Commercial, Admissions, Financial Aid, Communications, Continuing Education, IDEA, International Programs and USFQ NEXT). They work around the clock and here you can watch, ask and audit what they do.",
     },
   },
   wa: { es: "Hola, vi la oficina de IA de la USFQ y quiero saber más.", en: "Hi, I saw USFQ's AI office and I would like to know more." },
   analyst: "andrade",
-  directory: USFQ_DIRECTORY,
 };
 
 export type BrandKey = OfficeBrand["key"];

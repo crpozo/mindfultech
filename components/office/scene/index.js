@@ -393,8 +393,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     const order = [...POOL].sort(() => Math.random() - 0.5);
     const tries = [POOL[start], ...order];
     for (const [kind, , party] of tries) {
-      if (a.idx === 10 && kind !== "coffee" && kind !== "water" && kind !== "printer" && kind !== "visit") continue; // the front desk stays close
-      if (kind === "servers" && ![3, 5, 9].includes(a.idx) && Math.random() < 0.7) continue; // the technical desks
+      if (a.st.seatIdx === 10 && kind !== "coffee" && kind !== "water" && kind !== "printer" && kind !== "visit") continue; // the front desk stays close
+      if (kind === "servers" && ![3, 5, 9].includes(a.st.seatIdx) && Math.random() < 0.7) continue; // the technical desks
       if (kind === "visit") {
         const hosts = actors.filter((o) => o !== a && o.state === "work" && !o.visitorPending && !o.hostReq && o.breakAt - simT > 10 && o.st.visit.length);
         if (!hosts.length) continue;
@@ -674,7 +674,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
         if (t > a.subUntil) nextSub(a);
         const wantBreak =
           (a.invite && t > a.invite.at) ||
-          (t > a.breakAt && a.idx !== 10 && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5); // the receptionist never leaves her desk
+          (t > a.breakAt && a.st.seatIdx !== 10 && !a.hostReq && !a.visitorPending && awayCount() < MAX_AWAY && Math.random() < 0.5); // the receptionist never leaves her desk
         if (wantBreak) {
           if (a.invite) {
             const inv = a.invite;

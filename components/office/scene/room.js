@@ -176,9 +176,13 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
 
   // ========================================================= ground floor ====
   const stations = [];
+  // who sits where: a bot's `seat` wins, otherwise its roster position; a seat nobody takes is an empty desk
+  const seated = [];
+  bots.forEach((b, i) => { seated[typeof b.seat === "number" ? b.seat : i] = b; });
+  const EMPTY = { id: "", name: "", accent: "#9aa0a8", screen: "ops" };
   const desk = (seat, bot, i, ctx = g) => {
-    const visit = F.desk(ctx, seat, bot, i);
-    stations.push({ seat: { ...seat, y: ctx.y }, floor: ctx === g ? 0 : 1, kind: "desk", visit, bot });
+    const visit = F.desk(ctx, seat, bot || EMPTY, i);
+    if (bot) stations.push({ seat: { ...seat, y: ctx.y }, floor: ctx === g ? 0 : 1, kind: "desk", visit, bot, seatIdx: i });
   };
 
   // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
@@ -192,7 +196,7 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
   F.discPendant(g, -7.9, 2.6, 5.6, 0.34, floorH);
   F.discPendant(g, -7.7, 2.75, 7.0, 0.26, floorH);
   F.receptionBlock(g, -7.9, 6.3, -PI / 2);
-  stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: bots[10] });
+  if (seated[10]) stations.push({ seat: { x: -7.25, z: 6.3, yaw: -PI / 2, y: 0 }, floor: 0, kind: "stand", visit: [{ x: -7.25, z: 8.0, yaw: PI }, { x: -7.25, z: 4.7, yaw: 0 }], approach: { x: -7.2, z: 7.4 }, bot: seated[10], seatIdx: 10 });
   nav0.clear(-7.25, 6.3, 0.15);
   F.planter(g, -7.9, 4.55);
   F.planter(g, -7.9, 8.05);
@@ -204,8 +208,8 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
   light(scene, -8.2, 2.9, 6.3, "#ffd7a6", 3.5, 7);
 
   // ---- hall: quiet desks behind the glass, plant grid, ping-pong, bookshelf block and the stairs ----
-  desk({ x: -5.4, z: 1.6, yaw: -PI / 2 }, bots[6], 6);
-  desk({ x: -5.4, z: 3.2, yaw: -PI / 2 }, bots[7], 7);
+  desk({ x: -5.4, z: 1.6, yaw: -PI / 2 }, seated[6], 6);
+  desk({ x: -5.4, z: 3.2, yaw: -PI / 2 }, seated[7], 7);
   F.plantWall(g, -5.3, 4.5, 0, 2.4);
   const pp = F.pingpong(g, -4.0, 7.0, PI / 2);
   F.pendant(g, -4.0, 2.6, 7.0, 4.6);
@@ -228,8 +232,8 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
   nav0.blockCircle(-1.4, 8.4, 0.22);
 
   // ---- open workspace: two rows of desks facing each other across an aisle that opens onto the hall ----
-  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 5.2, yaw: PI }, bots[k], k);
-  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 7.5, yaw: 0 }, bots[3 + k], 3 + k);
+  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 5.2, yaw: PI }, seated[k], k);
+  for (let k = 0; k < 3; k++) desk({ x: 5.4 + k * 1.5, z: 7.5, yaw: 0 }, seated[3 + k], 3 + k);
   for (const x of [5.6, 8.2]) {
     F.pendant(g, x, 2.5, 6.35, 4.6);
     light(scene, x, 2.3, 6.35, "#ffd7a6", 4, 6.5);
@@ -347,12 +351,12 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
   nav1.blockCircle(-1.2, -5.5, 0.2);
   F.sign(uw, -2.5, 2.35, z0 + 0.12, 0, L.signs.everyDay, "#c9a06a", "#2a2320", 1.8, 0.8);
   // studio: two desks face to face
-  desk({ x: -0.15, z: -3.9, yaw: PI / 2 }, bots[8], 8, u);
-  desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, bots[9], 9, u);
+  desk({ x: -0.15, z: -3.9, yaw: PI / 2 }, seated[8], 8, u);
+  desk({ x: 1.85, z: -3.9, yaw: -PI / 2 }, seated[9], 9, u);
   stations[stations.length - 2].approach = { x: -0.15, z: -1.2 };
   stations[stations.length - 1].approach = { x: 1.85, z: -1.2 };
   // third studio desk, in line with the first: procurement (bots[11])
-  desk({ x: -0.15, z: -2.4, yaw: PI / 2 }, bots[11], 11, u);
+  desk({ x: -0.15, z: -2.4, yaw: PI / 2 }, seated[11], 11, u);
   stations[stations.length - 1].approach = { x: -0.15, z: -1.2 };
   F.stickyWall(uw, 1.0, 1.7, z0 + 0.09, 0, 2.2, 1.4);
   F.plant(u, 0.3, -5.5, 0.8);
