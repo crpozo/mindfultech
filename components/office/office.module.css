@@ -2176,6 +2176,10 @@
     z-index: 7;
     box-shadow: 0 -8px 40px rgba(14, 13, 18, 0.25);
   }
+  /* card headers: the filter pills wrap under the title instead of pushing the card sideways */
+  .chartHead { flex-wrap: wrap; }
+  .range { flex-wrap: wrap; border-radius: 14px; max-width: 100%; }
+  .nx { overflow-x: hidden; }
   .tabs { margin: 8px 8px 0; padding: 3px; gap: 3px; }
   .tab { padding: 8px 6px; font-size: 12px; white-space: nowrap; }
   .hint { top: 140px; }

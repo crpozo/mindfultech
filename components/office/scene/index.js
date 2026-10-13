@@ -1106,6 +1106,13 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   renderer.domElement.addEventListener("pointerdown", onDown);
   renderer.domElement.addEventListener("pointerup", onUp);
   renderer.domElement.style.cursor = "grab";
+  // phones: a two-finger pinch must dolly the camera, never zoom the page.
+  // touch-action: none covers Chrome; iOS Safari also needs the gesture and touch defaults cancelled
+  const swallow = (ev) => { if (ev.cancelable) ev.preventDefault(); };
+  renderer.domElement.addEventListener("touchstart", swallow, { passive: false });
+  renderer.domElement.addEventListener("touchmove", swallow, { passive: false });
+  renderer.domElement.addEventListener("gesturestart", swallow, { passive: false });
+  renderer.domElement.addEventListener("gesturechange", swallow, { passive: false });
 
   // ------------------------------------------------------- camera focus ----
   const focusTarget = REST_TARGET.clone();
@@ -1407,6 +1414,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   if (window.__OFFICE_DEBUG) {
     window.__OFFICE_DEBUG.info = renderer.info;
     window.__OFFICE_DEBUG.actors = actors;
+    window.__OFFICE_DEBUG.camera = camera;
+    window.__OFFICE_DEBUG.controls = controls;
     window.__OFFICE_DEBUG.nav = { nav0, nav1 };
     window.__OFFICE_DEBUG.timing = timing;
   }
