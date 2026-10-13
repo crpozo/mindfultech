@@ -343,16 +343,28 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
   const [openP, setOpenP] = React.useState<number | null>(null);
   const [openD, setOpenD] = React.useState<number | null>(null);
   const [where, setWhere] = React.useState<string>("all");
+  const [list, setList] = React.useState<"projects" | "donors">("projects");
+  const [query, setQuery] = React.useState("");
   const detailRef = React.useRef<HTMLDivElement>(null);
   const showP = (i: number) => { setOpenD(null); setOpenP(i); };
   const showD = (i: number) => { setOpenP(null); setOpenD(i); };
   React.useEffect(() => {
-    if (openP !== null || openD !== null) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // the narrow panel shows the detail on its own: start at its top; side by side it is already in view
+    const el = detailRef.current;
+    if (!el || (openP === null && openD === null)) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 0 || r.top > window.innerHeight * 0.6) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [openP, openD]);
 
   const projects = NEXT.projects.map((p, i) => ({ ...p, i })).filter((p) => sel === "all" || p.vertical === sel);
   const donorIds = new Set(projects.flatMap((p) => p.donors.map((d) => d.d)));
   const donors = NEXT.donors.map((d, i) => ({ ...d, i, inSel: sel === "all" ? d.amount : d.projects.filter((x) => NEXT.projects[x.p].vertical === sel).reduce((a, x) => a + x.amount, 0) })).filter((d) => donorIds.has(d.i)).sort((a, b) => b.inSel - a.inSel);
+  const q = norm(query.trim());
+  const matchP = (p: (typeof projects)[number]) => !q || norm(p.name + " " + p.area + " " + p.donors.map((d) => NEXT.donors[d.d].name).join(" ")).includes(q);
+  const matchD = (d: (typeof donors)[number]) => !q || norm(d.name + " " + d.projects.map((x) => NEXT.projects[x.p].name).join(" ")).includes(q);
+  const shownP = projects.filter(matchP), shownD = donors.filter(matchD);
+  // side by side, the detail always shows something: the first project of the selection
+  const effP = openP ?? (openD === null ? shownP[0]?.i ?? null : null);
   const total = sel === "all" ? NEXT.total : NEXT.verticals[sel].amount;
   const orgAmt = donors.filter((d) => d.category !== "Personas").reduce((a, d) => a + d.inSel, 0);
   const perAmt = donors.filter((d) => d.category === "Personas").reduce((a, d) => a + d.inSel, 0);
@@ -380,12 +392,6 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
         <VerticalTiles lang={lang} sel={sel} onSel={(v) => { setSel(v); setOpenP(null); setOpenD(null); }} />
       </div>
 
-      {(openP !== null || openD !== null) && (
-        <div className={s.nx12} ref={detailRef}>
-          {openP !== null ? <ProjectDetail idx={openP} lang={lang} onClose={() => setOpenP(null)} onDonor={showD} /> : <DonorDetail idx={openD!} lang={lang} onClose={() => setOpenD(null)} onProject={showP} />}
-        </div>
-      )}
-
       <div className={s.nx7}>
         <ChartCard
           title={t(`Por mes · ${selName}`, `By month · ${selName}`)}
@@ -410,47 +416,61 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
         </ChartCard>
       </div>
 
-      <div className={s.nx7}>
-        <ChartCard title={t(`Proyectos · ${selName}`, `Projects · ${selName}`)} sub={t("haz clic en un proyecto para ver su detalle", "click a project for its detail")}>
-          <div className={s.nxScroll}>
-            <table className={`${s.tbl} ${s.nxTbl} ${s.nxProjects}`}>
-              <thead><tr><th>{t("Proyecto", "Project")}</th><th className={s.num}>{t("Donantes", "Donors")}</th><th>{t("Período", "Period")}</th><th className={s.num}>{t("Recaudado", "Raised")}</th></tr></thead>
-              <tbody>
-                {projects.map((p) => (
-                  <tr key={p.i} className={`${s.rowBtn} ${openP === p.i ? s.rowOn : ""}`} onClick={() => showP(p.i)}>
-                    <td title={`${p.name} · ${p.area}`}>
-                      <span className={s.nxCell}>{p.name}</span>
-                      <small><i style={{ background: VCOLORS[p.vertical] }} />{vshort(p.vertical, lang)}{p.area !== p.name ? ` · ${p.area}` : ""}</small>
-                    </td>
-                    <td className={s.num}>{p.donors.length}</td>
-                    <td><small>{ymLabel(p.first, lang)}{p.first !== p.last ? ` → ${ymLabel(p.last, lang)}` : ""}</small></td>
-                    <td className={s.num}>{money0(p.amount, lang)}<Share value={p.amount} max={projects[0].amount} color={VCOLORS[p.vertical]} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* explorer: list on the left, detail pinned on the right (the narrow panel shows one at a time) */}
+      <div className={`${s.nx12} ${s.nxExplorer}`}>
+        <div className={`${s.chartCard} ${s.nxListCard}`}>
+          <div className={s.nxListHead}>
+            <div className={s.range} role="tablist">
+              <button type="button" role="tab" aria-selected={list === "projects"} className={list === "projects" ? s.on : ""} onClick={() => setList("projects")}>{t("Proyectos", "Projects")} {shownP.length}</button>
+              <button type="button" role="tab" aria-selected={list === "donors"} className={list === "donors" ? s.on : ""} onClick={() => setList("donors")}>{t("Donantes", "Donors")} {shownD.length}</button>
+            </div>
+            <input className={s.nxSearch} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("Buscar proyecto o donante…", "Search project or donor…")} aria-label={t("Buscar", "Search")} />
           </div>
-        </ChartCard>
-      </div>
-      <div className={s.nx5}>
-        <ChartCard title={t(`Donantes · ${selName}`, `Donors · ${selName}`)} sub={t("haz clic para ver qué financia cada uno", "click to see what each one funds")}>
-          <div className={s.nxScroll}>
-            <table className={`${s.tbl} ${s.nxTbl}`}>
-              <tbody>
-                {donors.slice(0, 40).map((d) => (
-                  <tr key={d.i} className={`${s.rowBtn} ${openD === d.i ? s.rowOn : ""}`} onClick={() => showD(d.i)}>
-                    <td title={d.name}>
-                      <span className={s.nxCell}>{d.name}</span>
-                      <small>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")} · {d.projects.filter((x) => sel === "all" || NEXT.projects[x.p].vertical === sel).length} {t("proy.", "proj.")}</small>
-                    </td>
-                    <td className={s.num}>{money0(d.inSel, lang)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {donors.length > 40 && <div className={s.nxMore}>+{donors.length - 40} {t("donantes más", "more donors")}</div>}
+          <div className={s.nxList}>
+            {list === "projects" ? (
+              <table className={`${s.tbl} ${s.nxTbl} ${s.nxProjects}`}>
+                <thead><tr><th>{t("Proyecto", "Project")}</th><th className={s.num}>{t("Don.", "Don.")}</th><th>{t("Período", "Period")}</th><th className={s.num}>{t("Recaudado", "Raised")}</th></tr></thead>
+                <tbody>
+                  {shownP.map((p) => (
+                    <tr key={p.i} className={`${s.rowBtn} ${effP === p.i && openD === null ? s.rowOn : ""}`} onClick={() => showP(p.i)}>
+                      <td title={`${p.name} · ${p.area}`}>
+                        <span className={s.nxCell}>{p.name}</span>
+                        <small><i style={{ background: VCOLORS[p.vertical] }} />{vshort(p.vertical, lang)}{p.area !== p.name ? ` · ${p.area}` : ""}</small>
+                      </td>
+                      <td className={s.num}>{p.donors.length}</td>
+                      <td><small>{ymLabel(p.first, lang)}{p.first !== p.last ? ` → ${ymLabel(p.last, lang)}` : ""}</small></td>
+                      <td className={s.num}>{money0(p.amount, lang)}<Share value={p.amount} max={projects[0].amount} color={VCOLORS[p.vertical]} /></td>
+                    </tr>
+                  ))}
+                  {shownP.length === 0 && <tr><td colSpan={4}><small>{t("Sin resultados", "No results")}</small></td></tr>}
+                </tbody>
+              </table>
+            ) : (
+              <table className={`${s.tbl} ${s.nxTbl}`}>
+                <thead><tr><th>{t("Donante", "Donor")}</th><th className={s.num}>{t("Monto", "Amount")}</th></tr></thead>
+                <tbody>
+                  {shownD.map((d) => (
+                    <tr key={d.i} className={`${s.rowBtn} ${openD === d.i ? s.rowOn : ""}`} onClick={() => showD(d.i)}>
+                      <td title={d.name}>
+                        <span className={s.nxCell}>{d.name}</span>
+                        <small>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")} · {d.projects.filter((x) => sel === "all" || NEXT.projects[x.p].vertical === sel).length} {t("proy.", "proj.")} · {ymLabel(d.first, lang)}{d.first !== d.last ? ` → ${ymLabel(d.last, lang)}` : ""}</small>
+                      </td>
+                      <td className={s.num}>{money0(d.inSel, lang)}</td>
+                    </tr>
+                  ))}
+                  {shownD.length === 0 && <tr><td colSpan={2}><small>{t("Sin resultados", "No results")}</small></td></tr>}
+                </tbody>
+              </table>
+            )}
           </div>
-        </ChartCard>
+        </div>
+        <div className={`${s.nxDetailCol} ${openP !== null || openD !== null ? s.nxDetailOpen : ""}`} ref={detailRef}>
+          {openD !== null ? (
+            <DonorDetail idx={openD} lang={lang} onClose={() => setOpenD(null)} onProject={showP} />
+          ) : effP !== null ? (
+            <ProjectDetail idx={effP} lang={lang} onClose={() => setOpenP(null)} onDonor={showD} />
+          ) : null}
+        </div>
       </div>
 
       <div className={s.nx12}>
