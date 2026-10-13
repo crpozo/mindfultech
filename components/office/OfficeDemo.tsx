@@ -718,10 +718,10 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
             </div>
             <div className={s.tabs}>
               <button type="button" className={`${s.tab} ${tab === "screen" ? s.tabActive : ""}`} onClick={() => setTab("screen")}>
-                <span className={s.live} /> {t("Su pantalla en vivo", "Live screen")}
+                <span className={s.live} /> {brand.key === "usfq" && officeOfBot(bot.id) ? t("En vivo", "Live") : t("Su pantalla en vivo", "Live screen")}
               </button>
               <button type="button" className={`${s.tab} ${tab === "chat" ? s.tabActive : ""}`} onClick={() => setTab("chat")}>
-                {t("Chat con", "Chat with")} {bot.name}
+                {brand.key === "usfq" && officeOfBot(bot.id) ? t("Chat", "Chat") : `${t("Chat con", "Chat with")} ${bot.name}`}
               </button>
               {brand.key === "usfq" && officeOfBot(bot.id) && (
                 <button type="button" className={`${s.tab} ${tab === "office" ? s.tabActive : ""}`} onClick={() => setTab("office")}>

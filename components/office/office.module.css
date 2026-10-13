@@ -2141,22 +2141,20 @@
   .brand strong {
     font-size: 13px;
   }
+  /* every button visible: the toolbar wraps into two compact rows instead of scrolling sideways */
   .tools {
     flex: 1 1 100%;
     order: 2;
     display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    flex-wrap: wrap;
+    gap: 5px;
     padding: 2px 2px 6px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .tools::-webkit-scrollbar {
-    display: none;
   }
   .tool {
     flex: 0 0 auto;
+    padding: 7px 10px 7px 8px;
+    font-size: 12px;
+    gap: 5px;
   }
   .hint {
     top: 104px;
@@ -2165,6 +2163,24 @@
   .tourShift {
     top: 102px;
   }
+  /* the toolbar scrolls sideways and would clip its dropdowns: on a phone the menus become a sheet under the HUD */
+  .menu {
+    position: fixed;
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: 62vh;
+    max-height: 62dvh;
+    z-index: 7;
+    box-shadow: 0 -8px 40px rgba(14, 13, 18, 0.25);
+  }
+  .tabs { margin: 8px 8px 0; padding: 3px; gap: 3px; }
+  .tab { padding: 8px 6px; font-size: 12px; white-space: nowrap; }
+  .hint { top: 140px; }
+  .tour,
+  .tourShift { top: 138px; }
 }
 
 /* ---- dashboards menu rows ---- */
