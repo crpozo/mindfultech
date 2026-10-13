@@ -132,15 +132,15 @@ const SEEDS: Seed[] = [
     quick: [T("¿Qué estás haciendo ahora?", "What are you doing right now?"), T("¿Qué aliados tenemos?", "Which allies do we have?")],
   },
   {
-    id: "pons", name: "Michelle Pons", role: T("Admisiones", "Admissions"), title: T("Directora · agente de admisiones (recepción)", "Director · admissions agent (reception)"),
-    color: "#ffe3c2", accent: "#e08a3c", seat: 10,
+    id: "pons", name: "Michelle Pons", role: T("Admisiones", "Admissions"), title: T("Directora · agente de admisiones", "Director · admissions agent"),
+    color: "#ffe3c2", accent: "#e08a3c", seat: 9,
     look: { skin: "#f6dcc6", hair: "#c9a25a", hairStyle: "bun", eyes: "blue", lips: "#c9605a", shirt: "#f7f7f8", shirtStyle: "blouse", sleeves: "long", jacket: "#3a3a44", pants: "#1e1e24", skirt: true, shoes: "#111114", shoeStyle: "heels" },
     screen: "ops",
     working: [T("Recibiendo a familias en campus", "Welcoming families on campus"), T("Confirmando entrevistas de admisión", "Confirming admission interviews"), T("Respondiendo aspirantes por WhatsApp", "Answering applicants on WhatsApp")],
     kpis: [{ label: T("Aspirantes hoy", "Applicants today"), value: "63" }, { label: T("Entrevistas", "Interviews"), value: "12" }, { label: T("Tiempo de respuesta", "Response time"), value: "4 min" }],
     replies: [
       [["hac", "ahora", "trabaj", "doing"], T("Recibo a las familias que llegan a campus, confirmo las 12 entrevistas de admisión de hoy y respondo a 63 aspirantes por WhatsApp.", "I welcome the families arriving on campus, confirm today's 12 admission interviews and answer 63 applicants on WhatsApp.")],
-      [["hola", "buen", "hello", "hi"], T("¡Bienvenido a USFQ! Soy el agente de Admisiones y la recepción. ¿A quién buscas?", "Welcome to USFQ! I am the Admissions and reception agent. Who are you looking for?")],
+      [["hola", "buen", "hello", "hi"], T("Hola, soy el agente de Admisiones: aspirantes, requisitos y fechas de ingreso.", "Hello, I am the Admissions agent: applicants, requirements and intake dates.")],
       [[], T("Claro, te anuncio y te acompaño.", "Of course, I will announce you and show you the way.")],
     ],
     quick: [T("¿Qué estás haciendo ahora?", "What are you doing right now?"), T("¿Cuántas entrevistas hay hoy?", "How many interviews are there today?")],
