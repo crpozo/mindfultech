@@ -5,7 +5,9 @@ import { NEXT } from "@/lib/office/usfqNext";
 import { botById } from "@/lib/office/bots";
 import { tx, LOCALE, type Lang } from "@/lib/office/i18n";
 import { AgentFace, type FaceMood } from "./AgentFace";
-import { LineChart, Donut, ChartCard, fmtMoney, fmtInt } from "./charts";
+import { LineChart, BarChart, Donut, ChartCard } from "./charts";
+import { DemoNote } from "./OfficeFile";
+import type { NextProject, NextDonor } from "@/lib/office/usfqNext";
 import s from "./office.module.css";
 
 const VCOLORS = ["#4f5fb8", "#d64c6a", "#2f8f80", "#e08a3c", "#7a5ab8", "#c98a2a"];
@@ -21,6 +23,23 @@ const MONTHS: Record<Lang, string[]> = { es: ["ene", "feb", "mar", "abr", "may",
 const monthLabel = (m: { y: number; m: number }, lang: Lang) => `${MONTHS[lang][m.m - 1]} ${String(m.y).slice(2)}`;
 const money0 = (v: number, lang: Lang) => new Intl.NumberFormat(LOCALE[lang], { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v);
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
+const ymLabel = (ym: number, lang: Lang) => monthLabel({ y: Math.floor(ym / 100), m: ym % 100 }, lang);
+const ymIndex = (ym: number) => NEXT.months.findIndex((m) => m.y * 100 + m.m === ym);
+const monthsBetween = (a: number, b: number) => ymIndex(b) - ymIndex(a) + 1;
+const vshort = (i: number, lang: Lang) => VSHORT[NEXT.verticals[i].name]?.[lang] ?? NEXT.verticals[i].name;
+/** Execution per project is SIMULATED: the spreadsheets carry inflows only. Deterministic per project so the demo is stable. */
+const execRatio = (i: number) => 0.55 + ((i * 37) % 30) / 100;
+function simulatedSpend(p: NextProject, i: number): number[] {
+  const inflow = NEXT.months.map((m) => p.months.find((x) => x.y === m.y && x.m === m.m)?.v ?? 0);
+  const r = execRatio(i);
+  const out = NEXT.months.map(() => 0);
+  inflow.forEach((v, k) => {
+    if (v <= 0) return;
+    // spent over the following four months
+    [0.1, 0.35, 0.35, 0.2].forEach((w, j) => { if (k + 1 + j < out.length) out[k + 1 + j] += v * r * w; });
+  });
+  return out;
+}
 
 type Vert = (typeof NEXT.verticals)[number];
 const sortedVerticals = () => [...NEXT.verticals].map((v, i) => ({ ...v, color: VCOLORS[i], idx: i })).sort((a, b) => b.amount - a.amount);
@@ -41,8 +60,8 @@ export function answerNext(q0: string, lang: Lang): string {
     return ["academ", "research", "investig", "art", "cultur", "sosten", "sustain", "ambient", "environment", "salud", "health", "bienestar", "wellbeing", "empresa", "business", "innov", "social"].some((k) => q.includes(k) && n.includes(k));
   });
   if (askedV && has(q, "vertical", "paraguas", "cuanto", "how much", "recib", "recaud", "raised", "area", "fund")) {
-    const top = NEXT.topProjects.filter((p) => p.vertical === askedV.idx).slice(0, 3).map((p) => `${p.name} (${money0(p.amount, lang)})`).join(", ");
-    return t(`${vName(askedV)}: ${money0(askedV.amount, lang)}, el ${pct(askedV.amount, total)}% del total en ${askedV.movements} movimientos. Proyectos principales: ${top || "—"}.`, `${vName(askedV)}: ${money0(askedV.amount, lang)}, ${pct(askedV.amount, total)}% of the total across ${askedV.movements} movements. Main projects: ${top || "—"}.`);
+    const top = askedV.projects.slice(0, 3).map((i) => `${NEXT.projects[i].name} (${money0(NEXT.projects[i].amount, lang)})`).join(", ");
+    return t(`${vName(askedV)}: ${money0(askedV.amount, lang)}, el ${pct(askedV.amount, total)}% del total, ${askedV.projects.length} proyectos y ${askedV.donors} donantes. Proyectos principales: ${top || "—"}.`, `${vName(askedV)}: ${money0(askedV.amount, lang)}, ${pct(askedV.amount, total)}% of the total, ${askedV.projects.length} projects and ${askedV.donors} donors. Main projects: ${top || "—"}.`);
   }
   if (has(q, "vertical", "paraguas", "area", "distribu", "reparto", "split", "por ")) {
     const list = vs.map((v) => `${vName(v)} ${pct(v.amount, total)}%`).join(", ");
@@ -68,6 +87,21 @@ export function answerNext(q0: string, lang: Lang): string {
     const high = sub.filter((p) => p.impact === "Alto" && p.appeal === "Alto");
     const grants = sub.filter((p) => p.funding.startsWith("Grants")).length;
     return t(`${sub.length} proyectos de vinculación${where ? ` en ${where}` : ""}, ${high.length} con impacto y atractivo altos; ${grants} con Grants USFQ y ${sub.length - grants} autofinanciados o sin fondos (los primeros candidatos para donantes). Ejemplos: ${high.slice(0, 3).map((p) => p.name).join("; ")}.`, `${sub.length} engagement projects${where ? ` in ${where}` : ""}, ${high.length} with high impact and appeal; ${grants} on USFQ grants and ${sub.length - grants} self-funded or unfunded (the first candidates for donors). Examples: ${high.slice(0, 3).map((p) => p.name).join("; ")}.`);
+  }
+  // a specific project or donor by name
+  const words = q.split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+  const score = (name: string) => words.filter((w) => norm(name).includes(w)).length;
+  const bestP = NEXT.projects.map((p, i) => ({ p, i, sc: score(p.name) })).filter((x) => x.sc >= Math.min(2, words.length) && x.sc > 0).sort((a, b) => b.sc - a.sc)[0];
+  const bestD = NEXT.donors.map((d, i) => ({ d, i, sc: score(d.name) })).filter((x) => x.sc >= Math.min(2, words.length) && x.sc > 0).sort((a, b) => b.sc - a.sc)[0];
+  if (bestP && (!bestD || bestP.sc >= bestD.sc)) {
+    const p = bestP.p;
+    const top = p.donors.slice(0, 3).map((d) => `${NEXT.donors[d.d].name} (${money0(d.amount, lang)})`).join(", ");
+    return t(`${p.name} (${p.area}, ${vshort(p.vertical, lang)}): ${money0(p.amount, lang)} en ${p.movements} movimientos de ${p.donors.length} donante${p.donors.length === 1 ? "" : "s"}, entre ${ymLabel(p.first, lang)} y ${ymLabel(p.last, lang)}. Principales: ${top}. La ejecución del gasto es simulada en el tablero: los archivos solo traen ingresos.`, `${p.name} (${p.area}, ${vshort(p.vertical, lang)}): ${money0(p.amount, lang)} across ${p.movements} movements from ${p.donors.length} donor${p.donors.length === 1 ? "" : "s"}, between ${ymLabel(p.first, lang)} and ${ymLabel(p.last, lang)}. Main: ${top}. Spending in the dashboard is simulated: the files only carry inflows.`);
+  }
+  if (bestD) {
+    const d = bestD.d;
+    const ps = d.projects.map((x) => `${NEXT.projects[x.p].name} (${money0(x.amount, lang)})`).join(", ");
+    return t(`${d.name} (${d.category === "Personas" ? "persona" : "organización"}): ${money0(d.amount, lang)} en ${d.movements} movimientos, entre ${ymLabel(d.first, lang)} y ${ymLabel(d.last, lang)}. Destino: ${ps}.`, `${d.name} (${d.category === "Personas" ? "individual" : "organisation"}): ${money0(d.amount, lang)} across ${d.movements} movements, between ${ymLabel(d.first, lang)} and ${ymLabel(d.last, lang)}. Destination: ${ps}.`);
   }
   // total / summary
   const biggest = NEXT.topProjects[0];
@@ -105,7 +139,7 @@ function NextChat({ lang, analyst }: { lang: Lang; analyst: string }) {
       }, 900 + Math.min(1400, reply.length * 5))
     );
   };
-  const quick = [t("¿Cuánto hemos recaudado?", "How much have we raised?"), t("¿Cómo se reparte por vertical?", "How is it split by vertical?"), t("¿Quiénes son los mayores donantes?", "Who are the biggest donors?"), t("¿Cuál fue el mejor mes?", "Which was the best month?"), t("¿Qué proyectos de vinculación tienen potencial?", "Which engagement projects have potential?")];
+  const quick = [t("¿Cuánto hemos recaudado?", "How much have we raised?"), t("¿Cómo se reparte por vertical?", "How is it split by vertical?"), t("¿Quiénes son los mayores donantes?", "Who are the biggest donors?"), t("¿Cuál fue el mejor mes?", "Which was the best month?"), t("¿Qué pasa con el convenio Tandayapa?", "What about the Tandayapa agreement?")];
   const caption = mood === "thinking" ? t("revisando los datos…", "checking the numbers…") : mood === "typing" ? t("escribiendo…", "typing…") : t("pregúntale sobre donaciones, donantes y proyectos", "ask about donations, donors and projects");
   return (
     <div className={s.dashChat}>
@@ -155,167 +189,290 @@ function NextChat({ lang, analyst }: { lang: Lang; analyst: string }) {
 }
 
 /* ------------------------------------------------------------- pieces ---- */
-function VerticalBars({ lang }: { lang: Lang }) {
+type Metric = "v" | "n" | "d";
+type Sel = number | "all";
+
+function VerticalTiles({ lang, sel, onSel }: { lang: Lang; sel: Sel; onSel: (v: Sel) => void }) {
+  const t = tx(lang);
   const vs = sortedVerticals();
-  const max = vs[0].amount;
-  const total = NEXT.total;
   return (
-    <div className={s.vbars}>
+    <div className={s.nxVerts} role="tablist">
+      <button type="button" role="tab" aria-selected={sel === "all"} className={`${s.nxVert} ${sel === "all" ? s.nxVertOn : ""}`} onClick={() => onSel("all")} style={{ ["--vc" as string]: "#0e0d12" }}>
+        <span className={s.nxVertName}>{t("Todas las verticales", "All verticals")}</span>
+        <b>{money0(NEXT.total, lang)}</b>
+        <small>{NEXT.projectCount} {t("proyectos", "projects")} · {NEXT.donorCount} {t("donantes", "donors")}</small>
+        <i style={{ width: "100%" }} />
+      </button>
       {vs.map((v) => (
-        <div key={v.name} className={s.vbar} title={`${v.name} · ${v.movements} ${lang === "es" ? "movimientos" : "movements"}`}>
-          <span className={s.vbarLabel}>{VSHORT[v.name]?.[lang] ?? v.name}</span>
-          <span className={s.vbarTrack}>
-            <i style={{ width: `${Math.max(1.5, (v.amount / max) * 100)}%`, background: v.color }} />
-          </span>
-          <b className={s.vbarValue}>{money0(v.amount, lang)}</b>
-          <small className={s.vbarPct}>{pct(v.amount, total)}%</small>
-        </div>
+        <button key={v.name} type="button" role="tab" aria-selected={sel === v.idx} className={`${s.nxVert} ${sel === v.idx ? s.nxVertOn : ""}`} onClick={() => onSel(sel === v.idx ? "all" : v.idx)} style={{ ["--vc" as string]: v.color }}>
+          <span className={s.nxVertName}>{VSHORT[v.name]?.[lang] ?? v.name}</span>
+          <b>{money0(v.amount, lang)}</b>
+          <small>{v.projects.length} {t("proy.", "proj.")} · {v.donors} {t("donantes", "donors")} · {pct(v.amount, NEXT.total)}%</small>
+          <i style={{ width: `${Math.max(2, (v.amount / vs[0].amount) * 100)}%` }} />
+        </button>
       ))}
     </div>
   );
 }
 
-function MonthlyChart({ lang, height = 190 }: { lang: Lang; height?: number }) {
-  const ms = NEXT.months;
-  return <LineChart series={[{ name: lang === "es" ? "Donaciones" : "Donations", color: "#e11b22", data: ms.map((m) => m.v) }]} labels={ms.map((m) => monthLabel(m, lang))} every={3} height={height} yFormat={(v) => (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${Math.round(v)}`)} lang={lang} />;
+function MonthlyChart({ lang, height = 190, sel = "all", metric = "v" }: { lang: Lang; height?: number; sel?: Sel; metric?: Metric }) {
+  const ms = sel === "all" ? NEXT.months : NEXT.verticals[sel].months;
+  const name = metric === "v" ? (lang === "es" ? "Recaudado" : "Raised") : metric === "n" ? (lang === "es" ? "Donaciones" : "Gifts") : lang === "es" ? "Donantes" : "Donors";
+  const data = ms.map((m) => (metric === "v" ? m.v : metric === "n" ? m.n ?? 0 : m.d ?? 0));
+  const color = sel === "all" ? "#e11b22" : VCOLORS[sel];
+  return <LineChart series={[{ name, color, data }]} labels={ms.map((m) => monthLabel(m, lang))} every={3} height={height} yFormat={(v) => (metric === "v" ? (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${Math.round(v)}`) : String(Math.round(v)))} lang={lang} />;
 }
 
-/** The hotspot panel: KPIs, verticals, months, donors, projects, outreach and the analyst chat. */
+function Share({ value, max, color }: { value: number; max: number; color: string }) {
+  return (
+    <span className={s.nxShare}>
+      <i style={{ width: `${Math.max(1.5, (value / max) * 100)}%`, background: color }} />
+    </span>
+  );
+}
+
+/** One project: where the money came from, when, and a simulated execution against it. */
+function ProjectDetail({ idx, lang, onClose, onDonor }: { idx: number; lang: Lang; onClose: () => void; onDonor: (d: number) => void }) {
+  const t = tx(lang);
+  const p = NEXT.projects[idx];
+  const color = VCOLORS[p.vertical];
+  const spend = simulatedSpend(p, idx);
+  const spent = spend.reduce((a, b) => a + b, 0);
+  const inflow = NEXT.months.map((m) => p.months.find((x) => x.y === m.y && x.m === m.m)?.v ?? 0);
+  const from = ymIndex(p.first), to = Math.min(NEXT.months.length - 1, ymIndex(p.last) + 4);
+  const groups = NEXT.months.slice(from, to + 1).map((m, k) => ({ label: monthLabel(m, lang), values: [inflow[from + k], spend[from + k]] }));
+  const active = p.last >= 202605;
+  const orgs = p.donors.filter((d) => NEXT.donors[d.d].category !== "Personas").length;
+  const outreach = NEXT.outreach.filter((o) => o.vertical === p.vertical && o.potential).slice(0, 3);
+  return (
+    <ChartCard
+      title={p.name}
+      sub={`${p.area} · ${p.college} · ${vshort(p.vertical, lang)}`}
+      right={
+        <button type="button" className={s.nxClose} onClick={onClose} aria-label={t("Cerrar", "Close")}>
+          ×
+        </button>
+      }
+    >
+      <div className={s.nxDetail}>
+        <div className={s.nxDetailKpis}>
+          <div className={s.nxKpi}><b>{money0(p.amount, lang)}</b><span>{t("recaudado", "raised")} · {p.movements} {t("movimientos", "movements")}</span></div>
+          <div className={s.nxKpi}><b>{p.donors.length}</b><span>{t("donantes", "donors")} · {orgs} {t("organizaciones", "organisations")}, {p.donors.length - orgs} {t("personas", "individuals")}</span></div>
+          <div className={s.nxKpi}><b>{ymLabel(p.first, lang)} → {ymLabel(p.last, lang)}</b><span>{t("primer y último ingreso", "first and last inflow")} · {monthsBetween(p.first, p.last)} {t("meses", "months")} · {active ? t("activo", "active") : t("sin ingresos desde entonces", "no inflows since")}</span></div>
+          <div className={`${s.nxKpi} ${s.nxKpiSim}`}><b>{money0(spent, lang)}</b><span>{t("ejecutado · simulado", "spent · simulated")} ({Math.round(execRatio(idx) * 100)}%) · {t("saldo", "balance")} {money0(p.amount - spent, lang)}</span></div>
+        </div>
+        <div className={s.nxDetailGrid}>
+          <div>
+            <div className={s.nxSubTitle}>{t("Cuándo entra y cuándo se invierte", "When money comes in and when it is spent")} <em>{t("· gasto simulado, los archivos solo traen ingresos", "· spending simulated, the files only carry inflows")}</em></div>
+            <BarChart groups={groups} colors={[color, "#c9ccd3"]} stacked={false} height={170} every={groups.length > 14 ? 2 : 1} yFormat={(v) => (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${Math.round(v)}`)} lang={lang} />
+            <div className={s.legend}><span><i style={{ background: color }} />{t("ingresos", "inflows")}</span><span><i style={{ background: "#c9ccd3" }} />{t("ejecución simulada", "simulated spend")}</span></div>
+          </div>
+          <div>
+            <div className={s.nxSubTitle}>{t("Donantes de este proyecto", "This project's donors")}</div>
+            <table className={`${s.tbl} ${s.nxTbl}`}>
+              <tbody>
+                {p.donors.slice(0, 8).map((d) => (
+                  <tr key={d.d} className={s.rowBtn} onClick={() => onDonor(d.d)}>
+                    <td title={NEXT.donors[d.d].name}>
+                      <span className={s.nxCell}>{NEXT.donors[d.d].name}</span>
+                      <Share value={d.amount} max={p.donors[0].amount} color={color} />
+                    </td>
+                    <td className={s.num}>{money0(d.amount, lang)}<small style={{ display: "block", color: "#6b7280" }}>{pct(d.amount, p.amount)}%</small></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {p.donors.length > 8 && <div className={s.nxMore}>+{p.donors.length - 8} {t("donantes más", "more donors")}</div>}
+            {outreach.length > 0 && (
+              <>
+                <div className={s.nxSubTitle} style={{ marginTop: 10 }}>{t("Vinculación afín con potencial de donación", "Related engagement projects with donation potential")}</div>
+                <ul className={s.mgList}>{outreach.map((o) => <li key={o.id}><b>{o.name}</b> · {o.lead} · {o.funding.startsWith("Grants") ? "Grants USFQ" : t("sin fondos", "unfunded")}</li>)}</ul>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </ChartCard>
+  );
+}
+
+/** One donor: what they fund, in which verticals, and when. */
+function DonorDetail({ idx, lang, onClose, onProject }: { idx: number; lang: Lang; onClose: () => void; onProject: (p: number) => void }) {
+  const t = tx(lang);
+  const d = NEXT.donors[idx];
+  const verts = [...new Set(d.projects.map((x) => NEXT.projects[x.p].vertical))];
+  return (
+    <ChartCard
+      title={d.name}
+      sub={`${d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")} · ${money0(d.amount, lang)} · ${ymLabel(d.first, lang)} → ${ymLabel(d.last, lang)}`}
+      right={
+        <button type="button" className={s.nxClose} onClick={onClose} aria-label={t("Cerrar", "Close")}>
+          ×
+        </button>
+      }
+    >
+      <div className={s.nxDetail}>
+        <div className={s.nxDetailKpis}>
+          <div className={s.nxKpi}><b>{money0(d.amount, lang)}</b><span>{t("donado", "given")} · {d.movements} {t("movimientos", "movements")}</span></div>
+          <div className={s.nxKpi}><b>{d.projects.length}</b><span>{t("proyectos financiados", "projects funded")}</span></div>
+          <div className={s.nxKpi}><b>{verts.map((v) => vshort(v, lang)).join(" · ")}</b><span>{t("verticales", "verticals")}</span></div>
+          <div className={s.nxKpi}><b>{pct(d.amount, NEXT.total)}%</b><span>{t("del total recaudado", "of everything raised")}</span></div>
+        </div>
+        <table className={`${s.tbl} ${s.nxTbl}`}>
+          <thead><tr><th>{t("Proyecto", "Project")}</th><th>{t("Vertical", "Vertical")}</th><th className={s.num}>{t("Monto", "Amount")}</th></tr></thead>
+          <tbody>
+            {d.projects.map((x) => (
+              <tr key={x.p} className={s.rowBtn} onClick={() => onProject(x.p)}>
+                <td title={NEXT.projects[x.p].name}><span className={s.nxCell}>{NEXT.projects[x.p].name}</span><small>{NEXT.projects[x.p].area}</small></td>
+                <td><small><i style={{ background: VCOLORS[NEXT.projects[x.p].vertical] }} />{vshort(NEXT.projects[x.p].vertical, lang)}</small></td>
+                <td className={s.num}>{money0(x.amount, lang)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </ChartCard>
+  );
+}
+
+/** The hotspot panel: KPIs, the analyst, verticals → projects → donors, months, outreach. */
 export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?: string }) {
   const t = tx(lang);
-  const vs = sortedVerticals();
-  const org = NEXT.categories.find((c) => c.name.startsWith("Empresas")), per = NEXT.categories.find((c) => c.name === "Personas");
+  const [sel, setSel] = React.useState<Sel>("all");
+  const [metric, setMetric] = React.useState<Metric>("v");
+  const [openP, setOpenP] = React.useState<number | null>(null);
+  const [openD, setOpenD] = React.useState<number | null>(null);
   const [where, setWhere] = React.useState<string>("all");
-  const places = [
-    ["all", t("Todos", "All")],
-    ["cumbaya", "Cumbayá"],
-    ["tiputini", "Tiputini"],
-    ["tandayapa", "Tandayapa"],
-    ["galapagos", "Galápagos"],
-    ["rural", t("Zonas rurales", "Rural areas")],
-  ] as const;
-  const outreach = NEXT.outreach.filter((p) => where === "all" || norm(p.where).includes(where));
-  const high = NEXT.outreach.filter((p) => p.impact === "Alto" && p.appeal === "Alto").length;
+  const detailRef = React.useRef<HTMLDivElement>(null);
+  const showP = (i: number) => { setOpenD(null); setOpenP(i); };
+  const showD = (i: number) => { setOpenP(null); setOpenD(i); };
+  React.useEffect(() => {
+    if (openP !== null || openD !== null) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [openP, openD]);
+
+  const projects = NEXT.projects.map((p, i) => ({ ...p, i })).filter((p) => sel === "all" || p.vertical === sel);
+  const donorIds = new Set(projects.flatMap((p) => p.donors.map((d) => d.d)));
+  const donors = NEXT.donors.map((d, i) => ({ ...d, i, inSel: sel === "all" ? d.amount : d.projects.filter((x) => NEXT.projects[x.p].vertical === sel).reduce((a, x) => a + x.amount, 0) })).filter((d) => donorIds.has(d.i)).sort((a, b) => b.inSel - a.inSel);
+  const total = sel === "all" ? NEXT.total : NEXT.verticals[sel].amount;
+  const orgAmt = donors.filter((d) => d.category !== "Personas").reduce((a, d) => a + d.inSel, 0);
+  const perAmt = donors.filter((d) => d.category === "Personas").reduce((a, d) => a + d.inSel, 0);
+  const perCount = donors.filter((d) => d.category === "Personas").length;
+  const outreach = NEXT.outreach.filter((p) => (sel === "all" || p.vertical === sel) && (where === "all" || norm(p.where).includes(where)));
+  const high = outreach.filter((p) => p.impact === "Alto" && p.appeal === "Alto").length;
+  const selName = sel === "all" ? t("todas las verticales", "all verticals") : vshort(sel, lang);
+  const selColor = sel === "all" ? "#e11b22" : VCOLORS[sel];
+  const places = [["all", t("Todos", "All")], ["cumbaya", "Cumbayá"], ["tiputini", "Tiputini"], ["tandayapa", "Tandayapa"], ["galapagos", "Galápagos"], ["rural", t("Rurales", "Rural")]] as const;
   const badge = (v: string) => <span className={`${s.tag} ${v === "Alto" ? s.tagOk : v === "Medio" ? s.tagWarn : ""}`}>{v}</span>;
   return (
     <div className={s.nx}>
-      {/* row 1: the numbers */}
       <div className={`${s.nx12} ${s.nxKpis}`}>
-        <div className={s.nxKpi}>
-          <b>{money0(NEXT.total, lang)}</b>
-          <span>{t("recaudado · sep 2024 – ago 2026", "raised · Sep 2024 – Aug 2026")}</span>
-        </div>
-        <div className={s.nxKpi}>
-          <b>{NEXT.donorCount}</b>
-          <span>{t("donantes", "donors")} · {org?.donors} {t("organizaciones", "organisations")}, {per?.donors} {t("personas", "individuals")}</span>
-        </div>
-        <div className={s.nxKpi}>
-          <b>{pct(org?.amount ?? 0, NEXT.total)}%</b>
-          <span>{t("viene de empresas y fundaciones", "comes from companies and foundations")}</span>
-        </div>
-        <div className={s.nxKpi}>
-          <b>{NEXT.outreach.length}</b>
-          <span>{t("proyectos con potencial de donación", "projects with donation potential")} · {high} {t("de impacto alto", "high impact")}</span>
-        </div>
+        <div className={s.nxKpi}><b>{money0(total, lang)}</b><span>{t("recaudado · sep 2024 – ago 2026", "raised · Sep 2024 – Aug 2026")}{sel !== "all" ? ` · ${pct(total, NEXT.total)}%` : ""}</span></div>
+        <div className={s.nxKpi}><b>{donors.length}</b><span>{t("donantes", "donors")} · {donors.length - perCount} {t("organizaciones", "organisations")}, {perCount} {t("personas", "individuals")}</span></div>
+        <div className={s.nxKpi}><b>{projects.length}</b><span>{t("proyectos que reciben fondos", "projects receiving funds")} · {pct(orgAmt, total)}% {t("de organizaciones", "from organisations")}</span></div>
+        <div className={s.nxKpi}><b>{outreach.length}</b><span>{t("proyectos de vinculación con potencial", "engagement projects with potential")} · {high} {t("de impacto alto", "high impact")}</span></div>
       </div>
 
-      {/* row 2: ask Alejandro, one compact strip */}
       <div className={`${s.nx12} ${s.nxAsk}`}>
         <NextChat lang={lang} analyst={analyst} />
       </div>
 
-      {/* row 3: verticals, donor mix, months */}
-      <div className={s.nx4}>
-        <ChartCard title={t("Por vertical", "By vertical")} sub={t("las seis verticales de USFQ NEXT", "USFQ NEXT's six verticals")}>
-          <VerticalBars lang={lang} />
-        </ChartCard>
-      </div>
-      <div className={s.nx3}>
-        <ChartCard title={t("Tipo de donante", "Donor type")} sub={t("monto neto", "net amount")}>
-          <div className={s.nxDonut}>
-            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: org?.amount ?? 0, color: "#e11b22" }, { label: t("Personas", "Individuals"), value: per?.amount ?? 0, color: "#2a2d3a" }]} size={104} format={(v) => money0(v, lang)} centerLabel={`$${(NEXT.total / 1e6).toFixed(2)}M`} lang={lang} />
-            <div className={s.nxDonutNote}>{t("Donación media por persona", "Average gift per individual")}: <b>{money0((per?.amount ?? 0) / Math.max(1, per?.donors ?? 1), lang)}</b></div>
-          </div>
-        </ChartCard>
-      </div>
-      <div className={s.nx5}>
-        <ChartCard title={t("Donaciones por mes", "Donations by month")} sub={t("valor neto · los picos son convenios y fondos grandes", "net value · spikes are agreements and large funds")}>
-          <MonthlyChart lang={lang} height={176} />
-        </ChartCard>
+      <div className={s.nx12}>
+        <VerticalTiles lang={lang} sel={sel} onSel={(v) => { setSel(v); setOpenP(null); setOpenD(null); }} />
       </div>
 
-      {/* row 4: donors and projects */}
-      <div className={s.nx5}>
-        <ChartCard title={t("Mayores donantes", "Top donors")} sub={t("neto acumulado 2024–2026", "net total 2024–2026")}>
-          <div className={s.nxDonors}>
-          <table className={`${s.tbl} ${s.nxTbl}`}>
-            <tbody>
-              {NEXT.topDonors.slice(0, 8).map((d) => (
-                <tr key={d.name}>
-                  <td title={d.name}>
-                    <span className={s.nxCell}>{d.name}</span>
-                    <small>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")}</small>
-                  </td>
-                  <td className={s.num}>{money0(d.amount, lang)}</td>
-                </tr>
+      {(openP !== null || openD !== null) && (
+        <div className={s.nx12} ref={detailRef}>
+          {openP !== null ? <ProjectDetail idx={openP} lang={lang} onClose={() => setOpenP(null)} onDonor={showD} /> : <DonorDetail idx={openD!} lang={lang} onClose={() => setOpenD(null)} onProject={showP} />}
+        </div>
+      )}
+
+      <div className={s.nx7}>
+        <ChartCard
+          title={t(`Por mes · ${selName}`, `By month · ${selName}`)}
+          sub={t("los picos son convenios y fondos grandes", "spikes are agreements and large funds")}
+          right={
+            <div className={s.range} role="tablist">
+              {([["v", t("Monto", "Amount")], ["n", t("Donaciones", "Gifts")], ["d", t("Donantes", "Donors")]] as [Metric, string][]).map(([k, l]) => (
+                <button key={k} type="button" role="tab" aria-selected={metric === k} className={metric === k ? s.on : ""} onClick={() => setMetric(k)}>{l}</button>
               ))}
-            </tbody>
-          </table>
+            </div>
+          }
+        >
+          <MonthlyChart lang={lang} height={176} sel={sel} metric={metric} />
+        </ChartCard>
+      </div>
+      <div className={s.nx5}>
+        <ChartCard title={t("Tipo de donante", "Donor type")} sub={t(`monto neto · ${selName}`, `net amount · ${selName}`)}>
+          <div className={s.nxDonut}>
+            <Donut parts={[{ label: t("Organizaciones", "Organisations"), value: orgAmt, color: selColor }, { label: t("Personas", "Individuals"), value: perAmt, color: "#2a2d3a" }]} size={104} format={(v) => money0(v, lang)} centerLabel={total >= 1e6 ? `$${(total / 1e6).toFixed(2)}M` : `$${Math.round(total / 1000)}k`} lang={lang} />
+            <div className={s.nxDonutNote}>{t("Donación media por persona", "Average gift per individual")}: <b>{money0(perAmt / Math.max(1, perCount), lang)}</b></div>
           </div>
         </ChartCard>
       </div>
 
       <div className={s.nx7}>
-        <ChartCard title={t("Proyectos que más reciben", "Projects receiving the most")} sub={t("destino registrado y su vertical", "registered destination and its vertical")}>
-          <table className={`${s.tbl} ${s.nxTbl}`}>
-            <tbody>
-              {NEXT.topProjects.slice(0, 8).map((p) => (
-                <tr key={p.name}>
-                  <td title={`${p.name} · ${p.area}`}>
-                    <span className={s.nxCell}>{p.name}</span>
-                    <small>
-                      <i style={{ background: VCOLORS[p.vertical] }} />
-                      {VSHORT[NEXT.verticals[p.vertical].name]?.[lang]}
-                    </small>
-                  </td>
-                  <td className={s.num}>{money0(p.amount, lang)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <ChartCard title={t(`Proyectos · ${selName}`, `Projects · ${selName}`)} sub={t("haz clic en un proyecto para ver su detalle", "click a project for its detail")}>
+          <div className={s.nxScroll}>
+            <table className={`${s.tbl} ${s.nxTbl} ${s.nxProjects}`}>
+              <thead><tr><th>{t("Proyecto", "Project")}</th><th className={s.num}>{t("Donantes", "Donors")}</th><th>{t("Período", "Period")}</th><th className={s.num}>{t("Recaudado", "Raised")}</th></tr></thead>
+              <tbody>
+                {projects.map((p) => (
+                  <tr key={p.i} className={`${s.rowBtn} ${openP === p.i ? s.rowOn : ""}`} onClick={() => showP(p.i)}>
+                    <td title={`${p.name} · ${p.area}`}>
+                      <span className={s.nxCell}>{p.name}</span>
+                      <small><i style={{ background: VCOLORS[p.vertical] }} />{vshort(p.vertical, lang)}{p.area !== p.name ? ` · ${p.area}` : ""}</small>
+                    </td>
+                    <td className={s.num}>{p.donors.length}</td>
+                    <td><small>{ymLabel(p.first, lang)}{p.first !== p.last ? ` → ${ymLabel(p.last, lang)}` : ""}</small></td>
+                    <td className={s.num}>{money0(p.amount, lang)}<Share value={p.amount} max={projects[0].amount} color={VCOLORS[p.vertical]} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </ChartCard>
       </div>
+      <div className={s.nx5}>
+        <ChartCard title={t(`Donantes · ${selName}`, `Donors · ${selName}`)} sub={t("haz clic para ver qué financia cada uno", "click to see what each one funds")}>
+          <div className={s.nxScroll}>
+            <table className={`${s.tbl} ${s.nxTbl}`}>
+              <tbody>
+                {donors.slice(0, 40).map((d) => (
+                  <tr key={d.i} className={`${s.rowBtn} ${openD === d.i ? s.rowOn : ""}`} onClick={() => showD(d.i)}>
+                    <td title={d.name}>
+                      <span className={s.nxCell}>{d.name}</span>
+                      <small>{d.category === "Personas" ? t("Persona", "Individual") : t("Organización", "Organisation")} · {d.projects.filter((x) => sel === "all" || NEXT.projects[x.p].vertical === sel).length} {t("proy.", "proj.")}</small>
+                    </td>
+                    <td className={s.num}>{money0(d.inSel, lang)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {donors.length > 40 && <div className={s.nxMore}>+{donors.length - 40} {t("donantes más", "more donors")}</div>}
+          </div>
+        </ChartCard>
+      </div>
+
       <div className={s.nx12}>
         <ChartCard
-          title={t("Proyectos de vinculación 2026", "2026 engagement projects")}
+          title={t(`Proyectos de vinculación 2026 · ${selName}`, `2026 engagement projects · ${selName}`)}
           sub={t(`${outreach.length} candidatos para donantes`, `${outreach.length} candidates for donors`)}
           right={
             <div className={s.range} role="tablist">
               {places.map(([k, label]) => (
-                <button key={k} type="button" role="tab" aria-selected={where === k} className={where === k ? s.on : ""} onClick={() => setWhere(k)}>
-                  {label}
-                </button>
+                <button key={k} type="button" role="tab" aria-selected={where === k} className={where === k ? s.on : ""} onClick={() => setWhere(k)}>{label}</button>
               ))}
             </div>
           }
         >
           <div className={s.nxScroll}>
             <table className={`${s.tbl} ${s.nxTbl}`}>
-              <thead>
-                <tr>
-                  <th>{t("Proyecto", "Project")}</th>
-                  <th>{t("Sede", "Site")}</th>
-                  <th>{t("Fondos", "Funding")}</th>
-                  <th>{t("Impacto", "Impact")}</th>
-                </tr>
-              </thead>
+              <thead><tr><th>{t("Proyecto", "Project")}</th><th>{t("Vertical", "Vertical")}</th><th>{t("Sede", "Site")}</th><th>{t("Fondos", "Funding")}</th><th>{t("Impacto", "Impact")}</th></tr></thead>
               <tbody>
                 {outreach.map((p) => (
-                  <tr key={p.name}>
-                    <td title={p.name}>
-                      <span className={s.nxCell}>{p.name}</span>
-                      <small>{p.lead}</small>
-                    </td>
+                  <tr key={p.id}>
+                    <td title={p.name}><span className={s.nxCell}>{p.name}</span><small>{p.lead}</small></td>
+                    <td><small><i style={{ background: VCOLORS[p.vertical] }} />{vshort(p.vertical, lang)}</small></td>
                     <td>{p.where.replace("Participación abierta en cualquiera de los proyectos Vecinos", t("Abierto", "Open")).replace("No; sin embargo, se desarrolla en zonas rurales", t("Rural", "Rural")).replace("Vecinos ", "")}</td>
                     <td>{p.funding.startsWith("Grants") ? "Grants USFQ" : t("Sin fondos", "Unfunded")}</td>
                     <td>{badge(p.impact)}</td>
@@ -326,7 +483,7 @@ export function NextPanel({ lang, analyst = "andrade" }: { lang: Lang; analyst?:
           </div>
         </ChartCard>
       </div>
-      <div className={`${s.nx12} ${s.nxSource}`}>{t("Fuente: ", "Source: ")}{NEXT.generatedFrom}.</div>
+      <div className={`${s.nx12} ${s.nxSource}`}>{t("Fuente: ", "Source: ")}{NEXT.generatedFrom}. {t("La ejecución por proyecto es simulada (los archivos no traen egresos); la vertical de cada destino se asigna por palabras clave.", "Per-project spending is simulated (the files carry no outflows); each destination's vertical is assigned by keyword.")}</div>
     </div>
   );
 }

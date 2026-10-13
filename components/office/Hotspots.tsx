@@ -6,6 +6,7 @@ import { tx, LOCALE, type Lang } from "@/lib/office/i18n";
 import s from "./office.module.css";
 import { DashChat, type DashFacts } from "./DashChat";
 import { NextPanel } from "./NextDashboard";
+import { VpPanel } from "./OfficeFile";
 import { dailySeries, hourlyToday, lastDays, dayLabel, weekdayShort, isWeekend, sum, avg, fmtInt, fmtK, fmtMoney, Delta, Spark, LineChart, BarChart, Donut, Legend, ChartCard } from "./charts";
 
 type Range = "hoy" | "7d" | "30d";
@@ -51,6 +52,7 @@ export function hotspotMeta(lang: Lang, brandKey?: string): Record<string, Hotsp
   const t = tx(lang);
   const usfq = brandKey === "usfq";
   return {
+    vp: { icon: "🏛️", title: t("Vicepresidencia · gestión", "Vice-presidency · management"), subtitle: t("Oficinas, presupuesto, solicitudes y alertas · datos demo", "Offices, budget, requests and alerts · demo data"), color: "#f7c4b6" },
     next: { icon: "🎓", title: "USFQ NEXT", subtitle: t("Donaciones por vertical, donantes y proyectos", "Donations by vertical, donors and projects"), color: "#ffd0d6" },
     board: { icon: "📋", title: t("Tablero de tareas", "Task board"), subtitle: t("Qué está haciendo cada empleado IA", "What each AI employee is working on"), color: "#d9f2e6" },
     tv: usfq
@@ -988,6 +990,7 @@ function LoungePanel({ events, status, onOpenBot, lang }: PanelProps) {
 
 export function HotspotPanel({ id, ...rest }: { id: string } & PanelProps) {
   switch (id) {
+    case "vp": return <VpPanel lang={rest.lang} />;
     case "next": return <NextPanel lang={rest.lang} analyst={rest.analyst ?? "andrade"} />;
     case "board": return <BoardPanel {...rest} />;
     case "tv": return rest.brandKey === "usfq" ? <NextPanel lang={rest.lang} analyst={rest.analyst ?? "andrade"} /> : <TvPanel {...rest} />;

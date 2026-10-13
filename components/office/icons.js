@@ -16,6 +16,7 @@ export const ICONS = {
   pingpong: wrap('<ellipse cx="13.5" cy="9" rx="5.6" ry="6.4" transform="rotate(-30 13.5 9)"/><path d="M9.8 14.6L5.2 20"/><circle cx="5.2" cy="7.4" r="1.6"/>'),
   reception: wrap('<path d="M5 17a7 7 0 0 1 14 0z"/><path d="M12 10V7.8"/><circle cx="12" cy="6.6" r="1.1"/><path d="M3.5 19.5h17"/>'),
   meeting: wrap('<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14" r="0.9" fill="currentColor"/><circle cx="12" cy="14" r="0.9" fill="currentColor"/><circle cx="15.5" cy="14" r="0.9" fill="currentColor"/>'),
+  vp: wrap('<rect x="9" y="3" width="6" height="4" rx="1"/><rect x="3" y="15" width="6" height="4" rx="1"/><rect x="15" y="15" width="6" height="4" rx="1"/><path d="M12 7v4M6 15v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/>'),
   next: wrap('<path d="M12 4.5l9.5 4.2L12 12.9 2.5 8.7z"/><path d="M6 10.5v5c0 1.4 2.7 2.8 6 2.8s6-1.4 6-2.8v-5"/><path d="M21.5 8.7v5.3"/><circle cx="21.5" cy="15.6" r="0.9" fill="currentColor"/>'),
   // HUD and room icons
   team: wrap('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9" r="2.6"/><path d="M15.5 14.2a5 5 0 0 1 5 5.3"/>'),

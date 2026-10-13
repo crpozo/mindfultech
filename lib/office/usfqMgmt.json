@@ -1,0 +1,1184 @@
+{
+  "dataset": "USFQ - Vicepresidencia Comercial y Desarrollo - Datos demo para Office Management IA",
+  "version": "1.0",
+  "fecha_corte": "2026-10-13",
+  "moneda": "USD",
+  "naturaleza": "100% SIMULACIÓN. Los montos, KPI, presupuestos, proyectos, fechas, equipo, alertas y solicitudes no representan registros institucionales reales.",
+  "nota_organigrama": "Las dependencias se basan en la fotografía adjunta. Las etiquetas o responsables de baja legibilidad deben confirmarse antes de usar como datos reales.",
+  "vicepresidencia": {
+    "id": "VP-CD-001",
+    "nombre": "Vicepresidencia Comercial y Desarrollo",
+    "responsable": "Alexandra Velasco",
+    "resumen": "Coordina captación y relacionamiento institucional, alianzas, comunicación, programas internacionales, formación continua e innovación educativa.",
+    "oficinas_principales": 6,
+    "subunidades": 2,
+    "colaboradores_simulados_total": 70,
+    "presupuesto_operativo_anual_usd": 2575000,
+    "gasto_operativo_acumulado_usd": 1845000,
+    "saldo_operativo_usd": 730000,
+    "ejecucion_presupuestaria_porcentaje": 71.7,
+    "solicitudes_abiertas_consolidadas": 163,
+    "ingresos_operacionales_registrados_simulados_usd": 3890000,
+    "donaciones_monetarias_recibidas_simuladas_usd": 312000,
+    "nota_consolidacion": "Dirección Comercial ya incluye los presupuestos de Admisiones y Relaciones Públicas y Eventos; para totales sumar solo las seis oficinas principales. No mezclar ingresos operacionales con donaciones o pipeline."
+  },
+  "interfaz_sugerida": {
+    "accion_click": "Abrir ficha lateral o modal por oficina, filtrada por su id.",
+    "pestanas": [
+      "Resumen",
+      "Qué hace",
+      "Indicadores",
+      "Finanzas",
+      "Proyectos",
+      "Solicitudes",
+      "Alertas y tareas",
+      "Preguntar a la IA"
+    ],
+    "reglas": [
+      "Mostrar un aviso visible Datos de demostración en todas las pantallas.",
+      "Usar la relación id_oficina_superior para construir el organigrama.",
+      "La ficha del jefe consolida únicamente presupuestos de hijos cuando están incluidos en él; nunca duplicar los mismos montos.",
+      "El asistente IA debe responder desde el JSON sin inventar cifras o atribuir la simulación a la USFQ real.",
+      "Destacar tareas con vencimiento y solicitudes vencidas antes de mostrar recomendaciones."
+    ]
+  },
+  "oficinas": [
+    {
+      "id": "COM-001",
+      "nombre": "Dirección Comercial",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "direccion",
+      "responsable": "Martín Borja",
+      "nota_responsable": null,
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Coordinar las estrategias comerciales y de relacionamiento que contribuyen a atraer, convertir y fidelizar públicos de la universidad.",
+      "que_hace": [
+        "Definir y monitorear planes comerciales y metas de captación.",
+        "Coordinar campañas, admisiones y eventos de promoción.",
+        "Analizar el embudo de prospectos y oportunidades.",
+        "Gestionar presupuestos, proveedores y reportes para la Vicepresidencia."
+      ],
+      "servicios_principales": [
+        "Definir y monitorear planes comerciales y metas de captación.",
+        "Coordinar campañas, admisiones y eventos de promoción.",
+        "Analizar el embudo de prospectos y oportunidades.",
+        "Gestionar presupuestos, proveedores y reportes para la Vicepresidencia."
+      ],
+      "usuarios_o_publicos": [
+        "Prospectos",
+        "Familias",
+        "Colegios",
+        "Aliados estratégicos",
+        "Autoridades USFQ"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 5,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 720000,
+        "gasto_acumulado_2026_usd": 533000,
+        "saldo_operativo_usd": 187000,
+        "ejecucion_presupuestaria_porcentaje": 74.0,
+        "indicadores_financieros_especificos": {
+          "observacion": "El presupuesto y el gasto de esta dirección INCLUYEN Admisiones y Relaciones Públicas y Eventos; no sumar estos nodos nuevamente.",
+          "presupuesto_directo_direccion_usd": 100000,
+          "gasto_directo_direccion_usd": 68000,
+          "presupuesto_admisiones_usd": 440000,
+          "gasto_admisiones_usd": 326000,
+          "presupuesto_relaciones_eventos_usd": 180000,
+          "gasto_relaciones_eventos_usd": 139000
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Prospectos canalizados",
+          "valor_actual": 2900,
+          "meta_anual": 3400,
+          "unidad": "personas",
+          "descripcion": "Contactos gestionados en el embudo institucional.",
+          "cumplimiento_porcentaje": 85.3
+        },
+        {
+          "nombre": "Oportunidades comerciales calificadas",
+          "valor_actual": 78,
+          "meta_anual": 100,
+          "unidad": "oportunidades",
+          "descripcion": "Oportunidades validadas por prioridad y potencial.",
+          "cumplimiento_porcentaje": 78.0
+        },
+        {
+          "nombre": "Cumplimiento de acuerdos de servicio",
+          "valor_actual": 92,
+          "meta_anual": 95,
+          "unidad": "porcentaje",
+          "descripcion": "Solicitudes atendidas dentro del SLA.",
+          "cumplimiento_porcentaje": 96.8
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "COM-P01",
+          "nombre": "CRM comercial integrado",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 68,
+          "costo_operativo_estimado_usd": 60000,
+          "proximo_hito": "Validar segmentación y tableros",
+          "fecha_proximo_hito": "2026-10-21",
+          "resultado_esperado": "Trazabilidad integral de oportunidades."
+        },
+        {
+          "id": "COM-P02",
+          "nombre": "Plan de captación institucional 2027",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 73,
+          "costo_operativo_estimado_usd": 35000,
+          "proximo_hito": "Presentar propuesta a la Vicepresidencia",
+          "fecha_proximo_hito": "2026-10-20",
+          "resultado_esperado": "Incrementar oportunidades y conversiones."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 15,
+        "de_las_abiertas_vencidas": 2,
+        "resueltas_en_octubre": 41
+      },
+      "alertas": [
+        {
+          "nivel": "media",
+          "descripcion": "Se requiere homologar definiciones de prospecto y lead entre unidades."
+        },
+        {
+          "nivel": "alta",
+          "descripcion": "Dos entregables de proveedores presentan retraso."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Presentar tablero consolidado comercial",
+          "fecha_limite": "2026-10-16",
+          "prioridad": "alta",
+          "responsable_rol": "Dirección Comercial",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Revisar metas de captación 2027",
+          "fecha_limite": "2026-10-20",
+          "prioridad": "media",
+          "responsable_rol": "Planificación",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Aprobar un modelo común de clasificación de leads."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Dirección Comercial y a quién atiende?",
+        "¿Qué indicadores de Dirección Comercial están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Dirección Comercial?"
+      ]
+    },
+    {
+      "id": "ADM-001",
+      "nombre": "Admisiones",
+      "id_oficina_superior": "COM-001",
+      "nivel": "subunidad",
+      "responsable": null,
+      "nota_responsable": "Nombre de la dirección no legible con certeza en la imagen; validar.",
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Acompañar a futuros estudiantes en el proceso de información, postulación, admisión y matrícula.",
+      "que_hace": [
+        "Atender y orientar prospectos de pregrado.",
+        "Gestionar postulaciones y documentos.",
+        "Organizar sesiones informativas y visitas de campus.",
+        "Analizar conversión, deserción del embudo y fuentes de captación."
+      ],
+      "servicios_principales": [
+        "Atender y orientar prospectos de pregrado.",
+        "Gestionar postulaciones y documentos.",
+        "Organizar sesiones informativas y visitas de campus.",
+        "Analizar conversión, deserción del embudo y fuentes de captación."
+      ],
+      "usuarios_o_publicos": [
+        "Postulantes",
+        "Familias",
+        "Colegios",
+        "Facultades"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 12,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 440000,
+        "gasto_acumulado_2026_usd": 326000,
+        "saldo_operativo_usd": 114000,
+        "ejecucion_presupuestaria_porcentaje": 74.1,
+        "indicadores_financieros_especificos": {
+          "observacion": "Presupuesto y gasto ya están incorporados en los totales de Dirección Comercial."
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Prospectos atendidos",
+          "valor_actual": 5100,
+          "meta_anual": 6000,
+          "unidad": "personas",
+          "descripcion": "Personas que recibieron información institucional.",
+          "cumplimiento_porcentaje": 85.0
+        },
+        {
+          "nombre": "Postulaciones recibidas",
+          "valor_actual": 3200,
+          "meta_anual": 3800,
+          "unidad": "postulaciones",
+          "descripcion": "Solicitudes ingresadas en el sistema.",
+          "cumplimiento_porcentaje": 84.2
+        },
+        {
+          "nombre": "Estudiantes admitidos",
+          "valor_actual": 1900,
+          "meta_anual": 2250,
+          "unidad": "personas",
+          "descripcion": "Postulantes con respuesta favorable.",
+          "cumplimiento_porcentaje": 84.4
+        },
+        {
+          "nombre": "Estudiantes matriculados",
+          "valor_actual": 1420,
+          "meta_anual": 1550,
+          "unidad": "personas",
+          "descripcion": "Estudiantes que completaron su matrícula.",
+          "cumplimiento_porcentaje": 91.6
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "ADM-P01",
+          "nombre": "Automatización del seguimiento a postulantes",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 61,
+          "costo_operativo_estimado_usd": 95000,
+          "proximo_hito": "Probar secuencias de comunicación",
+          "fecha_proximo_hito": "2026-10-19",
+          "resultado_esperado": "Mejorar tiempos de respuesta y conversión."
+        },
+        {
+          "id": "ADM-P02",
+          "nombre": "Programa de visitas para colegios",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 80,
+          "costo_operativo_estimado_usd": 50000,
+          "proximo_hito": "Realizar siguiente jornada de campus",
+          "fecha_proximo_hito": "2026-10-23",
+          "resultado_esperado": "Aumentar interacción temprana con estudiantes."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 48,
+        "de_las_abiertas_vencidas": 7,
+        "resueltas_en_octubre": 232
+      },
+      "alertas": [
+        {
+          "nivel": "alta",
+          "descripcion": "Siete solicitudes de postulantes superaron el plazo interno."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "La matrícula acumulada está por debajo de la meta anual."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Depurar expedientes pendientes",
+          "fecha_limite": "2026-10-15",
+          "prioridad": "alta",
+          "responsable_rol": "Equipo de Admisiones",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Enviar informe de conversión por colegio",
+          "fecha_limite": "2026-10-21",
+          "prioridad": "media",
+          "responsable_rol": "Analista de datos",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Priorizar automatización de seguimientos de interesados."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Admisiones y a quién atiende?",
+        "¿Qué indicadores de Admisiones están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Admisiones?"
+      ]
+    },
+    {
+      "id": "REL-001",
+      "nombre": "Relaciones Públicas y Eventos",
+      "id_oficina_superior": "COM-001",
+      "nivel": "subunidad",
+      "responsable": null,
+      "nota_responsable": "Denominación normalizada para la demo; confirmar el rótulo exacto del organigrama.",
+      "estado_semaforo": "verde",
+      "descripcion_funcional": "Planificar eventos y acciones de relacionamiento que fortalezcan la presencia institucional de la USFQ.",
+      "que_hace": [
+        "Coordinar eventos institucionales y protocolarios.",
+        "Gestionar invitados, aliados y logística.",
+        "Articular relaciones públicas y difusión de eventos.",
+        "Medir asistencia, satisfacción y resultados de activaciones."
+      ],
+      "servicios_principales": [
+        "Coordinar eventos institucionales y protocolarios.",
+        "Gestionar invitados, aliados y logística.",
+        "Articular relaciones públicas y difusión de eventos.",
+        "Medir asistencia, satisfacción y resultados de activaciones."
+      ],
+      "usuarios_o_publicos": [
+        "Comunidad universitaria",
+        "Medios",
+        "Aliados",
+        "Invitados externos"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 6,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 180000,
+        "gasto_acumulado_2026_usd": 139000,
+        "saldo_operativo_usd": 41000,
+        "ejecucion_presupuestaria_porcentaje": 77.2,
+        "indicadores_financieros_especificos": {
+          "observacion": "Presupuesto y gasto ya están incorporados en los totales de Dirección Comercial."
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Eventos ejecutados",
+          "valor_actual": 52,
+          "meta_anual": 64,
+          "unidad": "eventos",
+          "descripcion": "Eventos realizados en el año.",
+          "cumplimiento_porcentaje": 81.2
+        },
+        {
+          "nombre": "Asistencia acumulada",
+          "valor_actual": 25600,
+          "meta_anual": 30000,
+          "unidad": "asistentes",
+          "descripcion": "Participantes registrados en las actividades.",
+          "cumplimiento_porcentaje": 85.3
+        },
+        {
+          "nombre": "Satisfacción de asistentes",
+          "valor_actual": 91,
+          "meta_anual": 90,
+          "unidad": "porcentaje",
+          "descripcion": "Promedio de encuestas positivas.",
+          "cumplimiento_porcentaje": 101.1
+        },
+        {
+          "nombre": "Menciones en medios",
+          "valor_actual": 190,
+          "meta_anual": 225,
+          "unidad": "menciones",
+          "descripcion": "Cobertura acumulada vinculada a actividades.",
+          "cumplimiento_porcentaje": 84.4
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "REL-P01",
+          "nombre": "Calendario de eventos institucionales 2026",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 81,
+          "costo_operativo_estimado_usd": 70000,
+          "proximo_hito": "Revisar agenda de noviembre",
+          "fecha_proximo_hito": "2026-10-20",
+          "resultado_esperado": "Evitar solapamientos y optimizar la logística."
+        },
+        {
+          "id": "REL-P02",
+          "nombre": "Protocolo de eventos sostenibles",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 54,
+          "costo_operativo_estimado_usd": 45000,
+          "proximo_hito": "Validar criterios con proveedores",
+          "fecha_proximo_hito": "2026-10-22",
+          "resultado_esperado": "Reducir residuos y costos logísticos."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 11,
+        "de_las_abiertas_vencidas": 1,
+        "resueltas_en_octubre": 35
+      },
+      "alertas": [
+        {
+          "nivel": "media",
+          "descripcion": "Una confirmación de proveedor está vencida."
+        },
+        {
+          "nivel": "baja",
+          "descripcion": "Las evaluaciones de satisfacción superan la meta."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Cerrar cotizaciones de evento académico",
+          "fecha_limite": "2026-10-16",
+          "prioridad": "media",
+          "responsable_rol": "Producción de eventos",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Publicar guía de protocolo",
+          "fecha_limite": "2026-10-22",
+          "prioridad": "baja",
+          "responsable_rol": "Relaciones públicas",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Aprobar una lista homologada de proveedores de eventos."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Relaciones Públicas y Eventos y a quién atiende?",
+        "¿Qué indicadores de Relaciones Públicas y Eventos están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Relaciones Públicas y Eventos?"
+      ]
+    },
+    {
+      "id": "NEXT-001",
+      "nombre": "USFQ Next",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "direccion",
+      "responsable": null,
+      "nota_responsable": "En el organigrama proporcionado figura N/A; campo editable para el prototipo.",
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Movilizar recursos filantrópicos y construir alianzas para financiar iniciativas estratégicas de la universidad.",
+      "que_hace": [
+        "Identificar, segmentar y relacionarse con potenciales donantes y aliados.",
+        "Vincular intereses de financiadores con proyectos universitarios.",
+        "Gestionar pipeline, propuestas, acuerdos, donaciones y reportes de impacto.",
+        "Coordinar reconocimiento, seguimiento y fidelización de donantes."
+      ],
+      "servicios_principales": [
+        "Identificar, segmentar y relacionarse con potenciales donantes y aliados.",
+        "Vincular intereses de financiadores con proyectos universitarios.",
+        "Gestionar pipeline, propuestas, acuerdos, donaciones y reportes de impacto.",
+        "Coordinar reconocimiento, seguimiento y fidelización de donantes."
+      ],
+      "usuarios_o_publicos": [
+        "Donantes individuales",
+        "Empresas",
+        "Fundaciones",
+        "Áreas académicas y de impacto",
+        "Alumni"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 8,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 360000,
+        "gasto_acumulado_2026_usd": 248000,
+        "saldo_operativo_usd": 112000,
+        "ejecucion_presupuestaria_porcentaje": 68.9,
+        "indicadores_financieros_especificos": {
+          "donaciones_monetarias_recibidas_usd": 312000,
+          "donaciones_en_especie_valorizadas_usd": 68000,
+          "pipeline_potencial_usd": 1450000,
+          "meta_anual_donaciones_usd": 600000,
+          "importante": "No sumar pipeline o especie como ingreso en caja. Donaciones separadas del presupuesto operativo."
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Donaciones monetarias recibidas",
+          "valor_actual": 312000,
+          "meta_anual": 600000,
+          "unidad": "USD",
+          "descripcion": "Fondos efectivamente recibidos, excluye promesas y pipeline.",
+          "cumplimiento_porcentaje": 52.0
+        },
+        {
+          "nombre": "Pipeline de potenciales aportes",
+          "valor_actual": 1450000,
+          "meta_anual": 2000000,
+          "unidad": "USD",
+          "descripcion": "Monto potencial, no representa ingresos cobrados.",
+          "cumplimiento_porcentaje": 72.5
+        },
+        {
+          "nombre": "Prospectos activos",
+          "valor_actual": 42,
+          "meta_anual": 50,
+          "unidad": "prospectos",
+          "descripcion": "Contactos calificados con gestión en curso.",
+          "cumplimiento_porcentaje": 84.0
+        },
+        {
+          "nombre": "Propuestas presentadas",
+          "valor_actual": 18,
+          "meta_anual": 30,
+          "unidad": "propuestas",
+          "descripcion": "Propuestas enviadas a posibles aliados.",
+          "cumplimiento_porcentaje": 60.0
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "NEXT-P01",
+          "nombre": "TUERI: fortalecimiento del hospital de fauna silvestre",
+          "estado": "en_negociacion",
+          "avance_porcentaje": 45,
+          "costo_operativo_estimado_usd": 30000,
+          "proximo_hito": "Revisar condiciones de financiamiento",
+          "fecha_proximo_hito": "2026-10-21",
+          "resultado_esperado": "Buscar fondos para infraestructura y capacidad de atención."
+        },
+        {
+          "id": "NEXT-P02",
+          "nombre": "Alianzas para brigadas de salud comunitaria",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 82,
+          "costo_operativo_estimado_usd": 22000,
+          "proximo_hito": "Confirmar aportes logísticos",
+          "fecha_proximo_hito": "2026-10-19",
+          "resultado_esperado": "Movilizar recursos para atención médica comunitaria."
+        },
+        {
+          "id": "NEXT-P03",
+          "nombre": "Fondo de becas y permanencia estudiantil",
+          "estado": "en_diseno",
+          "avance_porcentaje": 34,
+          "costo_operativo_estimado_usd": 18000,
+          "proximo_hito": "Validar narrativa y beneficiarios",
+          "fecha_proximo_hito": "2026-10-23",
+          "resultado_esperado": "Ampliar apoyo económico a estudiantes."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 12,
+        "de_las_abiertas_vencidas": 3,
+        "resueltas_en_octubre": 27
+      },
+      "alertas": [
+        {
+          "nivel": "alta",
+          "descripcion": "Tres propuestas requieren seguimiento prioritario."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "Dos reportes de impacto próximos a vencer."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "La meta de donaciones recibidas está al 52%."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Enviar seguimiento a tres prospectos de alto potencial",
+          "fecha_limite": "2026-10-15",
+          "prioridad": "alta",
+          "responsable_rol": "Desarrollo de donantes",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Consolidar reporte de impacto de donaciones",
+          "fecha_limite": "2026-10-20",
+          "prioridad": "alta",
+          "responsable_rol": "Stewardship",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Priorizar propuestas con alta probabilidad de cierre.",
+        "Aprobar criterios de valoración del pipeline."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace USFQ Next y a quién atiende?",
+        "¿Qué indicadores de USFQ Next están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de USFQ Next?"
+      ]
+    },
+    {
+      "id": "COMMS-001",
+      "nombre": "Comunicación",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "coordinacion",
+      "responsable": "Cristina Calderón",
+      "nota_responsable": null,
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Desarrollar y coordinar contenidos, campañas y comunicaciones alineadas con la identidad institucional.",
+      "que_hace": [
+        "Producir campañas y contenidos institucionales.",
+        "Gestionar redes sociales, canales y cobertura digital.",
+        "Atender requerimientos de comunicación de áreas académicas y administrativas.",
+        "Medir alcance, interacción, reputación y cumplimiento de entregables."
+      ],
+      "servicios_principales": [
+        "Producir campañas y contenidos institucionales.",
+        "Gestionar redes sociales, canales y cobertura digital.",
+        "Atender requerimientos de comunicación de áreas académicas y administrativas.",
+        "Medir alcance, interacción, reputación y cumplimiento de entregables."
+      ],
+      "usuarios_o_publicos": [
+        "Estudiantes",
+        "Colaboradores",
+        "Públicos externos",
+        "Áreas USFQ"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 9,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 410000,
+        "gasto_acumulado_2026_usd": 297000,
+        "saldo_operativo_usd": 113000,
+        "ejecucion_presupuestaria_porcentaje": 72.4,
+        "indicadores_financieros_especificos": {}
+      },
+      "kpis": [
+        {
+          "nombre": "Alcance digital acumulado",
+          "valor_actual": 2350000,
+          "meta_anual": 3000000,
+          "unidad": "personas",
+          "descripcion": "Alcance agregado de campañas y canales.",
+          "cumplimiento_porcentaje": 78.3
+        },
+        {
+          "nombre": "Tasa de interacción",
+          "valor_actual": 5.8,
+          "meta_anual": 5.5,
+          "unidad": "porcentaje",
+          "descripcion": "Interacciones sobre alcance de publicaciones.",
+          "cumplimiento_porcentaje": 105.5
+        },
+        {
+          "nombre": "Campañas publicadas",
+          "valor_actual": 21,
+          "meta_anual": 27,
+          "unidad": "campañas",
+          "descripcion": "Campañas activadas en el periodo.",
+          "cumplimiento_porcentaje": 77.8
+        },
+        {
+          "nombre": "Solicitudes en plazo",
+          "valor_actual": 87,
+          "meta_anual": 95,
+          "unidad": "porcentaje",
+          "descripcion": "Solicitudes resueltas dentro de plazo.",
+          "cumplimiento_porcentaje": 91.6
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "COMMS-P01",
+          "nombre": "Campaña institucional de posicionamiento",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 76,
+          "costo_operativo_estimado_usd": 110000,
+          "proximo_hito": "Lanzar siguiente pauta digital",
+          "fecha_proximo_hito": "2026-10-17",
+          "resultado_esperado": "Fortalecer conocimiento de marca y alcance."
+        },
+        {
+          "id": "COMMS-P02",
+          "nombre": "Biblioteca de contenidos institucionales",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 57,
+          "costo_operativo_estimado_usd": 60000,
+          "proximo_hito": "Aprobar estructura de etiquetas",
+          "fecha_proximo_hito": "2026-10-22",
+          "resultado_esperado": "Reutilizar materiales y reducir tiempos de producción."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 22,
+        "de_las_abiertas_vencidas": 4,
+        "resueltas_en_octubre": 87
+      },
+      "alertas": [
+        {
+          "nivel": "alta",
+          "descripcion": "Cuatro solicitudes de diseño y contenidos se encuentran vencidas."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "Se requiere equilibrar demanda de campañas y capacidad de diseño."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Aprobar calendario editorial",
+          "fecha_limite": "2026-10-15",
+          "prioridad": "alta",
+          "responsable_rol": "Coordinación de Comunicación",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Entregar reporte de campañas",
+          "fecha_limite": "2026-10-20",
+          "prioridad": "media",
+          "responsable_rol": "Analítica digital",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Definir criterio de priorización de pedidos urgentes."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Comunicación y a quién atiende?",
+        "¿Qué indicadores de Comunicación están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Comunicación?"
+      ]
+    },
+    {
+      "id": "INTL-001",
+      "nombre": "Programas Internacionales",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "direccion",
+      "responsable": "Kiara Guerra",
+      "nota_responsable": null,
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Fortalecer oportunidades académicas globales y gestionar la relación con instituciones internacionales.",
+      "que_hace": [
+        "Administrar convenios y relaciones con universidades aliadas.",
+        "Coordinar movilidad entrante y saliente.",
+        "Gestionar programas internacionales y atención a estudiantes.",
+        "Monitorear servicios, ingresos, satisfacción y cumplimiento de convenios."
+      ],
+      "servicios_principales": [
+        "Administrar convenios y relaciones con universidades aliadas.",
+        "Coordinar movilidad entrante y saliente.",
+        "Gestionar programas internacionales y atención a estudiantes.",
+        "Monitorear servicios, ingresos, satisfacción y cumplimiento de convenios."
+      ],
+      "usuarios_o_publicos": [
+        "Estudiantes internacionales",
+        "Estudiantes USFQ",
+        "Universidades socias",
+        "Facultades"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 14,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 520000,
+        "gasto_acumulado_2026_usd": 379000,
+        "saldo_operativo_usd": 141000,
+        "ejecucion_presupuestaria_porcentaje": 72.9,
+        "indicadores_financieros_especificos": {
+          "ingresos_operacionales_simulados_usd": 3050000,
+          "meta_anual_ingresos_usd": 4000000,
+          "importante": "Ingresos brutos del programa y presupuesto operativo son métricas diferentes."
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Convenios activos",
+          "valor_actual": 142,
+          "meta_anual": 155,
+          "unidad": "convenios",
+          "descripcion": "Acuerdos institucionales vigentes.",
+          "cumplimiento_porcentaje": 91.6
+        },
+        {
+          "nombre": "Estudiantes internacionales entrantes",
+          "valor_actual": 220,
+          "meta_anual": 250,
+          "unidad": "estudiantes",
+          "descripcion": "Movilidad académica recibida.",
+          "cumplimiento_porcentaje": 88.0
+        },
+        {
+          "nombre": "Estudiantes USFQ salientes",
+          "valor_actual": 175,
+          "meta_anual": 210,
+          "unidad": "estudiantes",
+          "descripcion": "Movilidad de estudiantes USFQ.",
+          "cumplimiento_porcentaje": 83.3
+        },
+        {
+          "nombre": "Ingresos de programas",
+          "valor_actual": 3050000,
+          "meta_anual": 4000000,
+          "unidad": "USD",
+          "descripcion": "Facturación vinculada a servicios internacionales.",
+          "cumplimiento_porcentaje": 76.2
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "INTL-P01",
+          "nombre": "Renovación priorizada de convenios",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 72,
+          "costo_operativo_estimado_usd": 85000,
+          "proximo_hito": "Actualizar matriz de renovaciones",
+          "fecha_proximo_hito": "2026-10-19",
+          "resultado_esperado": "Reducir vencimientos sin gestión."
+        },
+        {
+          "id": "INTL-P02",
+          "nombre": "Portal de servicios para estudiantes visitantes",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 48,
+          "costo_operativo_estimado_usd": 65000,
+          "proximo_hito": "Validar prototipo con usuarios",
+          "fecha_proximo_hito": "2026-10-23",
+          "resultado_esperado": "Simplificar solicitudes y mejorar la experiencia."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 31,
+        "de_las_abiertas_vencidas": 5,
+        "resueltas_en_octubre": 66
+      },
+      "alertas": [
+        {
+          "nivel": "alta",
+          "descripcion": "Cinco trámites de convenios están por encima de su SLA."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "La proyección de movilidad saliente requiere acciones de promoción."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Consolidar acuerdos que requieren renovación",
+          "fecha_limite": "2026-10-16",
+          "prioridad": "alta",
+          "responsable_rol": "Gestión de convenios",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Actualizar proyección de participantes",
+          "fecha_limite": "2026-10-21",
+          "prioridad": "media",
+          "responsable_rol": "Programas internacionales",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Priorizar socios académicos para nuevas negociaciones."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Programas Internacionales y a quién atiende?",
+        "¿Qué indicadores de Programas Internacionales están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Programas Internacionales?"
+      ]
+    },
+    {
+      "id": "EDC-001",
+      "nombre": "Educación Continua",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "direccion",
+      "responsable": null,
+      "nota_responsable": "Nombre de responsable pendiente de confirmación de la imagen.",
+      "estado_semaforo": "amarillo",
+      "descripcion_funcional": "Diseñar y ofrecer opciones de formación continua que respondan a necesidades profesionales, empresariales y sociales.",
+      "que_hace": [
+        "Diseñar cursos, certificados y programas de actualización.",
+        "Gestionar inscripciones, docentes y calendario académico.",
+        "Desarrollar ofertas para empresas e instituciones.",
+        "Evaluar satisfacción, finalización e ingresos de programas."
+      ],
+      "servicios_principales": [
+        "Diseñar cursos, certificados y programas de actualización.",
+        "Gestionar inscripciones, docentes y calendario académico.",
+        "Desarrollar ofertas para empresas e instituciones.",
+        "Evaluar satisfacción, finalización e ingresos de programas."
+      ],
+      "usuarios_o_publicos": [
+        "Profesionales",
+        "Empresas",
+        "Egresados",
+        "Docentes externos"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 10,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 355000,
+        "gasto_acumulado_2026_usd": 242000,
+        "saldo_operativo_usd": 113000,
+        "ejecucion_presupuestaria_porcentaje": 68.2,
+        "indicadores_financieros_especificos": {
+          "ingresos_operacionales_simulados_usd": 840000,
+          "meta_anual_ingresos_usd": 1200000
+        }
+      },
+      "kpis": [
+        {
+          "nombre": "Programas ofrecidos",
+          "valor_actual": 42,
+          "meta_anual": 55,
+          "unidad": "programas",
+          "descripcion": "Oferta ejecutada durante 2026.",
+          "cumplimiento_porcentaje": 76.4
+        },
+        {
+          "nombre": "Participantes inscritos",
+          "valor_actual": 890,
+          "meta_anual": 1100,
+          "unidad": "personas",
+          "descripcion": "Participantes inscritos acumulados.",
+          "cumplimiento_porcentaje": 80.9
+        },
+        {
+          "nombre": "Ingresos por programas",
+          "valor_actual": 840000,
+          "meta_anual": 1200000,
+          "unidad": "USD",
+          "descripcion": "Facturación acumulada de educación continua.",
+          "cumplimiento_porcentaje": 70.0
+        },
+        {
+          "nombre": "Satisfacción de participantes",
+          "valor_actual": 92,
+          "meta_anual": 90,
+          "unidad": "porcentaje",
+          "descripcion": "Evaluaciones positivas de la experiencia.",
+          "cumplimiento_porcentaje": 102.2
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "EDC-P01",
+          "nombre": "Portafolio corporativo 2027",
+          "estado": "en_diseno",
+          "avance_porcentaje": 46,
+          "costo_operativo_estimado_usd": 35000,
+          "proximo_hito": "Validar programas con empresas",
+          "fecha_proximo_hito": "2026-10-21",
+          "resultado_esperado": "Ampliar demanda de formación ejecutiva."
+        },
+        {
+          "id": "EDC-P02",
+          "nombre": "Inscripción y pagos digitales",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 70,
+          "costo_operativo_estimado_usd": 40000,
+          "proximo_hito": "Realizar prueba de flujo de pago",
+          "fecha_proximo_hito": "2026-10-16",
+          "resultado_esperado": "Reducir fricción para participantes."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 15,
+        "de_las_abiertas_vencidas": 2,
+        "resueltas_en_octubre": 48
+      },
+      "alertas": [
+        {
+          "nivel": "media",
+          "descripcion": "Dos propuestas corporativas requieren aprobación de precios."
+        },
+        {
+          "nivel": "media",
+          "descripcion": "La meta de ingresos necesita mayor ritmo de apertura de cohortes."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Cerrar presupuesto de nuevos cursos",
+          "fecha_limite": "2026-10-17",
+          "prioridad": "alta",
+          "responsable_rol": "Dirección Académica Continua",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Confirmar docentes de siguiente cohorte",
+          "fecha_limite": "2026-10-22",
+          "prioridad": "media",
+          "responsable_rol": "Coordinación Académica",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Aprobar criterios de precio para formación in-company."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace Educación Continua y a quién atiende?",
+        "¿Qué indicadores de Educación Continua están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de Educación Continua?"
+      ]
+    },
+    {
+      "id": "IDEA-001",
+      "nombre": "IDEA",
+      "id_oficina_superior": "VP-CD-001",
+      "nivel": "direccion",
+      "responsable": null,
+      "nota_responsable": "Nombre de dirección poco legible en la imagen; confirmar.",
+      "estado_semaforo": "verde",
+      "descripcion_funcional": "Impulsar buenas prácticas de enseñanza, innovación pedagógica y desarrollo de competencias docentes.",
+      "que_hace": [
+        "Ofrecer capacitación y acompañamiento docente.",
+        "Asesorar en diseño y mejora de experiencias de aprendizaje.",
+        "Promover herramientas digitales y metodologías activas.",
+        "Evaluar la adopción y satisfacción de iniciativas formativas."
+      ],
+      "servicios_principales": [
+        "Ofrecer capacitación y acompañamiento docente.",
+        "Asesorar en diseño y mejora de experiencias de aprendizaje.",
+        "Promover herramientas digitales y metodologías activas.",
+        "Evaluar la adopción y satisfacción de iniciativas formativas."
+      ],
+      "usuarios_o_publicos": [
+        "Profesores USFQ",
+        "Coordinaciones académicas",
+        "Facultades"
+      ],
+      "equipo": {
+        "personas_adscritas_directamente": 6,
+        "perfiles_referenciales": [
+          "coordinacion",
+          "analisis",
+          "operaciones"
+        ]
+      },
+      "finanzas": {
+        "presupuesto_operativo_2026_usd": 210000,
+        "gasto_acumulado_2026_usd": 146000,
+        "saldo_operativo_usd": 64000,
+        "ejecucion_presupuestaria_porcentaje": 69.5,
+        "indicadores_financieros_especificos": {}
+      },
+      "kpis": [
+        {
+          "nombre": "Docentes capacitados",
+          "valor_actual": 260,
+          "meta_anual": 350,
+          "unidad": "docentes",
+          "descripcion": "Profesores participantes de formación.",
+          "cumplimiento_porcentaje": 74.3
+        },
+        {
+          "nombre": "Talleres ejecutados",
+          "valor_actual": 38,
+          "meta_anual": 50,
+          "unidad": "talleres",
+          "descripcion": "Sesiones formativas impartidas.",
+          "cumplimiento_porcentaje": 76.0
+        },
+        {
+          "nombre": "Cursos rediseñados",
+          "valor_actual": 32,
+          "meta_anual": 45,
+          "unidad": "cursos",
+          "descripcion": "Asignaturas acompañadas con cambios pedagógicos.",
+          "cumplimiento_porcentaje": 71.1
+        },
+        {
+          "nombre": "Satisfacción docente",
+          "valor_actual": 94,
+          "meta_anual": 92,
+          "unidad": "porcentaje",
+          "descripcion": "Satisfacción general de los participantes.",
+          "cumplimiento_porcentaje": 102.2
+        }
+      ],
+      "proyectos": [
+        {
+          "id": "IDEA-P01",
+          "nombre": "Programa de innovación pedagógica",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 79,
+          "costo_operativo_estimado_usd": 45000,
+          "proximo_hito": "Publicar materiales del siguiente módulo",
+          "fecha_proximo_hito": "2026-10-20",
+          "resultado_esperado": "Formación y actualización metodológica docente."
+        },
+        {
+          "id": "IDEA-P02",
+          "nombre": "Laboratorio de evaluación del aprendizaje",
+          "estado": "en_ejecucion",
+          "avance_porcentaje": 58,
+          "costo_operativo_estimado_usd": 35000,
+          "proximo_hito": "Concluir piloto con tres facultades",
+          "fecha_proximo_hito": "2026-10-22",
+          "resultado_esperado": "Fortalecer herramientas de evaluación y retroalimentación."
+        }
+      ],
+      "solicitudes": {
+        "abiertas": 9,
+        "de_las_abiertas_vencidas": 1,
+        "resueltas_en_octubre": 29
+      },
+      "alertas": [
+        {
+          "nivel": "media",
+          "descripcion": "Un reporte de evaluación de taller está vencido."
+        },
+        {
+          "nivel": "baja",
+          "descripcion": "La satisfacción docente supera la meta anual."
+        }
+      ],
+      "tareas_proximas": [
+        {
+          "titulo": "Entregar reporte de impacto de talleres",
+          "fecha_limite": "2026-10-16",
+          "prioridad": "media",
+          "responsable_rol": "Coordinación Pedagógica",
+          "estado": "pendiente"
+        },
+        {
+          "titulo": "Validar instrumentos de evaluación",
+          "fecha_limite": "2026-10-22",
+          "prioridad": "media",
+          "responsable_rol": "Asesoría Académica",
+          "estado": "pendiente"
+        }
+      ],
+      "decisiones_pendientes": [
+        "Definir facultades prioritarias para el próximo ciclo de formación."
+      ],
+      "consultas_ia_sugeridas": [
+        "¿Qué hace IDEA y a quién atiende?",
+        "¿Qué indicadores de IDEA están por debajo de la meta?",
+        "¿Cuáles son las alertas y próximas tareas de IDEA?"
+      ]
+    }
+  ]
+}

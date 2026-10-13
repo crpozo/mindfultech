@@ -12,6 +12,8 @@ import { BotScreen } from "./BotScreen";
 import { BotChat } from "./BotChat";
 import { HotspotPanel, hotspotMeta, type OfficeEvent } from "./Hotspots";
 import { AgentFace } from "./AgentFace";
+import { OfficePanel } from "./OfficeFile";
+import { officeOfBot } from "@/lib/office/usfqMgmt";
 import s from "./office.module.css";
 
 type Room = { id: string; name: string; floor: number };
@@ -78,7 +80,7 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
   const [room, setRoom] = React.useState<string | null>(null);
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomNames, setRoomNames] = React.useState<Record<string, string>>({});
-  const [tab, setTab] = React.useState<"screen" | "chat">("screen");
+  const [tab, setTab] = React.useState<"screen" | "chat" | "office">("screen");
   // what each person is doing right now; null = working at the desk (the
   // team panel then rotates through the role's tasks)
   const [status, setStatus] = React.useState<Record<string, string | null>>({});
@@ -412,6 +414,9 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
 
   const statusOf = (b: Bot, i: number) => status[b.id] ?? b.working[(taskIdx + i) % b.working.length];
   const bot = selected ? botById(lang, selected) ?? null : null;
+  React.useEffect(() => {
+    if (tab === "office" && (!bot || !officeOfBot(bot.id))) setTab("screen");
+  }, [bot, tab]);
   const hot = hotspot ? hotspotMeta(lang, brand.key)[hotspot] : null;
   const panelOpen = !!bot || !!hot;
   React.useEffect(() => {
@@ -716,6 +721,11 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
               <button type="button" className={`${s.tab} ${tab === "chat" ? s.tabActive : ""}`} onClick={() => setTab("chat")}>
                 {t("Chat con", "Chat with")} {bot.name}
               </button>
+              {brand.key === "usfq" && officeOfBot(bot.id) && (
+                <button type="button" className={`${s.tab} ${tab === "office" ? s.tabActive : ""}`} onClick={() => setTab("office")}>
+                  {t("Su oficina", "Their office")}
+                </button>
+              )}
             </div>
             <div className={s.panelBody}>
               <div className={s.kpis}>
@@ -726,7 +736,15 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
                   </div>
                 ))}
               </div>
-              {tab === "screen" ? <BotScreen key={bot.id} bot={bot} lang={lang} /> : <BotChat key={bot.id} bot={bot} lang={lang} />}
+              {tab === "office" && officeOfBot(bot.id) ? (
+                <div className={s.mgScroll}>
+                  <OfficePanel key={bot.id} officeId={officeOfBot(bot.id)} lang={lang} />
+                </div>
+              ) : tab === "screen" ? (
+                <BotScreen key={bot.id} bot={bot} lang={lang} />
+              ) : (
+                <BotChat key={bot.id} bot={bot} lang={lang} />
+              )}
             </div>
           </>
         )}

@@ -66,7 +66,7 @@ export const USFQ_BRAND: OfficeBrand = {
   home: "/office-usfq/",
   botsFor: usfqBotsFor,
   signs: { logo: ["USFQ NEXT"], welcome: ["BIENVENIDOS"] },
-  dashboards: [], // the office's main screen (tv) is the donations dashboard itself
+  dashboards: ["vp"], // the vice-presidency's management view; the main screen (tv) is the donations dashboard itself
   tourBot: "andrade",
   tourScreen: {
     es: "Seleccionamos a Alejandro Andrade, director de USFQ NEXT. Su panel muestra sus indicadores y su pantalla en vivo: el tablero de donaciones por vertical, donantes y proyectos. Es como mirar por encima de su hombro.",
@@ -75,8 +75,8 @@ export const USFQ_BRAND: OfficeBrand = {
   intro: {
     title: { es: "Bienvenido a la oficina de IA de la USFQ", en: "Welcome to USFQ's AI office" },
     text: {
-      es: "Cada persona que ves es un agente de IA con el rol de alguien de la Vicepresidencia Comercial y de Desarrollo: Alexandra Velasco y sus direcciones (Comercial, Admisiones, Becas, Comunicación, Educación Continua, IDEA, Programas Internacionales y USFQ NEXT). Trabajan las 24 horas y aquí puedes ver, preguntar y auditar lo que hacen.",
-      en: "Everyone you see is an AI agent with the role of someone in the Commercial & Development vice-presidency: Alexandra Velasco and her offices (Commercial, Admissions, Financial Aid, Communications, Continuing Education, IDEA, International Programs and USFQ NEXT). They work around the clock and here you can watch, ask and audit what they do.",
+      es: "Cada persona que ves es un agente de IA con el rol de alguien de la Vicepresidencia Comercial y de Desarrollo: Alexandra Velasco y sus direcciones (Comercial, Admisiones, Becas, Comunicación, Programas Internacionales y USFQ NEXT). Trabajan las 24 horas y aquí puedes ver, preguntar y auditar lo que hacen.",
+      en: "Everyone you see is an AI agent with the role of someone in the Commercial & Development vice-presidency: Alexandra Velasco and her offices (Commercial, Admissions, Financial Aid, Communications, International Programs and USFQ NEXT). They work around the clock and here you can watch, ask and audit what they do.",
     },
   },
   wa: { es: "Hola, vi la oficina de IA de la USFQ y quiero saber más.", en: "Hi, I saw USFQ's AI office and I would like to know more." },
