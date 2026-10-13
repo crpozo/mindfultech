@@ -48,7 +48,7 @@ const SEEDS: Seed[] = [
   },
   {
     id: "guerrero", name: "Yuvinne Guerrero", role: T("Asistencia Financiera y Becas", "Financial Aid & Scholarships"), title: T("Director · agente de becas", "Director · scholarships agent"),
-    color: "#d9c6f2", accent: "#7a5ab8", seat: 1,
+    color: "#d9c6f2", accent: "#7a5ab8", seat: 6,
     look: { skin: "#d9a98a", hair: "#1a1412", hairStyle: "short", eyes: "dark", shirt: "#cfe3f5", shirtStyle: "collar", sleeves: "long", pants: "#1d3557", shoes: "#5a3a28", shoeStyle: "flats", glasses: true },
     screen: "finance",
     working: [T("Evaluando solicitudes de beca", "Assessing scholarship applications"), T("Conciliando el fondo Waters-Freire", "Reconciling the Waters-Freire fund"), T("Respondiendo a familias sobre financiamiento", "Answering families about financing")],
@@ -62,7 +62,7 @@ const SEEDS: Seed[] = [
   },
   {
     id: "calderon", name: "Cristina Calderón", role: T("Comunicación", "Communications"), title: T("Coordinadora · agente de comunicación", "Coordinator · communications agent"),
-    color: "#ffd0d6", accent: "#d64c6a", seat: 2,
+    color: "#ffd0d6", accent: "#d64c6a", seat: 5,
     look: { skin: "#f6dcc6", hair: "#141010", hairStyle: "bob", eyes: "brown", lips: "#b8544f", shirt: "#1f1f24", shirtStyle: "tee", sleeves: "short", pants: "#f1efe9", shoes: "#111114", shoeStyle: "boots" },
     screen: "social",
     working: [T("Programando la semana en redes de USFQ", "Scheduling USFQ's week on social media"), T("Preparando la nota de prensa del convenio", "Preparing the agreement's press release"), T("Midiendo el alcance de la campaña de admisiones", "Measuring the admissions campaign reach")],
@@ -76,7 +76,7 @@ const SEEDS: Seed[] = [
   },
   {
     id: "guerra", name: "Kiara Guerra", role: T("Programas Internacionales", "International Programs"), title: T("Directora · agente de programas internacionales", "Director · international programs agent"),
-    color: "#a9dcd3", accent: "#2f8f80", seat: 5,
+    color: "#a9dcd3", accent: "#2f8f80", seat: 7,
     look: { skin: "#efc3a4", hair: "#3b2418", hairStyle: "ponytail", eyes: "hazel", lips: "#c0443f", shirt: "#3d4a7a", shirtStyle: "blouse", sleeves: "long", pants: "#1f1f24", shoes: "#111114", shoeStyle: "flats" },
     screen: "ops",
     working: [T("Confirmando intercambios del próximo semestre", "Confirming next semester's exchanges"), T("Respondiendo a estudiantes internacionales por WhatsApp", "Answering international students on WhatsApp"), T("Renovando convenios con universidades socias", "Renewing agreements with partner universities")],

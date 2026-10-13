@@ -1211,6 +1211,8 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
   const projected = new THREE.Vector3();
   const M = room.materials;
 
+  // a maximised panel covers the canvas: keep simulating, stop drawing (a blurred panel over a live canvas flickers)
+  let covered = false;
   const frame = () => {
     if (disposed) return;
     raf = requestAnimationFrame(frame);
@@ -1318,7 +1320,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
       for (const led of dyn.leds) if (Math.random() < 0.15) led.material = led.material === M.ledOff ? (Math.random() < 0.3 ? M.ledBlue : M.ledOn) : M.ledOff;
     }
 
-    renderer.render(scene, camera);
+    if (!covered) renderer.render(scene, camera);
 
     // ---- DOM overlay: labels, bubbles and hotspot markers; stacked so nothing overlaps ----
     const w = mount.clientWidth, h = mount.clientHeight;
@@ -1416,6 +1418,7 @@ export function createOffice({ mount, overlay, classes, bots, onSelect, onHover,
     focusRoom,
     setFloorView,
     setFloorLock,
+    setCovered: (v) => { covered = !!v; },
     setWalls,
     /** widths of the HUD panels covering the stage's left and right edges */
     setLayout: ({ left = 0, right = 0 }) => {

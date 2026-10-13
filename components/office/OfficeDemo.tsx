@@ -26,6 +26,7 @@ type Scene = {
   setLayout: (insets: { left?: number; right?: number }) => void;
   setWalls: (mode: WallMode) => void;
   setFloorLock: (locked: boolean) => void;
+  setCovered: (covered: boolean) => void;
   rooms: Room[];
   roomNames: Record<string, string>;
   dispose: () => void;
@@ -427,6 +428,7 @@ export function OfficeDemo({ brand: brandKey = "mt" }: { brand?: BrandKey }) {
     if (!ready) return;
     const apply = () => {
       const w = window.innerWidth;
+      sceneRef.current?.setCovered(panelOpen && panelMax);
       sceneRef.current?.setLayout(w > 900 ? { left: teamOpen ? 320 : 0, right: panelOpen && !panelMax ? Math.min(556, w - 16) : 0 } : { left: 0, right: panelOpen ? 1 : 0 });
     };
     apply();
