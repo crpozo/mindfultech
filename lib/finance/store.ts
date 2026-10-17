@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 65;
+export const STATE_VERSION = 66;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -581,7 +581,8 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // cosas está anotada todavía: se anotan cuando ocurran.
   // Dictado el 17 de octubre: 3 600. De acá sale a fin de octubre el pago de
   // la tarjeta (~2 500, anotado como deuda), el IESS (170) y unos 200 de otras
-  // salidas: quedarían ~730. Nada de eso está anotado como gasto todavía.
+  // salidas: quedarían ~730. Nada de eso está anotado como gasto todavía, y la
+  // tarjeta no va como deuda: se paga completa cada mes (v66).
   { id: "pichincha", sinceVersion: 64, name: "Pichincha", kind: "bank", balance: 3600 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
@@ -628,20 +629,7 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
  * arranque con una deuda que ya no existe; de los guardados lo quita
  * RETIRED_DEBTS.
  */
-const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [
-  // El corte de octubre de la Titanium, dictado el 17 de octubre como "unos
-  // 2,5k" que se debitan de Pichincha a fin de mes. Es plata ya gastada que
-  // se debe, así que resta del patrimonio desde hoy. Va con cuota 0 porque
-  // ese gasto ya está en el consumo del mes: contarlo además como cuota lo
-  // duplicaría. Cuando se pague, se retira y se anota el débito.
-  {
-    id: "titanium-oct",
-    sinceVersion: 64,
-    name: "Tarjeta Titanium · corte de octubre",
-    balance: 2500,
-    monthlyPayment: 0,
-  },
-];
+const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [];
 
 /**
  * Deudas liquidadas. Mismo criterio que los compromisos retirados: un id por
@@ -654,6 +642,12 @@ const RETIRED_DEBTS: { id: string; sinceVersion: number }[] = [
   // 2026, en la ventana del 1 al 5 que da la cooperativa y tal como se decidió
   // el 20 de agosto. Dictado el 7 de septiembre.
   { id: "auto", sinceVersion: 59 },
+  // El corte de octubre de la Titanium entró en v64 como deuda y el análisis
+  // lo tomó por un préstamo: sugirió "abonar a capital". No lo es, se paga
+  // completo cada mes. Él lo aclaró el 17 oct 2026 ("no tengo deuda, ya pagué
+  // el carro"). Sale de deudas; el pago de ~2 500 queda anotado en la nota de
+  // Pichincha y se registra como gasto cuando se debite a fin de mes.
+  { id: "titanium-oct", sinceVersion: 66 },
 ];
 const seedDebt = ({ sinceVersion: _v, ...d }: Debt & { sinceVersion: number }): Debt => d;
 const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number }): Account => a;
