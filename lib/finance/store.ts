@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 64;
+export const STATE_VERSION = 65;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -531,6 +531,14 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     amount: 1000,
     status: "pending",
     note: "Dictado el 17 oct 2026 como \"1k de otros proyectos\", sin desglose por cliente.",
+  },
+  {
+    id: "cambridge",
+    sinceVersion: 65,
+    client: "Cambridge",
+    amount: 5000,
+    status: "pending",
+    note: "Dictado el 17 oct 2026: me debe $5 000. Sin fecha de pago confirmada.",
   },
 ];
 
