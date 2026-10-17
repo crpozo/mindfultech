@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 63;
+export const STATE_VERSION = 64;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -506,6 +506,32 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     status: "pending",
     note: "Segundo mes seguido, misma dosis (~$3 800). FALTA EMITIR LA FACTURA al 28 ago 2026. Si el patrón se repite, se cobra a fin de septiembre; cada día que la factura se retrasa corre el cobro. Con este mes, Helixona queda confirmado como ingreso recurrente mensual, no como proyecto suelto.",
   },
+  {
+    // Dictado el 17 de octubre. Andrew ya había saldado los dos pagos de
+    // agosto; esto es trabajo nuevo.
+    id: "andrew-3",
+    sinceVersion: 64,
+    client: "Andrew Sam Binno",
+    amount: 3000,
+    status: "pending",
+    note: "Dictado el 17 oct 2026: me debe $3 000. Sin fecha de pago confirmada.",
+  },
+  {
+    id: "helixona-oct",
+    sinceVersion: 64,
+    client: "Helixona · octubre",
+    amount: 4000,
+    status: "pending",
+    note: "Dictado el 17 oct 2026: ~$4 000 de este mes, a cobrar a fin de octubre. Mismo patrón de los meses anteriores (pagador puntual).",
+  },
+  {
+    id: "otros-oct",
+    sinceVersion: 64,
+    client: "Otros proyectos · octubre",
+    amount: 1000,
+    status: "pending",
+    note: "Dictado el 17 oct 2026 como \"1k de otros proyectos\", sin desglose por cliente.",
+  },
 ];
 
 /** Sin `sinceVersion`, que no es parte del modelo guardado. */
@@ -525,13 +551,16 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // en la pantalla previa a confirmar: 4 000 pagados, 8,46 de comisión,
   // 3 991,54 al destino). Deducido, no leído: si algo más se movió en Wise
   // desde el 31 de agosto, hay que releer el saldo.
-  { id: "wise", sinceVersion: 62, name: "Wise", kind: "bank", balance: 54.96 },
+  // Dictado el 17 de octubre: "1 800 + 4 000" en Wise, dos saldos que van
+  // juntos en una sola cuenta. Reemplaza al 54,96 deducido de septiembre.
+  { id: "wise", sinceVersion: 64, name: "Wise", kind: "bank", balance: 5800 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
   // 3 000 + los 500 de Scott acreditados el 25 de agosto
   // vaciada: los 3 500 pasaron a Pichincha, rumbo a la cooperativa
-  { id: "paypal", sinceVersion: 46, name: "PayPal", kind: "bank", balance: 0 },
+  // Dictado el 17 de octubre: 680.
+  { id: "paypal", sinceVersion: 64, name: "PayPal", kind: "bank", balance: 680 },
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
@@ -542,7 +571,10 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // anotar. Plan dictado: en cuanto acredite lo de Wise en ProCredit, pasar
   // 2 000 acá y pagar desde acá la aportación del IESS. Ninguna de las dos
   // cosas está anotada todavía: se anotan cuando ocurran.
-  { id: "pichincha", sinceVersion: 63, name: "Pichincha", kind: "bank", balance: 218.43 },
+  // Dictado el 17 de octubre: 3 600. De acá sale a fin de octubre el pago de
+  // la tarjeta (~2 500, anotado como deuda), el IESS (170) y unos 200 de otras
+  // salidas: quedarían ~730. Nada de eso está anotado como gasto todavía.
+  { id: "pichincha", sinceVersion: 64, name: "Pichincha", kind: "bank", balance: 3600 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
@@ -553,7 +585,9 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // previstos antes del martes 8 de septiembre. Anotado por adelantado, como
   // los 7 000 de la cooperativa: FALTA CONFIRMAR que acreditó. Con esto vuelve
   // sobre el piso del arriendo y deja unos 4 300 de margen para octubre.
-  { id: "procredit", sinceVersion: 62, name: "ProCredit", kind: "bank", balance: 4857.54 },
+  // Dictado el 17 de octubre: 10 600. Confirma que los 3 991,54 de Wise
+  // acreditaron en septiembre y que entró más desde entonces.
+  { id: "procredit", sinceVersion: 64, name: "ProCredit", kind: "bank", balance: 10600 },
   // Ahorros a la Vista #2002084. El 1 de septiembre llegó a 13 525,59 con los
   // traslados desde ProCredit y Pichincha, y de ahí salió la precancelación
   // del quirografario en la primera semana de septiembre. Quedaron "como
@@ -586,7 +620,20 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
  * arranque con una deuda que ya no existe; de los guardados lo quita
  * RETIRED_DEBTS.
  */
-const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [];
+const SEEDED_DEBTS: (Debt & { sinceVersion: number })[] = [
+  // El corte de octubre de la Titanium, dictado el 17 de octubre como "unos
+  // 2,5k" que se debitan de Pichincha a fin de mes. Es plata ya gastada que
+  // se debe, así que resta del patrimonio desde hoy. Va con cuota 0 porque
+  // ese gasto ya está en el consumo del mes: contarlo además como cuota lo
+  // duplicaría. Cuando se pague, se retira y se anota el débito.
+  {
+    id: "titanium-oct",
+    sinceVersion: 64,
+    name: "Tarjeta Titanium · corte de octubre",
+    balance: 2500,
+    monthlyPayment: 0,
+  },
+];
 
 /**
  * Deudas liquidadas. Mismo criterio que los compromisos retirados: un id por
@@ -608,11 +655,12 @@ const seedAcc = ({ sinceVersion: _v, ...a }: Account & { sinceVersion: number })
 const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
   {
     id: "iess",
-    sinceVersion: 60,
+    sinceVersion: 64,
     name: "IESS: afiliación",
-    amount: 180,
+    // Dictado el 17 de octubre como 170 (antes anotado en 180).
+    amount: 170,
     category: "salud",
-    note: "Afiliado desde agosto de 2026, $180 al mes. Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario. Cada aportación pagada se registra como movimiento «IESS: aportación» para que el conteo de meses continuos quede a la vista: al 7 de septiembre de 2026 van dos, agosto y septiembre, confirmadas por él.",
+    note: "Afiliado desde agosto de 2026, $170 al mes (corregido de $180 el 17 oct 2026). Mantiene corriendo el historial de aportaciones que pide el BIESS para el crédito hipotecario. Cada aportación pagada se registra como movimiento «IESS: aportación» para que el conteo de meses continuos quede a la vista: al 7 de septiembre de 2026 van dos, agosto y septiembre, confirmadas por él.",
   },
   {
     id: "auto-seguros",
@@ -652,6 +700,17 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     amount: 46.57,
     category: "salud",
     note: "Son $326 por sesión y se repite cada 7 meses; acá va prorrateado a $46,57/mes. El pago del 13 ago 2026 queda registrado como movimiento excluido para no contarlo dos veces. Anual: $559.",
+  },
+  {
+    // Contratado en octubre de 2026, dictado el 17 de octubre. Temporal: va
+    // hasta enero de 2027, son cuatro pagos (oct, nov, dic, ene) y $3 200 en
+    // total. Al terminar se retira con RETIRED_COMMITMENTS.
+    id: "programador",
+    sinceVersion: 64,
+    name: "Programador (hasta enero 2027)",
+    amount: 800,
+    category: "negocio",
+    note: "$800 al mes sin IVA, de octubre de 2026 a enero de 2027: $3 200 en total. Si factura con IVA (15 %), cada pago sube a $920 y el total a $3 680.",
   },
   COWORKING_COMMITMENT,
 ];
