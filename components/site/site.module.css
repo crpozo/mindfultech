@@ -267,6 +267,8 @@
   .band { height: 170px; }
   /* phones: scale the collage and slide it so the team photo and the stat stay in frame */
   .bandInner { transform: scale(0.62); transform-origin: right bottom; right: -173px; }
+  .band .slidePrev { transform: translateX(-300%); }
+  .band .slideNext { transform: translateX(300%); }
   .svc h3 { font-size: 40px; }
   .big { font-size: 72px; }
   .rowTitle { font-size: 28px; }
@@ -487,17 +489,66 @@
 .flag { font-size: 16px; line-height: 1; width: 20px; text-align: center; }
 @media (max-width: 900px) {
   .officeSplit { grid-template-columns: 1fr; }
-  .officeArt { min-height: 320px; }
+  .officeArt { min-height: 0; aspect-ratio: 4 / 3; }
+  .officeDots { display: none; }
+  .officeMask { inset: 0; clip-path: none; border: 2px solid var(--ink); box-sizing: border-box; box-shadow: 10px 10px 0 var(--lime); }
   .feature { position: relative; top: auto; max-height: none; }
 }
 
+/* difference: split with stacked serif word blocks (reference: Jasper pillars) */
+.diffSplit { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
+.diffText p { font-size: 17px; line-height: 1.55; color: #333; margin: 0 0 14px; max-width: 520px; }
+.diffText .h2 { margin-bottom: 22px; }
+.diffStack { position: relative; padding: 48px 0 48px 56px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; min-height: 480px; isolation: isolate; }
+.diffBg { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background-image: radial-gradient(rgba(31, 122, 77, 0.26) 1.4px, transparent 1.6px); background-size: 16px 16px; -webkit-mask-image: radial-gradient(ellipse at 75% 65%, #000 25%, transparent 72%); mask-image: radial-gradient(ellipse at 75% 65%, #000 25%, transparent 72%); }
+.diffBg i { position: absolute; left: -20%; width: 140%; height: 44px; background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(31, 122, 77, 0.16); transform: rotate(-32deg); }
+.diffBg i:nth-child(1) { top: 24%; } .diffBg i:nth-child(2) { top: 50%; } .diffBg i:nth-child(3) { top: 76%; }
+.diffRow { display: flex; align-items: flex-start; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; transition: opacity 0.25s, filter 0.25s, transform 0.25s; font: inherit; color: inherit; }
+.diffRow:not(.diffOn) { opacity: 0.42; filter: saturate(0.25); }
+.diffRow.diffOn { transform: translateX(6px); }
+.diffPlus { width: 36px; height: 36px; display: grid; place-items: center; font-family: var(--mono); font-size: 20px; margin: 6px 6px 0 -42px; flex: none; }
+.diffWord { font-family: var(--serif); font-size: clamp(44px, 5.4vw, 84px); line-height: 1; letter-spacing: -0.02em; padding: 2px 18px 8px; white-space: nowrap; }
+.diffCard { margin-top: 10px; background: #fff; border: 1px solid var(--line); padding: 22px 24px; max-width: 440px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow 0.25s; }
+.diffCard p { margin: 0; font-size: 16.5px; line-height: 1.5; color: #333; }
+.diffCard p b { font-weight: 500; color: var(--ink); }
+.root .diffCard a { align-self: flex-start; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; background: var(--ink); color: #fff; padding: 10px 14px; }
+.root .diffCard a:hover { background: var(--dgreen); color: #fff; }
+@media (max-width: 960px) { .diffSplit { grid-template-columns: 1fr; gap: 24px; } .diffStack { padding: 24px 0 24px 42px; min-height: 0; } .diffBg i { display: none; } .diffWord { font-size: clamp(34px, 9vw, 56px); white-space: normal; } }
+
 /* hero sizing after the reference: bigger buttons, slides that cross-fade, slide dots */
 .heroIn .btn { padding: 20px 34px; font-size: 20px; }
-.slideOn { opacity: 1; transition: opacity 0.6s ease; }
-.slideOff { opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
-.slideDots { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: auto; }
-.slideDots button { width: 10px; height: 10px; border: 1.5px solid var(--ink); background: #fff; padding: 0; cursor: pointer; }
-.slideDots button.on { background: var(--ink); }
+/* slides move sideways like the reference: the current one sits, the previous leaves left, the next waits right */
+.slideMove { position: absolute; inset: 0; transition: transform 0.8s cubic-bezier(0.65, 0, 0.2, 1); will-change: transform; }
+.slideOn { transform: translateX(0); }
+.slidePrev { transform: translateX(-110%); }
+.slideNext { transform: translateX(110%); transition: none; }
+.bandBars { display: none; position: absolute; }
+.bandCard::before { content: ""; position: absolute; left: -14px; top: -10px; width: 0; height: 0; border-left: 10px solid var(--ink); border-top: 7px solid transparent; border-bottom: 7px solid transparent; transform: rotate(-35deg); }
+.bandCol i:nth-child(n + 3) { display: none; }
+/* composition 2: stepped grid on the left, three slanted bars, a two-by-two of circles */
+.v2 .bandGridL { left: 0; width: 720px; height: 210px; clip-path: polygon(0 45%, 34% 45%, 34% 0, 100% 0, 100% 100%, 0 100%); }
+.v2 .bandGridR { width: 430px; height: 150px; }
+.v2 .bandTri { left: 420px; width: 220px; height: 220px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.v2 .bandBars { display: block; left: 760px; bottom: 0; width: 240px; height: 240px; overflow: hidden; }
+.v2 .bandBars i { position: absolute; left: -40px; width: 320px; height: 28px; transform: rotate(-38deg); transform-origin: left bottom; }
+.v2 .bandBars i:nth-child(1) { bottom: 10px; } .v2 .bandBars i:nth-child(2) { bottom: 60px; } .v2 .bandBars i:nth-child(3) { bottom: 110px; }
+.v2 .bandPhoto { left: 540px; width: 300px; }
+.v2 .bandCard { left: 260px; bottom: 96px; }
+.v2 .bandStat { left: 880px; bottom: 90px; }
+.v2 .bandCol { right: 90px; width: 180px; height: 180px; display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
+.v2 .bandCol i { width: 90px; height: 90px; margin: 0 !important; display: block; }
+.v2 .bandCol i:nth-child(n + 3) { display: block; }
+/* composition 3: grid steps down to the right, tall bars, one big circle */
+.v3 .bandGridL { left: 120px; width: 460px; height: 120px; }
+.v3 .bandGridR { width: 820px; height: 200px; clip-path: polygon(0 0, 55% 0, 55% 50%, 100% 50%, 100% 100%, 0 100%); }
+.v3 .bandTri { left: 300px; width: 240px; height: 220px; clip-path: polygon(0 100%, 60% 0, 100% 100%); }
+.v3 .bandBars { display: flex; gap: 18px; left: 540px; bottom: 0; height: 240px; align-items: flex-end; }
+.v3 .bandBars i { display: block; width: 36px; } .v3 .bandBars i:nth-child(1) { height: 220px; } .v3 .bandBars i:nth-child(2) { height: 170px; } .v3 .bandBars i:nth-child(3) { height: 120px; }
+.v3 .bandPhoto { left: 700px; width: 300px; }
+.v3 .bandCard { left: 150px; bottom: 60px; }
+.v3 .bandStat { left: 1020px; bottom: 70px; }
+.v3 .bandCol { right: 40px; width: 120px; height: 120px; border-radius: 50%; }
+.v3 .bandCol i { display: none; }
 .bandPhoto { border: 2px solid var(--ink); box-sizing: border-box; }
 /* trusted by: serif title centred, big logos */
 .trustedIn { flex-direction: column; gap: 22px; padding: 40px 40px 36px; }
@@ -520,10 +571,7 @@
   .heroIn .h1 { font-size: clamp(44px, 13vw, 64px); }
   .heroSub { font-size: 17px; }
   .pill { font-size: 14px; gap: 10px; }
-  .slideDots { bottom: 8px; }
-  .officeArt { min-height: 260px; }
-  .officeMask { inset: 0 0 0 30px; }
-  .officeDots { width: 110px; }
+  .officeArt { aspect-ratio: 4 / 3; margin-right: 10px; }
   .feature { padding: 18px; }
   .featureText { font-size: 20px; padding: 12px 14px; }
   .featureFrame { box-shadow: 8px 8px 0 var(--ink); }

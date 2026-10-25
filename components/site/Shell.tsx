@@ -100,8 +100,8 @@ export function SiteFooter() {
         <div className={s.footerCols}>
           <div className={s.footerBrand}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} style={{ height: 30, width: "auto" }} />
-            <p>{es ? "Laboratorio de software full-stack en Quito. Investigación UX, ingeniería e IA aplicada." : "Full-stack software lab in Quito. UX research, engineering and applied AI."}</p>
+            <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} style={{ height: 44, width: "auto" }} />
+            <p>{es ? "Laboratorio de software en Quito." : "Software lab in Quito."}</p>
           </div>
           {cols.map(([h, links]) => (
             <div key={h} className={s.footerCol}>

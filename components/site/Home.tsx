@@ -26,10 +26,11 @@ const T = {
     trusted: "Trusted by",
     diffH2: "The MindfulTech difference",
     diffSub: "Measured results across design, engineering, and AI automation.",
+    diffP: ["MindfulTech is one lab that connects research, engineering and AI agents, so your product gets built as a system, not as a collection of vendors.", "Ten years shipping from Quito for teams across the Americas and Europe, with the people who did the research still in the room when the agent goes live."],
     diff: [
-      ["↑ Days shipping", "3,650+", "human-centered products in production."],
-      ["↑ Automation", "24/7", "an AI agent runs Helixona's medical billing end to end."],
-      ["↑ In production", "2", "app stores carry PARC Connect: App Store and Google Play."],
+      ["Days shipping", "3,650+ days", "of human-centered products in production, from university portals to automated commerce."],
+      ["Automation", "24/7 agents", "an AI agent runs Helixona's medical billing end to end: claims, coding and follow-ups."],
+      ["In production", "2 app stores", "carry PARC Connect today: App Store and Google Play, maintained by the team that built it."],
     ],
     learnHow: "Learn how →",
     whyH2: "Why teams choose MindfulTech",
@@ -109,10 +110,11 @@ const T = {
     trusted: "Confían en nosotros",
     diffH2: "La diferencia MindfulTech",
     diffSub: "Resultados medibles en diseño, ingeniería y automatización con IA.",
+    diffP: ["MindfulTech es un solo laboratorio que conecta investigación, ingeniería y agentes de IA, para que tu producto se construya como un sistema y no como una colección de proveedores.", "Diez años lanzando desde Quito para equipos de América y Europa, con la gente que hizo la investigación todavía en la sala cuando el agente sale a producción."],
     diff: [
-      ["↑ Días lanzando", "3,650+", "productos centrados en las personas, en producción."],
-      ["↑ Automatización", "24/7", "un agente de IA lleva la facturación médica de Helixona de punta a punta."],
-      ["↑ En producción", "2", "tiendas publican PARC Connect: App Store y Google Play."],
+      ["Días lanzando", "3,650+ días", "de productos centrados en las personas, en producción: de portales universitarios a comercio automatizado."],
+      ["Automatización", "Agentes 24/7", "un agente de IA lleva la facturación médica de Helixona de punta a punta: reclamos, codificación y seguimientos."],
+      ["En producción", "2 tiendas", "publican PARC Connect hoy: App Store y Google Play, mantenida por el equipo que la construyó."],
     ],
     learnHow: "Cómo lo hacemos →",
     whyH2: "Por qué los equipos eligen MindfulTech",
@@ -194,10 +196,16 @@ const SVC = [
 ];
 /* hero collage slides: same composition, different claim, stat, photo and tints (Jasper-style rotation) */
 const SLIDES = [
-  { en: "Ship an AI agent to production in 6 weeks", es: "Un agente de IA en producción en 6 semanas", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
-  { en: "An agent runs Helixona's medical billing, 24/7", es: "Un agente lleva la facturación de Helixona, 24/7", stat: "24/7", statEn: "claims, coding, follow-ups", statEs: "reclamos, codificación, seguimientos", img: "/art/helixona-hero.webp", pos: "left top", gridL: "#c9c4f2", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
-  { en: "From Excel to Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega", stat: "2", statEn: "app stores carry PARC Connect", statEs: "tiendas publican PARC Connect", img: "/art/wfs-hero.webp", pos: "left top", gridL: "#f4d98a", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
+  { en: "Ship an AI agent to production in 6 weeks", es: "Un agente de IA en producción en 6 semanas", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", gridR: "#3dbe7d", bar: "#f4d98a", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
+  { en: "An agent runs Helixona's medical billing, 24/7", es: "Un agente lleva la facturación de Helixona, 24/7", stat: "24/7", statEn: "claims, coding, follow-ups", statEs: "reclamos, codificación, seguimientos", img: "/art/ailab.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
+  { en: "From Excel to Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega", stat: "2", statEn: "app stores carry PARC Connect", statEs: "tiendas publican PARC Connect", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
+const DIFF_COL = [
+  { bg: "#0e1013", fg: "#bff5cf", shadow: "#bff5cf" },
+  { bg: "#3dbe7d", fg: "#ffffff", shadow: "#c9c4f2" },
+  { bg: "#bff5cf", fg: "#1f7a4d", shadow: "#85bfe9" },
+];
+const DIFF_HREF = ["/work", "/work#healthcare", "/work#parc"];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string][] = [
   ["USFQ", "/logo-usfq.svg"],
@@ -428,7 +436,6 @@ export function WorldMap({ lang }: { lang: Lang }) {
   return (
     <div className={s.where}>
       <div className={s.whereL}>
-        <span className={s.label}>{es ? "Dónde trabajamos" : "Where we work"}</span>
         <h2 className={s.h2}>{es ? "MindfulTech ayuda a empresas en todo el mundo" : "MindfulTech helps companies worldwide"}</h2>
         <p className={s.sub}>{es ? "Desde Ecuador, para equipos de América y Europa. Cada punto es un cliente, no una oficina." : "From Ecuador, for teams across the Americas and Europe. Every pin is a client, not an office."}</p>
         <div className={s.mapGroups}>
@@ -482,6 +489,7 @@ export function Home() {
   const t = T[lang as Lang];
   const [why, setWhy] = React.useState(0);
   const [proj, setProj] = React.useState(0);
+  const [diff, setDiff] = React.useState(0);
   const [slide, setSlide] = React.useState(0);
   const slidePaused = React.useRef(false);
   React.useEffect(() => {
@@ -517,21 +525,27 @@ export function Home() {
           </div>
         </div>
         <div className={s.band} aria-hidden="true">
-          {SLIDES.map((sl, i) => (
-            <div key={i} className={`${s.bandInner} ${slide === i ? s.slideOn : s.slideOff}`}>
-              <div className={`${s.bandGridL} ${s.grid}`} style={{ backgroundColor: sl.gridL }} />
-              <div className={`${s.bandGridR} ${s.grid}`} />
-              <div className={s.bandTri} style={{ background: sl.tri }} />
-              <div className={s.bandPhoto}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={sl.img} alt="" width={1200} height={900} style={{ objectPosition: sl.pos }} />
+          {SLIDES.map((sl, i) => {
+            const n = SLIDES.length;
+            const pos = i === slide ? s.slideOn : i === (slide + n - 1) % n ? s.slidePrev : s.slideNext;
+            return (
+              <div key={i} className={`${s.slideMove} ${pos}`}>
+                <div className={`${s.bandInner} ${[s.v1, s.v2, s.v3][i]}`}>
+                  <div className={`${s.bandGridL} ${s.grid}`} style={{ backgroundColor: sl.gridL }} />
+                  <div className={`${s.bandGridR} ${s.grid}`} style={{ backgroundColor: sl.gridR }} />
+                  <div className={s.bandBars}><i style={{ background: sl.bar }} /><i style={{ background: sl.bar }} /><i style={{ background: sl.bar }} /></div>
+                  <div className={s.bandTri} style={{ background: sl.tri }} />
+                  <div className={s.bandPhoto}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={sl.img} alt="" width={1200} height={900} style={{ objectPosition: sl.pos }} />
+                  </div>
+                  <div className={s.bandCard}>{lang === "es" ? sl.es : sl.en}</div>
+                  <div className={s.bandStat} style={{ background: sl.statBg, color: sl.statFg }}><b>{sl.stat}</b><span style={{ color: sl.statFg }}>{lang === "es" ? sl.statEs : sl.statEn}</span></div>
+                  <div className={s.bandCol} style={{ background: sl.col }}><i style={{ background: sl.dot }} /><i style={{ background: sl.dot }} /><i style={{ background: sl.dot }} /><i style={{ background: sl.dot }} /></div>
+                </div>
               </div>
-              <div className={s.bandCard}>{lang === "es" ? sl.es : sl.en}</div>
-              <div className={s.bandStat} style={{ background: sl.statBg, color: sl.statFg }}><b>{sl.stat}</b><span style={{ color: sl.statFg }}>{lang === "es" ? sl.statEs : sl.statEn}</span></div>
-              <div className={s.bandCol} style={{ background: sl.col }}><i style={{ background: sl.dot }} /><i style={{ background: sl.dot }} /></div>
-            </div>
-          ))}
-          <div className={s.slideDots}>{SLIDES.map((_, i) => <button key={i} type="button" aria-label={`Slide ${i + 1}`} className={slide === i ? s.on : ""} onClick={() => { setSlide(i); slidePaused.current = true; }} />)}</div>
+            );
+          })}
         </div>
       </section>
 
@@ -556,16 +570,25 @@ export function Home() {
         </div>
       </div>
 
-      {/* difference */}
-      <section className={`${s.wrap} ${s.sectionFirst}`}>
-        <div className={s.head}>
+      {/* difference: split after the reference, stacked word blocks, no accordion */}
+      <section className={`${s.wrap} ${s.sectionFirst} ${s.diffSplit}`}>
+        <div className={s.diffText}>
           <h2 className={s.h2}>{t.diffH2}</h2>
-          <p className={s.sub}>{t.diffSub}</p>
+          {t.diffP.map((p) => <p key={p}>{p}</p>)}
         </div>
-        <div className={s.cards3}>
-          <div className={`${s.diff} ${s.diffInk}`}><span className={s.mono}>{t.diff[0][0]}</span><span className={s.big}>{t.diff[0][1]}</span><p>{t.diff[0][2]}</p><Link href="/services">{t.learnHow}</Link></div>
-          <div className={`${s.diff} ${s.diffLime}`}><span className={s.mono}>{t.diff[1][0]}</span><span className={s.big}>{t.diff[1][1]}</span><p>{t.diff[1][2]}</p><Link href="/work">{t.learnHow}</Link></div>
-          <div className={`${s.diff} ${s.diffGrid} ${s.grid}`}><span className={`${s.mono} ${s.onWhite}`}>{t.diff[2][0]}</span><span className={`${s.big} ${s.onWhite}`}>{t.diff[2][1]}</span><p className={s.onWhite}>{t.diff[2][2]}</p><Link href="/work">{t.learnHow}</Link></div>
+        <div className={s.diffStack}>
+          <div className={s.diffBg} aria-hidden="true"><i /><i /><i /></div>
+          {t.diff.map(([kick, word], i) => (
+            <button key={kick} type="button" className={`${s.diffRow} ${diff === i ? s.diffOn : ""}`} onMouseEnter={() => setDiff(i)} onFocus={() => setDiff(i)} onClick={() => setDiff(i)} aria-pressed={diff === i}>
+              <span className={s.diffPlus} style={{ background: DIFF_COL[i].bg, color: DIFF_COL[i].fg }}>+</span>
+              <span className={s.diffWord} style={{ background: DIFF_COL[i].bg, color: DIFF_COL[i].fg }}>{word}</span>
+            </button>
+          ))}
+          <div className={s.diffCard} style={{ boxShadow: `8px 8px 0 ${DIFF_COL[diff].shadow}` }}>
+            <span className={s.mono} style={{ color: "var(--dgreen)" }}>{t.diff[diff][0]}</span>
+            <p><b>{t.diff[diff][1]}</b> {t.diff[diff][2]}</p>
+            <Link href={DIFF_HREF[diff]}>{t.learnHow}</Link>
+          </div>
         </div>
       </section>
 
@@ -624,7 +647,6 @@ export function Home() {
       {/* work */}
       <section id="work" className={`${s.wrap} ${s.section}`}>
         <div className={s.head}>
-          <span className={s.label}>{t.projectsLbl}</span>
           <h2 className={s.h2}>{t.workH2}</h2>
         </div>
         <div className={s.work}>
@@ -657,7 +679,7 @@ export function Home() {
       <section id="office" className={`${s.wrap} ${s.section}`}>
         <div className={s.officeSplit}>
           <div className={s.officeText}>
-            <div className={s.officeTag}><span>{t.pillNew}</span>{t.officeTag}</div>
+            <div className={s.officeTag}><span>{t.pillNew}</span></div>
             <h2 className={s.h2}>{t.officeH2a}<em>{t.officeH2b}</em></h2>
             <p className={s.sub}>{t.officeP}</p>
             <div className={s.ctas} style={{ justifyContent: "flex-start" }}>
