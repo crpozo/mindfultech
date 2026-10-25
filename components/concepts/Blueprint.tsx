@@ -49,6 +49,8 @@ export function Blueprint() {
   const es = lang === "es";
   const L = lang as Lang;
   const [booting, setBooting] = React.useState(true);
+  const [bootGone, setBootGone] = React.useState(false);
+  React.useEffect(() => { if (!booting) { const id = window.setTimeout(() => setBootGone(true), 600); return () => window.clearTimeout(id); } }, [booting]);
   const [pct, setPct] = React.useState(0);
   const [coords, setCoords] = React.useState("X:0000 Y:0000");
   const [step, setStep] = React.useState(0);
@@ -87,7 +89,7 @@ export function Blueprint() {
   return (
     <div className={s.root}>
       {/* preloader */}
-      <div className={`${s.boot} ${booting ? "" : s.bootOff}`} aria-hidden={!booting}>
+      {!bootGone && <div className={`${s.boot} ${booting ? "" : s.bootOff}`} aria-hidden={!booting}>
         <div className={s.bootTop}>
           <div className={s.bootTitle}>{es ? <>Software con IA,<br />construido desde la investigación,<br />desde Quito</> : <>AI software,<br />built from research,<br />from Quito</>}</div>
           <span className={s.bootPct}>{pct}%</span>
@@ -108,7 +110,7 @@ export function Blueprint() {
           </div>
         </div>
         <button type="button" className={s.bootSkip} onClick={() => setBooting(false)}>{es ? "Saltar →" : "Skip →"}</button>
-      </div>
+      </div>}
 
       <span className={s.coords}>{coords}</span>
 
