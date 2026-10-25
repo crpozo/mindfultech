@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ServiceDetail } from "@/components/pages/ServiceDetail";
+import { ServiceDetailPage } from "@/components/site/ServiceDetailPage";
 
 const META: Record<string, { name: string; desc: string }> = {
   ux: { name: "UX Design", desc: "Research-driven product design." },
@@ -28,5 +28,5 @@ export default async function ServicePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <ServiceDetail slug={slug} />;
+  return <ServiceDetailPage slug={slug} />;
 }

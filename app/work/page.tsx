@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { WorkBody } from "@/components/pages/WorkBody";
+import { WorkPage } from "@/components/site/WorkPage";
 
 export const metadata: Metadata = {
   title: "Work: MindfulTech",
   description: "Case studies: real teams, measured outcomes.",
 };
 
-export default function WorkPage() {
-  return <WorkBody />;
+export default function WorkRoute() {
+  return <WorkPage />;
 }

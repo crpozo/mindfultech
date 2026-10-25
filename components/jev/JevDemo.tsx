@@ -10,7 +10,8 @@
  */
 
 import * as React from "react";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SiteNav } from "@/components/site/Shell";
+import site from "@/components/site/site.module.css";
 import { useLang } from "@/components/i18n";
 import { Pill } from "@/components/internal/Shared";
 import { ImageSearch } from "./ImageSearch";
@@ -302,7 +303,9 @@ export function JevDemo() {
   const [tab, setTab] = React.useState(0);
   return (
     <div style={{ position: "relative", width: "100%", overflow: "clip", background: "#fff" }}>
-      <SiteHeader active="work" megaMenus />
+      <div className={site.root}>
+        <SiteNav active="work" />
+      </div>
       <main className="jev">
         <section className="jev-hero">
           <div className="jev-wrap">

@@ -3,9 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang, type Lang } from "@/components/i18n";
-import s from "./staging.module.css";
+import s from "./site.module.css";
+import { CtaBand } from "./Shell";
 
-/* Staging port of the home redesign (design_handoff_mindfultech_home, Oct 2026):
+/* The home page (redesign of Oct 2026, from design_handoff_mindfultech_home):
    serif display + flat geometric collage. Copy, tokens and interactions follow the
    handoff README; assets are the site's real ones. */
 
@@ -380,8 +381,8 @@ function ArtAI() {
 }
 
 /* ------------------------------------------------------------------ page ---- */
-export function StagingHome() {
-  const { lang, setLang } = useLang();
+export function Home() {
+  const { lang } = useLang();
   const t = T[lang as Lang];
   const [why, setWhy] = React.useState(0);
   const [proj, setProj] = React.useState(0);
@@ -396,29 +397,8 @@ export function StagingHome() {
     paused.current = true;
     setWhy(i);
   };
-  const navHref = ["/services", "/work", "/blog", "/company"];
-  return (
-    <div className={s.root}>
-      {/* nav */}
-      <div className={s.nav}>
-        <div className={`${s.navIn}`} style={{ maxWidth: 1440, margin: "0 auto" }}>
-          <Link href="/staging" className={s.navLogo}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
-          </Link>
-          <div className={s.navLinks}>
-            {t.nav.map((n, i) => (
-              <Link key={n} href={navHref[i]}>{n}</Link>
-            ))}
-          </div>
-          <div className={s.navRight}>
-            <button type="button" className={lang === "en" ? s.on : ""} onClick={() => setLang("en")}>EN</button>
-            <button type="button" className={lang === "es" ? s.on : ""} onClick={() => setLang("es")}>ES</button>
-            <a href="#contact" className={s.navCta}>{t.start}</a>
-          </div>
-        </div>
-      </div>
-
+    return (
+    <>
       {/* hero */}
       <section className={s.hero}>
         <div className={s.heroIn}>
@@ -594,43 +574,7 @@ export function StagingHome() {
         </div>
       </section>
 
-      {/* cta */}
-      <section id="contact" className={`${s.cta} ${s.grid}`}>
-        <div className={s.ctaCircle} />
-        <div className={s.ctaTri} />
-        <div className={s.ctaIn}>
-          <h2 className={s.ctaH2}>{t.ctaH2}</h2>
-          <p className={s.ctaSub}>{t.ctaSub}</p>
-          <a href="mailto:info@mindfultech.ec" className={`${s.btn} ${s.btnInk} ${s.btnInkWhite}`}>{t.ctaBtn}</a>
-        </div>
-      </section>
-
-      {/* footer */}
-      <footer className={s.footer}>
-        <div className={s.footerIn} style={{ maxWidth: 1440, margin: "0 auto" }}>
-          <div className={s.footerCols}>
-            <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} style={{ height: 26, width: "auto" }} />
-            </div>
-            <div className={s.footerCol}><span className={s.mono}>{t.nav[0]}</span>{t.fServices.map((x) => <Link key={x} href="/services">{x}</Link>)}</div>
-            <div className={s.footerCol}><span className={s.mono}>{t.nav[1]}</span>{t.fWork.map((x) => <Link key={x} href="/work">{x}</Link>)}</div>
-            <div className={s.footerCol}><span className={s.mono}>{t.nav[3]}</span>{t.fCompany.map((x, i) => <Link key={x} href={i === 1 ? "/blog" : "/company"}>{x}</Link>)}</div>
-            <div className={s.footerCol}>
-              <span className={s.mono}>{lang === "es" ? "Contacto" : "Contact"}</span>
-              <a href="mailto:info@mindfultech.ec">info@mindfultech.ec</a>
-              <a href="tel:+593958731994">+593 958 73 1994</a>
-              <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer">WhatsApp</a>
-              <span style={{ color: "#555" }}>Quito, Ecuador</span>
-            </div>
-          </div>
-          <div className={s.footerBottom}>
-            <span>{t.rights}</span>
-            <div>{t.legal.map((x) => <a key={x} href="#">{x}</a>)}</div>
-          </div>
-        </div>
-      </footer>
-      <span className={s.ribbon}>STAGING / {lang === "es" ? "VISTA PREVIA" : "PREVIEW"}</span>
-    </div>
+      <CtaBand />
+    </>
   );
 }

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { ServicesBody } from "@/components/pages/ServicesBody";
+import { ServicesPage } from "@/components/site/ServicesPage";
 
 export const metadata: Metadata = {
   title: "Services: MindfulTech",
   description: "UX-driven software for humans and enterprises.",
 };
 
-export default function ServicesPage() {
-  return <ServicesBody />;
+export default function ServicesRoute() {
+  return <ServicesPage />;
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArticleBody } from "@/components/pages/ArticleBody";
+import { ArticlePage } from "@/components/site/ArticlePage";
 import { POSTS, getPost } from "@/lib/blog/posts";
 
 // static export: only the known slugs exist; anything else is a 404
@@ -31,5 +31,5 @@ export default async function BlogPostPage({
 }) {
   const { slug } = await params;
   if (!getPost(slug)) notFound();
-  return <ArticleBody slug={slug} />;
+  return <ArticlePage slug={slug} />;
 }

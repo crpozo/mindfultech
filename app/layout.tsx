@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, IBM_Plex_Mono } from "next/font/google";
+import { Outfit, IBM_Plex_Mono, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { LanguageProvider } from "@/components/i18n";
 import { SiteChrome } from "@/components/SiteChrome";
 import "./globals.css";
@@ -20,6 +20,10 @@ const mono = IBM_Plex_Mono({
   // font for bandwidth on a slow connection (the h1 swap is what sets LCP)
   preload: false,
 });
+
+// display serif + label mono of the Oct 2026 redesign (see components/site)
+const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-serif", display: "swap" });
+const jbmono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jbmono", display: "swap", preload: false });
 
 // English, like the page it describes: the site opens in English (see
 // LanguageProvider) and the document title should match what loads.
@@ -59,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${mono.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${mono.variable} ${serif.variable} ${jbmono.variable}`}>
       <body>
         <LanguageProvider>
           {children}

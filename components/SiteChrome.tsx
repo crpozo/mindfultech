@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { PageLoader } from "@/components/PageLoader";
-import { ContactFooter } from "@/components/home/ContactFooter";
+import { SiteFooter } from "@/components/site/Shell";
 import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 
 /**
@@ -10,14 +10,14 @@ import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
  * every public page — but not on the private tools (/tasks, /finance,
  * /fitness) or the /office-demo client demo, which are standalone screens.
  */
-const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq", "/staging"];
+const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq"];
 
 export function SiteChrome() {
   const pathname = usePathname();
   if (PRIVATE.some((p) => pathname?.startsWith(p))) return null;
   return (
     <>
-      <ContactFooter />
+      <SiteFooter />
       <WhatsAppBubble />
       <PageLoader />
     </>
