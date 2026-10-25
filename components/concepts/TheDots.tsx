@@ -47,6 +47,12 @@ const SIGNS = {
   es: { lead: "LEAD CALIFICADO / REUNIÓN AGENDADA", fin: "24/7 / UNA PERSONA FIRMA SOLO DONDE IMPORTA", opi: "EXCEL → ODOO / CON RUTAS DE ENTREGA", mark: "SEMANA PLANIFICADA / PUBLICADA / REPORTADA", desk: "¿CUÁL ESCRITORIO ES EL TUYO?", tray: "NECESITA UNA PERSONA", paid: "PAGADO", act: { Sales: "agendó una reunión en el CRM", Support: "respondió un ticket de WhatsApp", Finance: "concilió 14 movimientos", Marketing: "publicó el post de la semana", Operations: "repuso insumos", Reception: "confirmó 6 citas" } as Record<Role, string> },
 };
 
+type Lang = "en" | "es";
+const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
+const ROLE_DESC: Record<Lang, Record<Role, string>> = {
+  en: { Sales: "Qualifies leads, follows up and books meetings in your CRM.", Support: "Answers tickets and WhatsApp 24/7, escalates to a person when it matters.", Finance: "Issues invoices, reconciles the bank and chases receivables.", Marketing: "Plans, publishes and reports the week's campaigns.", Operations: "Orders supplies and keeps the calendar and inventory in order.", Reception: "Confirms appointments and routes every request to the right place." },
+  es: { Sales: "Califica leads, da seguimiento y agenda reuniones en tu CRM.", Support: "Responde tickets y WhatsApp 24/7 y escala a una persona cuando importa.", Finance: "Emite facturas, concilia el banco y cobra cuentas pendientes.", Marketing: "Planifica, publica y reporta las campañas de la semana.", Operations: "Pide insumos y mantiene en orden el calendario y el inventario.", Reception: "Confirma citas y dirige cada solicitud al lugar correcto." },
+};
 const NS = "http://www.w3.org/2000/svg";
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -58,8 +64,6 @@ function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, 
   if (parent) parent.appendChild(e);
   return e;
 }
-
-type Lang = "en" | "es";
 
 /** Builds the dynamic parts of the scene and returns a render(progress) function plus a cleanup. */
 function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => void, s_blink: string) {
@@ -244,8 +248,15 @@ function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => voi
 
   const story = root.querySelector("[data-id=story]") as HTMLElement;
   let raf: number | null = null;
+  const sections = Array.from(root.querySelectorAll<HTMLElement>("[data-ch]"));
   const tick = () => {
-    const r = story.getBoundingClientRect(); const p = clamp(-r.top / (story.offsetHeight - window.innerHeight), 0, 1); render(p);
+    // progress = chapter index + how far the viewport's reading line has travelled through that chapter's section,
+    // so the scene and the copy stay in step whatever each section's height
+    const line = window.scrollY + window.innerHeight * 0.55;
+    let i = 0, frac = 0;
+    sections.forEach((sec, k) => { const top = sec.getBoundingClientRect().top + window.scrollY; if (line >= top) { i = k; frac = clamp((line - top) / Math.max(1, sec.offsetHeight), 0, 0.999); } });
+    const p = sections.length ? clamp((i + frac) / sections.length, 0, 0.9999) : clamp(-story.getBoundingClientRect().top / (story.offsetHeight - window.innerHeight), 0, 1);
+    render(p);
     if (prog) prog.style.width = `${(window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)) * 100}%`;
   };
   const schedule = () => { if (raf === null) raf = requestAnimationFrame(() => { raf = null; tick(); }); };
@@ -289,66 +300,183 @@ export function TheDots() {
       </div>
 
       <section className={s.story} data-id="story" aria-label="The Dots: a scroll story">
-        <div className={s.stage}>
-          <svg className={s.scene} viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label={es ? "Oficina isométrica donde pequeños robots automatizan el trabajo mientras bajas" : "Isometric office where small robots automate work as you scroll"}>
-            <defs>
-              <linearGradient id="dotsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1D24" /><stop offset="1" stopColor="#14161C" /></linearGradient>
-            </defs>
-            <path d="M500 95 905 300 500 505 95 300Z" fill="url(#dotsFloor)" stroke="#2A2E37" />
-            <g stroke="#23262E" strokeWidth="1" opacity=".8"><path d="M297 197 702 402M702 197 297 402M399 146 804 351M601 146 196 351M196 249 601 454M804 249 399 454" /></g>
-            <path d="M95 300 500 95 500 20 95 225Z" fill="#111318" stroke="#2A2E37" />
-            <path d="M905 300 500 95 500 20 905 225Z" fill="#0F1115" stroke="#2A2E37" />
-            <g data-id="doors" opacity="0">
-              {([["M150 262 200 237 200 290 150 315Z", 175, 280, "USFQ"], ["M240 217 290 192 290 245 240 270Z", 265, 235, "PARC"], ["M330 172 380 147 380 200 330 225Z", 355, 190, "WFS"], ["M620 147 670 172 670 225 620 200Z", 645, 190, "HELIXONA"], ["M710 192 760 217 760 270 710 245Z", 735, 235, "THEMED\u00a0MOTION"]] as [string, number, number, string][]).map(([d, x, y, n]) => (
-                <g key={n}><path d={d} fill="#191C23" stroke="#fff" strokeWidth="1" /><text x={x} y={y} textAnchor="middle" fontSize="7.5" fill="#fff">{n}</text></g>
-              ))}
-            </g>
-            <g><circle cx="470" cy="80" r="22" fill="#15181E" stroke="#fff" /><line data-id="clkH" x1="470" y1="80" x2="470" y2="68" stroke="#fff" strokeWidth="2" /><line data-id="clkM" x1="470" y1="80" x2="480" y2="80" stroke={GREEN} strokeWidth="2" /><text data-id="clkT" x="470" y="118" textAnchor="middle" fontSize="11" fill="#9AA3A1">2:14 AM</text></g>
-            <g><rect x="620" y="60" width="90" height="70" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="632" y="80" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "CALENDARIO" : "CALENDAR"}</text><rect data-id="calSlot" x="632" y="88" width="66" height="14" fill={GREEN} opacity="0" transform={skew(26.6)} /></g>
-            <g><rect x="250" y="130" width="70" height="90" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="258" y="150" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">CRM</text><g transform={skew(-26.6)} stroke="#fff" opacity=".6"><line x1="258" y1="165" x2="312" y2="165" /><line x1="258" y1="185" x2="312" y2="185" /><line x1="258" y1="205" x2="312" y2="205" /></g><rect data-id="crmCard" x="262" y="170" width="46" height="10" fill={GREEN} opacity="0" transform={skew(-26.6)} /></g>
-            <g data-id="map" opacity="0"><rect x="730" y="100" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="742" y="120" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "MAPA DE ENTREGAS" : "DELIVERY MAP"}</text><path data-id="route" d="M745 130 L770 150 L800 140 L825 165" fill="none" stroke={GREEN} strokeWidth="2" strokeDasharray="140" strokeDashoffset="140" transform={skew(26.6)} /></g>
-            <g data-id="board" opacity="0"><rect x="330" y="80" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="342" y="100" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">{es ? "PLAN SEMANAL" : "WEEK PLAN"}</text><g transform={skew(-26.6)} fill={GREEN}><rect data-id="b1" x="342" y="110" width="24" height="10" opacity="0" /><rect data-id="b2" x="372" y="110" width="24" height="10" opacity="0" /><rect data-id="b3" x="402" y="110" width="24" height="10" opacity="0" /><rect data-id="b4" x="342" y="128" width="54" height="10" opacity="0" /></g></g>
-            <g data-id="desks" />
-            <g data-id="piles" />
-            <g data-id="claims" opacity="0">
-              <g data-id="mountain" /><g data-id="paid" />
-              <g><path d="M690 420 730 400 770 420 730 440Z" fill="#2A1614" stroke={RED} /><text data-id="trayT" x="700" y="462" fontSize="9" fill={RED}>NEEDS A PERSON</text><g data-id="trayDocs" /></g>
-              <text data-id="paidT" x="560" y="500" fontSize="9" fill="#9AA3A1">PAID</text>
-            </g>
-            <g data-id="excel" opacity="0"><g data-id="cells" /><g data-id="shelves" /></g>
-            <g data-id="tickets" opacity="0" />
-            <g data-id="confetti" opacity="0" />
-            <g data-id="msg" opacity="0"><rect x="-26" y="-14" width="52" height="28" rx="2" fill="#fff" /><text x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>WHATSAPP</text></g>
-            <g data-id="sign" opacity="0"><rect data-id="signR" x="-100" y="-14" width="200" height="28" fill="#fff" stroke={INK} strokeWidth="2" /><text data-id="signT" x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>…</text></g>
-            <g data-id="human" opacity="0"><circle cx="0" cy="-30" r="9" fill="none" stroke="#fff" strokeWidth="2" /><path d="M0 -21 V8 M-12 -8 H12 M0 8 L-9 30 M0 8 L9 30" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><g data-id="pen" opacity="0"><path d="M14 -6 l10 -10" stroke={GREEN} strokeWidth="3" strokeLinecap="round" /></g></g>
-            <g data-id="activity" opacity="0" />
-            <g data-id="dots" />
-            <rect data-id="dark" x="0" y="0" width="1000" height="600" fill={INK} opacity=".86" style={{ pointerEvents: "none" }} />
-            <circle data-id="glow" r="60" fill={GREEN} opacity="0" style={{ pointerEvents: "none" }} />
-          </svg>
-          <div className={s.cap}>
-            <div className={s.n}>{caps[ch][0]}</div>
-            <div><h2>{caps[ch][1]}</h2><p>{caps[ch][2]}</p></div>
-            <div className={s.hint} data-id="hint">{es ? "Baja ↓" : "Scroll ↓"}</div>
-          </div>
-        </div>
-      </section>
+        <div className={s.layout}>
+          <div className={s.copy}>
+            {/* 01 hero */}
+            <section className={s.chapter} id="c1" data-ch="1">
+              <span className={s.kicker}>{caps[0][0]} / {es ? "2:14 AM, Quito" : "2:14 AM, Quito"}</span>
+              <h1 className={s.h}>{es ? "Pon software con IA a trabajar para tu negocio" : "Put AI software to work for your business"}</h1>
+              <p className={s.lead}>{es ? "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada: del descubrimiento al despliegue. Esta página te lo cuenta con seis agentes en una oficina a las 2 de la mañana." : "Full-stack software lab, powered by UX research and applied AI, from discovery to deployment. This page tells it with six agents in an office at 2 AM."}</p>
+              <div className={s.ctas}>
+                <a href="#c5" className={`${s.btn} ${s.btnFill}`}>{es ? "Ver proyectos" : "See the work"}</a>
+                <a href="#c9" className={s.btn}>{es ? "Empieza un proyecto" : "Start a project"}</a>
+              </div>
+              <div className={s.logos}>
+                <span className={s.mono}>{es ? "Confían en nosotros" : "Trusted by"}</span>
+                {LOGOS.map(([n, src]) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={n} src={src} alt={n} title={n} />
+                ))}
+                <b>CarCompraCorp</b>
+              </div>
+              <span className={`${s.hint}`} data-id="hint">{es ? "Baja para seguir la historia ↓" : "Scroll to follow the story ↓"}</span>
+            </section>
 
-      <section className={s.end} id="desk">
-        <div className={s.wrap}>
-          <span className={s.mono} style={{ color: GREEN }}>{es ? "Capítulo 9 / Tu oficina" : "Chapter 9 / Your office"}</span>
-          <h2>{es ? "¿Cuál escritorio es el tuyo?" : "Which desk is yours?"}</h2>
-          <p>{es ? "Un agente por rol, conectado a las herramientas que ya usas. Una persona firma solo donde importa. Elige el escritorio que llenarías primero." : "One agent per role, connected to the tools you already use. A person signs off only where it matters. Pick the desk you'd fill first."}</p>
-          <div className={s.roles}>
-            {ORDER.map((r) => (
-              <button key={r} type="button" aria-pressed={roles.includes(r)} onClick={() => setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]))}>{roleLabel[r]}</button>
-            ))}
+            {/* 02 what we do */}
+            <section className={s.chapter} id="c2" data-ch="2">
+              <span className={s.kicker}>{caps[1][0]} / {caps[1][1]}</span>
+              <h2 className={s.h}>{es ? "Un laboratorio, de punta a punta" : "One lab, end to end"}</h2>
+              <p className={s.lead}>{es ? "Rece dirige cada solicitud al escritorio correcto. Así trabajamos nosotros: investigación, diseño, ingeniería e IA en un solo equipo y una sola hoja de ruta." : "Rece routes every request to the right desk. That is how we work: research, design, engineering and AI in one team and one roadmap."}</p>
+              <div className={s.list}>
+                {([["Product Discovery", es ? "Investigación, mapas de experiencia y prototipos probados con usuarios reales antes del código." : "Research, journey maps and prototypes tested with real users before production code.", "/services/ux"], [es ? "Aplicaciones web y móviles" : "Web & mobile applications", es ? "Plataformas a medida en stacks modernos, mantenidas a largo plazo." : "Tailor-made platforms on modern stacks, maintained for the long run.", "/services/apps"], [es ? "Software a medida" : "Custom software", es ? "Herramientas internas con la forma de tus procesos, integradas con lo que ya usas." : "Internal tools shaped around your workflows, integrated with what you already run.", "/services/custom"], [es ? "IA y automatización" : "AI & automation", es ? "Asistentes, copilotos y agentes con revisión humana donde importa." : "Assistants, copilots and agents with human review where it matters.", "/services/ai"]] as [string, string, string][]).map(([t, d, href]) => (
+                  <Link key={t} href={href} className={s.row}><b>{t}</b><span>{d}</span><i>→</i></Link>
+                ))}
+              </div>
+            </section>
+
+            {/* 03 Sal: AI agents at work */}
+            <section className={s.chapter} id="c3" data-ch="3">
+              <span className={s.kicker}>{caps[2][0]} / {caps[2][1]}</span>
+              <h2 className={s.h}>{es ? "Agentes de IA que hacen el trabajo" : "AI agents that do the work"}</h2>
+              <p className={s.lead}>{es ? "Sal atrapa un lead de WhatsApp, lo registra en el CRM y agenda la reunión antes de que alguien despierte. Un agente por rol, dentro de las herramientas que ya usas." : "Sal catches a WhatsApp lead, logs it in the CRM and books the meeting before anyone wakes up. One agent per role, inside the tools you already use."}</p>
+              <div className={s.stats}>
+                <div><b>24/7</b><span>{es ? "un agente lleva la facturación médica de Helixona" : "an AI agent runs Helixona's medical billing"}</span></div>
+                <div><b>6</b><span>{es ? "semanas para poner un agente en producción" : "weeks to ship an agent to production"}</span></div>
+                <div><b>1</b><span>{es ? "persona firma, solo donde importa" : "person signs off, only where it matters"}</span></div>
+              </div>
+              <Link href="/services/ai" className={s.btn}>{es ? "IA y automatización →" : "AI & automation →"}</Link>
+            </section>
+
+            {/* 04 Sopo: human in the loop */}
+            <section className={s.chapter} id="c4" data-ch="4">
+              <span className={s.kicker}>{caps[3][0]} / {caps[3][1]}</span>
+              <h2 className={s.h}>{es ? "IA en la que tus usuarios sí pueden confiar" : "AI your users can actually trust"}</h2>
+              <p className={s.lead}>{es ? "Sopo resuelve tres tickets a las 3 AM. El difícil va a una persona. Así diseñamos cada asistente: con grounding en tus datos, respuestas citadas y escalamiento humano." : "Sopo solves three tickets at 3 AM. The hard one goes to a person. That is how we design every assistant: grounded in your data, cited answers, human escalation."}</p>
+              <div className={s.checks}>
+                {(es ? ["Respuestas desde tu propia base de conocimiento, con fuentes", "Compuertas de revisión donde importa el criterio", "Evals, guardrails y monitoreo en producción", "Web, WhatsApp o dentro de tu producto"] : ["Answers from your own knowledge base, with sources", "Review gates where judgment matters", "Evals, guardrails and monitoring in production", "Web, WhatsApp or inside your product"]).map((x) => <span key={x}><i />{x}</span>)}
+              </div>
+            </section>
+
+            {/* 05 Fin: Helixona */}
+            <section className={s.chapter} id="c5" data-ch="5">
+              <span className={s.kicker}>{caps[4][0]} / {caps[4][1]}</span>
+              <h2 className={s.h}>{es ? "Un agente de IA que lleva la facturación médica" : "An AI agent that runs medical billing"}</h2>
+              <p className={s.lead}>{es ? "Helixona, una clínica de medicina funcional en Estados Unidos. Nuestro agente procesa reclamos en eClinicalWorks, navega los envíos a Blue Shield y mantiene la documentación en movimiento. Fin es su retrato." : "Helixona, a functional-medicine clinic in the US. Our agent processes claims in eClinicalWorks, navigates Blue Shield submissions and keeps documentation moving. Fin is its portrait."}</p>
+              <Link href="/work#healthcare" className={s.card}>
+                <span className={s.cardBar}><i /><i /><i /><em>helixona.com</em></span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/art/helixona-hero.webp" alt="Helixona" width={1200} height={675} loading="lazy" />
+                <span className={s.cardFoot}><span>{es ? "Salud / agente de IA / 24/7" : "Healthcare / AI agent / 24/7"}</span><b>{es ? "Caso →" : "Case →"}</b></span>
+              </Link>
+            </section>
+
+            {/* 06 Opi: WFS + the rest of the work */}
+            <section className={s.chapter} id="c6" data-ch="6">
+              <span className={s.kicker}>{caps[5][0]} / {caps[5][1]}</span>
+              <h2 className={s.h}>{es ? "De Excel a un CRM que se enruta solo" : "From Excel to a CRM that routes itself"}</h2>
+              <p className={s.lead}>{es ? "Western Fence Supply: migramos el CRM de hojas de cálculo a Odoo, con asignación automática de leads y un módulo de rutas de entrega multi-parada. Opi convierte la hoja en estantes y la ruta en un camión." : "Western Fence Supply: we moved the CRM from spreadsheets to Odoo, with automatic lead routing and a multi-stop delivery module. Opi turns the sheet into shelves and the route into a truck."}</p>
+              <Link href="/work#fence" className={s.card}>
+                <span className={s.cardBar}><i /><i /><i /><em>westernfencesupply.com</em></span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/art/wfs-hero.webp" alt="Western Fence Supply" width={1200} height={675} loading="lazy" />
+                <span className={s.cardFoot}><span>{es ? "Distribución / Odoo / rutas" : "Distribution / Odoo / routes"}</span><b>{es ? "Caso →" : "Case →"}</b></span>
+              </Link>
+              <div className={s.more}>
+                {([["USFQ", es ? "EventFlow, publicada en el App Store" : "EventFlow, shipped on the App Store", "/work#usfq"], ["ThemedMotion", es ? "Portafolio 3D para un estudio de animatrónica" : "An immersive 3D portfolio for an animatronics studio", "/work#themedmotion"], ["PARC Home Care", es ? "PARC Connect, en las dos tiendas" : "PARC Connect, in both app stores", "/work#parc"], ["The Internet Coaches", es ? "Dashboard de IA para concesionarios" : "AI dashboard for car dealerships", "/work"]] as [string, string, string][]).map(([c, t, href]) => (
+                  <Link key={c} href={href} className={s.row}><b>{c}</b><span>{t}</span><i>→</i></Link>
+                ))}
+              </div>
+            </section>
+
+            {/* 07 Mark: the numbers */}
+            <section className={s.chapter} id="c7" data-ch="7">
+              <span className={s.kicker}>{caps[6][0]} / {caps[6][1]}</span>
+              <h2 className={s.h}>{es ? "Resultados medibles, en producción" : "Measured results, in production"}</h2>
+              <p className={s.lead}>{es ? "Mark planifica, publica y reporta. Nosotros también reportamos: estas son las cifras del laboratorio." : "Mark plans, publishes and reports. So do we: these are the lab's numbers."}</p>
+              <div className={s.stats}>
+                <div><b>3,650+</b><span>{es ? "días lanzando productos" : "days shipping products"}</span></div>
+                <div><b>48</b><span>{es ? "productos en producción" : "products in production"}</span></div>
+                <div><b>2</b><span>{es ? "tiendas publican PARC Connect" : "app stores carry PARC Connect"}</span></div>
+                <div><b>8</b><span>{es ? "países con clientes, desde Quito" : "countries with clients, from Quito"}</span></div>
+              </div>
+            </section>
+
+            {/* 08 the office */}
+            <section className={s.chapter} id="c8" data-ch="8">
+              <span className={s.kicker}>{caps[7][0]} / {es ? "Nuestro producto" : "Our product"}</span>
+              <h2 className={s.h}>{es ? "Una oficina donde cada empleado es un agente de IA" : "An office where every employee is an AI agent"}</h2>
+              <p className={s.lead}>{es ? "El AI Management Office es un producto nuestro, por suscripción mensual. Abres la oficina, ves qué hace cada agente, le preguntas y apruebas lo que necesite una persona. Los Dots son su versión de bolsillo." : "The AI Management Office is our own product, sold as a monthly subscription. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person. The Dots are its pocket version."}</p>
+              <div className={s.roleGrid}>
+                {ORDER.map((r) => (
+                  <div key={r}><b>{roleLabel[r]}</b><span>{ROLE_DESC[lang][r]}</span></div>
+                ))}
+              </div>
+              <div className={s.ctas}>
+                <Link href="/office-demo" className={`${s.btn} ${s.btnFill}`}>{es ? "Abrir la demo en vivo" : "Open the live demo"}</Link>
+                <Link href="/blog/ai-management-office" className={s.btn}>{es ? "Cómo funciona →" : "How it works →"}</Link>
+              </div>
+            </section>
+
+            {/* 09 your desk */}
+            <section className={s.chapter} id="c9" data-ch="9">
+              <span className={s.kicker}>{caps[8][0]} / {es ? "Tu oficina" : "Your office"}</span>
+              <h2 className={s.h}>{es ? "¿Cuál escritorio es el tuyo?" : "Which desk is yours?"}</h2>
+              <p className={s.lead}>{es ? "Elige el escritorio que llenarías primero y escríbenos. Respondemos en un día hábil con una primera lectura y los siguientes pasos." : "Pick the desk you'd fill first and write to us. We reply within one business day with a first read and next steps."}</p>
+              <div className={s.roles}>
+                {ORDER.map((r) => (
+                  <button key={r} type="button" aria-pressed={roles.includes(r)} onClick={() => setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]))}>{roleLabel[r]}</button>
+                ))}
+              </div>
+              <div className={s.ctas}>
+                <a href={mailto} className={`${s.btn} ${s.btnFill}`}>{es ? "Empieza un proyecto" : "Start a project"}</a>
+                <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={s.btn}>WhatsApp →</a>
+              </div>
+              <p className={s.note}>info@mindfultech.ec / +593 958 73 1994 / Quito, Ecuador<br />{es ? "Ecuador, California, Chicago, Florida, Países Bajos, Alemania, España, Grecia" : "Ecuador, California, Chicago, Florida, Netherlands, Germany, Spain, Greece"}</p>
+            </section>
           </div>
-          <div className={s.ctas}>
-            <a href={mailto} className={`${s.btn} ${s.btnFill}`}>{es ? "Empieza un proyecto" : "Start a project"}</a>
-            <Link href="/office-demo" className={s.btn}>{es ? "Abrir la demo real →" : "Open the live demo →"}</Link>
+
+          <div className={s.stage}>
+      <svg className={s.scene} viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label={es ? "Oficina isométrica donde pequeños robots automatizan el trabajo mientras bajas" : "Isometric office where small robots automate work as you scroll"}>
+        <defs>
+          <linearGradient id="dotsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1D24" /><stop offset="1" stopColor="#14161C" /></linearGradient>
+        </defs>
+        <path d="M500 95 905 300 500 505 95 300Z" fill="url(#dotsFloor)" stroke="#2A2E37" />
+        <g stroke="#23262E" strokeWidth="1" opacity=".8"><path d="M297 197 702 402M702 197 297 402M399 146 804 351M601 146 196 351M196 249 601 454M804 249 399 454" /></g>
+        <path d="M95 300 500 95 500 20 95 225Z" fill="#111318" stroke="#2A2E37" />
+        <path d="M905 300 500 95 500 20 905 225Z" fill="#0F1115" stroke="#2A2E37" />
+        <g data-id="doors" opacity="0">
+          {([["M150 262 200 237 200 290 150 315Z", 175, 280, "USFQ"], ["M240 217 290 192 290 245 240 270Z", 265, 235, "PARC"], ["M330 172 380 147 380 200 330 225Z", 355, 190, "WFS"], ["M620 147 670 172 670 225 620 200Z", 645, 190, "HELIXONA"], ["M710 192 760 217 760 270 710 245Z", 735, 235, "THEMED\u00a0MOTION"]] as [string, number, number, string][]).map(([d, x, y, n]) => (
+            <g key={n}><path d={d} fill="#191C23" stroke="#fff" strokeWidth="1" /><text x={x} y={y} textAnchor="middle" fontSize="7.5" fill="#fff">{n}</text></g>
+          ))}
+        </g>
+        <g><circle cx="470" cy="80" r="22" fill="#15181E" stroke="#fff" /><line data-id="clkH" x1="470" y1="80" x2="470" y2="68" stroke="#fff" strokeWidth="2" /><line data-id="clkM" x1="470" y1="80" x2="480" y2="80" stroke={GREEN} strokeWidth="2" /><text data-id="clkT" x="470" y="118" textAnchor="middle" fontSize="11" fill="#9AA3A1">2:14 AM</text></g>
+        <g><rect x="620" y="60" width="90" height="70" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="632" y="80" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "CALENDARIO" : "CALENDAR"}</text><rect data-id="calSlot" x="632" y="88" width="66" height="14" fill={GREEN} opacity="0" transform={skew(26.6)} /></g>
+        <g><rect x="250" y="130" width="70" height="90" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="258" y="150" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">CRM</text><g transform={skew(-26.6)} stroke="#fff" opacity=".6"><line x1="258" y1="165" x2="312" y2="165" /><line x1="258" y1="185" x2="312" y2="185" /><line x1="258" y1="205" x2="312" y2="205" /></g><rect data-id="crmCard" x="262" y="170" width="46" height="10" fill={GREEN} opacity="0" transform={skew(-26.6)} /></g>
+        <g data-id="map" opacity="0"><rect x="730" y="100" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="742" y="120" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "MAPA DE ENTREGAS" : "DELIVERY MAP"}</text><path data-id="route" d="M745 130 L770 150 L800 140 L825 165" fill="none" stroke={GREEN} strokeWidth="2" strokeDasharray="140" strokeDashoffset="140" transform={skew(26.6)} /></g>
+        <g data-id="board" opacity="0"><rect x="330" y="80" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="342" y="100" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">{es ? "PLAN SEMANAL" : "WEEK PLAN"}</text><g transform={skew(-26.6)} fill={GREEN}><rect data-id="b1" x="342" y="110" width="24" height="10" opacity="0" /><rect data-id="b2" x="372" y="110" width="24" height="10" opacity="0" /><rect data-id="b3" x="402" y="110" width="24" height="10" opacity="0" /><rect data-id="b4" x="342" y="128" width="54" height="10" opacity="0" /></g></g>
+        <g data-id="desks" />
+        <g data-id="piles" />
+        <g data-id="claims" opacity="0">
+          <g data-id="mountain" /><g data-id="paid" />
+          <g><path d="M690 420 730 400 770 420 730 440Z" fill="#2A1614" stroke={RED} /><text data-id="trayT" x="700" y="462" fontSize="9" fill={RED}>NEEDS A PERSON</text><g data-id="trayDocs" /></g>
+          <text data-id="paidT" x="560" y="500" fontSize="9" fill="#9AA3A1">PAID</text>
+        </g>
+        <g data-id="excel" opacity="0"><g data-id="cells" /><g data-id="shelves" /></g>
+        <g data-id="tickets" opacity="0" />
+        <g data-id="confetti" opacity="0" />
+        <g data-id="msg" opacity="0"><rect x="-26" y="-14" width="52" height="28" rx="2" fill="#fff" /><text x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>WHATSAPP</text></g>
+        <g data-id="sign" opacity="0"><rect data-id="signR" x="-100" y="-14" width="200" height="28" fill="#fff" stroke={INK} strokeWidth="2" /><text data-id="signT" x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>…</text></g>
+        <g data-id="human" opacity="0"><circle cx="0" cy="-30" r="9" fill="none" stroke="#fff" strokeWidth="2" /><path d="M0 -21 V8 M-12 -8 H12 M0 8 L-9 30 M0 8 L9 30" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><g data-id="pen" opacity="0"><path d="M14 -6 l10 -10" stroke={GREEN} strokeWidth="3" strokeLinecap="round" /></g></g>
+        <g data-id="activity" opacity="0" />
+        <g data-id="dots" />
+        <rect data-id="dark" x="0" y="0" width="1000" height="600" fill={INK} opacity=".86" style={{ pointerEvents: "none" }} />
+        <circle data-id="glow" r="60" fill={GREEN} opacity="0" style={{ pointerEvents: "none" }} />
+      </svg>
+            <div className={s.cap}>
+              <span className={s.n}>{caps[ch][0]}</span>
+              <span className={s.capT}>{caps[ch][1]}</span>
+            </div>
           </div>
-          <p className={s.note}>{es ? "Concepto / personajes y oficina dibujados en SVG / el scroll controla la historia / los ojos siguen tu cursor" : "Concept / characters and office drawn in SVG / scroll drives the story / the eyes follow your cursor"}</p>
         </div>
       </section>
 
