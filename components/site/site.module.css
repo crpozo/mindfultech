@@ -48,7 +48,7 @@
 .navLogo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 22px; color: var(--dgreen); }
 .navLogo img { height: 38px; width: auto; display: block; }
 .navLinks { display: flex; gap: 32px; font-size: 17px; font-weight: 500; }
-.navLinks a.navOn { color: var(--dgreen); box-shadow: inset 0 -2px 0 var(--green); }
+.navLinks a.navOn { color: var(--dgreen); }
 .navBurger { display: none; width: 40px; height: 40px; border: 1.5px solid var(--ink); background: #fff; flex-direction: column; justify-content: center; gap: 5px; padding: 0 10px; cursor: pointer; }
 .navBurger i { display: block; height: 2px; background: var(--ink); }
 .navSheet { display: flex; flex-direction: column; border-top: 1px solid var(--line); background: #fff; padding: 8px 20px 16px; }
