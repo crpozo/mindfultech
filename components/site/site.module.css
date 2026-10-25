@@ -109,8 +109,10 @@
 .diffGrid .mono.onWhite { padding: 6px 10px; }
 .diffGrid .big.onWhite { padding: 0 16px; }
 .diffGrid p.onWhite { padding: 12px 16px; }
-.diffGrid a { background: var(--ink); color: #fff; padding: 10px 14px; align-self: flex-start; }
-.diffGrid a:hover { background: #fff; color: var(--ink); }
+.root .diffGrid a { background: var(--ink); color: #fff; padding: 10px 14px; align-self: flex-start; }
+.root .diffGrid a:hover { background: #fff; color: var(--ink); }
+.root .diffInk a { color: var(--lime); }
+.root .diffInk a:hover { color: #fff; }
 
 /* ---- why ---- */
 .why { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 0 48px; align-items: start; }
