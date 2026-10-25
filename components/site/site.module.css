@@ -450,3 +450,8 @@
 .mapPulse { animation: mapPulse 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes mapPulse { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
 .mapPlate { animation: fadeIn 0.25s ease; }
+/* service tiles are links: keep ink text on hover (the tint changes, not the words) */
+.root a.tile, .root a.tile:hover { color: var(--ink); }
+.root a.tile h3, .root a.tile .specs b { color: var(--ink); }
+.root a.tile .tileLink { color: #fff; }
+.root a.tile:hover .tileLink { background: var(--dgreen); }
