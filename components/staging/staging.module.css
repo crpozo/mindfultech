@@ -166,6 +166,7 @@
 @keyframes mtSpinFrom { from { transform: rotate(var(--rot)); } to { transform: rotate(calc(var(--rot) + 360deg)); } }
 @keyframes mtPulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.15); opacity: 1; } }
 @keyframes mtFlow { 0% { left: 33%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 62%; opacity: 0; } }
+@keyframes mtFlowX { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(110px); opacity: 0; } }
 
 /* ---- work ---- */
 .work { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
@@ -177,13 +178,18 @@
 .itemBody { display: flex; flex-direction: column; gap: 4px; }
 .itemClient { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; color: var(--dgreen); text-transform: uppercase; }
 .itemTitle { font-family: var(--serif); font-size: 28px; line-height: 1.05; }
-.feature { position: relative; overflow: hidden; min-height: 560px; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px; gap: 16px; box-sizing: border-box; }
+.feature { position: relative; overflow: hidden; min-height: 560px; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px; gap: 14px; box-sizing: border-box; }
 .featureCircle { position: absolute; right: 32px; top: 32px; width: 180px; height: 180px; border-radius: 50%; background: var(--lav); }
-.featureImg { position: absolute; left: 40px; top: 40px; width: 55%; height: 55%; object-fit: cover; display: block; border: 2px solid var(--ink); box-shadow: 12px 12px 0 var(--ink); }
-.featureChip { position: relative; font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; background: #fff; padding: 8px 12px; align-self: flex-start; }
+.featureFrame { position: relative; width: min(100%, 560px); border: 2px solid var(--ink); background: #fff; box-shadow: 12px 12px 0 var(--ink); margin-bottom: 10px; animation: fadeIn 0.25s ease; }
+.featureBar { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-bottom: 2px solid var(--ink); background: #fff; }
+.featureBar i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); opacity: 0.25; }
+.featureBar em { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: #777; margin-left: 8px; }
+.featureImg { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: left top; }
+.featureChip { position: relative; font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; background: #fff; padding: 8px 12px; align-self: flex-start; text-transform: uppercase; }
 .featureText { position: relative; background: #fff; padding: 20px 24px; font-family: var(--serif); font-size: 30px; line-height: 1.05; max-width: 520px; text-wrap: pretty; }
-.featureBtn { position: relative; background: var(--ink); color: #fff; padding: 14px 20px; white-space: nowrap; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; align-self: flex-start; }
+.featureBtn { position: relative; background: var(--ink); color: #fff; padding: 14px 20px; white-space: nowrap; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; align-self: flex-start; text-transform: uppercase; }
 .featureBtn:hover { background: #fff; color: var(--ink); }
+.itemOn { background: var(--lime); }
 
 /* ---- office ---- */
 .office { margin-top: 140px; background: var(--ink); color: var(--bg); }
@@ -257,3 +263,43 @@
   .why { grid-template-columns: 1fr; }
   .panel { min-height: 520px; }
 }
+
+/* ---- richer mocks and illustrations ---- */
+.avatar { display: inline-grid; place-items: center; width: 26px; height: 26px; font-size: 11px; font-weight: 600; font-style: normal; letter-spacing: 0; color: var(--ink); flex: none; }
+.transcript { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; line-height: 1.4; color: #222; }
+.transcript p { margin: 0; display: flex; gap: 8px; }
+.transcript b { font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: #555; margin-top: 3px; flex: none; }
+.mockFoot { display: flex; justify-content: space-between; gap: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; color: #777; }
+.journey { display: flex; gap: 6px; align-items: flex-end; height: 110px; }
+.jcol { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
+.jcol i { display: block; width: 100%; }
+.jcol small { font-family: var(--mono); font-size: 9.5px; color: #555; }
+.jcol em { font-style: normal; font-size: 9.5px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pillTiny { font-size: 11px; font-weight: 600; padding: 4px 8px; white-space: nowrap; }
+.sticky { position: absolute; width: 150px; padding: 12px 14px; background: #FFF4A8; font-family: var(--serif); font-size: 19px; line-height: 1.1; box-shadow: 4px 4px 0 rgba(14, 13, 18, 0.15); animation: fadeIn 0.3s ease; }
+.step { display: grid; grid-template-columns: 1fr 70px auto; gap: 10px; align-items: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; }
+.step i { display: block; height: 6px; background: rgba(14, 13, 18, 0.08); }
+.step b { display: block; height: 100%; background: #3DBE7D; }
+.step em { font-style: normal; color: #1F7A4D; white-space: nowrap; }
+.log { padding: 10px 16px; border-top: 2px solid var(--ink); background: #0E1013; color: #BFF5CF; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.02em; line-height: 1.6; }
+.log span { color: #7f8a7f; }
+.seg { display: flex; gap: 2px; }
+.seg i { flex: 1; height: 12px; display: block; }
+.weeks { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; font-family: var(--mono); font-size: 10px; color: #777; text-align: center; }
+.roadmap span { display: flex; flex-direction: column; gap: 2px; }
+.roadmap small { font-size: 11px; font-weight: 400; opacity: 0.8; }
+.milestones { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: #333; }
+.team { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 12.5px; color: #333; }
+.team span { display: inline-flex; align-items: center; gap: 6px; }
+.quote small { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; color: #555; margin-top: 10px; text-transform: uppercase; }
+.note { width: 118px; padding: 10px 12px; background: #FFF4A8; font-family: var(--serif); font-size: 17px; line-height: 1.1; box-shadow: 4px 4px 0 rgba(14, 13, 18, 0.15); animation: mtFloat 6s ease-in-out infinite; }
+.miniChart { display: flex; gap: 4px; align-items: flex-end; width: 88px; height: 54px; padding: 6px; background: #fff; border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--lav); }
+.miniChart i { flex: 1; display: block; background: var(--lav); }
+.artLabel { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; background: #fff; border: 1.5px solid var(--ink); padding: 5px 8px; white-space: nowrap; }
+.node { width: 130px; height: 70px; }
+.node em { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: #1F7A4D; margin-bottom: 2px; }
+.badge { padding: 6px 9px; background: #fff; border: 2px solid var(--ink); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; color: #1F7A4D; box-shadow: 4px 4px 0 #3DBE7D; animation: mtFloat 5s ease-in-out infinite; }
+.tool { padding: 7px 10px; background: #fff; border: 2px solid var(--ink); font-size: 12px; font-weight: 600; box-shadow: 4px 4px 0 #85BFE9; animation: mtFloat 6s ease-in-out infinite; }
+.bubble { width: 190px; padding: 12px 14px; background: #fff; border: 2px solid var(--ink); box-shadow: 8px 8px 0 #85BFE9; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 4px; animation: mtFloat 5s ease-in-out 0.5s infinite; }
+.bubble em { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: #1F3A8A; text-transform: uppercase; }
+.bubble small { font-size: 10.5px; color: #777; }

@@ -15,7 +15,7 @@ const T = {
     start: "Start a project",
     pillNew: "NEW",
     pill: "AI Management Office — governed AI agents for your ops.",
-    learn: "Learn more →",
+    learn: "Open the demo →",
     h1: "Put AI software to work for your business",
     heroSub: "Full-stack software lab, powered by UX research and applied AI — from discovery to deployment.",
     projects: "Our projects",
@@ -46,20 +46,26 @@ const T = {
       ["Web Applications", "Scalable, tailor-made platforms on modern stacks, maintained for the long run."],
       ["AI Integration", "Assistants, copilots and intelligent agents your users can trust."],
     ],
-    projectsLbl: "● Projects",
+    projectsLbl: "Projects",
     workH2: "Built by MindfulTech",
     work: [
       ["Helixona", "An AI agent that runs medical billing"],
       ["USFQ", "EventFlow, shipped on the App Store"],
       ["Western Fence Supply", "Excel → Odoo, with delivery routes"],
-      ["ThemedMotion · Netherlands", "An immersive 3D portfolio for an animatronics studio"],
+      ["ThemedMotion / Netherlands", "An immersive 3D portfolio for an animatronics studio"],
       ["PARC Home Care", "PARC Connect, home care in your pocket"],
-      ["The Internet Coaches · California", "AI dashboard for car dealerships"],
+      ["The Internet Coaches / California", "AI dashboard for car dealerships"],
     ],
-    featChip: "Healthcare · AI agent · 24/7",
-    featText: "Claims, coding and follow-ups handled end to end inside the clinic's tools. A person signs off only where it matters.",
+    feat: [
+      ["Healthcare / AI agent / 24/7", "Claims, coding and follow-ups handled end to end inside the clinic's tools. A person signs off only where it matters."],
+      ["Education / iOS app / App Store", "Event check-in, agendas and certificates for a university of 10,000 students, shipped on the App Store."],
+      ["Industry / Odoo / logistics", "Quotes, inventory and delivery routes moved from spreadsheets into Odoo, with drivers on their phones."],
+      ["Entertainment / 3D web / Netherlands", "A real-time 3D portfolio that lets visitors walk around the studio's animatronics."],
+      ["Home care / mobile app / 2 stores", "PARC Connect puts schedules, visits and care notes in families' pockets, on iOS and Android."],
+      ["Automotive / AI dashboard / California", "One dashboard that reads every dealership's numbers and answers questions in plain language."],
+    ],
     caseStudy: "Case study →",
-    officeTag: "AI as a service · our new product",
+    officeTag: "AI as a service / our new product",
     officeH2a: "An office where every employee is an ",
     officeH2b: "AI agent",
     officeP: "A product we built, sold as a monthly subscription. One agent per role, connected to the tools you already use. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person.",
@@ -72,7 +78,7 @@ const T = {
       ["Operations", "Orders supplies and keeps the calendar and inventory in order."],
       ["Reception", "Confirms appointments and routes every request to the right place."],
     ],
-    whereLbl: "● Where we work",
+    whereLbl: "Where we work",
     whereH2: "MindfulTech helps companies worldwide",
     whereSub: "From Ecuador, for teams across the Americas and Europe.",
     homeBase: "Home base",
@@ -92,7 +98,7 @@ const T = {
     start: "Empieza un proyecto",
     pillNew: "NUEVO",
     pill: "AI Management Office: agentes de IA gobernados para tu operación.",
-    learn: "Saber más →",
+    learn: "Abrir la demo →",
     h1: "Pon software con IA a trabajar para tu negocio",
     heroSub: "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada: del descubrimiento al despliegue.",
     projects: "Nuestros proyectos",
@@ -123,20 +129,26 @@ const T = {
       ["Aplicaciones web", "Plataformas escalables y a medida en stacks modernos, mantenidas a largo plazo."],
       ["Integración de IA", "Asistentes, copilotos y agentes inteligentes en los que tus usuarios pueden confiar."],
     ],
-    projectsLbl: "● Proyectos",
+    projectsLbl: "Proyectos",
     workH2: "Construido por MindfulTech",
     work: [
       ["Helixona", "Un agente de IA que lleva la facturación médica"],
       ["USFQ", "EventFlow, publicada en el App Store"],
       ["Western Fence Supply", "De Excel a Odoo, con rutas de entrega"],
-      ["ThemedMotion · Países Bajos", "Un portafolio 3D inmersivo para un estudio de animatrónica"],
+      ["ThemedMotion / Países Bajos", "Un portafolio 3D inmersivo para un estudio de animatrónica"],
       ["PARC Home Care", "PARC Connect, cuidado en casa en tu bolsillo"],
-      ["The Internet Coaches · California", "Dashboard de IA para concesionarios"],
+      ["The Internet Coaches / California", "Dashboard de IA para concesionarios"],
     ],
-    featChip: "Salud · agente de IA · 24/7",
-    featText: "Reclamos, codificación y seguimientos resueltos de punta a punta dentro de las herramientas de la clínica. Una persona aprueba solo donde importa.",
+    feat: [
+      ["Salud / agente de IA / 24/7", "Reclamos, codificación y seguimientos resueltos de punta a punta dentro de las herramientas de la clínica. Una persona aprueba solo donde importa."],
+      ["Educación / app iOS / App Store", "Registro a eventos, agendas y certificados para una universidad de 10.000 estudiantes, publicada en el App Store."],
+      ["Industria / Odoo / logística", "Cotizaciones, inventario y rutas de entrega pasaron de hojas de cálculo a Odoo, con los choferes en su celular."],
+      ["Entretenimiento / web 3D / Países Bajos", "Un portafolio 3D en tiempo real para recorrer la animatrónica del estudio."],
+      ["Cuidado en casa / app móvil / 2 tiendas", "PARC Connect pone horarios, visitas y notas de cuidado en el bolsillo de las familias, en iOS y Android."],
+      ["Automotriz / dashboard de IA / California", "Un solo tablero que lee los números de cada concesionario y responde preguntas en lenguaje natural."],
+    ],
     caseStudy: "Caso de estudio →",
-    officeTag: "IA como servicio · nuestro nuevo producto",
+    officeTag: "IA como servicio / nuestro nuevo producto",
     officeH2a: "Una oficina donde cada empleado es un ",
     officeH2b: "agente de IA",
     officeP: "Un producto nuestro, vendido como suscripción mensual. Un agente por rol, conectado a las herramientas que ya usas. Abres la oficina, ves qué hace cada agente, le preguntas y apruebas lo que necesite una persona.",
@@ -149,7 +161,7 @@ const T = {
       ["Operaciones", "Pide insumos y mantiene en orden el calendario y el inventario."],
       ["Recepción", "Confirma citas y dirige cada solicitud al lugar correcto."],
     ],
-    whereLbl: "● Dónde trabajamos",
+    whereLbl: "Dónde trabajamos",
     whereH2: "MindfulTech ayuda a empresas en todo el mundo",
     whereSub: "Desde Ecuador, para equipos de América y Europa.",
     homeBase: "Sede",
@@ -178,6 +190,7 @@ const SVC = [
   { tint: "#E6F7EC", hot: "#8EF2B4", gl: "#9FDDBB" },
   { tint: "#E3F1FB", hot: "#8ED0FF", gl: "#9CCBEF" },
 ];
+const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string][] = [
   ["USFQ", "/logo-usfq.svg"],
   ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"],
@@ -187,120 +200,181 @@ const LOGOS: [string, string][] = [
 ];
 
 /* ------------------------------------------------- why: the four mocks ---- */
+const Lbl = ({ children, color = "#555" }: { children: React.ReactNode; color?: string }) => <span className={s.mockLbl} style={{ color }}>{children}</span>;
+
 function WhyMock({ i }: { i: number }) {
   if (i === 0)
     return (
       <>
-        <div className={s.mock} style={{ left: "8%", top: "12%", width: "52%", background: "#EEEDFB", boxShadow: "8px 8px 0 #C9C4F2", gap: 14 }}>
-          <div className={s.mockHead}>Interview #14<span className={s.mockLbl}>CLINIC · QUITO</span></div>
-          <div className={s.lines}><i style={{ width: "85%" }} /><i style={{ width: "60%" }} /><i style={{ width: "72%" }} /></div>
-          <div className={s.tags}><span>PAIN · BILLING</span><span>WORKAROUND</span><span className={s.outline}>QUOTE</span></div>
+        <div className={s.mock} style={{ left: "5%", top: "6%", width: "54%", background: "#EEEDFB", boxShadow: "8px 8px 0 #C9C4F2", gap: 12 }}>
+          <div className={s.mockHead}>
+            <span style={{ display: "flex", alignItems: "center", gap: 10 }}><span className={s.avatar} style={{ background: "#C9C4F2" }}>MR</span>Interview #14 <small style={{ fontWeight: 400, color: "#555" }}>/ 46 min</small></span>
+            <Lbl>CLINIC / QUITO</Lbl>
+          </div>
+          <div className={s.transcript}>
+            <p><b>Q</b> What happens when a claim comes back rejected?</p>
+            <p><b>A</b> “I print it, mark it in a notebook and re-type it on Friday. Some weeks there are forty.”</p>
+            <p><b>Q</b> Who sees the notebook?</p>
+            <p><b>A</b> “Only me. If I'm sick, nobody.”</p>
+          </div>
+          <div className={s.tags}><span>PAIN / BILLING</span><span>WORKAROUND</span><span>SINGLE POINT OF FAILURE</span><span className={s.outline}>QUOTE</span></div>
+          <div className={s.mockFoot}><span>Tagged by Lucía</span><span>Session 14 of 22</span></div>
         </div>
-        <div className={s.mock} style={{ right: "8%", top: "38%", width: "48%" }}>
-          <div className={s.mockLbl}>JOURNEY MAP · DAY 1 → DAY 30</div>
-          <div className={s.bars}><i style={{ height: "40%" }} /><i style={{ height: "70%" }} /><i style={{ height: "100%", background: "#0E1013" }} /><i style={{ height: "55%" }} /><i style={{ height: "30%" }} /></div>
-          <div style={{ fontSize: 15, fontWeight: 500 }}>Peak friction: claim rejections on day 12</div>
+        <div className={s.mock} style={{ right: "4%", top: "56%", width: "50%", gap: 10 }}>
+          <div className={s.mockHead} style={{ fontSize: 15 }}>Journey map <Lbl>DAY 1 → DAY 30</Lbl></div>
+          <div className={s.journey}>
+            {[["D1", 35, "intake"], ["D4", 55, "codes"], ["D8", 70, "submit"], ["D12", 100, "rejected"], ["D18", 60, "re-type"], ["D24", 45, "resubmit"], ["D30", 25, "paid"]].map(([d, h, l]) => (
+              <div key={d as string} className={s.jcol}><i style={{ height: `${h}%`, background: h === 100 ? "#0E1013" : "#C9C4F2" }} /><small>{d}</small><em>{l}</em></div>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>Peak friction: claim rejections on day 12</span>
+            <span className={s.pillTiny} style={{ background: "#C9C4F2" }}>3 of 5 clinics</span>
+          </div>
         </div>
+        <div className={s.sticky} style={{ left: "68%", top: "10%", transform: "rotate(4deg)" }}>Nobody owns the rejected pile.</div>
       </>
     );
   if (i === 1)
     return (
       <>
-        <div className={s.mock} style={{ left: "10%", top: "14%", width: "60%", background: "#E6F7EC", boxShadow: "8px 8px 0 #3DBE7D", padding: 0, gap: 0 }}>
-          <div className={s.mockHead} style={{ padding: "14px 18px", borderBottom: "2px solid #0E1013" }}>Deploy · main<span className={s.mockLbl} style={{ color: "#1F7A4D" }}>● LIVE</span></div>
-          <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div className={s.kv}><span>build</span><b>✓ 42s</b></div>
-            <div className={s.kv}><span>tests · 318</span><b>✓ passed</b></div>
-            <div className={s.kv}><span>deploy · aws</span><b>✓ 1m 08s</b></div>
+        <div className={s.mock} style={{ left: "6%", top: "10%", width: "62%", background: "#E6F7EC", boxShadow: "8px 8px 0 #3DBE7D", padding: 0, gap: 0 }}>
+          <div className={s.mockHead} style={{ padding: "12px 16px", borderBottom: "2px solid #0E1013" }}>
+            <span>Deploy <small style={{ fontWeight: 400, color: "#555" }}>main / a41f9c2</small></span>
+            <Lbl color="#1F7A4D">● LIVE</Lbl>
           </div>
+          <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9 }}>
+            {[["lint + typecheck", "✓ 18s", 100], ["tests / 318 passed", "✓ 42s", 100], ["build / next export", "✓ 1m 02s", 100], ["deploy / aws · us-east-1", "✓ 1m 08s", 100], ["smoke / 12 routes", "✓ 9s", 100]].map(([k, v, w]) => (
+              <div key={k as string} className={s.step}><span>{k}</span><i><b style={{ width: `${w}%` }} /></i><em>{v}</em></div>
+            ))}
+          </div>
+          <div className={s.log}><span>14:02:11</span> migrations: 2 applied · <span>14:02:14</span> cache warmed · <span>14:02:19</span> healthcheck 200 · <span>14:02:19</span> traffic shifted 100%</div>
         </div>
-        <div className={s.mock} style={{ right: "6%", top: "52%", width: "44%", padding: 18, gap: 8 }}>
-          <span className={s.mockLbl}>UPTIME · 90 DAYS</span>
+        <div className={s.mock} style={{ right: "5%", top: "50%", width: "46%", padding: 16, gap: 8 }}>
+          <Lbl>UPTIME / 90 DAYS</Lbl>
           <span className={s.uptime}>99.98%</span>
-          <div className={s.seg}><i /><i /><i /><i /><i /><i /></div>
+          <div className={s.seg}>{Array.from({ length: 30 }, (_, k) => <i key={k} style={{ background: k === 11 ? "#F4C542" : "#3DBE7D" }} />)}</div>
+          <div className={s.mockFoot}><span>1 incident / 9 min</span><span>p95 210 ms</span></div>
         </div>
+        <div className={s.sticky} style={{ left: "72%", top: "14%", transform: "rotate(-3deg)", background: "#BFF5CF" }}>Monitored since day one.</div>
       </>
     );
   if (i === 2)
     return (
       <>
-        <div className={s.mock} style={{ left: "8%", top: "10%", width: "56%", background: "#E3F1FB", padding: 0, gap: 0 }}>
-          <div className={s.mockHead} style={{ padding: "14px 18px", borderBottom: "2px solid #0E1013" }}>Finance agent · today</div>
-          <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className={s.mock} style={{ left: "6%", top: "8%", width: "58%", background: "#E3F1FB", padding: 0, gap: 0 }}>
+          <div className={s.mockHead} style={{ padding: "12px 16px", borderBottom: "2px solid #0E1013" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 10 }}><span className={s.avatar} style={{ background: "#85BFE9" }}>F</span>Finance agent <small style={{ fontWeight: 400, color: "#555" }}>/ today</small></span>
+            <Lbl color="#1F7A4D">● WORKING</Lbl>
+          </div>
+          <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
             <div className={s.fin}><span>Invoices issued</span><b>37</b></div>
-            <div className={s.fin}><span>Bank reconciled</span><b>✓</b></div>
+            <div className={s.fin}><span>Bank reconciled</span><b>✓ 212 / 212</b></div>
+            <div className={s.fin}><span>Receivables chased</span><b>14</b></div>
             <div className={`${s.fin} ${s.finHot}`}><span>Needs your signature</span><b>2</b></div>
           </div>
+          <div className={s.mockFoot} style={{ padding: "0 16px 12px" }}><span>QuickBooks / Pichincha / Gmail</span><span>Last run 09:40</span></div>
         </div>
-        <div className={s.mock} style={{ right: "6%", top: "44%", width: "48%", boxShadow: "8px 8px 0 #85BFE9", padding: 18, gap: 14 }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#85BFE9", display: "block", marginTop: 6, flexShrink: 0 }} />
-            <span style={{ fontSize: 15, lineHeight: 1.45 }}>Approved the two receivables over $5k. Follow-ups sent to the rest.</span>
-          </div>
+        <div className={s.mock} style={{ right: "5%", top: "46%", width: "50%", boxShadow: "8px 8px 0 #85BFE9", padding: 16, gap: 12 }}>
+          {[["09:41", "Approved the two receivables over $5k. Follow-ups sent to the rest."], ["09:38", "Invoice #1187 matched to a transfer of $2,350. Reconciled."], ["09:35", "Draft reminder for Clínica Norte (31 days). Waiting for your OK."]].map(([t, m]) => (
+            <div key={t} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#85BFE9", display: "block", marginTop: 6, flexShrink: 0 }} />
+              <span style={{ fontSize: 14, lineHeight: 1.45 }}><small style={{ color: "#777", fontFamily: "var(--mono)", fontSize: 10.5, marginRight: 6 }}>{t}</small>{m}</span>
+            </div>
+          ))}
+          <div style={{ display: "flex", gap: 8 }}><span className={s.pillTiny} style={{ background: "#0E1013", color: "#fff" }}>Approve</span><span className={s.pillTiny} style={{ border: "1.5px solid #0E1013" }}>Edit</span></div>
           <div className={s.reply}>Reply to Finance agent<span>→</span></div>
         </div>
       </>
     );
   return (
     <>
-      <div className={s.mock} style={{ left: "8%", right: "8%", top: "16%", padding: 22, gap: 18 }}>
-        <div className={s.mockLbl} style={{ display: "flex", justifyContent: "space-between" }}><span>ONE TEAM · ONE ROADMAP</span><span>WEEK 1 → 12</span></div>
+      <div className={s.mock} style={{ left: "5%", right: "5%", top: "6%", padding: 20, gap: 14 }}>
+        <div className={s.mockLbl} style={{ display: "flex", justifyContent: "space-between" }}><span>ONE TEAM / ONE ROADMAP</span><span>WEEK 1 → 12</span></div>
+        <div className={s.weeks}>{Array.from({ length: 12 }, (_, k) => <span key={k}>{k + 1}</span>)}</div>
         <div className={s.roadmap}>
-          <span style={{ gridColumn: "1/4", background: "#C9C4F2" }}>Research</span>
-          <span style={{ gridColumn: "3/8", background: "#BFF5CF" }}>Design + build</span>
-          <span style={{ gridColumn: "7/11", background: "#85BFE9" }}>AI agents</span>
-          <span style={{ gridColumn: "10/13", background: "#0E1013", color: "#fff" }}>Launch</span>
+          <span style={{ gridColumn: "1/4", background: "#C9C4F2" }}>Research <small>22 interviews</small></span>
+          <span style={{ gridColumn: "3/8", background: "#BFF5CF" }}>Design + build <small>weekly demos</small></span>
+          <span style={{ gridColumn: "7/11", background: "#85BFE9" }}>AI agents <small>in the clinic's tools</small></span>
+          <span style={{ gridColumn: "10/13", background: "#0E1013", color: "#fff" }}>Launch <small style={{ color: "#AEB4BE" }}>+ support</small></span>
         </div>
-        <div style={{ display: "flex", gap: 24, fontSize: 15, color: "#333", flexWrap: "wrap" }}><span>No hand-offs</span><span>No agencies in between</span><span>One Slack channel</span></div>
+        <div className={s.milestones}><span>◆ Problem statement</span><span>◆ Clickable prototype</span><span>◆ First claim filed by the agent</span><span>◆ Go-live</span></div>
+        <div className={s.team}>
+          {[["LC", "research", "#C9C4F2"], ["CP", "product", "#BFF5CF"], ["DM", "engineering", "#85BFE9"], ["AI", "agents", "#0E1013"]].map(([ini, role, bg]) => (
+            <span key={ini}><i className={s.avatar} style={{ background: bg, color: bg === "#0E1013" ? "#fff" : "#0E1013" }}>{ini}</i>{role}</span>
+          ))}
+          <span style={{ marginLeft: "auto", color: "#555" }}>No hand-offs · one Slack channel</span>
+        </div>
       </div>
-      <div className={s.quote} style={{ position: "absolute", left: "12%", bottom: "12%", border: "2px solid #0E1013" }}>“They sat in our clinic for two weeks before writing code.”</div>
+      <div className={s.quote} style={{ position: "absolute", right: "6%", bottom: "5%", border: "2px solid #0E1013", maxWidth: 330 }}>
+        “They sat in our clinic for two weeks before writing code.”
+        <small>Operations lead, Helixona</small>
+      </div>
     </>
   );
 }
 
 /* ------------------------------------------- services: CSS illustrations ---- */
 function ArtDiscovery() {
-  const doc = (l: string, t: string, w: number, h: number, delay: number) => (
-    <div className={s.doc} style={{ left: l, top: t, width: w, height: h, animationDelay: `${delay}s` }}><i style={{ width: "80%" }} /><i style={{ width: "58%" }} /><i style={{ width: "36%" }} /></div>
+  const doc = (l: string, t: string, w: number, h: number, delay: number, lines: number[]) => (
+    <div className={s.doc} style={{ left: l, top: t, width: w, height: h, animationDelay: `${delay}s` }}>{lines.map((x, k) => <i key={k} style={{ width: `${x}%` }} />)}</div>
   );
   return (
     <div className={s.art} style={{ ["--gl" as string]: "#C9C4F2" }}>
-      {doc("18%", "20%", 120, 130, 0)}
-      {doc("48%", "34%", 130, 110, 1.2)}
-      <div style={{ left: "40%", top: "66%", width: 22, height: 22, background: "#3DBE7D", clipPath: "polygon(0 0,100% 40%,45% 55%,30% 100%)", animation: "mtDrift 4s ease-in-out infinite" }} />
-      <div style={{ left: "74%", top: "18%", width: 36, height: 36, background: "#C9C4F2", clipPath: "polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)", animation: "mtSpin 12s linear infinite" }} />
-      <div style={{ left: "12%", top: "70%", width: 16, height: 16, border: "3px solid #0E1013", transform: "rotate(45deg)" }} />
+      {doc("8%", "16%", 128, 136, 0, [82, 60, 74, 40])}
+      {doc("36%", "40%", 136, 118, 1.2, [70, 88, 52])}
+      <div className={s.note} style={{ left: "60%", top: "12%", transform: "rotate(5deg)", animationDelay: "0.6s" }}>“forty a week”</div>
+      <div className={s.note} style={{ left: "70%", top: "58%", transform: "rotate(-4deg)", background: "#BFF5CF", animationDelay: "1.8s" }}>day 12 ↑</div>
+      <div className={s.miniChart} style={{ left: "66%", top: "34%" }}><i style={{ height: "40%" }} /><i style={{ height: "65%" }} /><i style={{ height: "100%", background: "#0E1013" }} /><i style={{ height: "55%" }} /><i style={{ height: "30%" }} /></div>
+      <div style={{ left: "30%", top: "76%", width: 22, height: 22, background: "#3DBE7D", clipPath: "polygon(0 0,100% 40%,45% 55%,30% 100%)", animation: "mtDrift 4s ease-in-out infinite" }} />
+      <div style={{ left: "88%", top: "20%", width: 36, height: 36, background: "#C9C4F2", clipPath: "polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)", animation: "mtSpin 12s linear infinite" }} />
+      <div style={{ left: "10%", top: "74%", width: 16, height: 16, border: "3px solid #0E1013", transform: "rotate(45deg)" }} />
+      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>22 interviews · 5 clinics · 1 problem</div>
     </div>
   );
 }
 function ArtApps() {
-  const node = (l: string, t: string, delay: number) => (
-    <div className={s.node} style={{ left: l, top: t, width: 120, height: 70, animationDelay: `${delay}s` }}><i style={{ width: "75%" }} /><i style={{ width: "50%" }} /></div>
+  const node = (l: string, t: string, delay: number, title: string, lines: number[]) => (
+    <div className={s.node} style={{ left: l, top: t, animationDelay: `${delay}s` }}><em>{title}</em>{lines.map((x, k) => <i key={k} style={{ width: `${x}%` }} />)}</div>
   );
   return (
     <div className={s.art} style={{ ["--gl" as string]: "#9FDDBB" }}>
-      {node("12%", "26%", 0)}
-      {node("60%", "52%", 1.5)}
-      <div style={{ left: "33%", top: "calc(26% + 33px)", width: "30%", height: 3, background: "#0E1013" }} />
-      <div style={{ left: "62%", top: "calc(26% + 33px)", width: 3, height: "26%", background: "#0E1013" }} />
-      <div style={{ left: "33%", top: "calc(26% + 26px)", width: 16, height: 16, borderRadius: "50%", background: "#3DBE7D", animation: "mtFlow 2.4s ease-in-out infinite" }} />
-      <div style={{ left: "70%", top: "14%", width: 56, height: 56, borderRadius: "50%", background: "#1F7A4D", animation: "mtPulse 3s ease-in-out infinite" }} />
-      <div style={{ left: "22%", top: "66%", width: 50, height: 44, background: "#3DBE7D", clipPath: "polygon(50% 0,100% 100%,0 100%)", animation: "mtDrift 5s ease-in-out .8s infinite" }} />
+      {node("6%", "18%", 0, "web / Next.js", [78, 50])}
+      {node("38%", "48%", 1.5, "api / Node", [64, 82])}
+      {node("70%", "14%", 0.8, "db / Postgres", [70, 44])}
+      <div style={{ left: "calc(6% + 130px)", top: "calc(18% + 34px)", width: "calc(32% - 130px + 4px)", height: 3, background: "#0E1013" }} />
+      <div style={{ left: "calc(38% + 60px)", top: "calc(18% + 34px)", width: 3, height: "calc(30% - 34px)", background: "#0E1013" }} />
+      <div style={{ left: "calc(38% + 130px)", top: "calc(48% + 34px)", width: "calc(32% - 130px + 4px)", height: 3, background: "#0E1013" }} />
+      <div style={{ left: "calc(70% + 60px)", top: "calc(14% + 70px)", width: 3, height: "calc(34% - 34px)", background: "#0E1013" }} />
+      <div style={{ left: "calc(6% + 130px)", top: "calc(18% + 27px)", width: 16, height: 16, borderRadius: "50%", background: "#3DBE7D", animation: "mtFlowX 2.4s ease-in-out infinite" }} />
+      <div className={s.badge} style={{ left: "8%", top: "62%" }}>✓ CI 42s</div>
+      <div className={s.badge} style={{ left: "8%", top: "78%", animationDelay: "0.7s" }}>✓ 318 tests</div>
+      <div className={s.badge} style={{ left: "72%", top: "70%", animationDelay: "1.3s" }}>uptime 99.98%</div>
+      <div style={{ left: "60%", top: "8%", width: 44, height: 44, borderRadius: "50%", background: "#1F7A4D", animation: "mtPulse 3s ease-in-out infinite" }} />
+      <div style={{ left: "88%", top: "56%", width: 50, height: 44, background: "#3DBE7D", clipPath: "polygon(50% 0,100% 100%,0 100%)", animation: "mtDrift 5s ease-in-out .8s infinite" }} />
+      <div className={s.artLabel} style={{ right: "6%", bottom: "8%" }}>AWS · CI · tests · monitoring</div>
     </div>
   );
 }
 function ArtAI() {
   return (
     <div className={s.art} style={{ ["--gl" as string]: "#9CCBEF" }}>
-      <div style={{ left: "50%", top: "50%", width: 56, height: 56, marginLeft: -28, marginTop: -28, background: "#85BFE9", clipPath: "polygon(50% 0,100% 50%,50% 100%,0 50%)", animation: "mtPulse 2.5s ease-in-out infinite" }} />
+      <div style={{ left: "38%", top: "50%", width: 64, height: 64, marginLeft: -32, marginTop: -32, background: "#85BFE9", clipPath: "polygon(50% 0,100% 50%,50% 100%,0 50%)", animation: "mtPulse 2.5s ease-in-out infinite" }} />
       {[[0, 14], [60, 18], [120, 22]].map(([rot, dur]) => (
-        <div key={rot} className={s.ring} style={{ ["--rot" as string]: `${rot}deg`, animationName: "mtSpinFrom", animationDuration: `${dur}s` }} />
+        <div key={rot} className={s.ring} style={{ left: "38%", ["--rot" as string]: `${rot}deg`, animationName: "mtSpinFrom", animationDuration: `${dur}s` }} />
       ))}
-      <div style={{ left: "76%", top: "22%", width: 40, height: 34, background: "#1F3A8A", clipPath: "polygon(0 0,100% 50%,0 100%)", animation: "mtDrift 5s ease-in-out infinite" }} />
-      <div style={{ left: "18%", top: "60%", width: 26, height: 26, background: "#85BFE9", clipPath: "polygon(50% 0,100% 100%,0 100%)" }} />
-      <div style={{ left: "70%", top: "70%", width: 24, height: 24, background: "#1F3A8A", transform: "rotate(45deg)", animation: "mtFloat 4s ease-in-out 1s infinite" }} />
-      <div style={{ left: "24%", top: "26%", width: 10, height: 10, borderRadius: "50%", background: "#0E1013" }} />
-      <div style={{ left: "82%", top: "56%", width: 8, height: 8, borderRadius: "50%", background: "#0E1013" }} />
+      {[["CRM", "12%", "22%"], ["Email", "10%", "68%"], ["WhatsApp", "56%", "76%"], ["ERP", "58%", "16%"]].map(([n, l, t]) => (
+        <div key={n} className={s.tool} style={{ left: l, top: t }}>{n}</div>
+      ))}
+      <div className={s.bubble} style={{ left: "58%", top: "34%" }}>
+        <em>Support agent</em>
+        Your order ships Tuesday. Want the tracking link?
+        <small>escalates to a person if unsure</small>
+      </div>
+      <div style={{ left: "84%", top: "12%", width: 40, height: 34, background: "#1F3A8A", clipPath: "polygon(0 0,100% 50%,0 100%)", animation: "mtDrift 5s ease-in-out infinite" }} />
+      <div style={{ left: "80%", top: "80%", width: 24, height: 24, background: "#1F3A8A", transform: "rotate(45deg)", animation: "mtFloat 4s ease-in-out 1s infinite" }} />
+      <div style={{ left: "24%", top: "40%", width: 10, height: 10, borderRadius: "50%", background: "#0E1013" }} />
+      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>one agent per role · human sign-off</div>
     </div>
   );
 }
@@ -310,6 +384,7 @@ export function StagingHome() {
   const { lang, setLang } = useLang();
   const t = T[lang as Lang];
   const [why, setWhy] = React.useState(0);
+  const [proj, setProj] = React.useState(0);
   const paused = React.useRef(false);
   React.useEffect(() => {
     const id = window.setInterval(() => {
@@ -350,7 +425,7 @@ export function StagingHome() {
           <div className={s.pill}>
             <span className={s.chip}>{t.pillNew}</span>
             <span>{t.pill}</span>
-            <a href="#office">{t.learn}</a>
+            <Link href="/office-demo">{t.learn}</Link>
           </div>
           <h1 className={s.h1}>{t.h1}</h1>
           <p className={s.heroSub}>{t.heroSub}</p>
@@ -461,19 +536,22 @@ export function StagingHome() {
         <div className={s.work}>
           <div className={s.list}>
             {t.work.map(([client, title], i) => (
-              <Link key={client} href="/work" className={s.item}>
+              <Link key={client} href="/work" className={`${s.item} ${proj === i ? s.itemOn : ""}`} onMouseEnter={() => setProj(i)} onFocus={() => setProj(i)}>
                 <span>{String(i + 1).padStart(2, "0")}</span>
                 <span className={s.itemBody}><span className={s.itemClient}>{client}</span><span className={s.itemTitle}>{title}</span></span>
                 <span>→</span>
               </Link>
             ))}
           </div>
-          <div className={`${s.feature} ${s.grid}`}>
+          <div className={`${s.feature} ${s.grid}`} key={proj}>
             <div className={s.featureCircle} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={s.featureImg} src="/art/helixona-hero.webp" alt="Helixona" width={1200} height={675} />
-            <span className={s.featureChip}>{t.featChip}</span>
-            <p className={s.featureText}>{t.featText}</p>
+            <div className={s.featureFrame}>
+              <span className={s.featureBar}><i /><i /><i /><em>{t.work[proj][0].split(" / ")[0].toLowerCase().replace(/\s+/g, "")}.com</em></span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={s.featureImg} src={FEAT_IMG[proj]} alt={t.work[proj][0]} width={1200} height={675} />
+            </div>
+            <span className={s.featureChip}>{t.feat[proj][0]}</span>
+            <p className={s.featureText}>{t.feat[proj][1]}</p>
             <Link href="/work" className={s.featureBtn}>{t.caseStudy}</Link>
           </div>
         </div>
@@ -543,7 +621,7 @@ export function StagingHome() {
               <a href="mailto:info@mindfultech.ec">info@mindfultech.ec</a>
               <a href="tel:+593958731994">+593 958 73 1994</a>
               <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer">WhatsApp</a>
-              <span style={{ color: "#555" }}>Quito · Ecuador</span>
+              <span style={{ color: "#555" }}>Quito, Ecuador</span>
             </div>
           </div>
           <div className={s.footerBottom}>
@@ -552,7 +630,7 @@ export function StagingHome() {
           </div>
         </div>
       </footer>
-      <span className={s.ribbon}>STAGING · {lang === "es" ? "VISTA PREVIA" : "PREVIEW"}</span>
+      <span className={s.ribbon}>STAGING / {lang === "es" ? "VISTA PREVIA" : "PREVIEW"}</span>
     </div>
   );
 }
