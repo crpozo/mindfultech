@@ -294,7 +294,7 @@ export function TheDots() {
         <Link href="/" className={s.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
-          <em>{es ? "Concepto 01 / The Dots" : "Concept 01 / The Dots"}</em>
+          <em>{es ? "Concepto 01 / AI Journey" : "Concept 01 / AI Journey"}</em>
         </Link>
         <span className={s.mono}><Link href="/concept/heron" style={{ marginRight: 18, color: "var(--lime)" }}>{es ? "Concepto 02 →" : "Concept 02 →"}</Link>{es ? "Capítulo" : "Chapter"} {ch + 1} / 9</span>
       </div>

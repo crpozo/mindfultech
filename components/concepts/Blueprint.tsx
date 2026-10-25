@@ -123,7 +123,7 @@ export function Blueprint() {
             <em>{es ? "Concepto 02 / Blueprint" : "Concept 02 / Blueprint"}</em>
           </Link>
           <div className={s.navLinks}>
-            <Link href="/services">{es ? "Servicios" : "Services"}</Link><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/concepts">{es ? "Concepto 01 →" : "Concept 01 →"}</Link>
+            <Link href="/services">{es ? "Servicios" : "Services"}</Link><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/concept/ai-journey">{es ? "Concepto 01 →" : "Concept 01 →"}</Link>
           </div>
           <div className={s.navRight}>
             <button type="button" className={lang === "en" ? s.on : ""} onClick={() => setLang("en")}>EN</button>
