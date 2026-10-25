@@ -192,6 +192,12 @@ const SVC = [
   { tint: "#E6F7EC", hot: "#8EF2B4", gl: "#9FDDBB" },
   { tint: "#E3F1FB", hot: "#8ED0FF", gl: "#9CCBEF" },
 ];
+/* hero collage slides: same composition, different claim, stat, photo and tints (Jasper-style rotation) */
+const SLIDES = [
+  { en: "Ship an AI agent to production in 6 weeks", es: "Un agente de IA en producción en 6 semanas", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
+  { en: "An agent runs Helixona's medical billing, 24/7", es: "Un agente lleva la facturación de Helixona, 24/7", stat: "24/7", statEn: "claims, coding, follow-ups", statEs: "reclamos, codificación, seguimientos", img: "/art/helixona-hero.webp", pos: "left top", gridL: "#c9c4f2", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
+  { en: "From Excel to Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega", stat: "2", statEn: "app stores carry PARC Connect", statEs: "tiendas publican PARC Connect", img: "/art/wfs-hero.webp", pos: "left top", gridL: "#f4d98a", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
+];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string][] = [
   ["USFQ", "/logo-usfq.svg"],
@@ -383,16 +389,16 @@ function ArtAI() {
 
 
 /* ------------------------------------------------------- where we work ---- */
-type Site = { id: string; lat: number; lon: number; en: string; es: string; region: "latam" | "us" | "eu"; base?: boolean };
+type Site = { id: string; flag: string; lat: number; lon: number; en: string; es: string; region: "latam" | "us" | "eu"; base?: boolean };
 const SITES: Site[] = [
-  { id: "ecuador", lat: -0.18, lon: -78.47, en: "Ecuador", es: "Ecuador", region: "latam", base: true },
-  { id: "california", lat: 36.8, lon: -119.4, en: "California", es: "California", region: "us" },
-  { id: "chicago", lat: 41.88, lon: -87.63, en: "Chicago", es: "Chicago", region: "us" },
-  { id: "florida", lat: 26.64, lon: -81.87, en: "Southwest Florida", es: "Suroeste de Florida", region: "us" },
-  { id: "netherlands", lat: 52.1, lon: 5.3, en: "Netherlands", es: "Países Bajos", region: "eu" },
-  { id: "germany", lat: 51.1, lon: 10.45, en: "Germany", es: "Alemania", region: "eu" },
-  { id: "spain", lat: 40.3, lon: -3.7, en: "Spain", es: "España", region: "eu" },
-  { id: "greece", lat: 37.98, lon: 23.73, en: "Greece", es: "Grecia", region: "eu" },
+  { id: "ecuador", flag: "🇪🇨", lat: -0.18, lon: -78.47, en: "Ecuador", es: "Ecuador", region: "latam", base: true },
+  { id: "california", flag: "🇺🇸", lat: 36.8, lon: -119.4, en: "California", es: "California", region: "us" },
+  { id: "chicago", flag: "🇺🇸", lat: 41.88, lon: -87.63, en: "Chicago", es: "Chicago", region: "us" },
+  { id: "florida", flag: "🇺🇸", lat: 26.64, lon: -81.87, en: "Southwest Florida", es: "Suroeste de Florida", region: "us" },
+  { id: "netherlands", flag: "🇳🇱", lat: 52.1, lon: 5.3, en: "Netherlands", es: "Países Bajos", region: "eu" },
+  { id: "germany", flag: "🇩🇪", lat: 51.1, lon: 10.45, en: "Germany", es: "Alemania", region: "eu" },
+  { id: "spain", flag: "🇪🇸", lat: 40.3, lon: -3.7, en: "Spain", es: "España", region: "eu" },
+  { id: "greece", flag: "🇬🇷", lat: 37.98, lon: 23.73, en: "Greece", es: "Grecia", region: "eu" },
 ];
 const REGIONS: { id: Site["region"]; en: string; es: string }[] = [
   { id: "latam", en: "Home base", es: "Sede" },
@@ -431,7 +437,7 @@ export function WorldMap({ lang }: { lang: Lang }) {
               <span className={s.mono}>{es ? r.es : r.en}</span>
               {SITES.filter((x) => x.region === r.id).map((x) => (
                 <button key={x.id} type="button" className={`${s.mapRow} ${active === x.id ? s.mapRowOn : ""}`} onMouseEnter={() => pick(x.id)} onFocus={() => pick(x.id)} onClick={() => pick(x.id)}>
-                  <i />{es ? x.es : x.en}{x.base && <em>HQ</em>}
+                  <span className={s.flag} aria-hidden="true">{x.flag}</span>{es ? x.es : x.en}{x.base && <em>HQ</em>}
                 </button>
               ))}
             </div>
@@ -440,7 +446,9 @@ export function WorldMap({ lang }: { lang: Lang }) {
       </div>
       <div className={s.mapCanvas}>
         <svg viewBox={`0 0 ${MAP_VIEW.w} ${MAP_VIEW.h}`} className={s.mapSvg} role="img" aria-label={es ? "Mapa de clientes" : "Client map"}>
-          <path d={LAND_PATH} fill="none" stroke="#1F7A4D" strokeWidth={2.6} strokeLinecap="round" opacity={0.32} />
+          <g fill="none" stroke="#e3e6e1" strokeWidth={1}>{[-120, -60, 0, 60].map((lon) => { const x = ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w; return <line key={lon} x1={x} y1={0} x2={x} y2={MAP_VIEW.h} />; })}{[60, 30, -30].map((lat) => { const y = ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h; return <line key={lat} x1={0} y1={y} x2={MAP_VIEW.w} y2={y} />; })}</g>
+          <path d={LAND_PATH} fill="none" stroke="#bff5cf" strokeWidth={7.5} strokeLinecap="round" />
+          <path d={LAND_PATH} fill="none" stroke="#1F7A4D" strokeWidth={3.4} strokeLinecap="round" opacity={0.75} />
           <line x1={0} y1={home.y} x2={MAP_VIEW.w} y2={home.y} stroke="#3DBE7D" strokeWidth={1} strokeDasharray="4 6" />
           {SITES.filter((x) => !x.base).map((x) => {
             const p = proj(x.lat, x.lon);
@@ -474,6 +482,12 @@ export function Home() {
   const t = T[lang as Lang];
   const [why, setWhy] = React.useState(0);
   const [proj, setProj] = React.useState(0);
+  const [slide, setSlide] = React.useState(0);
+  const slidePaused = React.useRef(false);
+  React.useEffect(() => {
+    const id = window.setInterval(() => { if (!slidePaused.current) setSlide((k) => (k + 1) % SLIDES.length); }, 5000);
+    return () => window.clearInterval(id);
+  }, []);
   const paused = React.useRef(false);
   React.useEffect(() => {
     const id = window.setInterval(() => {
@@ -503,25 +517,28 @@ export function Home() {
           </div>
         </div>
         <div className={s.band} aria-hidden="true">
-          <div className={s.bandInner}>
-            <div className={`${s.bandGridL} ${s.grid}`} />
-            <div className={`${s.bandGridR} ${s.grid}`} />
-            <div className={s.bandTri} />
-            <div className={s.bandPhoto}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/art/team.webp" alt="" width={1200} height={900} />
+          {SLIDES.map((sl, i) => (
+            <div key={i} className={`${s.bandInner} ${slide === i ? s.slideOn : s.slideOff}`}>
+              <div className={`${s.bandGridL} ${s.grid}`} style={{ backgroundColor: sl.gridL }} />
+              <div className={`${s.bandGridR} ${s.grid}`} />
+              <div className={s.bandTri} style={{ background: sl.tri }} />
+              <div className={s.bandPhoto}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={sl.img} alt="" width={1200} height={900} style={{ objectPosition: sl.pos }} />
+              </div>
+              <div className={s.bandCard}>{lang === "es" ? sl.es : sl.en}</div>
+              <div className={s.bandStat} style={{ background: sl.statBg, color: sl.statFg }}><b>{sl.stat}</b><span style={{ color: sl.statFg }}>{lang === "es" ? sl.statEs : sl.statEn}</span></div>
+              <div className={s.bandCol} style={{ background: sl.col }}><i style={{ background: sl.dot }} /><i style={{ background: sl.dot }} /></div>
             </div>
-            <div className={s.bandCard}>{t.bandCard}</div>
-            <div className={s.bandStat}><b>3,650+</b><span>{t.bandStat}</span></div>
-            <div className={s.bandCol}><i /><i /></div>
-          </div>
+          ))}
+          <div className={s.slideDots}>{SLIDES.map((_, i) => <button key={i} type="button" aria-label={`Slide ${i + 1}`} className={slide === i ? s.on : ""} onClick={() => { setSlide(i); slidePaused.current = true; }} />)}</div>
         </div>
       </section>
 
       {/* trusted by */}
       <div className={s.trusted}>
         <div className={s.trustedIn} style={{ maxWidth: 1440, margin: "0 auto" }}>
-          <span className={s.mono}>{t.trusted}</span>
+          <h2 className={s.trustedTitle}>{lang === "es" ? "Equipos que confían en MindfulTech" : "Teams that trust MindfulTech"}</h2>
           <div className={s.marquee} aria-label={t.trusted}>
             <div className={s.marqueeTrack}>
               {[0, 1].map((k) => (
@@ -624,7 +641,10 @@ export function Home() {
             <div className={s.featureFrame}>
               <span className={s.featureBar}><i /><i /><i /><em>{t.work[proj][0].split(" / ")[0].toLowerCase().replace(/\s+/g, "")}.com</em></span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={s.featureImg} src={FEAT_IMG[proj]} alt={t.work[proj][0]} width={1200} height={675} />
+              <span className={s.featureShot}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className={s.featureImg} src={FEAT_IMG[proj]} alt={t.work[proj][0]} width={1200} height={675} />
+              </span>
             </div>
             <span className={s.featureChip}>{t.feat[proj][0]}</span>
             <p className={s.featureText}>{t.feat[proj][1]}</p>
@@ -634,24 +654,28 @@ export function Home() {
       </section>
 
       {/* AI office */}
-      <section id="office" className={s.office}>
-        <div className={s.officeIn}>
-          <div className={s.officeHead}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              <div className={s.officeTag}><span>{t.pillNew}</span>{t.officeTag}</div>
-              <h2 className={s.officeH2}>{t.officeH2a}<em>{t.officeH2b}</em></h2>
+      <section id="office" className={`${s.wrap} ${s.section}`}>
+        <div className={s.officeSplit}>
+          <div className={s.officeText}>
+            <div className={s.officeTag}><span>{t.pillNew}</span>{t.officeTag}</div>
+            <h2 className={s.h2}>{t.officeH2a}<em>{t.officeH2b}</em></h2>
+            <p className={s.sub}>{t.officeP}</p>
+            <div className={s.ctas} style={{ justifyContent: "flex-start" }}>
+              <Link href="/office-demo" className={`${s.btn} ${s.btnGreen}`}>{t.officeBtn}</Link>
+              <Link href="/blog/ai-management-office" className={`${s.btn} ${s.btnOutline}`}>{lang === "es" ? "Cómo funciona" : "How it works"}</Link>
             </div>
-            <div className={s.officeRight}>
-              <p>{t.officeP}</p>
-              <Link href="/office-demo" className={`${s.btn} ${s.btnLime}`}>{t.officeBtn}</Link>
+            <div className={s.roleList}>
+              {t.roles.map(([name, body]) => (
+                <div key={name}><b>{name}</b><span>{body}</span></div>
+              ))}
             </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={s.officePreview} src="/office-demo-preview.webp" alt="AI Management Office" width={2000} height={1125} loading="lazy" />
-          <div className={s.roles}>
-            {t.roles.map(([name, body]) => (
-              <div key={name} className={s.role}><b>{name}</b><span>{body}</span></div>
-            ))}
+          <div className={s.officeArt} aria-hidden="true">
+            <div className={s.officeDots}>{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</div>
+            <div className={s.officeMask}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/office-demo-preview.webp" alt="" width={2000} height={1125} loading="lazy" />
+            </div>
           </div>
         </div>
       </section>
