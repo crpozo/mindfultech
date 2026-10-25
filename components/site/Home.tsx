@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang, type Lang } from "@/components/i18n";
 import s from "./site.module.css";
 import { CtaBand } from "./Shell";
+import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 
 /* The home page (redesign of Oct 2026, from design_handoff_mindfultech_home):
    serif display + flat geometric collage. Copy, tokens and interactions follow the
@@ -380,6 +381,93 @@ function ArtAI() {
   );
 }
 
+
+/* ------------------------------------------------------- where we work ---- */
+type Site = { id: string; lat: number; lon: number; en: string; es: string; region: "latam" | "us" | "eu"; base?: boolean };
+const SITES: Site[] = [
+  { id: "ecuador", lat: -0.18, lon: -78.47, en: "Ecuador", es: "Ecuador", region: "latam", base: true },
+  { id: "california", lat: 36.8, lon: -119.4, en: "California", es: "California", region: "us" },
+  { id: "chicago", lat: 41.88, lon: -87.63, en: "Chicago", es: "Chicago", region: "us" },
+  { id: "florida", lat: 26.64, lon: -81.87, en: "Southwest Florida", es: "Suroeste de Florida", region: "us" },
+  { id: "netherlands", lat: 52.1, lon: 5.3, en: "Netherlands", es: "Países Bajos", region: "eu" },
+  { id: "germany", lat: 51.1, lon: 10.45, en: "Germany", es: "Alemania", region: "eu" },
+  { id: "spain", lat: 40.3, lon: -3.7, en: "Spain", es: "España", region: "eu" },
+  { id: "greece", lat: 37.98, lon: 23.73, en: "Greece", es: "Grecia", region: "eu" },
+];
+const REGIONS: { id: Site["region"]; en: string; es: string }[] = [
+  { id: "latam", en: "Home base", es: "Sede" },
+  { id: "us", en: "United States", es: "Estados Unidos" },
+  { id: "eu", en: "Europe", es: "Europa" },
+];
+const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
+
+function WorldMap({ lang }: { lang: Lang }) {
+  const es = lang === "es";
+  const [active, setActive] = React.useState("ecuador");
+  const paused = React.useRef(false);
+  React.useEffect(() => {
+    const id = window.setInterval(() => {
+      if (paused.current) return;
+      setActive((cur) => SITES[(SITES.findIndex((x) => x.id === cur) + 1) % SITES.length].id);
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, []);
+  const pick = (id: string) => { paused.current = true; setActive(id); };
+  const home = proj(SITES[0].lat, SITES[0].lon);
+  const act = SITES.find((x) => x.id === active) ?? SITES[0];
+  const ap = proj(act.lat, act.lon);
+  const label = es ? act.es : act.en;
+  const plateW = label.length * 10.4 + 28;
+  const flip = ap.x + plateW + 30 > MAP_VIEW.w;
+  return (
+    <div className={s.where}>
+      <div className={s.whereL}>
+        <span className={s.label}>{es ? "Dónde trabajamos" : "Where we work"}</span>
+        <h2 className={s.h2}>{es ? "MindfulTech ayuda a empresas en todo el mundo" : "MindfulTech helps companies worldwide"}</h2>
+        <p className={s.sub}>{es ? "Desde Ecuador, para equipos de América y Europa. Cada punto es un cliente, no una oficina." : "From Ecuador, for teams across the Americas and Europe. Every pin is a client, not an office."}</p>
+        <div className={s.mapGroups}>
+          {REGIONS.map((r) => (
+            <div key={r.id} className={s.mapGroup}>
+              <span className={s.mono}>{es ? r.es : r.en}</span>
+              {SITES.filter((x) => x.region === r.id).map((x) => (
+                <button key={x.id} type="button" className={`${s.mapRow} ${active === x.id ? s.mapRowOn : ""}`} onMouseEnter={() => pick(x.id)} onFocus={() => pick(x.id)} onClick={() => pick(x.id)}>
+                  <i />{es ? x.es : x.en}{x.base && <em>HQ</em>}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className={s.mapCanvas}>
+        <svg viewBox={`0 0 ${MAP_VIEW.w} ${MAP_VIEW.h}`} className={s.mapSvg} role="img" aria-label={es ? "Mapa de clientes" : "Client map"}>
+          <path d={LAND_PATH} fill="none" stroke="#1F7A4D" strokeWidth={2.6} strokeLinecap="round" opacity={0.32} />
+          <line x1={0} y1={home.y} x2={MAP_VIEW.w} y2={home.y} stroke="#3DBE7D" strokeWidth={1} strokeDasharray="4 6" />
+          {SITES.filter((x) => !x.base).map((x) => {
+            const p = proj(x.lat, x.lon);
+            const mx = (home.x + p.x) / 2, my = Math.min(home.y, p.y) - Math.abs(p.x - home.x) * 0.18;
+            return <path key={x.id} d={`M${home.x},${home.y} Q${mx},${my} ${p.x},${p.y}`} fill="none" stroke={active === x.id ? "#1F7A4D" : "#C9C4F2"} strokeWidth={active === x.id ? 2.5 : 1.5} />;
+          })}
+          {SITES.map((x) => {
+            const p = proj(x.lat, x.lon); const on = active === x.id; const r = x.base ? 12 : 9;
+            return (
+              <g key={x.id} onMouseEnter={() => pick(x.id)} onClick={() => pick(x.id)} style={{ cursor: "pointer" }}>
+                <rect x={p.x - r + 3} y={p.y - r + 3} width={r * 2} height={r * 2} fill="#0E1013" />
+                <rect x={p.x - r} y={p.y - r} width={r * 2} height={r * 2} fill={x.base ? "#0E1013" : on ? "#3DBE7D" : "#BFF5CF"} stroke="#0E1013" strokeWidth={2} />
+                {on && <rect x={p.x - r - 6} y={p.y - r - 6} width={r * 2 + 12} height={r * 2 + 12} fill="none" stroke="#3DBE7D" strokeWidth={2} className={s.mapPulse} />}
+              </g>
+            );
+          })}
+          <g transform={`translate(${flip ? ap.x - plateW - 26 : ap.x + 26}, ${ap.y - 18})`} className={s.mapPlate}>
+            <rect x={5} y={5} width={plateW} height={36} fill="#C9C4F2" />
+            <rect x={0} y={0} width={plateW} height={36} fill="#fff" stroke="#0E1013" strokeWidth={2} />
+            <text x={14} y={24} fontFamily="var(--mono)" fontSize={16} letterSpacing={1.6} fill="#0E1013">{label.toUpperCase()}</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ page ---- */
 export function Home() {
   const { lang } = useLang();
@@ -434,11 +522,20 @@ export function Home() {
       <div className={s.trusted}>
         <div className={s.trustedIn} style={{ maxWidth: 1440, margin: "0 auto" }}>
           <span className={s.mono}>{t.trusted}</span>
-          {LOGOS.map(([name, src]) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={name} src={src} alt={name} title={name} />
-          ))}
-          <b>CarCompraCorp</b>
+          <div className={s.marquee} aria-label={t.trusted}>
+            <div className={s.marqueeTrack}>
+              {[0, 1].map((k) => (
+                <div key={k} className={s.marqueeGroup} aria-hidden={k === 1}>
+                  {LOGOS.map(([name, src]) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={name} src={src} alt={name} title={name} />
+                  ))}
+                  <b>CarCompraCorp</b>
+                  <b>The Internet Coaches</b>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -517,7 +614,6 @@ export function Home() {
           <div className={s.list}>
             {t.work.map(([client, title], i) => (
               <Link key={client} href="/work" className={`${s.item} ${proj === i ? s.itemOn : ""}`} onMouseEnter={() => setProj(i)} onFocus={() => setProj(i)}>
-                <span>{String(i + 1).padStart(2, "0")}</span>
                 <span className={s.itemBody}><span className={s.itemClient}>{client}</span><span className={s.itemTitle}>{title}</span></span>
                 <span>→</span>
               </Link>
@@ -561,17 +657,8 @@ export function Home() {
       </section>
 
       {/* where we work */}
-      <section className={`${s.wrap} ${s.section} ${s.where}`}>
-        <div className={s.whereL}>
-          <span className={s.label}>{t.whereLbl}</span>
-          <h2 className={s.h2}>{t.whereH2}</h2>
-          <p className={s.sub}>{t.whereSub}</p>
-        </div>
-        <div className={s.places}>
-          <div className={`${s.place} ${s.placeHq}`}><span className={s.mono}>{t.homeBase}</span><b>Ecuador <small>HQ</small></b></div>
-          <div className={s.place}><span className={s.mono}>{t.us}</span><span>California<br />Chicago<br />Southwest Florida</span></div>
-          <div className={s.place}><span className={s.mono}>{t.eu}</span><span>Netherlands<br />Germany<br />Spain<br />Greece</span></div>
-        </div>
+      <section className={`${s.wrap} ${s.section}`}>
+        <WorldMap lang={lang} />
       </section>
 
       <CtaBand />
