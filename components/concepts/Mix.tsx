@@ -150,7 +150,7 @@ export function Mix() {
       {/* sectors (Fauna) */}
       <section className={`${site.wrap} ${site.section}`}>
         <div className={site.head}><span className={site.label}>{es ? "Sectores" : "Sectors"}</span><h2 className={site.h2}>{es ? "Hecho para la gente que opera" : "Made for the people who run the operation"}</h2></div>
-        <div className={s.sectors}>{sectors.map(([t, d, bg, href]) => <div key={t} className={s.sector} style={{ background: bg }}><b>{t}</b><p>{d}</p><Link href={href}>{es ? "Ver el caso →" : "See the case →"}</Link></div>)}</div>
+        <div className={s.sectors}>{sectors.map(([t, d, bg, href]) => <div key={t} className={s.sector} style={{ background: bg }}><b>{t}</b><p>{d}</p><Link href={href} className={s.sectorLink}>{es ? "Ver el caso →" : "See the case →"}</Link></div>)}</div>
       </section>
 
       {/* map (site) */}

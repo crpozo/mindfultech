@@ -41,8 +41,8 @@
 .sector { padding: 32px 28px; min-height: 360px; display: flex; flex-direction: column; gap: 12px; color: #0e1013; }
 .sector b { font-family: var(--font-serif), Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1; }
 .sector p { margin: 0; font-size: 15.5px; line-height: 1.5; max-width: 380px; }
-.sector a { margin-top: auto; align-self: flex-start; background: #0e1013; color: #fff; padding: 10px 14px; font-family: var(--font-jbmono), monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-.sector a:hover { background: #fff; color: #0e1013; }
+.sector a.sectorLink { margin-top: auto; align-self: flex-start; background: #0e1013; color: #fff; padding: 10px 14px; font-family: var(--font-jbmono), monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+.sector a.sectorLink:hover { background: #fff; color: #0e1013; }
 .coords { position: fixed; left: 18px; bottom: 16px; z-index: 30; font-family: var(--font-jbmono), monospace; font-size: 10.5px; letter-spacing: 0.1em; color: #777; pointer-events: none; }
 @media (max-width: 960px) {
   .storyWrap, .layers { grid-template-columns: 1fr; gap: 24px; }
