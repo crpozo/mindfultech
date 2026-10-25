@@ -401,7 +401,7 @@ const REGIONS: { id: Site["region"]; en: string; es: string }[] = [
 ];
 const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
 
-function WorldMap({ lang }: { lang: Lang }) {
+export function WorldMap({ lang }: { lang: Lang }) {
   const es = lang === "es";
   const [active, setActive] = React.useState("ecuador");
   const paused = React.useRef(false);

@@ -273,6 +273,60 @@ function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => voi
   };
 }
 
+
+/** The pinned Dots scene (SVG + chapter caption). Reused by the Mix concept; the parent must mount `mountStory`. */
+export function DotsStage({ ch, lang }: { ch: number; lang: Lang }) {
+  const es = lang === "es";
+  const caps = CAPS[lang];
+  const skew = (k: number) => `skewY(${k})`;
+  return (
+    <div className={s.stage}>
+<svg className={s.scene} viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label={es ? "Oficina isométrica donde pequeños robots automatizan el trabajo mientras bajas" : "Isometric office where small robots automate work as you scroll"}>
+  <defs>
+    <linearGradient id="dotsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1D24" /><stop offset="1" stopColor="#14161C" /></linearGradient>
+  </defs>
+  <path d="M500 95 905 300 500 505 95 300Z" fill="url(#dotsFloor)" stroke="#2A2E37" />
+  <g stroke="#23262E" strokeWidth="1" opacity=".8"><path d="M297 197 702 402M702 197 297 402M399 146 804 351M601 146 196 351M196 249 601 454M804 249 399 454" /></g>
+  <path d="M95 300 500 95 500 20 95 225Z" fill="#111318" stroke="#2A2E37" />
+  <path d="M905 300 500 95 500 20 905 225Z" fill="#0F1115" stroke="#2A2E37" />
+  <g data-id="doors" opacity="0">
+    {([["M150 262 200 237 200 290 150 315Z", 175, 280, "USFQ"], ["M240 217 290 192 290 245 240 270Z", 265, 235, "PARC"], ["M330 172 380 147 380 200 330 225Z", 355, 190, "WFS"], ["M620 147 670 172 670 225 620 200Z", 645, 190, "HELIXONA"], ["M710 192 760 217 760 270 710 245Z", 735, 235, "THEMED\u00a0MOTION"]] as [string, number, number, string][]).map(([d, x, y, n]) => (
+      <g key={n}><path d={d} fill="#191C23" stroke="#fff" strokeWidth="1" /><text x={x} y={y} textAnchor="middle" fontSize="7.5" fill="#fff">{n}</text></g>
+    ))}
+  </g>
+  <g><circle cx="470" cy="80" r="22" fill="#15181E" stroke="#fff" /><line data-id="clkH" x1="470" y1="80" x2="470" y2="68" stroke="#fff" strokeWidth="2" /><line data-id="clkM" x1="470" y1="80" x2="480" y2="80" stroke={GREEN} strokeWidth="2" /><text data-id="clkT" x="470" y="118" textAnchor="middle" fontSize="11" fill="#9AA3A1">2:14 AM</text></g>
+  <g><rect x="620" y="60" width="90" height="70" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="632" y="80" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "CALENDARIO" : "CALENDAR"}</text><rect data-id="calSlot" x="632" y="88" width="66" height="14" fill={GREEN} opacity="0" transform={skew(26.6)} /></g>
+  <g><rect x="250" y="130" width="70" height="90" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="258" y="150" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">CRM</text><g transform={skew(-26.6)} stroke="#fff" opacity=".6"><line x1="258" y1="165" x2="312" y2="165" /><line x1="258" y1="185" x2="312" y2="185" /><line x1="258" y1="205" x2="312" y2="205" /></g><rect data-id="crmCard" x="262" y="170" width="46" height="10" fill={GREEN} opacity="0" transform={skew(-26.6)} /></g>
+  <g data-id="map" opacity="0"><rect x="730" y="100" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="742" y="120" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "MAPA DE ENTREGAS" : "DELIVERY MAP"}</text><path data-id="route" d="M745 130 L770 150 L800 140 L825 165" fill="none" stroke={GREEN} strokeWidth="2" strokeDasharray="140" strokeDashoffset="140" transform={skew(26.6)} /></g>
+  <g data-id="board" opacity="0"><rect x="330" y="80" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="342" y="100" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">{es ? "PLAN SEMANAL" : "WEEK PLAN"}</text><g transform={skew(-26.6)} fill={GREEN}><rect data-id="b1" x="342" y="110" width="24" height="10" opacity="0" /><rect data-id="b2" x="372" y="110" width="24" height="10" opacity="0" /><rect data-id="b3" x="402" y="110" width="24" height="10" opacity="0" /><rect data-id="b4" x="342" y="128" width="54" height="10" opacity="0" /></g></g>
+  <g data-id="desks" />
+  <g data-id="piles" />
+  <g data-id="claims" opacity="0">
+    <g data-id="mountain" /><g data-id="paid" />
+    <g><path d="M690 420 730 400 770 420 730 440Z" fill="#2A1614" stroke={RED} /><text data-id="trayT" x="700" y="462" fontSize="9" fill={RED}>NEEDS A PERSON</text><g data-id="trayDocs" /></g>
+    <text data-id="paidT" x="560" y="500" fontSize="9" fill="#9AA3A1">PAID</text>
+  </g>
+  <g data-id="excel" opacity="0"><g data-id="cells" /><g data-id="shelves" /></g>
+  <g data-id="tickets" opacity="0" />
+  <g data-id="confetti" opacity="0" />
+  <g data-id="msg" opacity="0"><rect x="-26" y="-14" width="52" height="28" rx="2" fill="#fff" /><text x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>WHATSAPP</text></g>
+  <g data-id="sign" opacity="0"><rect data-id="signR" x="-100" y="-14" width="200" height="28" fill="#fff" stroke={INK} strokeWidth="2" /><text data-id="signT" x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>…</text></g>
+  <g data-id="human" opacity="0"><circle cx="0" cy="-30" r="9" fill="none" stroke="#fff" strokeWidth="2" /><path d="M0 -21 V8 M-12 -8 H12 M0 8 L-9 30 M0 8 L9 30" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><g data-id="pen" opacity="0"><path d="M14 -6 l10 -10" stroke={GREEN} strokeWidth="3" strokeLinecap="round" /></g></g>
+  <g data-id="activity" opacity="0" />
+  <g data-id="dots" />
+  <rect data-id="dark" x="0" y="0" width="1000" height="600" fill={INK} opacity=".86" style={{ pointerEvents: "none" }} />
+  <circle data-id="glow" r="60" fill={GREEN} opacity="0" style={{ pointerEvents: "none" }} />
+</svg>
+      <div className={s.cap}>
+        <span className={s.n}>{caps[ch][0]}</span>
+        <span className={s.capT}>{caps[ch][1]}</span>
+      </div>
+    </div>
+  );
+}
+export { mountStory as mountDotsStory, ORDER as DOT_ORDER, ROLE_DESC as DOT_ROLE_DESC };
+export type { Role as DotRole };
+
 export function TheDots() {
   const { lang } = useLang();
   const es = lang === "es";
@@ -286,7 +340,6 @@ export function TheDots() {
   const caps = CAPS[lang];
   const roleLabel: Record<Role, string> = es ? { Sales: "Ventas", Support: "Soporte", Finance: "Finanzas", Marketing: "Marketing", Operations: "Operaciones", Reception: "Recepción" } : { Sales: "Sales", Support: "Support", Finance: "Finance", Marketing: "Marketing", Operations: "Operations", Reception: "Reception" };
   const mailto = `mailto:info@mindfultech.ec?subject=${encodeURIComponent(es ? "Quiero un escritorio en el AI Management Office" : "I want a desk in the AI Management Office")}&body=${encodeURIComponent((es ? "Escritorios que llenaría primero: " : "Desks I would fill first: ") + (roles.length ? roles.map((r) => roleLabel[r]).join(", ") : "—"))}`;
-  const skew = (k: number) => `skewY(${k})`;
   return (
     <div className={s.root} ref={rootRef}>
       <div className={s.prog} data-id="prog" />
@@ -435,48 +488,7 @@ export function TheDots() {
             </section>
           </div>
 
-          <div className={s.stage}>
-      <svg className={s.scene} viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label={es ? "Oficina isométrica donde pequeños robots automatizan el trabajo mientras bajas" : "Isometric office where small robots automate work as you scroll"}>
-        <defs>
-          <linearGradient id="dotsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1D24" /><stop offset="1" stopColor="#14161C" /></linearGradient>
-        </defs>
-        <path d="M500 95 905 300 500 505 95 300Z" fill="url(#dotsFloor)" stroke="#2A2E37" />
-        <g stroke="#23262E" strokeWidth="1" opacity=".8"><path d="M297 197 702 402M702 197 297 402M399 146 804 351M601 146 196 351M196 249 601 454M804 249 399 454" /></g>
-        <path d="M95 300 500 95 500 20 95 225Z" fill="#111318" stroke="#2A2E37" />
-        <path d="M905 300 500 95 500 20 905 225Z" fill="#0F1115" stroke="#2A2E37" />
-        <g data-id="doors" opacity="0">
-          {([["M150 262 200 237 200 290 150 315Z", 175, 280, "USFQ"], ["M240 217 290 192 290 245 240 270Z", 265, 235, "PARC"], ["M330 172 380 147 380 200 330 225Z", 355, 190, "WFS"], ["M620 147 670 172 670 225 620 200Z", 645, 190, "HELIXONA"], ["M710 192 760 217 760 270 710 245Z", 735, 235, "THEMED\u00a0MOTION"]] as [string, number, number, string][]).map(([d, x, y, n]) => (
-            <g key={n}><path d={d} fill="#191C23" stroke="#fff" strokeWidth="1" /><text x={x} y={y} textAnchor="middle" fontSize="7.5" fill="#fff">{n}</text></g>
-          ))}
-        </g>
-        <g><circle cx="470" cy="80" r="22" fill="#15181E" stroke="#fff" /><line data-id="clkH" x1="470" y1="80" x2="470" y2="68" stroke="#fff" strokeWidth="2" /><line data-id="clkM" x1="470" y1="80" x2="480" y2="80" stroke={GREEN} strokeWidth="2" /><text data-id="clkT" x="470" y="118" textAnchor="middle" fontSize="11" fill="#9AA3A1">2:14 AM</text></g>
-        <g><rect x="620" y="60" width="90" height="70" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="632" y="80" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "CALENDARIO" : "CALENDAR"}</text><rect data-id="calSlot" x="632" y="88" width="66" height="14" fill={GREEN} opacity="0" transform={skew(26.6)} /></g>
-        <g><rect x="250" y="130" width="70" height="90" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="258" y="150" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">CRM</text><g transform={skew(-26.6)} stroke="#fff" opacity=".6"><line x1="258" y1="165" x2="312" y2="165" /><line x1="258" y1="185" x2="312" y2="185" /><line x1="258" y1="205" x2="312" y2="205" /></g><rect data-id="crmCard" x="262" y="170" width="46" height="10" fill={GREEN} opacity="0" transform={skew(-26.6)} /></g>
-        <g data-id="map" opacity="0"><rect x="730" y="100" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="742" y="120" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "MAPA DE ENTREGAS" : "DELIVERY MAP"}</text><path data-id="route" d="M745 130 L770 150 L800 140 L825 165" fill="none" stroke={GREEN} strokeWidth="2" strokeDasharray="140" strokeDashoffset="140" transform={skew(26.6)} /></g>
-        <g data-id="board" opacity="0"><rect x="330" y="80" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="342" y="100" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">{es ? "PLAN SEMANAL" : "WEEK PLAN"}</text><g transform={skew(-26.6)} fill={GREEN}><rect data-id="b1" x="342" y="110" width="24" height="10" opacity="0" /><rect data-id="b2" x="372" y="110" width="24" height="10" opacity="0" /><rect data-id="b3" x="402" y="110" width="24" height="10" opacity="0" /><rect data-id="b4" x="342" y="128" width="54" height="10" opacity="0" /></g></g>
-        <g data-id="desks" />
-        <g data-id="piles" />
-        <g data-id="claims" opacity="0">
-          <g data-id="mountain" /><g data-id="paid" />
-          <g><path d="M690 420 730 400 770 420 730 440Z" fill="#2A1614" stroke={RED} /><text data-id="trayT" x="700" y="462" fontSize="9" fill={RED}>NEEDS A PERSON</text><g data-id="trayDocs" /></g>
-          <text data-id="paidT" x="560" y="500" fontSize="9" fill="#9AA3A1">PAID</text>
-        </g>
-        <g data-id="excel" opacity="0"><g data-id="cells" /><g data-id="shelves" /></g>
-        <g data-id="tickets" opacity="0" />
-        <g data-id="confetti" opacity="0" />
-        <g data-id="msg" opacity="0"><rect x="-26" y="-14" width="52" height="28" rx="2" fill="#fff" /><text x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>WHATSAPP</text></g>
-        <g data-id="sign" opacity="0"><rect data-id="signR" x="-100" y="-14" width="200" height="28" fill="#fff" stroke={INK} strokeWidth="2" /><text data-id="signT" x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>…</text></g>
-        <g data-id="human" opacity="0"><circle cx="0" cy="-30" r="9" fill="none" stroke="#fff" strokeWidth="2" /><path d="M0 -21 V8 M-12 -8 H12 M0 8 L-9 30 M0 8 L9 30" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><g data-id="pen" opacity="0"><path d="M14 -6 l10 -10" stroke={GREEN} strokeWidth="3" strokeLinecap="round" /></g></g>
-        <g data-id="activity" opacity="0" />
-        <g data-id="dots" />
-        <rect data-id="dark" x="0" y="0" width="1000" height="600" fill={INK} opacity=".86" style={{ pointerEvents: "none" }} />
-        <circle data-id="glow" r="60" fill={GREEN} opacity="0" style={{ pointerEvents: "none" }} />
-      </svg>
-            <div className={s.cap}>
-              <span className={s.n}>{caps[ch][0]}</span>
-              <span className={s.capT}>{caps[ch][1]}</span>
-            </div>
-          </div>
+          <DotsStage ch={ch} lang={lang} />
         </div>
       </section>
 
