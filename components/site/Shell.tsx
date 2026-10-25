@@ -100,7 +100,7 @@ export function SiteFooter() {
         <div className={s.footerCols}>
           <div className={s.footerBrand}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
+            <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} style={{ height: 30, width: "auto" }} />
             <p>{es ? "Laboratorio de software full-stack en Quito. Investigación UX, ingeniería e IA aplicada." : "Full-stack software lab in Quito. UX research, engineering and applied AI."}</p>
           </div>
           {cols.map(([h, links]) => (
@@ -135,14 +135,21 @@ export function SiteFooter() {
 /* ---- small shared pieces used by the inner pages ---- */
 
 /** Page hero: label, serif H1, lead and optional actions, on the page background. */
-export function PageHero({ label, title, lead, children, tint }: { label?: string; title: React.ReactNode; lead?: string; children?: React.ReactNode; tint?: string }) {
+/** Page banner: centred on a tinted field with thin column lines and dot patterns; `mark` highlights one word of the title. */
+export function PageHero({ label, title, lead, children, tint, mark }: { label?: string; title: React.ReactNode; lead?: string; children?: React.ReactNode; tint?: string; mark?: string }) {
+  const marked = typeof title === "string" && mark && title.includes(mark)
+    ? title.split(mark).flatMap((part, i, arr) => (i < arr.length - 1 ? [part, <mark key={i} className={s.heroMark}>{mark}</mark>] : [part]))
+    : title;
   return (
-    <section className={s.pageHero} style={tint ? { background: tint } : undefined}>
+    <section className={s.pageHero} style={tint ? { ["--tint" as string]: tint } : undefined}>
+      <div className={s.heroLines} aria-hidden="true"><i /><i /><i /><i /></div>
+      <div className={`${s.heroDots} ${s.heroDotsA}`} aria-hidden="true" />
+      <div className={`${s.heroDots} ${s.heroDotsB}`} aria-hidden="true" />
       <div className={s.wrap}>
-        {label && <span className={s.label}>{label}</span>}
-        <h1 className={s.h1} style={{ maxWidth: 1100 }}>{title}</h1>
+        {label && <span className={s.heroLabel}>{label}</span>}
+        <h1 className={s.h1}>{marked}</h1>
         {lead && <p className={s.heroSub} style={{ maxWidth: 760 }}>{lead}</p>}
-        {children && <div className={s.ctas} style={{ justifyContent: "flex-start" }}>{children}</div>}
+        {children && <div className={s.ctas}>{children}</div>}
       </div>
     </section>
   );

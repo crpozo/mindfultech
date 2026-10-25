@@ -36,6 +36,8 @@ export function ServicesPage() {
       <PageHero
         label={es ? "Servicios full-stack" : "Full-stack services"}
         title={es ? "Software guiado por UX para humanos y empresas" : "UX-driven software for humans and enterprises"}
+        tint="#e6f7ec"
+        mark={es ? "humanos" : "humans"}
         lead={es ? "Diseña, construye y automatiza con un solo lab: alcance flexible, confiabilidad de producción e investigación incluida." : "Design, engineer, and automate with one lab: flexible scope, production reliability, and research built in."}
       >
         <a href="#build" className={`${s.btn} ${s.btnInk}`}>{es ? "Ver servicios" : "Explore services"}</a>

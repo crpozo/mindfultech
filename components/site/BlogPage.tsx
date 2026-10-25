@@ -50,7 +50,7 @@ export function BlogPage() {
   const list = featured ? visible.slice(1) : visible;
   return (
     <Shell active="blog">
-      <PageHero label="Blog" title={es ? "Notas desde el laboratorio" : "Notes from the lab"} lead={es ? "Sobre agentes de IA, ingeniería y cómo construimos software en el que la gente confía." : "On AI agents, engineering, and how we build software people trust."}>
+      <PageHero label="Blog" tint="#e3f1fb" mark={es ? "laboratorio" : "lab"} title={es ? "Notas desde el laboratorio" : "Notes from the lab"} lead={es ? "Sobre agentes de IA, ingeniería y cómo construimos software en el que la gente confía." : "On AI agents, engineering, and how we build software people trust."}>
         <div className={s.filters} role="group" aria-label={es ? "Filtrar por tema" : "Filter by topic"}>
           <button type="button" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>{es ? "Todo" : "All"}</button>
           {tags.map(([key, tag]) => (

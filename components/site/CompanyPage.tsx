@@ -27,6 +27,8 @@ export function CompanyPage() {
       <PageHero
         label={es ? "Empresa" : "Company"}
         title={es ? "Un laboratorio de software enfocado en personas" : "A software lab focused on people"}
+        tint="#fdebd3"
+        mark={es ? "personas" : "people"}
         lead={es ? "Desde 2016 diseñamos y construimos productos digitales desde Quito para equipos de Ecuador y más allá, con investigación, oficio y ahora IA aplicada en el centro." : "Since 2016 we've designed and engineered digital products from Quito for teams across Ecuador and beyond, with research, craft, and now applied AI at the core."}
       />
 

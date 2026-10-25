@@ -70,7 +70,7 @@ const T = {
     officeTag: "AI as a service / our new product",
     officeH2a: "An office where every employee is an ",
     officeH2b: "AI agent",
-    officeP: "A product we built, sold as a monthly subscription. One agent per role, connected to the tools you already use. You open the office, watch what each agent is doing, ask it questions and sign off on whatever needs a person.",
+    officeP: "One agent per role, inside the tools you already use. You watch, you ask, you sign off.",
     officeBtn: "Open the live demo",
     roles: [
       ["Sales", "Qualifies leads, follows up and books meetings in your CRM."],
@@ -153,7 +153,7 @@ const T = {
     officeTag: "IA como servicio / nuestro nuevo producto",
     officeH2a: "Una oficina donde cada empleado es un ",
     officeH2b: "agente de IA",
-    officeP: "Un producto nuestro, vendido como suscripción mensual. Un agente por rol, conectado a las herramientas que ya usas. Abres la oficina, ves qué hace cada agente, le preguntas y apruebas lo que necesite una persona.",
+    officeP: "Un agente por rol, dentro de las herramientas que ya usas. Tú miras, preguntas y apruebas.",
     officeBtn: "Abrir la demo en vivo",
     roles: [
       ["Ventas", "Califica leads, da seguimiento y agenda reuniones en tu CRM."],
@@ -664,10 +664,8 @@ export function Home() {
               <Link href="/office-demo" className={`${s.btn} ${s.btnGreen}`}>{t.officeBtn}</Link>
               <Link href="/blog/ai-management-office" className={`${s.btn} ${s.btnOutline}`}>{lang === "es" ? "Cómo funciona" : "How it works"}</Link>
             </div>
-            <div className={s.roleList}>
-              {t.roles.map(([name, body]) => (
-                <div key={name}><b>{name}</b><span>{body}</span></div>
-              ))}
+            <div className={s.roleChips}>
+              {t.roles.map(([name]) => <span key={name}>{name}</span>)}
             </div>
           </div>
           <div className={s.officeArt} aria-hidden="true">

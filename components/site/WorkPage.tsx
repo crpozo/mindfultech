@@ -17,6 +17,8 @@ export function WorkPage() {
       <PageHero
         label={es ? "Proyectos" : "Work"}
         title={es ? "Entregado con clientes" : "Shipped with clients"}
+        tint="#eeedfb"
+        mark={es ? "clientes" : "clients"}
         lead={es ? "Una década de productos en producción, de portales universitarios a comercio automatizado." : "A decade of products in production, from university portals to automated commerce."}
       />
       <section className={`${s.wrap}`} style={{ paddingTop: 24 }}>
