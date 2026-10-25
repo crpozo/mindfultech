@@ -10,7 +10,7 @@ import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
  * every public page — but not on the private tools (/tasks, /finance,
  * /fitness) or the /office-demo client demo, which are standalone screens.
  */
-const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq"];
+const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq", "/concepts"];
 
 export function SiteChrome() {
   const pathname = usePathname();

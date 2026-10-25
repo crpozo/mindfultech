@@ -1,0 +1,346 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useLang } from "@/components/i18n";
+import s from "./dots.module.css";
+
+/* Concept 01, "The Dots": six small robots, one per role of the AI Management
+   Office, automate an office overnight while you scroll. Ported from Carlos's
+   prototype (Oct 2026). The scene is one SVG; `mountStory` drives it from the
+   scroll position, imperatively, the way the prototype did. */
+
+const GREEN = "#3DBE7D", LIME = "#BFF5CF", INK = "#0E1013", PAPER = "#F4F5F3", RED = "#FF6B5B", LAV = "#C9C4F2";
+const ORDER = ["Sales", "Support", "Finance", "Marketing", "Operations", "Reception"] as const;
+type Role = (typeof ORDER)[number];
+const DESK: Record<Role, [number, number]> = { Sales: [330, 255], Support: [420, 210], Finance: [560, 300], Marketing: [480, 165], Operations: [640, 250], Reception: [500, 360] };
+const DOT_NAMES = ["Rece", "Sal", "Sopo", "Fin", "Mark", "Opi"] as const;
+const DOT_ROLE: Record<string, Role> = { Rece: "Reception", Sal: "Sales", Sopo: "Support", Fin: "Finance", Mark: "Marketing", Opi: "Operations" };
+const ACC: Record<string, string> = { Rece: "bell", Sal: "headset", Sopo: "bubble", Fin: "visor", Mark: "megaphone", Opi: "wrench" };
+
+const CAPS = {
+  en: [
+    ["01", "Every company has work nobody should be doing at 2 AM.", "An office in Quito. Six desks, six piles of paper, nobody in. Keep scrolling."],
+    ["02", "Meet Rece. The first Dot.", "She turns the lights on and routes every request to the right desk. The others are coming."],
+    ["03", "Sal catches a lead before it goes cold.", "WhatsApp → CRM → calendar. A meeting is booked before anyone wakes up."],
+    ["04", "Sopo answers at 3 AM. And knows when not to.", "Three tickets solved. The hard one goes to a person. That is the point."],
+    ["05", "Fin runs Helixona's medical billing, end to end.", "Claims, coding, follow-ups. A person signs off only where it matters."],
+    ["06", "Opi turns a spreadsheet into a system.", "Western Fence Supply: Excel → Odoo, with delivery routes."],
+    ["07", "Mark plans the week, publishes, reports.", "The short chapter. Marketing on autopilot, with a human on the report."],
+    ["08", "This is the AI Management Office. It is running now.", "One agent per role, inside the tools you already use. The live demo is one click away."],
+    ["09", "Now the desks are empty again. For you.", "Scroll down and pick the desk you would fill first."],
+  ],
+  es: [
+    ["01", "Toda empresa tiene trabajo que nadie debería hacer a las 2 AM.", "Una oficina en Quito. Seis escritorios, seis pilas de papel, nadie adentro. Sigue bajando."],
+    ["02", "Ella es Rece. La primera Dot.", "Enciende la luz y dirige cada solicitud al escritorio correcto. Los demás vienen en camino."],
+    ["03", "Sal atrapa un lead antes de que se enfríe.", "WhatsApp → CRM → calendario. La reunión queda agendada antes de que alguien despierte."],
+    ["04", "Sopo responde a las 3 AM. Y sabe cuándo no hacerlo.", "Tres tickets resueltos. El difícil va a una persona. De eso se trata."],
+    ["05", "Fin lleva la facturación médica de Helixona de punta a punta.", "Reclamos, codificación, seguimientos. Una persona firma solo donde importa."],
+    ["06", "Opi convierte una hoja de cálculo en un sistema.", "Western Fence Supply: de Excel a Odoo, con rutas de entrega."],
+    ["07", "Mark planifica la semana, publica, reporta.", "El capítulo corto. Marketing en piloto automático, con un humano en el reporte."],
+    ["08", "Esto es el AI Management Office. Está corriendo ahora.", "Un agente por rol, dentro de las herramientas que ya usas. La demo en vivo está a un clic."],
+    ["09", "Ahora los escritorios vuelven a estar vacíos. Para ti.", "Baja y elige el escritorio que llenarías primero."],
+  ],
+};
+const SIGNS = {
+  en: { lead: "LEAD QUALIFIED / MEETING BOOKED", fin: "24/7 / A PERSON SIGNS OFF ONLY WHERE IT MATTERS", opi: "EXCEL → ODOO / WITH DELIVERY ROUTES", mark: "WEEK PLANNED / PUBLISHED / REPORTED", desk: "WHICH DESK IS YOURS?", tray: "NEEDS A PERSON", paid: "PAID", act: { Sales: "booked a meeting in the CRM", Support: "answered a WhatsApp ticket", Finance: "reconciled 14 bank entries", Marketing: "published this week's post", Operations: "reordered supplies", Reception: "confirmed 6 appointments" } as Record<Role, string> },
+  es: { lead: "LEAD CALIFICADO / REUNIÓN AGENDADA", fin: "24/7 / UNA PERSONA FIRMA SOLO DONDE IMPORTA", opi: "EXCEL → ODOO / CON RUTAS DE ENTREGA", mark: "SEMANA PLANIFICADA / PUBLICADA / REPORTADA", desk: "¿CUÁL ESCRITORIO ES EL TUYO?", tray: "NECESITA UNA PERSONA", paid: "PAGADO", act: { Sales: "agendó una reunión en el CRM", Support: "respondió un ticket de WhatsApp", Finance: "concilió 14 movimientos", Marketing: "publicó el post de la semana", Operations: "repuso insumos", Reception: "confirmó 6 citas" } as Record<Role, string> },
+};
+
+const NS = "http://www.w3.org/2000/svg";
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a), 0, 1);
+function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number>, parent?: Element): SVGElementTagNameMap[K] {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+type Lang = "en" | "es";
+
+/** Builds the dynamic parts of the scene and returns a render(progress) function plus a cleanup. */
+function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => void) {
+  const q = <T extends Element = SVGElement>(sel: string) => root.querySelector(sel) as T;
+  const SG = SIGNS[lang];
+  // desks
+  const desks = q("[data-id=desks]");
+  ORDER.forEach((r) => {
+    const [x, y] = DESK[r]; const g = el("g", {}, desks);
+    el("path", { d: `M${x - 42} ${y} ${x} ${y + 21} ${x} ${y + 40} ${x - 42} ${y + 19}Z`, fill: "#1A1D23", stroke: PAPER }, g);
+    el("path", { d: `M${x} ${y + 21} ${x + 42} ${y} ${x + 42} ${y + 19} ${x} ${y + 40}Z`, fill: "#23262E", stroke: PAPER }, g);
+    el("path", { d: `M${x - 42} ${y} ${x} ${y - 21} ${x + 42} ${y} ${x} ${y + 21}Z`, fill: "#2E323B", stroke: PAPER }, g);
+    const t = el("text", { x, y: y + 58, "text-anchor": "middle", fill: "#9AA3A1", "font-size": 9 }, g); t.textContent = r.toUpperCase();
+  });
+  // paper piles
+  const piles = q("[data-id=piles]"); const pileEls: Partial<Record<Role, SVGGElement>> = {};
+  ORDER.forEach((r) => {
+    const [x, y] = DESK[r]; const g = el("g", {}, piles);
+    for (let i = 0; i < 5; i++) el("path", { d: `M${x - 14} ${y - 6 - i * 3} ${x + 2} ${y + 2 - i * 3} ${x + 16} ${y - 5 - i * 3} ${x} ${y - 13 - i * 3}Z`, fill: "#F2F2F2", stroke: INK, "stroke-width": 0.6 }, g);
+    pileEls[r] = g;
+  });
+  // the Dots
+  const dotsG = q("[data-id=dots]");
+  const D: Record<string, { g: SVGGElement; body: SVGGElement; pupil: SVGCircleElement; carry: SVGGElement; x: number; y: number }> = {};
+  DOT_NAMES.forEach((n) => {
+    const g = el("g", { opacity: 0 }, dotsG); const body = el("g", {}, g);
+    el("ellipse", { cx: 0, cy: 26, rx: 16, ry: 5, fill: "#000", opacity: 0.35 }, body);
+    el("circle", { cx: 0, cy: 0, r: 22, fill: GREEN }, body);
+    el("circle", { cx: -7, cy: -8, r: 6, fill: "#fff", opacity: 0.35 }, body);
+    el("rect", { x: -11, y: -6, width: 22, height: 14, rx: 6, fill: INK }, body);
+    const pupil = el("circle", { cx: 0, cy: 1, r: 3.2, fill: LIME }, body);
+    const a = el("g", {}, body); const acc = ACC[n];
+    if (acc === "bell") { el("path", { d: "M-6 -22 q6 -10 12 0 z", fill: "#fff" }, a); el("circle", { cx: 0, cy: -21, r: 2, fill: "#fff" }, a); }
+    if (acc === "headset") { el("path", { d: "M-22 -4 a22 22 0 0 1 44 0", fill: "none", stroke: "#fff", "stroke-width": 3 }, a); el("rect", { x: -26, y: -8, width: 6, height: 12, rx: 2, fill: "#fff" }, a); el("rect", { x: 20, y: -8, width: 6, height: 12, rx: 2, fill: "#fff" }, a); }
+    if (acc === "bubble") { el("path", { d: "M8 -46 h22 a5 5 0 0 1 5 5 v10 a5 5 0 0 1 -5 5 h-12 l-6 6 v-6 h-4 a5 5 0 0 1 -5 -5 v-10 a5 5 0 0 1 5 -5z", fill: "#fff" }, a); [15, 21, 27].forEach((cx) => el("circle", { cx, cy: -36, r: 1.6, fill: INK }, a)); }
+    if (acc === "visor") el("path", { d: "M-20 -14 h40 l6 8 h-52z", fill: "#fff" }, a);
+    if (acc === "megaphone") { el("path", { d: "M22 -4 l16 -10 v24 l-16 -10z", fill: "#fff" }, a); el("rect", { x: 18, y: -4, width: 5, height: 8, fill: "#fff" }, a); }
+    if (acc === "wrench") { el("path", { d: "M-22 4 l-14 10 M22 4 l14 10", stroke: "#fff", "stroke-width": 4, "stroke-linecap": "round" }, a); el("circle", { cx: -38, cy: 16, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2 }, a); el("circle", { cx: 38, cy: 16, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2 }, a); }
+    const carry = el("g", { opacity: 0 }, body); el("rect", { x: -10, y: 12, width: 20, height: 12, rx: 2, fill: "#fff" }, carry);
+    const name = el("text", { x: 0, y: 44, "text-anchor": "middle", fill: "#9AA3A1", "font-size": 9 }, g); name.textContent = n.toUpperCase();
+    D[n] = { g, body, pupil, carry, x: 0, y: 0 };
+  });
+  const place = (n: string, x: number, y: number, o: number, scale = 1) => { const d = D[n]; d.x = x; d.y = y; d.g.setAttribute("opacity", String(o)); d.g.setAttribute("transform", `translate(${x},${y}) scale(${scale})`); };
+  const bob = (n: string, t: number, amt = 4) => D[n].body.setAttribute("transform", `translate(0,${Math.sin(t * 22) * amt}) rotate(${Math.sin(t * 22) * amt * 0.6})`);
+  const still = (n: string) => D[n].body.setAttribute("transform", "");
+  const carry = (n: string, on: boolean) => D[n].carry.setAttribute("opacity", on ? "1" : "0");
+  const path2 = (n: string, t: number, pts: [number, number][]) => { const segs = pts.length - 1, k = Math.min(segs - 1, Math.floor(t * segs)), lt = t * segs - k; const a = pts[k], b = pts[k + 1]; place(n, lerp(a[0], b[0], lt), lerp(a[1], b[1], lt), 1); bob(n, t, 4); };
+  let mx = 0.5, my = 0.5;
+  const onMove = (e: PointerEvent) => { mx = e.clientX / window.innerWidth; my = e.clientY / window.innerHeight; };
+  const eyes = () => Object.keys(D).forEach((n) => { D[n].pupil.setAttribute("cx", String((mx - 0.5) * 8)); D[n].pupil.setAttribute("cy", String(1 + (my - 0.5) * 5)); });
+
+  // props
+  const CLAIMS = 18; const mountain = q("[data-id=mountain]"), paid = q("[data-id=paid]"), trayDocs = q("[data-id=trayDocs]");
+  const claimEls: SVGElement[] = [], paidEls: SVGElement[] = [];
+  for (let i = 0; i < CLAIMS; i++) { const col = i % 6, row = Math.floor(i / 6); const x = 520 + col * 9 - row * 9, y = 300 - row * 7 + col * 4; claimEls.push(el("path", { d: `M${x - 12} ${y} ${x} ${y + 6} ${x + 12} ${y} ${x} ${y - 6}Z`, fill: "#F2F2F2", stroke: INK, "stroke-width": 0.6 }, mountain)); }
+  for (let i = 0; i < CLAIMS; i++) { const x = 560, y = 470 - i * 2.6; paidEls.push(el("path", { d: `M${x - 12} ${y} ${x} ${y + 6} ${x + 12} ${y} ${x} ${y - 6}Z`, fill: GREEN, stroke: INK, "stroke-width": 0.6, opacity: 0 }, paid)); }
+  const trayEls = [0, 1].map((i) => el("path", { d: `M${718 + i * 8} ${418 - i * 4} ${730 + i * 8} ${424 - i * 4} ${742 + i * 8} ${418 - i * 4} ${730 + i * 8} ${412 - i * 4}Z`, fill: RED, opacity: 0 }, trayDocs));
+  const cells = q("[data-id=cells]"), shelves = q("[data-id=shelves]"); const cellEls: SVGRectElement[] = [];
+  for (let i = 0; i < 12; i++) cellEls.push(el("rect", { x: 0, y: 0, width: 16, height: 9, fill: "#F2F2F2", stroke: INK, "stroke-width": 0.6 }, cells));
+  [0, 1, 2].forEach((i) => el("path", { d: `M690 ${268 + i * 26} 740 ${293 + i * 26} 740 ${296 + i * 26} 690 ${271 + i * 26}Z`, fill: "#fff", opacity: 0.5 }, shelves));
+  const sh = el("text", { x: 690, y: 258, fill: "#9AA3A1", "font-size": 9 }, shelves); sh.textContent = "ODOO";
+  const tickets = q("[data-id=tickets]"); const tEls = [0, 1, 2, 3].map((i) => el("rect", { x: 0, y: 0, width: 34, height: 16, rx: 4, fill: i === 3 ? RED : "#fff" }, tickets));
+  const conf = q("[data-id=confetti]"); const cEls = Array.from({ length: 26 }, (_, i) => el("rect", { x: 0, y: 0, width: 5, height: 8, fill: i % 3 ? GREEN : LAV, transform: `rotate(${i * 37})` }, conf));
+  const act = q("[data-id=activity]"); const actEls: Partial<Record<Role, SVGGElement>> = {};
+  ORDER.forEach((r) => { const [x, y] = DESK[r]; const g = el("g", { opacity: 0 }, act); const w = SG.act[r].length * 5.4 + 18; el("rect", { x: x - w / 2, y: y - 78, width: w, height: 20, rx: 2, fill: "#fff" }, g); const t = el("text", { x, y: y - 65, "text-anchor": "middle", fill: INK, "font-size": 8 }, g); t.textContent = SG.act[r]; actEls[r] = g; });
+  q<SVGTextElement>("[data-id=trayT]").textContent = SG.tray; q<SVGTextElement>("[data-id=paidT]").textContent = SG.paid;
+
+  const sign = q("[data-id=sign]"), signT = q<SVGTextElement>("[data-id=signT]"), signR = q("[data-id=signR]");
+  const showSign = (x: number, y: number, text: string) => { sign.setAttribute("opacity", "1"); sign.setAttribute("transform", `translate(${x},${y})`); signT.textContent = text; const w = text.length * 6.2 + 24; signR.setAttribute("x", String(-w / 2)); signR.setAttribute("width", String(w)); };
+  const clock = (h: number, m: number, label: string) => { q("[data-id=clkH]").setAttribute("transform", `rotate(${(h % 12) * 30 + m * 0.5} 470 80)`); q("[data-id=clkM]").setAttribute("transform", `rotate(${m * 6 - 90} 470 80)`); q<SVGTextElement>("[data-id=clkT]").textContent = label; };
+  const seated = (name: string, role: Role) => { const [x, y] = DESK[role]; place(name, x + 6, y - 26, 1, 0.85); };
+  const ids = ["msg", "sign", "human", "pen", "claims", "excel", "tickets", "confetti", "map", "board", "activity", "doors", "glow", "crmCard", "calSlot"] as const;
+  const E = Object.fromEntries(ids.map((id) => [id, q(`[data-id=${id}]`)])) as Record<(typeof ids)[number], SVGElement>;
+  const dark = q("[data-id=dark]"), hint = root.querySelector("[data-id=hint]") as HTMLElement, prog = root.querySelector("[data-id=prog]") as HTMLElement;
+  let lastCh = -1;
+
+  function render(p: number) {
+    const CH = 9; const ch = Math.min(CH - 1, Math.floor(p * CH)), t = ease(p * CH - ch);
+    if (ch !== lastCh) { lastCh = ch; onChapter(ch); }
+    if (hint) hint.style.opacity = p < 0.02 ? "1" : "0";
+    let darkO = 0;
+    Object.keys(D).forEach((n) => { place(n, D[n].x, D[n].y, 0); still(n); carry(n, false); });
+    ids.forEach((id) => E[id].setAttribute("opacity", "0"));
+    ORDER.forEach((r) => pileEls[r]!.setAttribute("opacity", "1"));
+
+    if (ch === 0) { darkO = 0.86; clock(2, 14, "2:14 AM"); }
+    if (ch === 1) {
+      darkO = lerp(0.86, 0, seg(t, 0.65, 1)); clock(2, 14, "2:14 AM");
+      path2("Rece", seg(t, 0, 0.6), [[60, 330], [330, 300]]);
+      if (t > 0.38 && t < 0.5) D.Rece.body.setAttribute("transform", `rotate(${Math.sin(t * 90) * 18})`);
+      if (t > 0.6) { place("Rece", 330, 300, 1); still("Rece"); }
+      if (t > 0.5) pileEls.Sales!.setAttribute("opacity", "0.35");
+    }
+    if (ch >= 2) { seated("Rece", "Reception"); pileEls.Reception!.setAttribute("opacity", "0"); clock(2, 40, "2:40 AM"); }
+    if (ch === 2) {
+      const fy = lerp(-40, 230, seg(t, 0, 0.25)); E.msg.setAttribute("opacity", t < 0.35 ? "1" : "0"); E.msg.setAttribute("transform", `translate(420,${fy})`);
+      if (t < 0.35) path2("Sal", seg(t, 0.05, 0.35), [[120, 420], [400, 260]]);
+      else if (t < 0.7) { path2("Sal", seg(t, 0.35, 0.7), [[400, 260], [300, 230]]); carry("Sal", true); }
+      else { path2("Sal", seg(t, 0.7, 0.95), [[300, 230], [600, 170]]); carry("Sal", t < 0.9); E.crmCard.setAttribute("opacity", "1"); }
+      if (t > 0.9) { E.calSlot.setAttribute("opacity", "1"); showSign(600, 110, SG.lead); }
+      pileEls.Sales!.setAttribute("opacity", String(lerp(1, 0, t)));
+    }
+    if (ch >= 3) { seated("Sal", "Sales"); pileEls.Sales!.setAttribute("opacity", "0"); }
+    if (ch === 3) {
+      darkO = lerp(0, 0.8, seg(t, 0, 0.15)) * (t < 0.9 ? 1 : lerp(1, 0, seg(t, 0.9, 1))); clock(3, 2, "3:02 AM");
+      const [sx, sy] = DESK.Support; place("Sopo", sx + 6, sy - 26, 1, 0.85);
+      E.glow.setAttribute("opacity", String(darkO * 0.25)); E.glow.setAttribute("cx", String(sx + 6)); E.glow.setAttribute("cy", String(sy - 26));
+      E.tickets.setAttribute("opacity", "1");
+      tEls.forEach((e, i) => {
+        const st = seg(t, 0.1 + i * 0.17, 0.25 + i * 0.17); const x = lerp(sx + 60, sx - 30, st), y = lerp(sy - 110, sy - 40, st);
+        e.setAttribute("transform", `translate(${x},${y})`); e.setAttribute("opacity", t > 0.1 + i * 0.17 && (i < 3 ? st < 1 || t < 0.9 : true) ? "1" : "0");
+        if (i === 3 && st >= 1) { const h = seg(t, 0.78, 0.95); e.setAttribute("transform", `translate(${lerp(sx - 30, DESK.Reception[0] + 60, h)},${lerp(sy - 40, DESK.Reception[1] - 20, h)})`); }
+      });
+      if (t > 0.5 && t < 0.8) D.Sopo.body.setAttribute("transform", `rotate(${Math.sin(t * 40) * 8})`);
+      pileEls.Support!.setAttribute("opacity", String(lerp(1, 0, t)));
+    }
+    if (ch >= 4) { seated("Sopo", "Support"); pileEls.Support!.setAttribute("opacity", "0"); clock(3, 30, "3:30 AM"); }
+    if (ch === 4) {
+      E.claims.setAttribute("opacity", "1"); pileEls.Finance!.setAttribute("opacity", "0");
+      const [fx, fy] = DESK.Finance; place("Fin", fx - 40, fy - 10, 1, 0.9); bob("Fin", t * 3, 2);
+      const done = Math.floor(seg(t, 0.08, 0.78) * CLAIMS);
+      claimEls.forEach((e, i) => e.setAttribute("opacity", i < CLAIMS - done ? "1" : "0"));
+      paidEls.forEach((e, i) => e.setAttribute("opacity", i < done - 2 ? "1" : "0"));
+      trayEls.forEach((e, i) => e.setAttribute("opacity", done > 6 + i * 5 ? "1" : "0"));
+      if (t > 0.72) { E.human.setAttribute("opacity", "1"); const st = seg(t, 0.72, 0.86); E.human.setAttribute("transform", `translate(${lerp(960, 760, st)},${lerp(430, 392, st)})`); if (st >= 1) { E.pen.setAttribute("opacity", "1"); trayEls.forEach((e) => e.setAttribute("fill", t > 0.93 ? GREEN : RED)); } }
+      if (t > 0.9) showSign(600, 520, SG.fin);
+    }
+    if (ch >= 5) { seated("Fin", "Finance"); pileEls.Finance!.setAttribute("opacity", "0"); }
+    if (ch === 5) {
+      E.excel.setAttribute("opacity", "1"); E.map.setAttribute("opacity", "1"); pileEls.Operations!.setAttribute("opacity", "0");
+      const [ox, oy] = DESK.Operations; place("Opi", ox - 10, oy - 28, 1, 0.9); bob("Opi", t * 2, 2);
+      cellEls.forEach((e, i) => { const c = i % 4, r = Math.floor(i / 4); const st = seg(t, 0.1 + i * 0.045, 0.3 + i * 0.045); const x0 = ox - 60 + c * 18, y0 = oy + 20 + r * 11, x1 = 695 + c * 11, y1 = 280 + r * 26 + c * 5.5; e.setAttribute("x", String(lerp(x0, x1, st))); e.setAttribute("y", String(lerp(y0, y1, st))); e.setAttribute("fill", st >= 1 ? GREEN : "#F2F2F2"); });
+      q("[data-id=route]").setAttribute("stroke-dashoffset", String(lerp(140, 0, seg(t, 0.7, 0.95))));
+      if (t > 0.92) showSign(640, 520, SG.opi);
+    }
+    if (ch >= 6) { seated("Opi", "Operations"); pileEls.Operations!.setAttribute("opacity", "0"); clock(8, 0, "8:00 AM"); }
+    if (ch === 6) {
+      E.board.setAttribute("opacity", "1"); pileEls.Marketing!.setAttribute("opacity", "0");
+      const [mxx, myy] = DESK.Marketing; place("Mark", mxx + 8, myy - 28, 1, 0.85); bob("Mark", t * 2, 2);
+      ["b1", "b2", "b3", "b4"].forEach((id, i) => q(`[data-id=${id}]`).setAttribute("opacity", t > 0.1 + i * 0.12 ? "1" : "0"));
+      if (t > 0.55 && t < 0.9) { E.confetti.setAttribute("opacity", "1"); const st = seg(t, 0.55, 0.9); cEls.forEach((e, i) => { const a = (i / cEls.length) * Math.PI * 2; e.setAttribute("transform", `translate(${mxx + 8 + Math.cos(a) * st * 90},${myy - 40 + Math.sin(a) * st * 60 + st * st * 80}) rotate(${i * 37 + st * 300})`); }); }
+      if (t > 0.8) { E.human.setAttribute("opacity", "1"); E.human.setAttribute("transform", "translate(600,150)"); showSign(640, 520, SG.mark); }
+    }
+    if (ch >= 7) { seated("Mark", "Marketing"); pileEls.Marketing!.setAttribute("opacity", "0"); clock(9, 15, "9:15 AM"); }
+    if (ch === 7) {
+      E.doors.setAttribute("opacity", String(seg(t, 0, 0.3))); E.activity.setAttribute("opacity", "1");
+      ORDER.forEach((r, i) => actEls[r]!.setAttribute("opacity", t > 0.15 + i * 0.1 ? "1" : "0"));
+      Object.keys(D).forEach((n, i) => bob(n, t * 4 + i, 1.5));
+    }
+    if (ch === 8) {
+      E.doors.setAttribute("opacity", "1");
+      DOT_NAMES.forEach((n, i) => { const [x, y] = DESK[DOT_ROLE[n]]; const st = seg(t, 0, 0.5); place(n, lerp(x + 6, 380 + i * 48, st), lerp(y - 26, 470, st), lerp(1, 0, seg(t, 0.75, 1)), lerp(0.85, 1, st)); bob(n, t * 3 + i, 1.5); });
+      if (t > 0.5) { showSign(500, 520, SG.desk); sign.setAttribute("opacity", String(seg(t, 0.5, 0.7))); }
+    }
+    dark.setAttribute("opacity", String(darkO));
+    eyes();
+  }
+
+  const story = root.querySelector("[data-id=story]") as HTMLElement;
+  let raf: number | null = null;
+  const tick = () => {
+    const r = story.getBoundingClientRect(); const p = clamp(-r.top / (story.offsetHeight - window.innerHeight), 0, 1); render(p);
+    if (prog) prog.style.width = `${(window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)) * 100}%`;
+  };
+  const schedule = () => { if (raf === null) raf = requestAnimationFrame(() => { raf = null; tick(); }); };
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule);
+  window.addEventListener("pointermove", onMove, { passive: true });
+  window.addEventListener("pointermove", schedule, { passive: true });
+  tick();
+  return () => {
+    window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule);
+    window.removeEventListener("pointermove", onMove); window.removeEventListener("pointermove", schedule);
+    if (raf !== null) cancelAnimationFrame(raf);
+    [desks, piles, dotsG, mountain, paid, trayDocs, cells, shelves, tickets, conf, act].forEach((g) => { while (g.firstChild) g.removeChild(g.firstChild); });
+  };
+}
+
+export function TheDots() {
+  const { lang } = useLang();
+  const es = lang === "es";
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const [ch, setCh] = React.useState(0);
+  const [roles, setRoles] = React.useState<Role[]>([]);
+  React.useEffect(() => {
+    if (!rootRef.current) return;
+    return mountStory(rootRef.current, lang, setCh);
+  }, [lang]);
+  const caps = CAPS[lang];
+  const roleLabel: Record<Role, string> = es ? { Sales: "Ventas", Support: "Soporte", Finance: "Finanzas", Marketing: "Marketing", Operations: "Operaciones", Reception: "Recepción" } : { Sales: "Sales", Support: "Support", Finance: "Finance", Marketing: "Marketing", Operations: "Operations", Reception: "Reception" };
+  const mailto = `mailto:info@mindfultech.ec?subject=${encodeURIComponent(es ? "Quiero un escritorio en el AI Management Office" : "I want a desk in the AI Management Office")}&body=${encodeURIComponent((es ? "Escritorios que llenaría primero: " : "Desks I would fill first: ") + (roles.length ? roles.map((r) => roleLabel[r]).join(", ") : "—"))}`;
+  const skew = (k: number) => `skewY(${k})`;
+  return (
+    <div className={s.root} ref={rootRef}>
+      <div className={s.prog} data-id="prog" />
+      <div className={s.bar}>
+        <Link href="/" className={s.brand}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
+          <em>{es ? "Concepto 01 / The Dots" : "Concept 01 / The Dots"}</em>
+        </Link>
+        <span className={s.mono}>{es ? "Capítulo" : "Chapter"} {ch + 1} / 9</span>
+      </div>
+
+      <section className={s.story} data-id="story" aria-label="The Dots: a scroll story">
+        <div className={s.stage}>
+          <svg className={s.scene} viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label={es ? "Oficina isométrica donde pequeños robots automatizan el trabajo mientras bajas" : "Isometric office where small robots automate work as you scroll"}>
+            <defs>
+              <linearGradient id="dotsFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1D24" /><stop offset="1" stopColor="#14161C" /></linearGradient>
+            </defs>
+            <path d="M500 95 905 300 500 505 95 300Z" fill="url(#dotsFloor)" stroke="#2A2E37" />
+            <g stroke="#23262E" strokeWidth="1" opacity=".8"><path d="M297 197 702 402M702 197 297 402M399 146 804 351M601 146 196 351M196 249 601 454M804 249 399 454" /></g>
+            <path d="M95 300 500 95 500 20 95 225Z" fill="#111318" stroke="#2A2E37" />
+            <path d="M905 300 500 95 500 20 905 225Z" fill="#0F1115" stroke="#2A2E37" />
+            <g data-id="doors" opacity="0">
+              {([["M150 262 200 237 200 290 150 315Z", 175, 280, "USFQ"], ["M240 217 290 192 290 245 240 270Z", 265, 235, "PARC"], ["M330 172 380 147 380 200 330 225Z", 355, 190, "WFS"], ["M620 147 670 172 670 225 620 200Z", 645, 190, "HELIXONA"], ["M710 192 760 217 760 270 710 245Z", 735, 235, "THEMED\u00a0MOTION"]] as [string, number, number, string][]).map(([d, x, y, n]) => (
+                <g key={n}><path d={d} fill="#191C23" stroke="#fff" strokeWidth="1" /><text x={x} y={y} textAnchor="middle" fontSize="7.5" fill="#fff">{n}</text></g>
+              ))}
+            </g>
+            <g><circle cx="470" cy="80" r="22" fill="#15181E" stroke="#fff" /><line data-id="clkH" x1="470" y1="80" x2="470" y2="68" stroke="#fff" strokeWidth="2" /><line data-id="clkM" x1="470" y1="80" x2="480" y2="80" stroke={GREEN} strokeWidth="2" /><text data-id="clkT" x="470" y="118" textAnchor="middle" fontSize="11" fill="#9AA3A1">2:14 AM</text></g>
+            <g><rect x="620" y="60" width="90" height="70" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="632" y="80" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "CALENDARIO" : "CALENDAR"}</text><rect data-id="calSlot" x="632" y="88" width="66" height="14" fill={GREEN} opacity="0" transform={skew(26.6)} /></g>
+            <g><rect x="250" y="130" width="70" height="90" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="258" y="150" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">CRM</text><g transform={skew(-26.6)} stroke="#fff" opacity=".6"><line x1="258" y1="165" x2="312" y2="165" /><line x1="258" y1="185" x2="312" y2="185" /><line x1="258" y1="205" x2="312" y2="205" /></g><rect data-id="crmCard" x="262" y="170" width="46" height="10" fill={GREEN} opacity="0" transform={skew(-26.6)} /></g>
+            <g data-id="map" opacity="0"><rect x="730" y="100" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(26.6)} /><text x="742" y="120" transform={skew(26.6)} fontSize="9" fill="#9AA3A1">{es ? "MAPA DE ENTREGAS" : "DELIVERY MAP"}</text><path data-id="route" d="M745 130 L770 150 L800 140 L825 165" fill="none" stroke={GREEN} strokeWidth="2" strokeDasharray="140" strokeDashoffset="140" transform={skew(26.6)} /></g>
+            <g data-id="board" opacity="0"><rect x="330" y="80" width="110" height="80" rx="2" fill="#15181E" stroke="#fff" transform={skew(-26.6)} /><text x="342" y="100" transform={skew(-26.6)} fontSize="9" fill="#9AA3A1">{es ? "PLAN SEMANAL" : "WEEK PLAN"}</text><g transform={skew(-26.6)} fill={GREEN}><rect data-id="b1" x="342" y="110" width="24" height="10" opacity="0" /><rect data-id="b2" x="372" y="110" width="24" height="10" opacity="0" /><rect data-id="b3" x="402" y="110" width="24" height="10" opacity="0" /><rect data-id="b4" x="342" y="128" width="54" height="10" opacity="0" /></g></g>
+            <g data-id="desks" />
+            <g data-id="piles" />
+            <g data-id="claims" opacity="0">
+              <g data-id="mountain" /><g data-id="paid" />
+              <g><path d="M690 420 730 400 770 420 730 440Z" fill="#2A1614" stroke={RED} /><text data-id="trayT" x="700" y="462" fontSize="9" fill={RED}>NEEDS A PERSON</text><g data-id="trayDocs" /></g>
+              <text data-id="paidT" x="560" y="500" fontSize="9" fill="#9AA3A1">PAID</text>
+            </g>
+            <g data-id="excel" opacity="0"><g data-id="cells" /><g data-id="shelves" /></g>
+            <g data-id="tickets" opacity="0" />
+            <g data-id="confetti" opacity="0" />
+            <g data-id="msg" opacity="0"><rect x="-26" y="-14" width="52" height="28" rx="2" fill="#fff" /><text x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>WHATSAPP</text></g>
+            <g data-id="sign" opacity="0"><rect data-id="signR" x="-100" y="-14" width="200" height="28" fill="#fff" stroke={INK} strokeWidth="2" /><text data-id="signT" x="0" y="4" textAnchor="middle" fontSize="9" fill={INK}>…</text></g>
+            <g data-id="human" opacity="0"><circle cx="0" cy="-30" r="9" fill="none" stroke="#fff" strokeWidth="2" /><path d="M0 -21 V8 M-12 -8 H12 M0 8 L-9 30 M0 8 L9 30" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><g data-id="pen" opacity="0"><path d="M14 -6 l10 -10" stroke={GREEN} strokeWidth="3" strokeLinecap="round" /></g></g>
+            <g data-id="activity" opacity="0" />
+            <g data-id="dots" />
+            <rect data-id="dark" x="0" y="0" width="1000" height="600" fill={INK} opacity=".86" style={{ pointerEvents: "none" }} />
+            <circle data-id="glow" r="60" fill={GREEN} opacity="0" style={{ pointerEvents: "none" }} />
+          </svg>
+          <div className={s.cap}>
+            <div className={s.n}>{caps[ch][0]}</div>
+            <div><h2>{caps[ch][1]}</h2><p>{caps[ch][2]}</p></div>
+            <div className={s.hint} data-id="hint">{es ? "Baja ↓" : "Scroll ↓"}</div>
+          </div>
+        </div>
+      </section>
+
+      <section className={s.end} id="desk">
+        <div className={s.wrap}>
+          <span className={s.mono} style={{ color: GREEN }}>{es ? "Capítulo 9 / Tu oficina" : "Chapter 9 / Your office"}</span>
+          <h2>{es ? "¿Cuál escritorio es el tuyo?" : "Which desk is yours?"}</h2>
+          <p>{es ? "Un agente por rol, conectado a las herramientas que ya usas. Una persona firma solo donde importa. Elige el escritorio que llenarías primero." : "One agent per role, connected to the tools you already use. A person signs off only where it matters. Pick the desk you'd fill first."}</p>
+          <div className={s.roles}>
+            {ORDER.map((r) => (
+              <button key={r} type="button" aria-pressed={roles.includes(r)} onClick={() => setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]))}>{roleLabel[r]}</button>
+            ))}
+          </div>
+          <div className={s.ctas}>
+            <a href={mailto} className={`${s.btn} ${s.btnFill}`}>{es ? "Empieza un proyecto" : "Start a project"}</a>
+            <Link href="/office-demo" className={s.btn}>{es ? "Abrir la demo real →" : "Open the live demo →"}</Link>
+          </div>
+          <p className={s.note}>{es ? "Concepto / personajes y oficina dibujados en SVG / el scroll controla la historia / los ojos siguen tu cursor" : "Concept / characters and office drawn in SVG / scroll drives the story / the eyes follow your cursor"}</p>
+        </div>
+      </section>
+
+      <section className={s.read}>
+        <div className={s.wrap}>
+          <div className={s.readHead}>
+            <h3>{es ? "La historia, en texto" : "The story, as text"}</h3>
+            <span className={s.mono}>{es ? "Para leer sin animación" : "To read without the animation"}</span>
+          </div>
+          <ol>
+            {caps.map(([n, h, p]) => (
+              <li key={n}><span>{n}</span><b>{h}</b><p>{p}</p></li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    </div>
+  );
+}
