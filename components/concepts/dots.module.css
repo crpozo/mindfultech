@@ -67,3 +67,7 @@
 @media (prefers-reduced-motion: reduce) {
   .prog { transition: none; }
 }
+
+/* eyelids: a quick blink every few seconds */
+.blink { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: blink 4.2s ease-in-out infinite; }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(0); } 95%, 97% { transform: scaleY(1); } }

@@ -62,7 +62,7 @@ function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, 
 type Lang = "en" | "es";
 
 /** Builds the dynamic parts of the scene and returns a render(progress) function plus a cleanup. */
-function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => void) {
+function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => void, s_blink: string) {
   const q = <T extends Element = SVGElement>(sel: string) => root.querySelector(sel) as T;
   const SG = SIGNS[lang];
   // desks
@@ -83,24 +83,48 @@ function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => voi
   });
   // the Dots
   const dotsG = q("[data-id=dots]");
-  const D: Record<string, { g: SVGGElement; body: SVGGElement; pupil: SVGCircleElement; carry: SVGGElement; x: number; y: number }> = {};
-  DOT_NAMES.forEach((n) => {
+  const D: Record<string, { g: SVGGElement; body: SVGGElement; pupils: SVGCircleElement[]; carry: SVGGElement; x: number; y: number }> = {};
+  // Cute, MicroDuck-like: a chubby egg body, two big eyes with highlights, blush, a tiny beak, stubby feet and
+  // a lit antenna. Each Dot keeps the accessory that says its job.
+  DOT_NAMES.forEach((n, idx) => {
     const g = el("g", { opacity: 0 }, dotsG); const body = el("g", {}, g);
-    el("ellipse", { cx: 0, cy: 26, rx: 16, ry: 5, fill: "#000", opacity: 0.35 }, body);
-    el("circle", { cx: 0, cy: 0, r: 22, fill: GREEN }, body);
-    el("circle", { cx: -7, cy: -8, r: 6, fill: "#fff", opacity: 0.35 }, body);
-    el("rect", { x: -11, y: -6, width: 22, height: 14, rx: 6, fill: INK }, body);
-    const pupil = el("circle", { cx: 0, cy: 1, r: 3.2, fill: LIME }, body);
+    el("ellipse", { cx: 0, cy: 27, rx: 17, ry: 5, fill: "#000", opacity: 0.35 }, body);
+    // feet
+    el("ellipse", { cx: -8, cy: 25, rx: 7, ry: 3.2, fill: "#F2A33C" }, body);
+    el("ellipse", { cx: 8, cy: 25, rx: 7, ry: 3.2, fill: "#F2A33C" }, body);
+    // body + belly
+    el("ellipse", { cx: 0, cy: 2, rx: 22, ry: 24, fill: GREEN }, body);
+    el("ellipse", { cx: 0, cy: 10, rx: 13, ry: 11, fill: LIME, opacity: 0.55 }, body);
+    el("circle", { cx: -9, cy: -11, r: 6, fill: "#fff", opacity: 0.28 }, body);
+    // stubby arms
+    el("ellipse", { cx: -21, cy: 8, rx: 4.5, ry: 7, fill: GREEN, transform: "rotate(18 -21 8)" }, body);
+    el("ellipse", { cx: 21, cy: 8, rx: 4.5, ry: 7, fill: GREEN, transform: "rotate(-18 21 8)" }, body);
+    // antenna with its light
+    el("path", { d: "M0 -22 q2 -8 6 -12", fill: "none", stroke: INK, "stroke-width": 2, "stroke-linecap": "round" }, body);
+    el("circle", { cx: 6.5, cy: -35, r: 3.2, fill: LIME, stroke: INK, "stroke-width": 1.2 }, body);
+    // eyes
+    const pupils: SVGCircleElement[] = [];
+    [-7.5, 7.5].forEach((ex) => {
+      el("circle", { cx: ex, cy: -4, r: 7.2, fill: "#fff", stroke: INK, "stroke-width": 1.2 }, body);
+      pupils.push(el("circle", { cx: ex, cy: -3, r: 3.6, fill: INK }, body));
+      el("circle", { cx: ex + 1.6, cy: -5.2, r: 1.4, fill: "#fff" }, body);
+      const lid = el("rect", { x: ex - 7.6, y: -11.6, width: 15.2, height: 15.2, rx: 7.6, fill: GREEN, class: s_blink }, body);
+      lid.style.animationDelay = `${(idx * 0.7) % 4}s`;
+    });
+    // blush + beak + smile
+    el("ellipse", { cx: -13, cy: 3, rx: 3.6, ry: 2, fill: "#FF9BB0", opacity: 0.8 }, body);
+    el("ellipse", { cx: 13, cy: 3, rx: 3.6, ry: 2, fill: "#FF9BB0", opacity: 0.8 }, body);
+    el("path", { d: "M-4 4 q4 3 8 0 q-4 5 -8 0z", fill: "#F2A33C", stroke: INK, "stroke-width": 0.8 }, body);
     const a = el("g", {}, body); const acc = ACC[n];
-    if (acc === "bell") { el("path", { d: "M-6 -22 q6 -10 12 0 z", fill: "#fff" }, a); el("circle", { cx: 0, cy: -21, r: 2, fill: "#fff" }, a); }
-    if (acc === "headset") { el("path", { d: "M-22 -4 a22 22 0 0 1 44 0", fill: "none", stroke: "#fff", "stroke-width": 3 }, a); el("rect", { x: -26, y: -8, width: 6, height: 12, rx: 2, fill: "#fff" }, a); el("rect", { x: 20, y: -8, width: 6, height: 12, rx: 2, fill: "#fff" }, a); }
-    if (acc === "bubble") { el("path", { d: "M8 -46 h22 a5 5 0 0 1 5 5 v10 a5 5 0 0 1 -5 5 h-12 l-6 6 v-6 h-4 a5 5 0 0 1 -5 -5 v-10 a5 5 0 0 1 5 -5z", fill: "#fff" }, a); [15, 21, 27].forEach((cx) => el("circle", { cx, cy: -36, r: 1.6, fill: INK }, a)); }
-    if (acc === "visor") el("path", { d: "M-20 -14 h40 l6 8 h-52z", fill: "#fff" }, a);
-    if (acc === "megaphone") { el("path", { d: "M22 -4 l16 -10 v24 l-16 -10z", fill: "#fff" }, a); el("rect", { x: 18, y: -4, width: 5, height: 8, fill: "#fff" }, a); }
-    if (acc === "wrench") { el("path", { d: "M-22 4 l-14 10 M22 4 l14 10", stroke: "#fff", "stroke-width": 4, "stroke-linecap": "round" }, a); el("circle", { cx: -38, cy: 16, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2 }, a); el("circle", { cx: 38, cy: 16, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2 }, a); }
-    const carry = el("g", { opacity: 0 }, body); el("rect", { x: -10, y: 12, width: 20, height: 12, rx: 2, fill: "#fff" }, carry);
-    const name = el("text", { x: 0, y: 44, "text-anchor": "middle", fill: "#9AA3A1", "font-size": 9 }, g); name.textContent = n.toUpperCase();
-    D[n] = { g, body, pupil, carry, x: 0, y: 0 };
+    if (acc === "bell") { el("path", { d: "M-24 -14 q6 -11 12 0 z", fill: "#fff", stroke: INK, "stroke-width": 1 }, a); el("circle", { cx: -18, cy: -12, r: 1.8, fill: INK }, a); }
+    if (acc === "headset") { el("path", { d: "M-23 -6 a23 23 0 0 1 46 0", fill: "none", stroke: "#fff", "stroke-width": 3 }, a); el("rect", { x: -27, y: -9, width: 6, height: 12, rx: 3, fill: "#fff" }, a); el("rect", { x: 21, y: -9, width: 6, height: 12, rx: 3, fill: "#fff" }, a); el("path", { d: "M24 3 q0 10 -10 10", fill: "none", stroke: "#fff", "stroke-width": 2 }, a); }
+    if (acc === "bubble") { el("path", { d: "M12 -48 h22 a5 5 0 0 1 5 5 v10 a5 5 0 0 1 -5 5 h-12 l-6 6 v-6 h-4 a5 5 0 0 1 -5 -5 v-10 a5 5 0 0 1 5 -5z", fill: "#fff" }, a); [19, 25, 31].forEach((cx) => el("circle", { cx, cy: -38, r: 1.6, fill: INK }, a)); }
+    if (acc === "visor") { el("path", { d: "M-21 -16 h42 l5 7 h-52z", fill: "#1F7A4D" }, a); el("rect", { x: -18, y: -15, width: 36, height: 3, fill: "#fff", opacity: 0.6 }, a); }
+    if (acc === "megaphone") { el("path", { d: "M24 2 l16 -10 v24 l-16 -10z", fill: "#fff", stroke: INK, "stroke-width": 1 }, a); el("rect", { x: 20, y: 2, width: 5, height: 8, rx: 1, fill: "#fff" }, a); }
+    if (acc === "wrench") { el("path", { d: "M-24 10 l-10 10 M24 10 l10 10", stroke: "#fff", "stroke-width": 4, "stroke-linecap": "round" }, a); el("circle", { cx: -36, cy: 22, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2.2 }, a); el("circle", { cx: 36, cy: 22, r: 4, fill: "none", stroke: "#fff", "stroke-width": 2.2 }, a); }
+    const carry = el("g", { opacity: 0 }, body); el("rect", { x: -10, y: 14, width: 20, height: 12, rx: 2, fill: "#fff", stroke: INK, "stroke-width": 0.8 }, carry);
+    const name = el("text", { x: 0, y: 46, "text-anchor": "middle", fill: "#9AA3A1", "font-size": 9 }, g); name.textContent = n.toUpperCase();
+    D[n] = { g, body, pupils, carry, x: 0, y: 0 };
   });
   const place = (n: string, x: number, y: number, o: number, scale = 1) => { const d = D[n]; d.x = x; d.y = y; d.g.setAttribute("opacity", String(o)); d.g.setAttribute("transform", `translate(${x},${y}) scale(${scale})`); };
   const bob = (n: string, t: number, amt = 4) => D[n].body.setAttribute("transform", `translate(0,${Math.sin(t * 22) * amt}) rotate(${Math.sin(t * 22) * amt * 0.6})`);
@@ -109,7 +133,7 @@ function mountStory(root: HTMLElement, lang: Lang, onChapter: (i: number) => voi
   const path2 = (n: string, t: number, pts: [number, number][]) => { const segs = pts.length - 1, k = Math.min(segs - 1, Math.floor(t * segs)), lt = t * segs - k; const a = pts[k], b = pts[k + 1]; place(n, lerp(a[0], b[0], lt), lerp(a[1], b[1], lt), 1); bob(n, t, 4); };
   let mx = 0.5, my = 0.5;
   const onMove = (e: PointerEvent) => { mx = e.clientX / window.innerWidth; my = e.clientY / window.innerHeight; };
-  const eyes = () => Object.keys(D).forEach((n) => { D[n].pupil.setAttribute("cx", String((mx - 0.5) * 8)); D[n].pupil.setAttribute("cy", String(1 + (my - 0.5) * 5)); });
+  const eyes = () => Object.keys(D).forEach((n) => D[n].pupils.forEach((pp, i) => { pp.setAttribute("cx", String((i ? 7.5 : -7.5) + (mx - 0.5) * 5)); pp.setAttribute("cy", String(-3 + (my - 0.5) * 4)); }));
 
   // props
   const CLAIMS = 18; const mountain = q("[data-id=mountain]"), paid = q("[data-id=paid]"), trayDocs = q("[data-id=trayDocs]");
@@ -246,7 +270,7 @@ export function TheDots() {
   const [roles, setRoles] = React.useState<Role[]>([]);
   React.useEffect(() => {
     if (!rootRef.current) return;
-    return mountStory(rootRef.current, lang, setCh);
+    return mountStory(rootRef.current, lang, setCh, s.blink);
   }, [lang]);
   const caps = CAPS[lang];
   const roleLabel: Record<Role, string> = es ? { Sales: "Ventas", Support: "Soporte", Finance: "Finanzas", Marketing: "Marketing", Operations: "Operaciones", Reception: "Recepción" } : { Sales: "Sales", Support: "Support", Finance: "Finance", Marketing: "Marketing", Operations: "Operations", Reception: "Reception" };
