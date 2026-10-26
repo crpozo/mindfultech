@@ -75,23 +75,30 @@ const SHELL_FRAG = /* glsl */ `
 
 /* a band with real thickness along a curve: width `w` across the binormal, thickness `th` along the normal.
    Four faces (top, bottom, two sides); uv.x runs along the curve, uv.y across; aFace 0 = top, 1 = bottom, 2 = side. */
-function bandGeometry(curve, w, th, segs = 150) {
-  const frames = curve.computeFrenetFrames(segs, false);
+function bandGeometry(curve, w, th, segs = 180) {
+  // Stable frame (no Frenet twist): the width lies in the plane facing the camera (binormal = T x Z),
+  // the thickness points along N = B x T. A ribbon built this way cannot twist into itself; the crests
+  // are rounded in the curve definitions so the width never exceeds the bend radius.
+  const Z = new THREE.Vector3(0, 0, 1);
   const pos = [], nor = [], uv = [], face = [], idx = [];
   let v = 0;
+  const frames = [];
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const T = curve.getTangentAt(t).normalize();
+    let B = new THREE.Vector3().crossVectors(T, Z);
+    if (B.lengthSq() < 1e-6) B.set(1, 0, 0); else B.normalize();
+    const N = new THREE.Vector3().crossVectors(B, T).normalize();
+    frames.push({ p: curve.getPointAt(t), N, B });
+  }
   const strip = (offA, offB, normalOf, f) => {
     const start = v;
     for (let i = 0; i <= segs; i++) {
-      const t = i / segs;
-      const p = curve.getPointAt(t);
-      const n = frames.normals[i], bn = frames.binormals[i];
-      const A = offA(n, bn), B = offB(n, bn);
-      const nn = normalOf(n, bn);
-      pos.push(p.x + A.x, p.y + A.y, p.z + A.z, p.x + B.x, p.y + B.y, p.z + B.z);
+      const t = i / segs; const { p, N, B } = frames[i];
+      const A = offA(N, B), Bv = offB(N, B); const nn = normalOf(N, B);
+      pos.push(p.x + A.x, p.y + A.y, p.z + A.z, p.x + Bv.x, p.y + Bv.y, p.z + Bv.z);
       nor.push(nn.x, nn.y, nn.z, nn.x, nn.y, nn.z);
-      uv.push(t, 0, t, 1);
-      face.push(f, f);
-      v += 2;
+      uv.push(t, 0, t, 1); face.push(f, f); v += 2;
       if (i < segs) { const k = start + i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
     }
   };
@@ -131,9 +138,9 @@ export function createBackground(canvas, opts = {}) {
   const mats = [];
   /* arches: they rise from below the fold, crest around the upper right third and dive back down */
   const archDefs = [
-    { pts: [[-1, -11, 0.5], [1.5, -5, 0.5], [4.2, 0.5, 0.5], [6.5, 3.6, 0.5], [9, 1, 0.5], [11, -6, 0.5], [12, -12, 0.5]], w: 2.4, th: 0.45, amp: 0.1, mid: accent, streak: 0.0 },
-    { pts: [[3.5, -12, -3.5], [5.5, -6, -3.5], [8, -0.5, -3.5], [10, 3, -3.5], [12, 0.5, -3.5], [13.5, -6, -3.5], [14, -12, -3.5]], w: 2.9, th: 0.55, amp: 0.12, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
-    { pts: [[-5, -12, -7.5], [-2.5, -7, -7.5], [1, -2.5, -7.5], [4, 0.2, -7.5], [7.5, -1.5, -7.5], [10.5, -6, -7.5], [12, -12, -7.5]], w: 2.2, th: 0.4, amp: 0.08, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
+    { pts: [[-1, -11, 0.5], [1.5, -5, 0.5], [4, 0.5, 0.5], [5.4, 2.9, 0.5], [6.6, 3.7, 0.5], [7.8, 2.9, 0.5], [9.2, 0.6, 0.5], [11, -6, 0.5], [12, -12, 0.5]], w: 2.0, th: 0.45, amp: 0.05, mid: accent, streak: 0.0 },
+    { pts: [[3.5, -12, -3.5], [5.5, -6, -3.5], [7.8, -0.8, -3.5], [9, 2.2, -3.5], [10.2, 3.1, -3.5], [11.4, 2.2, -3.5], [12.4, -0.2, -3.5], [13.5, -6, -3.5], [14, -12, -3.5]], w: 2.4, th: 0.55, amp: 0.06, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
+    { pts: [[-5, -12, -7.5], [-2.5, -7, -7.5], [0.8, -2.6, -7.5], [2.6, -0.4, -7.5], [4.2, 0.3, -7.5], [5.8, -0.3, -7.5], [7.6, -1.8, -7.5], [10.5, -6, -7.5], [12, -12, -7.5]], w: 1.9, th: 0.4, amp: 0.04, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
   ];
   /* columns: tall bands leaning to the right, like a curtain (the company page) */
   const columnDefs = Array.from({ length: 6 }, (_, i) => {
@@ -142,7 +149,7 @@ export function createBackground(canvas, opts = {}) {
   });
   const defs = mode === "globe" ? [] : mode === "columns" ? columnDefs : archDefs;
   for (const d of defs) {
-    const curve = new THREE.CatmullRomCurve3(d.pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)), false, "catmullrom", 0.6);
+    const curve = new THREE.CatmullRomCurve3(d.pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)), false, "centripetal");
     const geo = bandGeometry(curve, d.w, d.th);
     const mat = new THREE.ShaderMaterial({
       vertexShader: RIBBON_VERT, fragmentShader: RIBBON_FRAG, side: THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
