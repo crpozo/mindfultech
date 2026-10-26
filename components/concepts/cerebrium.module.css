@@ -292,8 +292,13 @@
 
 /* floating window mock inside the built-with cards */
 .mockThumb { position: relative; display: grid; place-items: center; padding: 22px 28px; background: radial-gradient(ellipse at 70% 30%, color-mix(in srgb, var(--tint, #2a1a3a) 100%, #fff 12%), var(--tint, #2a1a3a) 60%, #0b0b14 130%); }
-.mockThumb .win { position: relative; display: block; width: 78%; border-radius: 8px; overflow: hidden; background: #1b1b2a; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08); transform: perspective(1200px) rotateX(6deg) rotateY(-8deg) rotateZ(1.5deg); transition: transform 0.4s; padding-top: 22px; }
-.builtCard:hover .mockThumb .win { transform: perspective(1200px) rotateX(2deg) rotateY(-3deg) rotateZ(0.5deg) translateY(-4px); }
+.mockThumb .win { position: relative; display: block; width: 78%; border-radius: 8px; overflow: hidden; background: #1b1b2a; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08); transition: transform 0.4s; padding-top: 22px; }
+.builtCard:hover .mockThumb .win { transform: translateY(-4px); }
 .mockThumb .win i { position: absolute; top: 8px; width: 7px; height: 7px; border-radius: 50%; background: #ff5f57; }
 .mockThumb .win i:nth-child(2) { left: 22px; background: #febc2e; } .mockThumb .win i:nth-child(3) { left: 34px; background: #28c840; } .mockThumb .win i:nth-child(1) { left: 10px; }
 .mockThumb .win img { width: 100%; height: auto; display: block; opacity: 1; }
+
+/* segmented control (their Voice / LLMS / Other) */
+.segTabs { display: inline-flex; gap: 4px; padding: 5px; border-radius: 10px; background: #eef1f6; }
+.segTabs button { font: inherit; font-size: 16px; font-weight: 500; padding: 12px 26px; border-radius: 7px; border: 0; background: transparent; color: #1d2a5a; cursor: pointer; }
+.segTabs button.on { background: #5b6186; color: #fff; }
