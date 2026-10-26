@@ -18,6 +18,8 @@ const NAV: { key: NavKey; href: string; en: string; es: string }[] = [
   { key: "office", href: "/office-demo", en: "AI Office", es: "Oficina IA" },
 ];
 
+/** Web3Forms access key for carlos@mindfultech.ec (get it at web3forms.com with that email; no account needed). Empty = FormSubmit with a timeout, then mailto. */
+export const WEB3FORMS_KEY = "";
 export const CONTACT = { formTo: "carlos@mindfultech.ec", email: "info@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
 
 export function SiteNav({ active }: { active?: NavKey }) {
@@ -200,10 +202,13 @@ export function ContactForm() {
     if (state === "sending") return;
     setState("sending");
     try {
-      const r = await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, {
-        method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ type: join ? "join" : "project", name: f.name, email: f.email, [join ? "portfolio" : "company"]: f.company, message: f.msg, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }),
-      });
+      const ctrl = new AbortController();
+      const timer = window.setTimeout(() => ctrl.abort(), 8000);
+      const payload = { type: join ? "join" : "project", name: f.name, email: f.email, [join ? "portfolio" : "company"]: f.company, message: f.msg };
+      const r = WEB3FORMS_KEY
+        ? await fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject, from_name: "mindfultech.ec", replyto: f.email, ...payload }) })
+        : await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ ...payload, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }) });
+      window.clearTimeout(timer);
       if (!r.ok) throw new Error(String(r.status));
       setState("sent");
       setF({ name: "", email: "", company: "", msg: "" });

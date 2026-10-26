@@ -48,12 +48,12 @@ function Robot({ color, path, dur, delay }: { color: string; path: string; dur: 
         {/* treads */}
         <rect x="-7" y="2" width="14" height="4.5" rx="2.2" fill="#2B2F3A" /><rect x="-5.5" y="3" width="11" height="2.4" rx="1.2" fill="#444A58" />
         {/* body */}
-        <rect x="-5.5" y="-7" width="11" height="10" rx="2" fill={color} /><rect x="-5.5" y="-7" width="11" height="3" rx="2" fill="#fff" opacity="0.22" />
-        <rect x="-2" y="-4" width="4" height="1.4" rx="0.7" fill="#0E1013" opacity="0.5" /><rect x="-2" y="-1.5" width="4" height="1.4" rx="0.7" fill="#0E1013" opacity="0.5" />
+        <rect x="-5.5" y="-7" width="11" height="10" rx="2" fill={color} /><rect x="-5.5" y="-7" width="11" height="3" rx="2" fill="#fff" opacity="0.5" />
+        <rect x="-2" y="-4" width="4" height="1.4" rx="0.7" fill="#3DBE7D" /><rect x="-2" y="-1.5" width="4" height="1.4" rx="0.7" fill="#9AA3A1" opacity="0.6" />
         {/* arms */}
         <rect x="-8.5" y="-5" width="2.6" height="7" rx="1.3" fill={color} className="ac-arm" /><rect x="5.9" y="-5" width="2.6" height="7" rx="1.3" fill={color} className="ac-arm2" />
         {/* head */}
-        <rect x="-6" y="-17" width="12" height="9" rx="2.5" fill={color} /><rect x="-6" y="-17" width="12" height="3" rx="2.5" fill="#fff" opacity="0.22" />
+        <rect x="-6" y="-17" width="12" height="9" rx="2.5" fill={color} /><rect x="-6" y="-17" width="12" height="3" rx="2.5" fill="#fff" opacity="0.5" />
         <rect x="-4.5" y="-15" width="9" height="4.6" rx="1.2" fill="#0E1013" />
         <circle cx="-2" cy="-12.7" r="1.1" fill="#BFF5CF" className="ac-eye" /><circle cx="2" cy="-12.7" r="1.1" fill="#BFF5CF" className="ac-eye" />
         <line x1="0" y1="-17" x2="0" y2="-21" stroke="#0E1013" strokeWidth="1" /><circle cx="0" cy="-22" r="1.4" fill="#BFF5CF" className="ac-beacon" />
@@ -119,10 +119,10 @@ export function AgentCity({ es }: { es: boolean }) {
       <Box ix={8.1} iy={8.1} w={2.7} d={2.6} h={15} top="#2C3348"><Windows ix={8.1} iy={8.1} w={2.7} d={2.6} h={15} rows={1} seed={16} /></Box>
       {[0.5, 1.1, 1.7, 2.3].map((o) => <line key={o} x1={iso(8.1 + o, 8.1, 15)[0]} y1={iso(8.1 + o, 8.1, 15)[1]} x2={iso(8.1 + o, 10.7, 15)[0]} y2={iso(8.1 + o, 10.7, 15)[1]} stroke="#3A4258" strokeWidth="0.8" />)}
       {/* robots */}
-      <Robot color="#F5B400" path={back(R.clinic)} dur={9} delay={0} />
-      <Robot color="#7ED321" path={back(R.uni)} dur={6.5} delay={1.2} />
-      <Robot color="#F04FB3" path={back(R.store)} dur={6} delay={0.6} />
-      <Robot color="#2E8BEA" path={back(R.wh)} dur={6.8} delay={2} />
+      <Robot color="#E6E9F0" path={back(R.clinic)} dur={9} delay={0} />
+      <Robot color="#E6E9F0" path={back(R.uni)} dur={6.5} delay={1.2} />
+      <Robot color="#E6E9F0" path={back(R.store)} dur={6} delay={0.6} />
+      <Robot color="#E6E9F0" path={back(R.wh)} dur={6.8} delay={2} />
       {/* labels */}
       {lbl(1.5, 3.1, es ? "CLÍNICA" : "CLINIC")}{lbl(10.9, 2.4, es ? "UNIVERSIDAD" : "UNIVERSITY")}{lbl(1.8, 11.4, es ? "TIENDA" : "STORE")}{lbl(9.5, 11.6, es ? "BODEGA" : "WAREHOUSE")}{lbl(5.4, 7.2, "MINDFULTECH", "#BFF5CF")}
       {/* ticker */}

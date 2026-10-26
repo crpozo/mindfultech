@@ -30,7 +30,7 @@ const jbmono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], vari
 const SITE_TITLE = "MindfulTech";
 const OG_TITLE = "MindfulTech: AI systems designed for humans";
 const SITE_DESC =
-  "One AI agent per area (billing, support, sales, operations), plugged into your CRM, ERP and inbox, working 24/7. First agent in production within a week. Quito, Ecuador.";
+  "We understand your business and your systems, integrate them and apply AI where it genuinely saves time. First result in production within a week, with a person signing off where it matters. Quito, Ecuador.";
 
 export const metadata: Metadata = {
   // absolute base for og:url / og:image on the static export
