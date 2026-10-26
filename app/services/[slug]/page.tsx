@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ServiceDetailPage } from "@/components/site/ServiceDetailPage";
+import { CbService } from "@/components/concepts/CerebriumDetail";
 
 const META: Record<string, { name: string; desc: string }> = {
   ux: { name: "UX Design", desc: "Research-driven product design." },
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const m = META[slug];
-  return { title: `${m?.name ?? "Services"}, MindfulTech`, description: m?.desc };
+  return { title: "MindfulTech", description: m?.desc };
 }
 
 export default async function ServicePage({
@@ -28,5 +28,5 @@ export default async function ServicePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <ServiceDetailPage slug={slug} />;
+  return <CbService slug={slug} />;
 }

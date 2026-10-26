@@ -302,3 +302,13 @@
 .segTabs { display: inline-flex; gap: 4px; padding: 5px; border-radius: 10px; background: #eef1f6; }
 .segTabs button { font: inherit; font-size: 16px; font-weight: 500; padding: 12px 26px; border-radius: 7px; border: 0; background: transparent; color: #1d2a5a; cursor: pointer; }
 .segTabs button.on { background: #5b6186; color: #fff; }
+
+/* article body */
+.article { max-width: 760px; margin: 0 auto; padding: 56px 0 100px; font-size: 18px; line-height: 1.7; color: #1d1f2a; }
+.articleMeta { display: flex; gap: 24px; margin-bottom: 32px; color: #3b3f55; }
+.article h2 { font-weight: 400; font-size: clamp(26px, 2.6vw, 36px); letter-spacing: -0.02em; line-height: 1.15; margin: 48px 0 16px; }
+.article p { margin: 0 0 20px; }
+.article ul { margin: 0 0 20px; padding-left: 22px; }
+.article li { margin-bottom: 8px; }
+.article blockquote { margin: 32px 0; padding: 18px 24px; border-left: 3px solid var(--acc); background: #fff; border-radius: 0 10px 10px 0; font-size: 21px; line-height: 1.5; color: var(--ink); }
+.featPostBg img { max-height: 520px; }

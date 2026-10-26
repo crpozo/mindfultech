@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArticlePage } from "@/components/site/ArticlePage";
+import { CbArticle } from "@/components/concepts/CerebriumDetail";
 import { POSTS, getPost } from "@/lib/blog/posts";
 
 // static export: only the known slugs exist; anything else is a 404
@@ -17,9 +17,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
-  if (!post) return { title: "Blog · MindfulTech" };
+  if (!post) return { title: "MindfulTech" };
   return {
-    title: `${post.title.en} · MindfulTech`,
+    title: "MindfulTech",
     description: post.excerpt.en,
   };
 }
@@ -31,5 +31,5 @@ export default async function BlogPostPage({
 }) {
   const { slug } = await params;
   if (!getPost(slug)) notFound();
-  return <ArticlePage slug={slug} />;
+  return <CbArticle slug={slug} />;
 }

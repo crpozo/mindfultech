@@ -117,13 +117,13 @@ export function createBackground(canvas, opts = {}) {
   const reduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mode = opts.mode || "bands"; // bands (arches), globe (sliced core on the right), columns (tall vertical bands)
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance", logarithmicDepthBuffer: true });
   let dpr = Math.min(window.devicePixelRatio || 1, 1.25);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0b14, 0.04);
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 80);
   camera.position.set(0, -1.5, 13);
 
   /* ribbons */
@@ -138,8 +138,8 @@ export function createBackground(canvas, opts = {}) {
   ];
   /* columns: tall bands leaning to the right, like a curtain (the company page) */
   const columnDefs = Array.from({ length: 6 }, (_, i) => {
-    const x = -2 + i * 2.3, z = -2 - i * 0.9, lean = 2.2 + i * 0.3;
-    return { pts: [[x - lean, -12, z], [x - lean * 0.4, -5, z + 0.3], [x + 0.2, 0, z + 0.5], [x + lean * 0.5, 6, z + 0.3], [x + lean, 12, z]], w: 1.6 + (i % 3) * 0.4, th: 0.45, amp: 0.05, mid: accent.clone().multiplyScalar(0.45 + 0.1 * (i % 3)), streak: i / 6 };
+    const x = -2 + i * 2.6, z = -1.5 - i * 2.2, lean = 2.2 + i * 0.3;
+    return { pts: [[x - lean, -12, z], [x - lean * 0.4, -5, z], [x + 0.2, 0, z], [x + lean * 0.5, 6, z], [x + lean, 12, z]], w: 1.6 + (i % 3) * 0.4, th: 0.5, amp: 0, mid: accent.clone().multiplyScalar(0.45 + 0.1 * (i % 3)), streak: i / 6 };
   });
   const defs = mode === "globe" ? [] : mode === "columns" ? columnDefs : archDefs;
   for (const d of defs) {
@@ -241,7 +241,7 @@ export function createBackground(canvas, opts = {}) {
     // drift slowly out of the hero (still behind the logos and the dot band), come back for the footer
     const f = state.foot;
     ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
-    ribbons.visible = defs.length > 0 && (s < 2.4 || f > 0.01);
+    ribbons.visible = defs.length > 0 && (mode === "columns" || s < 2.4 || f > 0.01);
     ribbons.position.x += (-(canvas.clientWidth < 760 ? 3.5 : 1.5) - H * 5 - ribbons.position.x) * 0.1;
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.5;
     ribbons.rotation.x = state.py * 0.08 + H * 0.25;

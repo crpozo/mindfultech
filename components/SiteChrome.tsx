@@ -16,7 +16,7 @@ export function SiteChrome() {
   const pathname = usePathname();
   if (PRIVATE.some((p) => pathname?.startsWith(p))) return null;
   const norm = (pathname || "/").replace(/\/+$/, "") || "/";
-  const dark = ["/", "/services", "/work", "/company", "/blog"].includes(norm);
+  const dark = !norm.startsWith("/staging");
   return (
     <>
       {!dark && <SiteFooter />}

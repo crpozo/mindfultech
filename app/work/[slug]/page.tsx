@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CASES } from "@/lib/site/cases";
-import { CasePage } from "@/components/site/CasePage";
+import { CbCase } from "@/components/concepts/CerebriumDetail";
 
 export const dynamicParams = false;
 
@@ -12,11 +12,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const c = CASES.find((x) => x.id === slug);
-  return c ? { title: `${c.brand.en}: MindfulTech`, description: c.title.en } : {};
+  return c ? { title: "MindfulTech", description: c.title.en } : {};
 }
 
 export default async function CaseRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!CASES.some((c) => c.id === slug)) notFound();
-  return <CasePage slug={slug} />;
+  return <CbCase slug={slug} />;
 }
