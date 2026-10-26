@@ -570,7 +570,6 @@ export function Home() {
       <section id="services" className={`${s.wrap} ${s.sectionFirst}`}>
         <div className={s.svcHead}>
           <h2 className={s.h2}>{t.svcH2a}<span style={{ color: "#1F7A4D" }}>{t.svcH2b}</span></h2>
-          <p className={s.sub}>{t.svcSub}</p>
         </div>
         <div className={s.cards3}>
           {t.svc.map(([title, body], i) => (

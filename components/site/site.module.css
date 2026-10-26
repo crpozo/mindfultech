@@ -54,7 +54,7 @@
 .navSheet { display: flex; flex-direction: column; border-top: 1px solid var(--line); background: #fff; padding: 8px 20px 16px; }
 .navSheet a { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 17px; font-weight: 500; }
 .navRight { display: flex; gap: 24px; align-items: center; font-size: 17px; font-weight: 500; }
-.navRight button { font: inherit; border: 0; background: none; cursor: pointer; color: #777; padding: 0; }
+.navRight button { font: inherit; font-size: 14px; border: 0; background: none; cursor: pointer; color: #777; padding: 0; }
 .navRight button.on { color: var(--ink); }
 .navRight button:hover { color: var(--dgreen); }
 .navCta { background: var(--ink); color: #fff; padding: 16px 26px; white-space: nowrap; }
@@ -72,7 +72,7 @@
 .band { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: calc(260px * var(--k, 1)); overflow: hidden; pointer-events: none; }
 .bandInner { position: absolute; left: 50%; bottom: 0; width: 1440px; height: 260px; transform: translateX(-50%) scale(var(--k, 1)); transform-origin: bottom center; }
 .bandInner > * { position: absolute; }
-.bandGridL { left: 60px; bottom: 0; width: 560px; height: 150px; }
+.bandGridL { left: 0; bottom: 0; width: 620px; height: 150px; }
 .bandGridR { right: 0; bottom: 0; width: 620px; height: 110px; }
 .bandTri { left: 380px; bottom: 0; width: 260px; height: 240px; background: var(--lav); clip-path: polygon(40% 0, 100% 100%, 0 100%); }
 .bandPhoto { left: 560px; bottom: 0; width: 320px; height: 260px; overflow: hidden; background: #d9ddd6; }
@@ -539,7 +539,7 @@
 .v2 .bandCol i { width: 90px; height: 90px; margin: 0 !important; display: block; }
 .v2 .bandCol i:nth-child(n + 3) { display: block; }
 /* composition 3: grid steps down to the right, tall bars, one big circle */
-.v3 .bandGridL { left: 120px; width: 460px; height: 120px; }
+.v3 .bandGridL { left: 0; width: 580px; height: 120px; }
 .v3 .bandGridR { width: 820px; height: 200px; clip-path: polygon(0 0, 55% 0, 55% 50%, 100% 50%, 100% 100%, 0 100%); }
 .v3 .bandTri { left: 300px; width: 240px; height: 220px; clip-path: polygon(0 100%, 60% 0, 100% 100%); }
 .v3 .bandBars { display: flex; gap: 18px; left: 540px; bottom: 0; height: 240px; align-items: flex-end; }
