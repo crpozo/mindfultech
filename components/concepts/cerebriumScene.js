@@ -115,6 +115,7 @@ export function createBackground(canvas, opts = {}) {
   const edge = new THREE.Color(opts.edge || "#bff5cf");
   const base = new THREE.Color(opts.base || "#0f3d27");
   const reduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const mode = opts.mode || "bands"; // bands (arches), globe (sliced core on the right), columns (tall vertical bands)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance" });
   let dpr = Math.min(window.devicePixelRatio || 1, 1.25);
@@ -130,11 +131,17 @@ export function createBackground(canvas, opts = {}) {
   scene.add(ribbons);
   const mats = [];
   /* arches: they rise from below the fold, crest around the upper right third and dive back down */
-  const defs = [
+  const archDefs = [
     { pts: [[-1, -11, -1], [1.5, -5, -0.5], [4.2, 0.5, 0], [6.5, 3.6, -0.5], [9, 1, -1.5], [11, -6, -2.5], [12, -12, -3]], w: 2.4, th: 0.45, amp: 0.1, mid: accent, streak: 0.0 },
     { pts: [[3.5, -12, -3.5], [5.5, -6, -3], [8, -0.5, -2.5], [10, 3, -3], [12, 0.5, -4], [13.5, -6, -5], [14, -12, -5.5]], w: 2.9, th: 0.55, amp: 0.12, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
     { pts: [[-5, -12, -6], [-2.5, -7, -5.5], [1, -2.5, -5], [4, 0.2, -5.5], [7.5, -1.5, -6.5], [10.5, -6, -7.5], [12, -12, -8]], w: 2.2, th: 0.4, amp: 0.08, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
   ];
+  /* columns: tall bands leaning to the right, like a curtain (the company page) */
+  const columnDefs = Array.from({ length: 6 }, (_, i) => {
+    const x = -2 + i * 2.3, z = -2 - i * 0.9, lean = 2.2 + i * 0.3;
+    return { pts: [[x - lean, -12, z], [x - lean * 0.4, -5, z + 0.3], [x + 0.2, 0, z + 0.5], [x + lean * 0.5, 6, z + 0.3], [x + lean, 12, z]], w: 1.6 + (i % 3) * 0.4, th: 0.45, amp: 0.05, mid: accent.clone().multiplyScalar(0.45 + 0.1 * (i % 3)), streak: i / 6 };
+  });
+  const defs = mode === "globe" ? [] : mode === "columns" ? columnDefs : archDefs;
   for (const d of defs) {
     const curve = new THREE.CatmullRomCurve3(d.pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)), false, "catmullrom", 0.6);
     const geo = bandGeometry(curve, d.w, d.th);
@@ -179,6 +186,7 @@ export function createBackground(canvas, opts = {}) {
   const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute("position", new THREE.BufferAttribute(dust, 3));
   globe.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: edge, size: 0.035, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending })));
   globe.position.set(2.6, -2.2, -2.5);
+  if (mode === "globe") { globe.position.set(3.6, -0.8, -2); globe.scale.setScalar(1.45); }
 
   /* particles */
   const N = 320;
@@ -203,9 +211,9 @@ export function createBackground(canvas, opts = {}) {
     renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
     bloom.resolution.set(w, h);
     const narrow = w < 760;
+    if (mode === "globe") { globe.position.x = narrow ? 0.5 : 3.6; globe.position.y = narrow ? -3.5 : -0.8; }
     ribbons.position.x = narrow ? -3.5 : -1.5;
-    globe.position.x = narrow ? 0 : 2.6;
-    globe.scale.setScalar(narrow ? 0.8 : 1);
+    if (mode !== "globe") globe.position.x = narrow ? 0 : 2.6;
   };
   resize();
   window.addEventListener("resize", resize);
@@ -233,17 +241,17 @@ export function createBackground(canvas, opts = {}) {
     const s = state.scroll;
     // drift slowly out of the hero (still behind the logos and the dot band), come back for the footer
     const f = state.foot;
-    ribbons.position.y = (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
-    ribbons.visible = s < 2.4 || f > 0.01;
+    ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
+    ribbons.visible = defs.length > 0 && (s < 2.4 || f > 0.01);
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.25;
     ribbons.rotation.x = state.py * 0.08 + H * 0.35;
     ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.6;
     ribbons.scale.setScalar((canvas.clientWidth < 760 ? 0.72 : 1) * (1 + H * 0.12));
     // globe: scale and fade with the dark-section progress
-    const g = state.globe;
+    const g = mode === "globe" ? Math.max(0.15, 1 - s * 0.6) : state.globe;
     globe.visible = g > 0.01;
-    const k = 0.2 + 0.8 * g;
-    globe.scale.setScalar(k * (canvas.clientWidth < 760 ? 0.8 : 1));
+    const k = (mode === "globe" ? 1.45 : 0.2 + 0.8 * g) * (canvas.clientWidth < 760 ? 0.8 : 1);
+    globe.scale.setScalar(k);
     shellMat.uniforms.uAlpha.value = 0.75 * g;
     discMat.opacity = discMatCut.opacity = g; discMat.transparent = discMatCut.transparent = g < 0.99;
     rings.rotation.y += dt * 0.18;

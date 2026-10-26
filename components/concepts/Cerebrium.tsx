@@ -7,13 +7,13 @@ import { POSTS } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { Split, Scramble, HoldCursor, Dots, Typewriter, useInView } from "./CerebriumFx";
+import { CbNav, CbFooter, CB } from "./CerebriumParts";
 import s from "./cerebrium.module.css";
 
 /* Concept 06, "Cerebrium" (Oct 2026), after cerebrium.ai: deep navy with glowing ribbons, a sans headline with one
    gradient word, mono labels with a dot, a light "why" section (sticky list + product cards), a dark governance block,
    case cards, a feature cloud and the blog. All content is MindfulTech's. */
 
-const WORDS = { en: ["Quickly", "Scale", "Globally"], es: ["Rápido", "Escala", "Global"] };
 const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
 const PINS = [{ id: "ec", lat: -0.18, lon: -78.47, k: "EC" }, { id: "ca", lat: 36.8, lon: -119.8, k: "US-W" }, { id: "il", lat: 41.9, lon: -87.6, k: "US-C" }, { id: "fl", lat: 26.6, lon: -81.9, k: "US-E" }, { id: "nl", lat: 52.4, lon: 4.9, k: "NL" }, { id: "de", lat: 51.2, lon: 10.4, k: "DE" }, { id: "es", lat: 40.4, lon: -3.7, k: "ES" }, { id: "gr", lat: 37.98, lon: 23.7, k: "GR" }];
 const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
@@ -57,7 +57,6 @@ function Chart({ mode }: { mode: number }) {
 export function Cerebrium() {
   const { lang, setLang } = useLang();
   const es = lang === "es";
-  const [word, setWord] = React.useState(0);
   const [feat, setFeat] = React.useState(0);
   const [bench, setBench] = React.useState(0);
   const [chart, setChart] = React.useState(0);
@@ -67,7 +66,6 @@ export function Cerebrium() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const heroRef = React.useRef<HTMLElement>(null);
   const darkRef = React.useRef<HTMLElement>(null);
-  const footRef = React.useRef<HTMLElement>(null);
   const [termRef, termOn] = useInView<HTMLPreElement>();
   const [barsRef, barsOn] = useInView<HTMLDivElement>();
   const [chartRef, chartOn] = useInView<HTMLDivElement>();
@@ -83,7 +81,7 @@ export function Cerebrium() {
       bg.setScroll(window.scrollY / h);
       const d = darkRef.current;
       if (d) { const r = d.getBoundingClientRect(); const vh = window.innerHeight; const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
-      const ft = footRef.current;
+      const ft = document.querySelector<HTMLElement>("[data-cb-foot]");
       if (ft) { const r = ft.getBoundingClientRect(); const vh = window.innerHeight; bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.8)))); }
     };
     const loop = () => { feed(); raf = requestAnimationFrame(loop); };
@@ -104,7 +102,6 @@ export function Cerebrium() {
   }, []);
   const onHold = React.useCallback((p: number) => bgRef.current?.setHold(p), []);
 
-  React.useEffect(() => { const id = window.setInterval(() => setWord((w) => (w + 1) % 3), 1800); return () => window.clearInterval(id); }, []);
   React.useEffect(() => { const id = window.setInterval(() => setPin((p) => PINS[(PINS.findIndex((x) => x.id === p) + 1) % PINS.length].id), 1600); return () => window.clearInterval(id); }, []);
   React.useEffect(() => {
     const obs = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) setFeat(Number((e.target as HTMLElement).dataset.i)); }, { rootMargin: "-40% 0px -45% 0px" });
@@ -147,26 +144,13 @@ export function Cerebrium() {
   return (
     <div className={s.root}>
       <canvas ref={canvasRef} className={s.bg} aria-hidden="true" />
-      <header className={s.nav}>
-        <div className={s.navIn}>
-          <Link href="/" aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
-          <nav className={s.navLinks}>
-            <Link href="/services">{es ? "Servicios" : "Services"}</Link><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/blog">Blog</Link>
-          </nav>
-          <div className={s.navRight}>
-            <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
-            <a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Start a project"} /></a>
-          </div>
-        </div>
-      </header>
+      <CbNav active="home" />
 
       <section className={s.hero} ref={heroRef}>
         <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onProgress={onHold} />
-        <div className={s.words} aria-hidden="true">{WORDS[lang].map((w, i) => <span key={w} className={word === i ? s.on : ""}>{w}</span>)}</div>
         <div className={s.heroIn}>
           <div>
-            <h1 className={s.h1}>{es ? <><Split text="Software con IA que" /> <span className={s.grad}><Split text="escala" delay={400} /></span> <Split text="contigo" delay={520} /></> : <><Split text="AI software that" /> <span className={s.grad}><Split text="scales" delay={360} /></span> <Split text="with you" delay={480} /></>}</h1>
-            <Link href="/office-demo" className={s.play}><i>▶</i><Scramble className={s.mono} text={es ? "Ver la demo" : "Open the demo"} /></Link>
+            <h1 className={s.h1}>{es ? <><Split text="Software con IA" /><br /><Split text="que" delay={240} /> <span className={s.grad}><Split text="escala" delay={300} /></span><br /><Split text="contigo" delay={420} /></> : <><Split text="AI software" /><br /><Split text="that" delay={240} /> <span className={s.grad}><Split text="scales" delay={300} /></span><br /><Split text="with you" delay={420} /></>}</h1>
           </div>
           <div className={s.heroSide}>
             <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
@@ -302,25 +286,9 @@ export function Cerebrium() {
           <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
           <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
-        <footer className={s.foot} ref={footRef}>
-          <div className={s.footTop}>
-            <div className={s.social}>
-              <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.5c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21H9z" /></svg></a>
-              <a href="https://github.com/crpozo" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z" /></svg></a>
-              <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 12 12 0 0 0 4.6 4.1c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z" /></svg></a>
-              <a href="mailto:carlos@mindfultech.ec" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg></a>
-            </div>
-            <div className={s.footCols}>
-              <div><span>{es ? "Servicios" : "Services"}</span><Link href="/services/ux">{es ? "Diseño UX" : "UX Design"}</Link><Link href="/services/apps">{es ? "Apps web y móviles" : "Web & Mobile Apps"}</Link><Link href="/services/custom">{es ? "Software a medida" : "Custom Software"}</Link><Link href="/services/ai">{es ? "IA y automatización" : "AI & Automation"}</Link></div>
-              <div><span>MindfulTech</span><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/blog">Blog</Link><a href="mailto:carlos@mindfultech.ec">{es ? "Contacto" : "Contact"}</a><Link href="/concept">{es ? "Conceptos" : "Concepts"}</Link></div>
-            </div>
-          </div>
-          <div className={s.footClose}>
-            <h2 className={s.h2}><Split text={es ? "Empieza a construir con IA hoy," : "Start building with AI today,"} /><br /><Split text={es ? "o cuéntanos tu flujo." : "or talk to us about your workflow."} delay={300} /></h2>
-            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Get started"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>
-          </div>
-          <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>info@mindfultech.ec / +593 958 73 1994</span></div>
-        </footer>
+      </section>
+      <CbFooter />
+      <section className={`${s.dark} ${s.darkClear}`} style={{ display: "none" }}>
       </section>
       <Link href="/concept" className={s.concept}>{es ? "Concepto 06 / Cerebrium" : "Concept 06 / Cerebrium"}</Link>
     </div>
