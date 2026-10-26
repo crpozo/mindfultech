@@ -23,15 +23,19 @@ export function useInView<T extends HTMLElement>(margin = "-15% 0px -15% 0px", o
 
 export function Split({ text, as: Tag = "span", className, delay = 0 }: { text: string; as?: "span" | "h1" | "h2" | "p"; className?: string; delay?: number }) {
   const [ref, on] = useInView<HTMLElement>("-10% 0px -10% 0px");
+  // phones: plain text (per-letter spans break kerning and word spacing on small screens)
+  const [plain, setPlain] = React.useState(false);
+  React.useEffect(() => { const mq = window.matchMedia("(max-width: 960px)"); const f = () => setPlain(mq.matches); f(); mq.addEventListener("change", f); return () => mq.removeEventListener("change", f); }, []);
   const words = text.split(" ");
   let k = 0;
+  if (plain) return <Tag ref={ref as React.RefObject<HTMLHeadingElement>} className={`cb-split cb-split-on ${className ?? ""}`}>{text}</Tag>;
   return (
     <Tag ref={ref as React.RefObject<HTMLHeadingElement>} className={`cb-split ${on ? "cb-split-on" : ""} ${className ?? ""}`} aria-label={text}>
       {words.map((w, wi) => (
-        <span key={wi} className="cb-word" aria-hidden="true">
-          {Array.from(w).map((ch, ci) => <span key={ci} className="cb-ch" style={{ transitionDelay: `${delay + (k++) * 22}ms` }}>{ch}</span>)}
-          {wi < words.length - 1 ? " " : ""}
-        </span>
+        <React.Fragment key={wi}>
+          <span className="cb-word" aria-hidden="true">{Array.from(w).map((ch, ci) => <span key={ci} className="cb-ch" style={{ transitionDelay: `${delay + (k++) * 22}ms` }}>{ch}</span>)}</span>
+          {wi < words.length - 1 ? " " : ""}
+        </React.Fragment>
       ))}
     </Tag>
   );
