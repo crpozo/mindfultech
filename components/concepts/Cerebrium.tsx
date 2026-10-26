@@ -290,7 +290,6 @@ export function Cerebrium() {
       <CbFooter />
       <section className={`${s.dark} ${s.darkClear}`} style={{ display: "none" }}>
       </section>
-      <Link href="/concept" className={s.concept}>{es ? "Concepto 06 / Cerebrium" : "Concept 06 / Cerebrium"}</Link>
     </div>
   );
 }

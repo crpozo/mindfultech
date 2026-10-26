@@ -96,7 +96,6 @@ export function CbPage({ mode, active, children }: { mode: CbMode; active: "serv
       <CbNav active={active} />
       {children}
       <CbFooter />
-      <Link href="/concept" className={s.concept}>{lang === "es" ? "Concepto 06 / Cerebrium" : "Concept 06 / Cerebrium"}</Link>
     </div>
   );
 }
