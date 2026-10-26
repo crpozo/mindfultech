@@ -95,9 +95,7 @@ export function CbServices() {
 export function CbWork() {
   const { lang } = useLang();
   const es = lang === "es";
-  const tags = React.useMemo(() => { const set = new Map<string, string>(); for (const c of CASES) for (const t of c.tag.en.split(" · ")) set.set(t, t); return ["ALL", ...set.keys()]; }, []);
-  const [tag, setTag] = React.useState("ALL");
-  const list = tag === "ALL" ? CASES : CASES.filter((c) => c.tag.en.split(" · ").includes(tag));
+  const list = CASES;
   return (
     <CbPage mode="bands" active="work">
       <Banner mode="split" label={es ? "Proyectos" : "Work"} title={es ? "Entregado con clientes en tres continentes" : "Shipped with clients on three continents"} grad={es ? "tres continentes" : "three continents"} lead={es ? "Una década de productos en producción, de portales universitarios a comercio automatizado y agentes que facturan." : "A decade of products in production, from university portals to automated commerce and agents that bill."} cta />
@@ -105,7 +103,6 @@ export function CbWork() {
         <div className={`${s.wrap} ${s.section}`}>
           <div className={s.secHead}>
             <h2 className={s.h2}><Split text={es ? "Casos de estudio" : "Case studies"} /></h2>
-            <div className={s.pillTabs} style={{ flexWrap: "wrap" }}>{tags.map((t) => <button key={t} type="button" className={tag === t ? s.on : ""} onClick={() => setTag(t)}>{t === "ALL" ? (es ? "Todos" : "All") : t}</button>)}</div>
           </div>
           <div className={s.cases}>
             {list.map((c) => (
