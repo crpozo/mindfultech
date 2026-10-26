@@ -200,6 +200,7 @@ const SLIDES = [
   { en: "Research, engineering and AI in one lab", es: "Investigación, ingeniería e IA en un solo laboratorio", stat: "10", statEn: "years shipping from Quito", statEs: "años lanzando desde Quito", img: "/art/product.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
   { en: "Web, mobile and custom software, maintained after launch", es: "Web, móvil y software a medida, con mantenimiento tras el lanzamiento", stat: "3", statEn: "continents with clients", statEs: "continentes con clientes", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
+const WORK_SLUG = ["healthcare", "usfq", "fence", "themedmotion", "parc", ""];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string, string][] = [
   ["USFQ", "/logo-usfq.svg", "usfq"],
@@ -604,12 +605,10 @@ export function Home() {
                 aria-expanded={on}
               >
                 <div className={s.rowTitle}>{title}{i === 2 && <span className={s.rowNew}>{t.pillNew}</span>}</div>
-                {on && (
-                  <>
-                    <p className={s.rowBody}>{body}</p>
-                    <Link href={WHY_HREF[i]} className={s.rowCta}>{cta} →</Link>
-                  </>
-                )}
+                <div className={s.rowMore}>
+                  <p className={s.rowBody}>{body}</p>
+                  <Link href={WHY_HREF[i]} className={s.rowCta}>{cta} →</Link>
+                </div>
               </div>
             );
           })}
@@ -627,9 +626,13 @@ export function Home() {
         <div className={s.work}>
           <div className={s.list}>
             {t.work.map(([client, title], i) => (
-              <Link key={client} href="/work" className={`${s.item} ${proj === i ? s.itemOn : ""}`} onMouseEnter={() => setProj(i)} onFocus={() => setProj(i)}>
-                <span className={s.itemBody}><span className={s.itemClient}>{client}</span><span className={s.itemTitle}>{title}</span></span>
-                <span>→</span>
+              <Link key={client} href={WORK_SLUG[i] ? `/work/${WORK_SLUG[i]}` : "/work"} className={`${s.item} ${proj === i ? s.itemOn : ""}`} onMouseEnter={() => setProj(i)} onFocus={() => setProj(i)}>
+                <span className={s.itemShot}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={FEAT_IMG[i]} alt="" width={1200} height={675} />
+                </span>
+                <span className={s.itemBody}><span className={s.itemClient}>{client}</span><span className={s.itemTitle}>{title}</span><span className={s.itemText}>{t.feat[i][1]}</span></span>
+                <span className={s.itemArrow}>→</span>
               </Link>
             ))}
           </div>
@@ -645,7 +648,7 @@ export function Home() {
             </div>
             <span className={s.featureChip}>{t.feat[proj][0]}</span>
             <p className={s.featureText}>{t.feat[proj][1]}</p>
-            <Link href="/work" className={s.featureBtn}>{t.caseStudy}</Link>
+            <Link href={WORK_SLUG[proj] ? `/work/${WORK_SLUG[proj]}` : "/work"} className={s.featureBtn}>{t.caseStudy}</Link>
           </div>
         </div>
       </section>

@@ -27,7 +27,7 @@ const jbmono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], vari
 
 // English, like the page it describes: the site opens in English (see
 // LanguageProvider) and the document title should match what loads.
-const SITE_TITLE = "MindfulTech: Building the future with AI software";
+const SITE_TITLE = "MindfulTech: Put AI software to work for your business";
 const SITE_DESC =
   "Full-stack software lab, powered by UX research and applied AI. Human-centered products, built in Quito, Ecuador.";
 
