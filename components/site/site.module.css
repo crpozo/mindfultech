@@ -480,18 +480,18 @@
 .roleList div { background: #fff; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
 .roleList b { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1; }
 .roleList span { font-size: 13px; line-height: 1.4; color: #555; }
-.officeArt { position: relative; min-height: 520px; }
-.officeDots { position: absolute; left: -10px; top: 20px; width: 160px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; z-index: 0; }
-.officeDots i { display: block; aspect-ratio: 1; border-radius: 50%; background: var(--dgreen); }
-.officeDots i:nth-child(3n) { background: var(--lime); }
-.officeMask { position: absolute; inset: 0 0 0 60px; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%, 0 42%, 7% 42%, 7% 28%, 14% 28%); background: var(--lime); }
+.officeArt { position: relative; aspect-ratio: 4 / 3; margin: 24px 24px 24px 40px; }
+.officeBlockA { position: absolute; left: -40px; top: -24px; width: 46%; height: 58%; background: var(--lav); }
+.officeBlockB { position: absolute; right: -24px; bottom: -24px; width: 38%; height: 44%; background: var(--green); }
+.officeBlockB::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(14, 13, 18, 0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 13, 18, 0.35) 1px, transparent 1px); background-size: 28px 28px; }
+.officeMask { position: absolute; inset: 0; border: 2px solid var(--ink); box-sizing: border-box; background: #fff; overflow: hidden; }
 .officeMask img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; display: block; }
 .flag { font-size: 16px; line-height: 1; width: 20px; text-align: center; }
 @media (max-width: 900px) {
   .officeSplit { grid-template-columns: 1fr; }
-  .officeArt { min-height: 0; aspect-ratio: 4 / 3; }
-  .officeDots { display: none; }
-  .officeMask { inset: 0; clip-path: none; border: 2px solid var(--ink); box-sizing: border-box; box-shadow: 10px 10px 0 var(--lime); }
+  .officeArt { margin: 16px 16px 16px 24px; }
+  .officeBlockA { left: -24px; top: -16px; }
+  .officeBlockB { right: -16px; bottom: -16px; }
   .feature { position: relative; top: auto; max-height: none; }
 }
 
@@ -505,10 +505,10 @@
 .diffBg i:nth-child(1) { top: 24%; } .diffBg i:nth-child(2) { top: 50%; } .diffBg i:nth-child(3) { top: 76%; }
 .diffRow { display: flex; align-items: flex-start; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; transition: opacity 0.25s, filter 0.25s, transform 0.25s; font: inherit; color: inherit; }
 .diffRow:not(.diffOn) { opacity: 0.42; filter: saturate(0.25); }
-.diffRow.diffOn { transform: translateX(6px); }
+.diffRow.diffOn { transform: none; }
 .diffPlus { width: 36px; height: 36px; display: grid; place-items: center; font-family: var(--mono); font-size: 20px; margin: 6px 6px 0 -42px; flex: none; }
 .diffWord { font-family: var(--serif); font-size: clamp(44px, 5.4vw, 84px); line-height: 1; letter-spacing: -0.02em; padding: 2px 18px 8px; white-space: nowrap; }
-.diffCard { margin-top: 10px; background: #fff; border: 1px solid var(--line); padding: 22px 24px; max-width: 440px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow 0.25s; }
+.diffCard { margin-top: 10px; min-height: 196px; width: 100%; box-sizing: border-box; background: #fff; border: 1px solid var(--line); padding: 22px 24px; max-width: 440px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow 0.25s; }
 .diffCard p { margin: 0; font-size: 16.5px; line-height: 1.5; color: #333; }
 .diffCard p b { font-weight: 500; color: var(--ink); }
 .root .diffCard a { align-self: flex-start; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; background: var(--ink); color: #fff; padding: 10px 14px; }
@@ -571,7 +571,6 @@
   .heroIn .h1 { font-size: clamp(44px, 13vw, 64px); }
   .heroSub { font-size: 17px; }
   .pill { font-size: 14px; gap: 10px; }
-  .officeArt { aspect-ratio: 4 / 3; margin-right: 10px; }
   .feature { padding: 18px; }
   .featureText { font-size: 20px; padding: 12px 14px; }
   .featureFrame { box-shadow: 8px 8px 0 var(--ink); }

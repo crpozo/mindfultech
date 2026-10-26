@@ -21,7 +21,7 @@ const T = {
     h1: "Put AI software to work for your business",
     heroSub: "Full-stack software lab, powered by UX research and applied AI — from discovery to deployment.",
     projects: "Our projects",
-    bandCard: "Ship an AI agent to production in 6 weeks",
+    bandCard: "Ship an AI agent to production in 1 week",
     bandStat: "days shipping products",
     trusted: "Trusted by",
     diffH2: "The MindfulTech difference",
@@ -30,7 +30,7 @@ const T = {
     diff: [
       ["Days shipping", "3,650+ days", "of human-centered products in production, from university portals to automated commerce."],
       ["Automation", "24/7 agents", "an AI agent runs Helixona's medical billing end to end: claims, coding and follow-ups."],
-      ["In production", "2 app stores", "carry PARC Connect today: App Store and Google Play, maintained by the team that built it."],
+      ["Reach", "3 continents", "with clients across the Americas and Europe, all served by one team in Quito."],
     ],
     learnHow: "Learn how →",
     whyH2: "Why teams choose MindfulTech",
@@ -105,7 +105,7 @@ const T = {
     h1: "Pon software con IA a trabajar para tu negocio",
     heroSub: "Laboratorio de software full-stack, impulsado por investigación UX e IA aplicada: del descubrimiento al despliegue.",
     projects: "Nuestros proyectos",
-    bandCard: "Un agente de IA en producción en 6 semanas",
+    bandCard: "Un agente de IA en producción en 1 semana",
     bandStat: "días lanzando productos",
     trusted: "Confían en nosotros",
     diffH2: "La diferencia MindfulTech",
@@ -114,7 +114,7 @@ const T = {
     diff: [
       ["Días lanzando", "3,650+ días", "de productos centrados en las personas, en producción: de portales universitarios a comercio automatizado."],
       ["Automatización", "Agentes 24/7", "un agente de IA lleva la facturación médica de Helixona de punta a punta: reclamos, codificación y seguimientos."],
-      ["En producción", "2 tiendas", "publican PARC Connect hoy: App Store y Google Play, mantenida por el equipo que la construyó."],
+      ["Alcance", "3 continentes", "con clientes en América y Europa, todos atendidos por un solo equipo en Quito."],
     ],
     learnHow: "Cómo lo hacemos →",
     whyH2: "Por qué los equipos eligen MindfulTech",
@@ -196,7 +196,7 @@ const SVC = [
 ];
 /* hero collage slides: same composition, different claim, stat, photo and tints (Jasper-style rotation) */
 const SLIDES = [
-  { en: "Ship an AI agent to production in 6 weeks", es: "Un agente de IA en producción en 6 semanas", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", gridR: "#3dbe7d", bar: "#f4d98a", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
+  { en: "Ship an AI agent to production in 1 week", es: "Un agente de IA en producción en 1 semana", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", gridR: "#3dbe7d", bar: "#f4d98a", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
   { en: "Research, engineering and AI in one lab", es: "Investigación, ingeniería e IA en un solo laboratorio", stat: "10", statEn: "years shipping from Quito", statEs: "años lanzando desde Quito", img: "/art/ailab.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
   { en: "Web, mobile and custom software, maintained after launch", es: "Web, móvil y software a medida, con mantenimiento tras el lanzamiento", stat: "3", statEn: "continents with clients", statEs: "continentes con clientes", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
@@ -205,7 +205,7 @@ const DIFF_COL = [
   { bg: "#3dbe7d", fg: "#ffffff", shadow: "#c9c4f2" },
   { bg: "#bff5cf", fg: "#1f7a4d", shadow: "#85bfe9" },
 ];
-const DIFF_HREF = ["/work", "/work#healthcare", "/work#parc"];
+const DIFF_HREF = ["/work", "/work#healthcare", "/company#about"];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string][] = [
   ["USFQ", "/logo-usfq.svg"],
@@ -457,10 +457,13 @@ export function WorldMap({ lang }: { lang: Lang }) {
           <path d={LAND_PATH} fill="none" stroke="#bff5cf" strokeWidth={7.5} strokeLinecap="round" />
           <path d={LAND_PATH} fill="none" stroke="#1F7A4D" strokeWidth={3.4} strokeLinecap="round" opacity={0.75} />
           <line x1={0} y1={home.y} x2={MAP_VIEW.w} y2={home.y} stroke="#3DBE7D" strokeWidth={1} strokeDasharray="4 6" />
-          {SITES.filter((x) => !x.base).map((x) => {
+          {SITES.filter((x) => !x.base).map((x, i) => {
             const p = proj(x.lat, x.lon);
-            const mx = (home.x + p.x) / 2, my = Math.min(home.y, p.y) - Math.abs(p.x - home.x) * 0.18;
-            return <path key={x.id} d={`M${home.x},${home.y} Q${mx},${my} ${p.x},${p.y}`} fill="none" stroke={active === x.id ? "#1F7A4D" : "#C9C4F2"} strokeWidth={active === x.id ? 2.5 : 1.5} />;
+            const dx = p.x - home.x, dy = p.y - home.y;
+            const lift = Math.abs(dx) * (0.08 + 0.09 * (i % 4)) + 14 * i;
+            const c1x = home.x + dx * 0.2 - (i % 2 ? 1 : -1) * 18 * (i + 1), c1y = home.y + dy * 0.35 - lift;
+            const c2x = home.x + dx * 0.75, c2y = p.y - lift * 0.5;
+            return <path key={x.id} d={`M${home.x},${home.y} C${c1x},${c1y} ${c2x},${c2y} ${p.x},${p.y}`} fill="none" stroke={active === x.id ? "#1F7A4D" : "#C9C4F2"} strokeWidth={active === x.id ? 2.5 : 1.4} opacity={active === x.id ? 1 : 0.85} />;
           })}
           {SITES.map((x) => {
             const p = proj(x.lat, x.lon); const on = active === x.id; const r = x.base ? 12 : 9;
@@ -691,7 +694,8 @@ export function Home() {
             </div>
           </div>
           <div className={s.officeArt} aria-hidden="true">
-            <div className={s.officeDots}>{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</div>
+            <div className={s.officeBlockA} />
+            <div className={s.officeBlockB} />
             <div className={s.officeMask}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/office-demo-preview.webp" alt="" width={2000} height={1125} loading="lazy" />
