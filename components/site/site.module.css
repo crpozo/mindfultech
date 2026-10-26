@@ -58,7 +58,7 @@
 .navRight button { font: inherit; font-size: 14px; border: 0; background: none; cursor: pointer; color: #777; padding: 0; }
 .navRight button.on { color: var(--ink); }
 .navRight button:hover { color: var(--dgreen); }
-.navCta { background: var(--ink); color: #fff; padding: 16px 26px; white-space: nowrap; }
+.navCta { background: var(--ink); color: #fff; padding: 12px 20px; font-size: 15px; white-space: nowrap; }
 .navCta:hover { background: var(--dgreen); color: #fff; }
 
 /* ---- hero ---- */
@@ -571,7 +571,9 @@
   .heroIn { padding-top: 32px; gap: 18px; }
   .heroIn .h1 { font-size: clamp(44px, 13vw, 64px); }
   .heroSub { font-size: 17px; }
-  .pill { font-size: 14px; gap: 10px; }
+  .pill { font-size: 13px; gap: 8px; flex-wrap: nowrap; padding: 4px 10px 4px 4px; }
+  .pill .pillMore { display: none; }
+  .pill .chip { font-size: 12px; padding: 4px 7px; }
   .feature { padding: 18px; }
   .featureText { font-size: 20px; padding: 12px 14px; }
   .featureFrame { box-shadow: 8px 8px 0 var(--ink); }
@@ -597,3 +599,29 @@
   .prose { font-size: 17px; }
   .prose h2 { font-size: 30px; }
 }
+
+/* trusted logos link to the project pages; "more projects" cards on a case page */
+.marqueeGroup a { display: flex; align-items: center; }
+.marqueeGroup a:hover img { filter: grayscale(0) brightness(1); }
+.root a.moreCase { display: flex; flex-direction: column; gap: 14px; padding: 26px; background: #fff; border: 1px solid var(--line); color: var(--ink); min-height: 200px; }
+.root a.moreCase b { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.05; letter-spacing: -0.01em; flex: 1; }
+.root a.moreCase .mono { color: var(--dgreen); }
+.root a.moreCase:hover { border-color: var(--ink); box-shadow: 8px 8px 0 var(--lime); color: var(--ink); }
+
+/* contact modal */
+.modalBack { position: fixed; inset: 0; z-index: 10000; background: rgba(14, 16, 19, 0.55); display: grid; place-items: center; padding: 16px; }
+.modal { position: relative; width: min(560px, 100%); max-height: calc(100svh - 32px); overflow: auto; background: #fff; border: 2px solid var(--ink); box-shadow: 14px 14px 0 var(--lime); padding: 34px 32px 30px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; }
+.modal h2 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 36px; line-height: 1; letter-spacing: -0.02em; }
+.modal p { margin: 0 0 6px; color: #555; font-size: 15px; }
+.modal label { display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #555; }
+.modal input, .modal textarea { font: inherit; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--ink); padding: 12px 14px; border: 1.5px solid var(--line); background: #fafbf9; outline: none; resize: vertical; }
+.modal input:focus, .modal textarea:focus { border-color: var(--ink); background: #fff; }
+.modalX { position: absolute; right: 12px; top: 10px; width: 36px; height: 36px; border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: var(--ink); }
+.root button.btn { font: inherit; border: 0; cursor: pointer; font-weight: 500; }
+.root button.btnInk { background: var(--ink); color: #fff; }
+.root button.btnInkWhite:hover { background: #fff; color: var(--ink); }
+.root button.btnGreen { background: var(--green); color: var(--ink); }
+.root button.navCta { font: inherit; border: 0; cursor: pointer; }
+@media (max-width: 720px) { .modal { padding: 26px 20px 22px; } .modal h2 { font-size: 30px; } }
+.navRight button.navCta { background: var(--ink); color: #fff; padding: 12px 20px; font-size: 15px; }
+.navRight button.navCta:hover { background: var(--dgreen); color: #fff; }

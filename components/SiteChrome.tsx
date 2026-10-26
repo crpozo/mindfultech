@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { PageLoader } from "@/components/PageLoader";
-import { SiteFooter } from "@/components/site/Shell";
+import { SiteFooter, ContactForm } from "@/components/site/Shell";
 import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
 
 /**
@@ -20,6 +20,7 @@ export function SiteChrome() {
       <SiteFooter />
       <WhatsAppBubble />
       <PageLoader />
+      <ContactForm />
     </>
   );
 }

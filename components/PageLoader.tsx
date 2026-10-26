@@ -17,6 +17,20 @@ export function PageLoader() {
     setShow(false);
   }, [pathname]);
 
+  // Safety nets: hide when the page is restored from the back/forward cache, on history moves,
+  // and after a few seconds no matter what, so a failed or cancelled navigation never leaves it stuck.
+  React.useEffect(() => {
+    const off = () => setShow(false);
+    window.addEventListener("pageshow", off);
+    window.addEventListener("popstate", off);
+    return () => { window.removeEventListener("pageshow", off); window.removeEventListener("popstate", off); };
+  }, []);
+  React.useEffect(() => {
+    if (!show) return;
+    const id = window.setTimeout(() => setShow(false), 4000);
+    return () => window.clearTimeout(id);
+  }, [show]);
+
   React.useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
@@ -26,6 +40,7 @@ export function PageLoader() {
       if (!a) return;
       const href = a.getAttribute("href") || "";
       if (!href.startsWith("/")) return; // ignore hashes, mailto, tel, external
+      if (a.target === "_blank" || a.hasAttribute("download")) return;
       // Compare against window.location.pathname — both include the basePath
       // (usePathname strips it), so this stays correct on GitHub Pages.
       const norm = (p: string) => p.replace(/\/+$/, "") || "/";

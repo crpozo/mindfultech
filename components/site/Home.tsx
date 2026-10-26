@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang, type Lang } from "@/components/i18n";
 import s from "./site.module.css";
-import { CtaBand } from "./Shell";
+import { CtaBand, openContact } from "./Shell";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 
 /* The home page (redesign of Oct 2026, from design_handoff_mindfultech_home):
@@ -201,12 +201,12 @@ const SLIDES = [
   { en: "Web, mobile and custom software, maintained after launch", es: "Web, móvil y software a medida, con mantenimiento tras el lanzamiento", stat: "3", statEn: "continents with clients", statEs: "continentes con clientes", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
-const LOGOS: [string, string][] = [
-  ["USFQ", "/logo-usfq.svg"],
-  ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"],
-  ["Helixona", "/helixona-logo-m.webp"],
-  ["Western Fence Supply", "/wfs-logo.svg"],
-  ["PARC Home Care", "/parc-logo-m.webp"],
+const LOGOS: [string, string, string][] = [
+  ["USFQ", "/logo-usfq.svg", "usfq"],
+  ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp", "themedmotion"],
+  ["Helixona", "/helixona-logo-m.webp", "healthcare"],
+  ["Western Fence Supply", "/wfs-logo.svg", "fence"],
+  ["PARC Home Care", "/parc-logo-m.webp", "parc"],
 ];
 
 /* ------------------------------------------------- why: the four mocks ---- */
@@ -510,14 +510,14 @@ export function Home() {
         <div className={s.heroIn}>
           <div className={s.pill}>
             <span className={s.chip}>{t.pillNew}</span>
-            <span>{t.pill}</span>
+            <span>{t.pill.split(/ — |: /)[0]}<span className={s.pillMore}>{t.pill.slice(t.pill.split(/ — |: /)[0].length)}</span></span>
             <Link href="/office-demo">{t.learn}</Link>
           </div>
           <h1 className={s.h1}>{t.h1}</h1>
           <p className={s.heroSub}>{t.heroSub}</p>
           <div className={s.ctas}>
             <a href="#work" className={`${s.btn} ${s.btnOutline}`}>{t.projects}</a>
-            <a href="#contact" className={`${s.btn} ${s.btnGreen}`}>{t.start}</a>
+            <button type="button" onClick={openContact} className={`${s.btn} ${s.btnGreen}`}>{t.start}</button>
           </div>
         </div>
         <div className={s.band} aria-hidden="true">
@@ -548,16 +548,18 @@ export function Home() {
       {/* trusted by */}
       <div className={s.trusted}>
         <div className={s.trustedIn} style={{ maxWidth: 1440, margin: "0 auto" }}>
-          <h2 className={s.trustedTitle}>{lang === "es" ? "Equipos que confían en MindfulTech" : "Teams that trust MindfulTech"}</h2>
+          <h2 className={s.trustedTitle}>{lang === "es" ? "Empresas que confían en MindfulTech" : "Companies that trust MindfulTech"}</h2>
           <div className={s.marquee} aria-label={t.trusted}>
             <div className={s.marqueeTrack}>
               {[0, 1].map((k) => (
                 <div key={k} className={s.marqueeGroup} aria-hidden={k === 1}>
-                  {LOGOS.map(([name, src]) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={name} src={src} alt={name} title={name} />
+                  {LOGOS.map(([name, src, slug]) => (
+                    <Link key={name} href={`/work/${slug}`} aria-label={name} tabIndex={k === 1 ? -1 : 0}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt={name} title={name} />
+                    </Link>
                   ))}
-                  <b>CarCompraCorp</b>
+                  <Link href="/work/carcompra" tabIndex={k === 1 ? -1 : 0}><b>CarCompraCorp</b></Link>
                   <b>The Internet Coaches</b>
                 </div>
               ))}
@@ -657,7 +659,6 @@ export function Home() {
             <p className={s.sub}>{t.officeP}</p>
             <div className={s.ctas} style={{ justifyContent: "flex-start" }}>
               <Link href="/office-demo" className={`${s.btn} ${s.btnGreen}`}>{t.officeBtn}</Link>
-              <Link href="/blog/ai-management-office" className={`${s.btn} ${s.btnOutline}`}>{lang === "es" ? "Cómo funciona" : "How it works"}</Link>
             </div>
             <div className={s.roleChips}>
               {t.roles.map(([name]) => <span key={name}>{name}</span>)}

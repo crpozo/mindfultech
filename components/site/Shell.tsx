@@ -18,7 +18,7 @@ const NAV: { key: NavKey; href: string; en: string; es: string }[] = [
   { key: "office", href: "/office-demo", en: "AI Office", es: "Oficina IA" },
 ];
 
-export const CONTACT = { email: "info@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
+export const CONTACT = { formTo: "carlos@mindfultech.ec", email: "info@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
 
 export function SiteNav({ active }: { active?: NavKey }) {
   const { lang, setLang } = useLang();
@@ -38,7 +38,7 @@ export function SiteNav({ active }: { active?: NavKey }) {
         <div className={s.navRight}>
           <button type="button" className={lang === "en" ? s.on : ""} onClick={() => setLang("en")}>EN</button>
           <button type="button" className={lang === "es" ? s.on : ""} onClick={() => setLang("es")}>ES</button>
-          <a href={`mailto:${CONTACT.email}`} className={s.navCta}>{lang === "es" ? "Empieza un proyecto" : "Start a project"}</a>
+          <button type="button" onClick={openContact} className={s.navCta}>{lang === "es" ? "Empieza un proyecto" : "Start a project"}</button>
           <button type="button" className={s.navBurger} aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
             <i /><i /><i />
           </button>
@@ -77,7 +77,7 @@ export function CtaBand({ title, sub, cta }: { title?: string; sub?: string; cta
         <h2 className={s.ctaH2}>{title ?? (es ? "Empieza a construir con MindfulTech" : "Start building with MindfulTech")}</h2>
         <p className={s.ctaSub}>{sub ?? (es ? "De la primera sesión de investigación a la IA en producción: un laboratorio, de punta a punta." : "From the first research session to production AI: one lab, end to end.")}</p>
         <div className={s.ctas}>
-          <a href={`mailto:${CONTACT.email}`} className={`${s.btn} ${s.btnInk} ${s.btnInkWhite}`}>{cta ?? (es ? "Escríbenos" : "Get started now")}</a>
+          <button type="button" onClick={openContact} className={`${s.btn} ${s.btnInk} ${s.btnInkWhite}`}>{cta ?? (es ? "Escríbenos" : "Get started now")}</button>
           <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnWhite}`}>WhatsApp →</a>
         </div>
       </div>
@@ -120,11 +120,6 @@ export function SiteFooter() {
         </div>
         <div className={s.footerBottom}>
           <span>© 2026 MindfulTech. {es ? "Todos los derechos reservados." : "All rights reserved."}</span>
-          <div>
-            <Link href="/company#about">{es ? "Nosotros" : "About"}</Link>
-            <Link href="/blog">Blog</Link>
-            <a href={`mailto:${CONTACT.email}`}>{es ? "Contacto" : "Contact"}</a>
-          </div>
         </div>
       </div>
     </footer>
@@ -163,6 +158,55 @@ export function SectionHead({ label, title, sub, right }: { label?: string; titl
         {sub && <p className={s.sub}>{sub}</p>}
       </div>
       {right}
+    </div>
+  );
+}
+
+/* ---- contact form: opened by the CTA buttons, sends the message to Carlos ---- */
+
+export function openContact() {
+  window.dispatchEvent(new CustomEvent("mt:contact"));
+}
+
+/** Modal contact form. Mounted once by SiteChrome; opens on the `mt:contact` event.
+    Submitting composes the email to CONTACT.formTo in the visitor's mail app (static site, no server). */
+export function ContactForm() {
+  const { lang } = useLang();
+  const es = lang === "es";
+  const [open, setOpen] = React.useState(false);
+  const [f, setF] = React.useState({ name: "", email: "", company: "", msg: "" });
+  React.useEffect(() => {
+    const on = () => setOpen(true);
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("mt:contact", on);
+    window.addEventListener("keydown", esc);
+    return () => { window.removeEventListener("mt:contact", on); window.removeEventListener("keydown", esc); };
+  }, []);
+  React.useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
+  if (!open) return null;
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = es ? `Nuevo proyecto: ${f.company || f.name}` : `New project: ${f.company || f.name}`;
+    const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, "", f.msg].join("\n");
+    window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setOpen(false);
+  };
+  return (
+    <div className={`${s.root} ${s.modalBack}`} onClick={() => setOpen(false)} role="presentation">
+      <form className={s.modal} onClick={(e) => e.stopPropagation()} onSubmit={submit} aria-label={es ? "Formulario de contacto" : "Contact form"}>
+        <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={() => setOpen(false)}>×</button>
+        <h2>{es ? "Cuéntanos tu proyecto" : "Tell us about your project"}</h2>
+        <p>{es ? "Te respondemos en un día hábil." : "We answer within one business day."}</p>
+        <label><span>{es ? "Nombre" : "Name"}</span><input required value={f.name} onChange={set("name")} autoComplete="name" /></label>
+        <label><span>Email</span><input required type="email" value={f.email} onChange={set("email")} autoComplete="email" /></label>
+        <label><span>{es ? "Empresa" : "Company"}</span><input value={f.company} onChange={set("company")} autoComplete="organization" /></label>
+        <label><span>{es ? "¿Qué quieres construir?" : "What do you want to build?"}</span><textarea required rows={5} value={f.msg} onChange={set("msg")} /></label>
+        <div className={s.ctas} style={{ justifyContent: "flex-start", marginTop: 6 }}>
+          <button type="submit" className={`${s.btn} ${s.btnInk}`}>{es ? "Enviar" : "Send"}</button>
+          <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnOutline}`}>WhatsApp →</a>
+        </div>
+      </form>
     </div>
   );
 }
