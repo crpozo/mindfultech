@@ -197,8 +197,8 @@ const SVC = [
 /* hero collage slides: same composition, different claim, stat, photo and tints (Jasper-style rotation) */
 const SLIDES = [
   { en: "Ship an AI agent to production in 6 weeks", es: "Un agente de IA en producción en 6 semanas", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", gridR: "#3dbe7d", bar: "#f4d98a", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
-  { en: "An agent runs Helixona's medical billing, 24/7", es: "Un agente lleva la facturación de Helixona, 24/7", stat: "24/7", statEn: "claims, coding, follow-ups", statEs: "reclamos, codificación, seguimientos", img: "/art/ailab.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
-  { en: "From Excel to Odoo, with delivery routes", es: "De Excel a Odoo, con rutas de entrega", stat: "2", statEn: "app stores carry PARC Connect", statEs: "tiendas publican PARC Connect", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
+  { en: "Research, engineering and AI in one lab", es: "Investigación, ingeniería e IA en un solo laboratorio", stat: "10", statEn: "years shipping from Quito", statEs: "años lanzando desde Quito", img: "/art/ailab.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
+  { en: "Web, mobile and custom software, maintained after launch", es: "Web, móvil y software a medida, con mantenimiento tras el lanzamiento", stat: "3", statEn: "continents with clients", statEs: "continentes con clientes", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
 const DIFF_COL = [
   { bg: "#0e1013", fg: "#bff5cf", shadow: "#bff5cf" },
