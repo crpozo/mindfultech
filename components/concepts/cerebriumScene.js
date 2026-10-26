@@ -118,7 +118,7 @@ export function createBackground(canvas, opts = {}) {
   const mode = opts.mode || "bands"; // bands (arches), globe (sliced core on the right), columns (tall vertical bands)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance", logarithmicDepthBuffer: true });
-  let dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+  let dpr = Math.min(window.devicePixelRatio || 1, (typeof window !== "undefined" && window.innerWidth < 760) ? 1 : 1.25);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
@@ -189,18 +189,18 @@ export function createBackground(canvas, opts = {}) {
   if (mode === "globe") { globe.position.set(3.6, -0.8, -2); globe.scale.setScalar(1.45); }
 
   /* particles */
-  const N = 420;
+  const N = 260;
   const pp = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { pp[i * 3] = (Math.random() - 0.5) * 30; pp[i * 3 + 1] = (Math.random() - 0.5) * 20; pp[i * 3 + 2] = -Math.random() * 12; }
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pp, 3));
-  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: new THREE.Color("#e6fff0"), size: 0.075, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
+  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: new THREE.Color("#e6fff0"), size: 0.065, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   scene.add(particles);
 
   /* post */
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.5, 0.8);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), (typeof window !== "undefined" && window.innerWidth < 760) ? 0.3 : 0.45, 0.5, 0.8);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
@@ -215,7 +215,10 @@ export function createBackground(canvas, opts = {}) {
     if (mode !== "globe") globe.position.x = narrow ? 0 : 2.6;
   };
   resize();
-  window.addEventListener("resize", resize);
+  // phones fire resize on every address-bar show/hide; only a width change (or a big height change) rebuilds the buffers
+  let lastW = window.innerWidth, lastH = window.innerHeight;
+  const onResize = () => { const w = window.innerWidth, h = window.innerHeight; if (w !== lastW || Math.abs(h - lastH) > 160) { lastW = w; lastH = h; resize(); } };
+  window.addEventListener("resize", onResize);
   const onVis = () => { state.running = !document.hidden; if (state.running) loop(); };
   document.addEventListener("visibilitychange", onVis);
 
@@ -240,9 +243,9 @@ export function createBackground(canvas, opts = {}) {
     const s = state.scroll;
     // drift slowly out of the hero (still behind the logos and the dot band), come back for the footer
     const f = state.foot;
-    ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
+    ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (1.2) * f;
     ribbons.visible = defs.length > 0 && (mode === "columns" || s < 2.4 || f > 0.01);
-    ribbons.position.x += (-(canvas.clientWidth < 760 ? 3.5 : 1.5) - H * 5 - ribbons.position.x) * 0.1;
+    ribbons.position.x += (-(canvas.clientWidth < 760 ? 3.5 : 1.5) - H * 5 - state.foot * 4.5 - ribbons.position.x) * 0.1;
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.5;
     ribbons.rotation.x = state.py * 0.08 + H * 0.25;
     ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.9;
@@ -287,7 +290,7 @@ export function createBackground(canvas, opts = {}) {
     setHold(p) { state.hold = Math.max(0, Math.min(1, p)); },
     dispose() {
       state.running = false; cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize); document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", onVis);
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); });
       composer.dispose?.(); renderer.dispose();
     },

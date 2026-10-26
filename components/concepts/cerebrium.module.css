@@ -141,8 +141,11 @@
   .navRight { margin-left: auto; gap: 8px; }
   .navRight .btn { height: 44px; padding: 0 14px; font-size: 11px; }
   .nav { position: sticky; background: rgba(11, 11, 20, 0.8); backdrop-filter: blur(10px); }
-  .heroIn { padding-bottom: 72px; }
-  .heroIn { grid-template-columns: 1fr; gap: 28px; padding-top: 120px; }
+  .heroIn { grid-template-columns: 1fr; gap: 22px; padding-top: 104px; padding-bottom: 36px; align-self: start; }
+  .hero { min-height: 100svh; padding-top: 0; }
+  .h1 { font-size: clamp(40px, 11vw, 52px); }
+  .heroSide p { font-size: 15.5px; margin-bottom: 20px; }
+  .heroSide .ctas .btn { padding: 12px 16px; font-size: 11px; }
   .words { display: none; }
   .whyHead, .why, .darkIn { grid-template-columns: 1fr; gap: 28px; }
   .whyList { position: static; }
@@ -332,3 +335,10 @@
 .workStats small { font-family: var(--font-jbmono), monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #3b3f55; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .workFoot { display: flex; justify-content: space-between; font-size: 14px; color: #1f7a4d; }
 @media (max-width: 960px) { .workGrid { grid-template-columns: 1fr; } .navIn { padding: 14px 16px; } }
+
+@media (max-width: 960px) {
+  .navLinks, .nav, .logos, .builtDark, .step, .modal { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .bg { transform: translateZ(0); }
+  .gov div { grid-template-columns: 24px 1fr; }
+  .h2 { word-break: normal; overflow-wrap: normal; }
+}

@@ -619,6 +619,9 @@
 .modal input:focus, .modal textarea:focus { border-color: #3dbe7d; background: rgba(255, 255, 255, 0.08); }
 .modalX { position: absolute; right: 12px; top: 10px; width: 36px; height: 36px; border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: #fff; }
 .modal .btn { border-radius: 7px; font-family: var(--font-jbmono), monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 22px; }
+.sentMark { width: 56px; height: 56px; margin-bottom: 6px; }
+.sentMark svg { width: 100%; height: 100%; }
+.modal button.btnInk:disabled { opacity: 0.6; cursor: default; }
 .modal button.btnInk { background: #3dbe7d; color: #0e1013; border: 0; cursor: pointer; }
 .modal button.btnInk:hover { background: #4fd08f; }
 .modal a.btnOutline { border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; background: rgba(255, 255, 255, 0.06); }

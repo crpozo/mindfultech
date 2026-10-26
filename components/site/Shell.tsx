@@ -175,6 +175,7 @@ export function ContactForm() {
   const es = lang === "es";
   const [open, setOpen] = React.useState(false);
   const [f, setF] = React.useState({ name: "", email: "", company: "", msg: "" });
+  const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
   React.useEffect(() => {
     const on = () => setOpen(true);
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -185,17 +186,47 @@ export function ContactForm() {
   React.useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
   if (!open) return null;
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subject = es ? `Nuevo proyecto: ${f.company || f.name}` : `New project: ${f.company || f.name}`;
+  const subject = es ? `Nuevo proyecto: ${f.company || f.name}` : `New project: ${f.company || f.name}`;
+  const mailto = () => {
     const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, "", f.msg].join("\n");
     window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setOpen(false);
   };
+  // Static site: the message goes through FormSubmit's AJAX endpoint straight to CONTACT.formTo (the first
+  // submission triggers a one-time activation email to that inbox). If the request fails, fall back to mailto.
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (state === "sending") return;
+    setState("sending");
+    try {
+      const r = await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, {
+        method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ name: f.name, email: f.email, company: f.company, message: f.msg, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }),
+      });
+      if (!r.ok) throw new Error(String(r.status));
+      setState("sent");
+      setF({ name: "", email: "", company: "", msg: "" });
+    } catch {
+      setState("error");
+      mailto();
+    }
+  };
+  const close = () => { setOpen(false); setState("idle"); };
   return (
-    <div className={`${s.root} ${s.modalBack}`} onClick={() => setOpen(false)} role="presentation">
+    <div className={`${s.root} ${s.modalBack}`} onClick={close} role="presentation">
+      {state === "sent" ? (
+        <div className={s.modal} onClick={(e) => e.stopPropagation()} role="status">
+          <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={close}>×</button>
+          <div className={s.sentMark} aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#3dbe7d" /><path d="M14 25 l7 7 l13 -14" fill="none" stroke="#0e1013" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
+          <h2>{es ? "Mensaje enviado" : "Message sent"}</h2>
+          <p>{es ? "Gracias. Te respondemos a tu correo en un día hábil." : "Thanks. We'll reply to your email within one business day."}</p>
+          <div className={s.ctas} style={{ justifyContent: "flex-start", marginTop: 6 }}>
+            <button type="button" onClick={close} className={`${s.btn} ${s.btnInk}`}>{es ? "Listo" : "Done"}</button>
+            <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnOutline}`}>WhatsApp →</a>
+          </div>
+        </div>
+      ) : (
       <form className={s.modal} onClick={(e) => e.stopPropagation()} onSubmit={submit} aria-label={es ? "Formulario de contacto" : "Contact form"}>
-        <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={() => setOpen(false)}>×</button>
+        <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={close}>×</button>
         <h2>{es ? "Cuéntanos tu proyecto" : "Tell us about your project"}</h2>
         <p>{es ? "Te respondemos en un día hábil." : "We answer within one business day."}</p>
         <label><span>{es ? "Nombre" : "Name"}</span><input required value={f.name} onChange={set("name")} autoComplete="name" /></label>
@@ -203,10 +234,12 @@ export function ContactForm() {
         <label><span>{es ? "Empresa" : "Company"}</span><input value={f.company} onChange={set("company")} autoComplete="organization" /></label>
         <label><span>{es ? "¿Qué quieres construir?" : "What do you want to build?"}</span><textarea required rows={5} value={f.msg} onChange={set("msg")} /></label>
         <div className={s.ctas} style={{ justifyContent: "flex-start", marginTop: 6 }}>
-          <button type="submit" className={`${s.btn} ${s.btnInk}`}>{es ? "Enviar" : "Send"}</button>
+          <button type="submit" className={`${s.btn} ${s.btnInk}`} disabled={state === "sending"}>{state === "sending" ? (es ? "Enviando…" : "Sending…") : (es ? "Enviar" : "Send")}</button>
           <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnOutline}`}>WhatsApp →</a>
         </div>
+        {state === "error" && <p style={{ color: "#f4d98a", fontSize: 14 }}>{es ? "No pudimos enviar desde aquí; abrimos tu correo con el mensaje listo." : "We couldn't send from here; we opened your mail app with the message ready."}</p>}
       </form>
+      )}
     </div>
   );
 }

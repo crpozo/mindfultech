@@ -6,8 +6,9 @@ import { useLang } from "@/components/i18n";
 import { POSTS } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
-import { Split, Scramble, HoldCursor, Dots, Typewriter, useInView } from "./CerebriumFx";
+import { Split, Scramble, HoldCursor, Dots, useInView } from "./CerebriumFx";
 import { CbNav, CbFooter, CB } from "./CerebriumParts";
+import { AgentsAtWork } from "./AgentsAtWork";
 import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
@@ -70,7 +71,6 @@ export function Cerebrium() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const heroRef = React.useRef<HTMLElement>(null);
   const darkRef = React.useRef<HTMLElement>(null);
-  const [termRef, termOn] = useInView<HTMLPreElement>();
   const [barsRef, barsOn] = useInView<HTMLDivElement>();
   const [chartRef, chartOn] = useInView<HTMLDivElement>();
 
@@ -86,7 +86,7 @@ export function Cerebrium() {
       const d = darkRef.current;
       if (d) { const r = d.getBoundingClientRect(); const vh = window.innerHeight; const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
       const ft = document.querySelector<HTMLElement>("[data-cb-foot]");
-      if (ft) { const r = ft.getBoundingClientRect(); const vh = window.innerHeight; bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.8)))); }
+      if (ft) { const r = ft.getBoundingClientRect(); const vh = window.innerHeight; bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.5)))); }
     };
     const loop = () => { feed(); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
@@ -115,8 +115,8 @@ export function Cerebrium() {
   const go = (i: number) => { setFeat(i); cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "center" }); };
 
   const FEATS = es
-    ? ["Primer agente en 1 semana", "Un equipo, tres continentes", "Tu código, tu stack", "Observabilidad de punta a punta"]
-    : ["First agent in 1 week", "One team, three continents", "Your code, your stack", "End-to-end observability"];
+    ? ["Primer agente en 1 semana", "Un equipo, tres continentes", "Agentes dentro de tus herramientas", "Observabilidad de punta a punta"]
+    : ["First agent in 1 week", "One team, three continents", "Agents inside your tools", "End-to-end observability"];
   const BENCH = [
     { k: "MINDFULTECH", v: es ? "1 sem" : "1 wk", w: 8, c: "#bff5cf" },
     { k: es ? "AGENCIA" : "AGENCY", v: es ? "6 sem" : "6 wks", w: 40, c: "#3dbe7d" },
@@ -200,21 +200,11 @@ export function Cerebrium() {
                 <p>{es ? "Diez años entregando para empresas de América y Europa, en tu zona horaria de trabajo y en tu idioma. Sin intermediarios ni agencias entre tú y la gente que construye." : "Ten years shipping for companies across the Americas and Europe, in your working hours and your language. No intermediaries or agencies between you and the people who build."}</p>
               </div>
               <div className={s.card} data-i={2} ref={(el) => { cardRefs.current[2] = el; }}>
-                <div className={`${s.stage} ${s.stagePad}`}>
-                  <span className={`${s.chip} ${s.mono}`}>Terminal</span>
-                  <pre className={s.term} ref={termRef}><Typewriter on={termOn} lines={[
-                    <>{`carlos@mindfultech billing % `}<b>mindfultech run agent billing --role finance --tools odoo,gmail</b>{`\n\n`}</>,
-                    <><b>✓</b>{` Connected to Odoo (invoices, payments)\n`}</>,
-                    <><b>✓</b>{` Connected to Gmail (billing@clinic.ec)\n`}</>,
-                    <><b>✓</b>{` Policies loaded: approve > $500 by a person\n\n`}</>,
-                    <><em>09:12:04</em>{`  claim #4821 rejected by insurer → reason: missing code\n`}</>,
-                    <><em>09:12:06</em>{`  drafted correction, attached report, queued resend\n`}</>,
-                    <><em>09:12:07</em>{`  approval requested: María (finance) ........ `}<b>approved</b>{`\n`}</>,
-                    <><em>09:12:31</em>{`  claim #4821 resubmitted ✓   next check in 48h`}</>,
-                  ]} /></pre>
+                <div className={s.stage} style={{ padding: 0, overflow: "hidden" }}>
+                  <AgentsAtWork es={es} />
                 </div>
-                <h3>{es ? "Tu código, tus herramientas. Nosotros lo hacemos correr." : "Your code, your tools. We make it run."}</h3>
-                <p>{es ? "Sin reescrituras ni SDKs propios. Los agentes se conectan a lo que ya usas: Odoo, Salesforce, Gmail, WhatsApp, tu base de datos. Versionado, reproducible y listo para escalar." : "No rewrites, no custom SDKs. Agents plug into what you already use: Odoo, Salesforce, Gmail, WhatsApp, your database. Versioned, reproducible and ready to scale."}</p>
+                <h3>{es ? "Un agente por rol, dentro de tus herramientas." : "One agent per role, inside your tools."}</h3>
+                <p>{es ? "Fin factura, Sopo responde, Sal agenda. Trabajan en tu CRM, tu ERP y tu correo, sin reescribir nada, y cuando algo requiere criterio lo pasan a una persona que firma." : "Fin bills, Sopo answers, Sal books. They work inside your CRM, your ERP and your inbox, nothing rewritten, and when something needs judgment they hand it to a person who signs off."}</p>
               </div>
               <div className={s.card} data-i={3} ref={(el) => { cardRefs.current[3] = el; }}>
                 <div className={s.stage}>

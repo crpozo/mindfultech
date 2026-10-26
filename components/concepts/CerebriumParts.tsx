@@ -26,7 +26,7 @@ export function CbScene({ mode }: { mode: CbMode }) {
       const d = document.querySelector<HTMLElement>("[data-cb-dark]"); const vh = window.innerHeight;
       if (d) { const r = d.getBoundingClientRect(); const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
       const ft = document.querySelector<HTMLElement>("[data-cb-foot]");
-      if (ft) { const r = ft.getBoundingClientRect(); bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.8)))); }
+      if (ft) { const r = ft.getBoundingClientRect(); bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.5)))); }
     };
     const loop = () => { feed(); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
