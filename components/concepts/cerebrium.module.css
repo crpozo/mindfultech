@@ -6,11 +6,14 @@
 .mono { font-family: var(--font-jbmono), monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
 .wrap { max-width: 1480px; margin: 0 auto; padding: 0 40px; }
 /* nav */
-.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: transparent; border-bottom: 0; pointer-events: none; }
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: transparent; border-bottom: 1px solid transparent; pointer-events: none; transition: background 0.25s, border-color 0.25s; }
 .nav > * { pointer-events: auto; }
+.navBar { background: rgba(11, 11, 20, 0.96); border-bottom-color: rgba(255, 255, 255, 0.08); pointer-events: auto; }
+.navBar .navIn { padding-top: 10px; padding-bottom: 10px; }
+.navBar .navIn img { height: 36px; }
+.navBar .navLinks, .navBar .navRight .btn { height: 46px; }
 .navIn { display: flex; align-items: center; gap: 20px; padding: 14px 40px; max-width: 1480px; margin: 0 auto; }
-.navIn img { height: 44px; width: auto; filter: brightness(0) invert(1); transition: filter 0.25s; }
-.navIn .logoLight img { filter: none; }
+.navIn img { height: 44px; width: auto; filter: brightness(0) invert(1); transition: height 0.25s; }
 .navLinks { display: flex; gap: 8px; margin-left: auto; padding: 0 12px; height: 56px; align-items: center; border-radius: 6px; background: #16161f; font-family: var(--font-jbmono), monospace; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
 .navLinks a { padding: 10px 14px; border-radius: 4px; }
 .navLinks a.navOn { text-decoration: underline; text-underline-offset: 4px; }
@@ -140,7 +143,7 @@
   .navIn img { height: 36px; }
   .navRight { margin-left: auto; gap: 8px; }
   .navRight .btn { height: 44px; padding: 0 14px; font-size: 11px; }
-  .nav { position: sticky; background: rgba(11, 11, 20, 0.92); }
+  .nav { position: sticky; background: rgba(11, 11, 20, 0.96); pointer-events: auto; }
   .heroIn { grid-template-columns: 1fr; gap: 22px; padding-top: 104px; padding-bottom: 36px; align-self: start; }
   .hero { min-height: 100svh; padding-top: 0; }
   .h1 { font-size: clamp(40px, 11vw, 52px); }
