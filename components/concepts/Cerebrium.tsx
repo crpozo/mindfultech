@@ -9,6 +9,7 @@ import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { Split, Scramble, HoldCursor, Dots, useInView } from "./CerebriumFx";
 import { CbNav, CbFooter, CB } from "./CerebriumParts";
 import { AgentsAtWork } from "./AgentsAtWork";
+import { AgentCity } from "./AgentCity";
 import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
@@ -66,7 +67,6 @@ export function Cerebrium() {
   const { lang, setLang } = useLang();
   const es = lang === "es";
   const [feat, setFeat] = React.useState(0);
-  const [bench, setBench] = React.useState(0);
   const [chart, setChart] = React.useState(0);
   const [built, setBuilt] = React.useState(0);
   const railRef = React.useRef<HTMLDivElement>(null);
@@ -76,7 +76,6 @@ export function Cerebrium() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const heroRef = React.useRef<HTMLElement>(null);
   const darkRef = React.useRef<HTMLElement>(null);
-  const [barsRef, barsOn] = useInView<HTMLDivElement>();
   const [chartRef, chartOn] = useInView<HTMLDivElement>();
 
   // Native scrolling (never blocked by the 3D); the WebGL scene is built in idle time after the first paint.
@@ -120,20 +119,8 @@ export function Cerebrium() {
   const go = (i: number) => { setFeat(i); cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "center" }); };
 
   const FEATS = es
-    ? ["Primer agente en 1 semana", "Un equipo, tres continentes", "Agentes dentro de tus herramientas", "Observabilidad de punta a punta"]
-    : ["First agent in 1 week", "One team, three continents", "Agents inside your tools", "End-to-end observability"];
-  const BENCH = [
-    { k: "MINDFULTECH", v: es ? "1 sem" : "1 wk", w: 8, c: "#bff5cf" },
-    { k: es ? "AGENCIA" : "AGENCY", v: es ? "6 sem" : "6 wks", w: 40, c: "#3dbe7d" },
-    { k: "IN-HOUSE", v: es ? "12 sem" : "12 wks", w: 72, c: "rgba(255,255,255,0.5)" },
-    { k: "OFFSHORE", v: es ? "16 sem" : "16 wks", w: 100, c: "rgba(255,255,255,0.3)" },
-  ];
-  const BENCH2 = [
-    { k: "MINDFULTECH", v: es ? "6 sem" : "6 wks", w: 24, c: "#bff5cf" },
-    { k: es ? "AGENCIA" : "AGENCY", v: es ? "14 sem" : "14 wks", w: 56, c: "#3dbe7d" },
-    { k: "IN-HOUSE", v: es ? "20 sem" : "20 wks", w: 80, c: "rgba(255,255,255,0.5)" },
-    { k: "OFFSHORE", v: es ? "24 sem" : "24 wks", w: 100, c: "rgba(255,255,255,0.3)" },
-  ];
+    ? ["Una operación agentizada", "Un equipo, tres continentes", "Agentes dentro de tus herramientas", "Observabilidad de punta a punta"]
+    : ["An agentized operation", "One team, three continents", "Agents inside your tools", "End-to-end observability"];
   const GOV = es
     ? [["Una persona firma", "Cada agente propone y una persona aprueba donde importa: pagos, contratos, salud. El criterio humano queda en el circuito."], ["Tus datos en tus herramientas", "Los agentes trabajan dentro de tu CRM, ERP y correo. Nada se copia a un sistema nuevo ni sale de tu región."], ["Aislamiento por agente", "Cada rol corre aislado, con sus propias credenciales y permisos mínimos. Un agente de ventas no ve finanzas."], ["Registro de auditoría", "Cada acción queda registrada: quién pidió, qué hizo el agente, quién aprobó. Exportable cuando lo necesites."]]
     : [["A person signs off", "Every agent proposes and a person approves where it matters: payments, contracts, health. Human judgment stays in the loop."], ["Your data in your tools", "Agents work inside your CRM, ERP and inbox. Nothing is copied into a new system or leaves your region."], ["Isolation per agent", "Each role runs isolated, with its own credentials and least privilege. A sales agent never sees finance."], ["Audit trail", "Every action is logged: who asked, what the agent did, who approved. Exportable whenever you need it."]];
@@ -188,12 +175,11 @@ export function Cerebrium() {
             </div>
             <div className={s.cards}>
               <div className={s.card} data-i={0} ref={(el) => { cardRefs.current[0] = el; }}>
-                <div className={s.stage}>
-                  <div className={s.tabs}><button type="button" className={bench === 0 ? s.on : ""} onClick={() => setBench(0)}>{es ? "Agente de IA" : "AI agent"}</button><button type="button" className={bench === 1 ? s.on : ""} onClick={() => setBench(1)}>{es ? "App web" : "Web app"}</button></div>
-                  <div className={`${s.bars} ${barsOn ? s.barsOn : ""}`} ref={barsRef}>{(bench === 0 ? BENCH : BENCH2).map((b) => <div key={b.k} className={s.bar}><span className={s.mono}>{b.k}</span><i style={{ ["--w" as string]: `${b.w}%`, ["--c" as string]: b.c }} /><b>{b.v}</b></div>)}</div>
+                <div className={s.stage} style={{ padding: 0, overflow: "hidden" }}>
+                  <AgentCity es={es} />
                 </div>
-                <h3>{es ? "En producción desde la primera semana." : "In production from the first week."}</h3>
-                <p>{es ? "Empezamos con el flujo que más duele, lo automatizamos con un agente y lo dejamos corriendo con una persona que aprueba. Sin reescribir tu sistema ni esperar a la gran plataforma." : "We start with the flow that hurts most, automate it with an agent and leave it running with a person approving. No rewriting your system, no waiting for the big platform."}</p>
+                <h3>{es ? "Toda tu operación, agentizada." : "Your whole operation, agentized."}</h3>
+                <p>{es ? "Ventas, soporte, facturación y operaciones reciben cada uno un agente. Se mueven entre tus sistemas como un equipo por una ciudad: los datos fluyen, el trabajo se hace y las luces siguen encendidas a las 3 AM. Y cuando algo requiere criterio, una persona firma." : "Sales, support, billing and operations each get an agent. They move between your systems like a team across a city: data flows, work gets done and the lights stay on at 3 AM. And when something needs judgment, a person signs off."}</p>
               </div>
               <div className={s.card} data-i={1} ref={(el) => { cardRefs.current[1] = el; }}>
                 <div className={s.stage}>
