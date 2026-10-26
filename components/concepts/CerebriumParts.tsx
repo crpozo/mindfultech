@@ -46,11 +46,23 @@ export function CbScene({ mode }: { mode: CbMode }) {
 export function CbNav({ active }: { active?: "home" | "services" | "work" | "company" | "blog" }) {
   const { lang, setLang } = useLang();
   const es = lang === "es";
+  // the logo goes to its colour version while a light section sits under the nav
+  const [onLight, setOnLight] = React.useState(false);
+  React.useEffect(() => {
+    const check = () => {
+      const light = document.elementsFromPoint(60, 44).some((el) => !!(el as HTMLElement).closest("[data-cb-light]"));
+      setOnLight(light);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => { window.removeEventListener("scroll", check); window.removeEventListener("resize", check); };
+  }, []);
   const items: [string, string, string][] = [["services", `${CB}/services`, es ? "Servicios" : "Services"], ["work", `${CB}/work`, es ? "Proyectos" : "Work"], ["office", "/office-demo", "AI Office"], ["company", `${CB}/company`, es ? "Empresa" : "Company"]];
   return (
     <header className={s.nav}>
       <div className={s.navIn}>
-        <Link href="/" aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
+        <Link href="/" aria-label="MindfulTech" className={onLight ? s.logoLight : ""}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
         <nav className={s.navLinks}>{items.map(([k, href, label]) => <Link key={k} href={href} className={active === k ? s.navOn : ""}>{label}</Link>)}</nav>
         <div className={s.navRight}>
           <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>

@@ -170,7 +170,7 @@ export function Cerebrium() {
       <div className={s.logos}><div className={s.marquee}><div className={s.marqueeTrack}>{[0, 1].map((k) => <div key={k} className={s.logosIn} aria-hidden={k === 1}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div>)}</div></div></div>
       <div className={s.dotBand}><Dots className={s.dots} squares /></div>
 
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={s.wrap}>
           <div className={s.whyHead}>
             <span className={`${s.mono} ${s.label}`}>{es ? "Por qué MindfulTech" : "Why MindfulTech"}</span>
@@ -255,7 +255,7 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <section className={s.light} style={{ display: "none" }}>
+      <section className={s.light} data-cb-light style={{ display: "none" }}>
         <div className={`${s.wrap} ${s.section}`} style={{ display: "none" }}>
           <div className={s.secHead}>
             <h2 className={s.h2}>{es ? "Construido con MindfulTech" : "Built with MindfulTech"}</h2>

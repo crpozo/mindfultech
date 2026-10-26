@@ -54,7 +54,7 @@ export function CbServices() {
   return (
     <CbPage mode="globe" active="services">
       <Banner mode="split" label={es ? "Servicios" : "Services"} title={es ? "Investigación, software y agentes de IA" : "Research, software and AI agents"} grad={es ? "agentes de IA" : "AI agents"} lead={es ? "Cuatro servicios, un solo equipo. Cada uno llega con investigación, documentación y gente que responde después del lanzamiento." : "Four services, one team. Each ships with research, documentation and people who answer after launch."} cta />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={s.wrap}>
           <div className={s.why} style={{ paddingTop: 96 }}>
             <div className={s.whyList}>
@@ -99,7 +99,7 @@ export function CbWork() {
   return (
     <CbPage mode="bands" active="work">
       <Banner mode="split" label={es ? "Proyectos" : "Work"} title={es ? "Entregado con clientes en tres continentes" : "Shipped with clients on three continents"} grad={es ? "tres continentes" : "three continents"} lead={es ? "Una década de productos en producción, de portales universitarios a comercio automatizado y agentes que facturan." : "A decade of products in production, from university portals to automated commerce and agents that bill."} cta />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
           <div className={s.secHead}>
             <h2 className={s.h2}><Split text={es ? "Casos de estudio" : "Case studies"} /></h2>
@@ -139,7 +139,7 @@ export function CbCompany() {
   return (
     <CbPage mode="columns" active="company">
       <Banner mode="wide" label={es ? "Empresa" : "Company"} title={es ? "Ayudamos a empresas a construir software con IA que la gente quiere" : "Enabling companies to build AI software people love"} grad={es ? "software con IA" : "build AI"} lead={es ? "En MindfulTech creemos que la IA va a cambiar cómo operan los negocios. Construimos el software y los agentes que hacen posible ese cambio, con investigación primero y una persona que firma donde importa. Somos un equipo pequeño y senior en Quito, trabajando para clientes de América y Europa desde 2016." : "At MindfulTech we believe AI will change how businesses operate. We build the software and the agents that make that shift possible, research first and with a person signing off where it matters. We're a small senior team in Quito, working for clients across the Americas and Europe since 2016."} />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
           <span className={`${s.mono} ${s.label}`}>{es ? "Sobre MindfulTech" : "About MindfulTech"}</span>
           <div className={s.about}>
@@ -169,7 +169,7 @@ export function CbCompany() {
           <div className={s.timeline}>{years.map(([y, t]) => <div key={y}><b>{y}</b><p>{t}</p></div>)}</div>
         </div>
       </section>
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
           <div className={s.contactGrid}>
             <CopyEmail label={es ? "Consultas generales" : "General inquiries"} email="info@mindfultech.ec" />
@@ -195,7 +195,7 @@ export function CbBlog() {
       <section className={s.hero} data-cb-hero style={{ minHeight: 0, paddingTop: 110, paddingBottom: 40 }}>
         <div className={s.wrap}><h1 className={s.h1} style={{ fontSize: "clamp(36px,4vw,56px)" }}><Split text={es ? "Notas desde el laboratorio" : "Notes from the lab"} /></h1></div>
       </section>
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`} style={{ paddingTop: 56 }}>
           <Link href={`/blog/${feat.slug}`} className={s.featPost}>
             <div className={s.featPostBg} style={{ background: feat.bg }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={feat.cover} alt="" width={800} height={500} /></div>

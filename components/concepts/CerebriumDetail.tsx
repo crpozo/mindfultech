@@ -44,7 +44,7 @@ export function CbCase({ slug }: { slug: string }) {
       <DetailBanner label={`${c.brand[lang]} / ${c.tag[lang].replace(/ · /g, " / ")}`} title={c.title[lang]} lead={c.body[lang]}
         primary={c.live ? <a href={c.live.href} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Ver sitio en vivo" : "Visit live site"} /></a> : <button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Solicitar caso de estudio" : "Request case study"} /></button>}
         secondary={<Link href="/work" className={`${s.btn} ${s.btnSolid}`}><Scramble text={es ? "Todos los proyectos" : "All projects"} /></Link>} />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
           <div className={s.card} style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div className={`${s.mockThumb}`} style={{ ["--tint" as string]: ["#2a1a3a", "#1a2a3a", "#1f2d1a", "#3a2a1a", "#1a1f3a", "#2a1a1a", "#1a2f2a"][i % 7], borderRadius: 12 }}>
@@ -88,7 +88,7 @@ export function CbService({ slug }: { slug: string }) {
       <DetailBanner label={d.tag} title={d.title} grad={grad} lead={d.subtitle}
         primary={<button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>}
         secondary={<Link href="/services" className={`${s.btn} ${s.btnSolid}`}><Scramble text={es ? "Todos los servicios" : "All services"} /></Link>} />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
           <div className={s.statRow}>{d.specs.map(([k, v]) => <div key={k}><span className={s.mono}>{k}</span><b style={{ fontSize: 26, fontWeight: 400, marginTop: 6 }}>{v}</b></div>)}</div>
           <div className={s.whyHead} style={{ paddingTop: 72, paddingBottom: 36 }}>
@@ -138,7 +138,7 @@ export function CbArticle({ slug }: { slug: string }) {
   return (
     <CbPage mode="bands" active="blog">
       <DetailBanner label={`${post.dateLabel[lang]} / ${post.tag[lang]} / ${post.readMins} ${es ? "min" : "min read"}`} title={post.title[lang]} lead={post.excerpt[lang]} />
-      <section className={s.light}>
+      <section className={s.light} data-cb-light>
         <div className={s.wrap} style={{ paddingTop: 0 }}>
           <div className={s.featPostBg} style={{ background: post.bg, borderRadius: 18, overflow: "hidden", marginTop: -40, position: "relative", zIndex: 3, maxHeight: 520 }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={post.cover} alt="" width={1600} height={900} /></div>
           <article className={s.article}>
