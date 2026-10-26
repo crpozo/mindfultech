@@ -122,8 +122,8 @@ export function Dots({ className, squares = false }: { className?: string; squar
           continue;
         }
         const px = x + dx * k * 0.18, py = y + dy * k * 0.18;
-        ctx.fillStyle = `rgba(230,232,239,${(squares ? 0.5 : 0.22) + k * 0.5})`;
-        ctx.beginPath(); ctx.arc(px, py, (1.1 + k * 1.6) * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(230,232,239,${(squares ? 0.5 : 0.08) + k * 0.6})`;
+        ctx.beginPath(); ctx.arc(px, py, (0.9 + k * 1.6) * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
       } }
       if (running) raf = requestAnimationFrame(draw);
     };
