@@ -60,7 +60,6 @@ const RIBBON_FRAG = /* glsl */ `
     /* soft rim on the long edges and film grain */
     float e = smoothstep(uEdgeW, 0.0, min(vUv.y, 1.0 - vUv.y));
     col += uEdge * e * 0.25;
-    col += (hash(gl_FragCoord.xy) - 0.5) * 0.02;
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -117,13 +116,13 @@ export function createBackground(canvas, opts = {}) {
   const reduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mode = opts.mode || "bands"; // bands (arches), globe (sliced core on the right), columns (tall vertical bands)
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance", logarithmicDepthBuffer: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance" });
   let dpr = Math.min(window.devicePixelRatio || 1, (typeof window !== "undefined" && window.innerWidth < 760) ? 1 : 1.25);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0b14, 0.04);
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 80);
+  const camera = new THREE.PerspectiveCamera(38, 1, 1, 60);
   camera.position.set(0, -1.5, 13);
 
   /* ribbons */
@@ -132,9 +131,9 @@ export function createBackground(canvas, opts = {}) {
   const mats = [];
   /* arches: they rise from below the fold, crest around the upper right third and dive back down */
   const archDefs = [
-    { pts: [[-1, -11, -1], [1.5, -5, -0.5], [4.2, 0.5, 0], [6.5, 3.6, -0.5], [9, 1, -1.5], [11, -6, -2.5], [12, -12, -3]], w: 2.4, th: 0.45, amp: 0.1, mid: accent, streak: 0.0 },
-    { pts: [[3.5, -12, -3.5], [5.5, -6, -3], [8, -0.5, -2.5], [10, 3, -3], [12, 0.5, -4], [13.5, -6, -5], [14, -12, -5.5]], w: 2.9, th: 0.55, amp: 0.12, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
-    { pts: [[-5, -12, -6], [-2.5, -7, -5.5], [1, -2.5, -5], [4, 0.2, -5.5], [7.5, -1.5, -6.5], [10.5, -6, -7.5], [12, -12, -8]], w: 2.2, th: 0.4, amp: 0.08, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
+    { pts: [[-1, -11, 0.5], [1.5, -5, 0.5], [4.2, 0.5, 0.5], [6.5, 3.6, 0.5], [9, 1, 0.5], [11, -6, 0.5], [12, -12, 0.5]], w: 2.4, th: 0.45, amp: 0.1, mid: accent, streak: 0.0 },
+    { pts: [[3.5, -12, -3.5], [5.5, -6, -3.5], [8, -0.5, -3.5], [10, 3, -3.5], [12, 0.5, -3.5], [13.5, -6, -3.5], [14, -12, -3.5]], w: 2.9, th: 0.55, amp: 0.12, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
+    { pts: [[-5, -12, -7.5], [-2.5, -7, -7.5], [1, -2.5, -7.5], [4, 0.2, -7.5], [7.5, -1.5, -7.5], [10.5, -6, -7.5], [12, -12, -7.5]], w: 2.2, th: 0.4, amp: 0.08, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
   ];
   /* columns: tall bands leaning to the right, like a curtain (the company page) */
   const columnDefs = Array.from({ length: 6 }, (_, i) => {
