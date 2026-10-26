@@ -189,12 +189,12 @@ export function createBackground(canvas, opts = {}) {
   if (mode === "globe") { globe.position.set(3.6, -0.8, -2); globe.scale.setScalar(1.45); }
 
   /* particles */
-  const N = 320;
+  const N = 420;
   const pp = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { pp[i * 3] = (Math.random() - 0.5) * 30; pp[i * 3 + 1] = (Math.random() - 0.5) * 20; pp[i * 3 + 2] = -Math.random() * 12; }
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pp, 3));
-  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: edge, size: 0.05, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
+  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: new THREE.Color("#e6fff0"), size: 0.075, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   scene.add(particles);
 
   /* post */
