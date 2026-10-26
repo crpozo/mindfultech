@@ -150,10 +150,10 @@ export function Cerebrium() {
         </div>
         <div className={s.heroIn} style={{ opacity: cine > 0.02 ? 0 : 1, transition: "opacity 0.25s" }}>
           <div>
-            <h1 className={s.h1}>{es ? <><Split text="Software con IA" /><br /><Split text="que" delay={240} /> <span className={s.grad}><Split text="escala" delay={300} /></span><br /><Split text="contigo" delay={420} /></> : <><Split text="AI software" /><br /><Split text="that" delay={240} /> <span className={s.grad}><Split text="scales" delay={300} /></span><br /><Split text="with you" delay={420} /></>}</h1>
+            <h1 className={s.h1}>{es ? <><Split text="Agentes de IA que" /><br /><Split text="hacen el" delay={240} /> <span className={s.grad}><Split text="trabajo" delay={300} /></span><br /><Split text="repetitivo" delay={420} /></> : <><Split text="AI agents that" /><br /><Split text="do the" delay={240} /> <span className={s.grad}><Split text="repetitive" delay={300} /></span><br /><Split text="work" delay={420} /></>}</h1>
           </div>
           <div className={s.heroSide}>
-            <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
+            <p>{es ? "Facturación, soporte, ventas y operaciones: un agente por área, conectado a tu CRM, ERP y correo, trabajando 24/7. En una semana el primero está en producción. Hoy uno factura para una clínica en EE. UU. sin un humano en el ciclo, salvo para firmar." : "Billing, support, sales and operations: one agent per area, plugged into your CRM, ERP and inbox, working 24/7. The first one is in production within a week. Today one runs billing for a US clinic with no human in the loop except to sign off."}</p>
             <div className={s.ctas}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
           </div>
         </div>
