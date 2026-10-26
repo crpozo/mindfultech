@@ -76,7 +76,7 @@ const SHELL_FRAG = /* glsl */ `
 
 /* a band with real thickness along a curve: width `w` across the binormal, thickness `th` along the normal.
    Four faces (top, bottom, two sides); uv.x runs along the curve, uv.y across; aFace 0 = top, 1 = bottom, 2 = side. */
-function bandGeometry(curve, w, th, segs = 260) {
+function bandGeometry(curve, w, th, segs = 150) {
   const frames = curve.computeFrenetFrames(segs, false);
   const pos = [], nor = [], uv = [], face = [], idx = [];
   let v = 0;
@@ -117,7 +117,8 @@ export function createBackground(canvas, opts = {}) {
   const reduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: false, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  let dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+  renderer.setPixelRatio(dpr);
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0b0b14, 0.04);
@@ -150,14 +151,14 @@ export function createBackground(canvas, opts = {}) {
   globe.visible = false;
   scene.add(globe);
   const shellMat = new THREE.ShaderMaterial({ vertexShader: SHELL_VERT, fragmentShader: SHELL_FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uColor: { value: accent }, uAlpha: { value: 0.9 } } });
-  globe.add(new THREE.Mesh(new THREE.SphereGeometry(3.6, 64, 64), shellMat));
+  globe.add(new THREE.Mesh(new THREE.SphereGeometry(3.6, 48, 32), shellMat));
   const rings = new THREE.Group();
   for (let i = -3; i <= 3; i++) {
     const y = i * 0.78;
     const r = Math.sqrt(Math.max(3.1 * 3.1 - y * y, 0.3));
     const mat = new THREE.ShaderMaterial({ vertexShader: RIBBON_VERT, fragmentShader: RIBBON_FRAG, side: THREE.FrontSide, uniforms: { uTime: { value: i }, uAmp: { value: 0 }, uBase: { value: base }, uMid: { value: accent.clone().multiplyScalar(0.7 + 0.1 * Math.abs(i)) }, uEdge: { value: edge }, uEdgeW: { value: 0.12 }, uStreak: { value: (i + 3) / 7 } } });
     mats.push(mat);
-    const ringGeo = new THREE.TorusGeometry(r, 0.26, 10, 120);
+    const ringGeo = new THREE.TorusGeometry(r, 0.26, 8, 80);
     ringGeo.setAttribute("aFace", new THREE.Float32BufferAttribute(new Float32Array(ringGeo.attributes.position.count), 1));
     const ring = new THREE.Mesh(ringGeo, mat);
     ring.rotation.x = Math.PI / 2;
@@ -169,7 +170,7 @@ export function createBackground(canvas, opts = {}) {
   globe.position.set(2.6, -2.2, -2.5);
 
   /* particles */
-  const N = 500;
+  const N = 320;
   const pp = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { pp[i * 3] = (Math.random() - 0.5) * 30; pp[i * 3 + 1] = (Math.random() - 0.5) * 20; pp[i * 3 + 2] = -Math.random() * 12; }
   const pGeo = new THREE.BufferGeometry();
@@ -184,13 +185,13 @@ export function createBackground(canvas, opts = {}) {
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
-  const state = { scroll: 0, globe: 0, px: 0, py: 0, tx: 0, ty: 0, running: true };
+  const state = { scroll: 0, globe: 0, px: 0, py: 0, tx: 0, ty: 0, hold: 0, h: 0, running: true };
   const resize = () => {
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
+    renderer.setPixelRatio(dpr); composer.setPixelRatio(dpr);
     renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
     bloom.resolution.set(w, h);
     const narrow = w < 760;
-    ribbons.scale.setScalar(narrow ? 0.72 : 1);
     ribbons.position.x = narrow ? -3.5 : -1.5;
     globe.position.x = narrow ? 0 : 2.6;
     globe.scale.setScalar(narrow ? 0.8 : 1);
@@ -200,22 +201,30 @@ export function createBackground(canvas, opts = {}) {
   const onVis = () => { state.running = !document.hidden; if (state.running) loop(); };
   document.addEventListener("visibilitychange", onVis);
 
+  renderer.compile(scene, camera);
   const clock = new THREE.Clock();
-  let raf = 0;
+  let raf = 0, frames = 0, slow = 0;
   function loop() {
     if (!state.running) return;
     raf = requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), 0.05);
+    // adaptive quality: if the first seconds run slow, drop the pixel ratio and the bloom once
+    if (frames < 120) { frames++; if (dt > 0.03) slow++; if (frames === 120 && slow > 50) { dpr = Math.max(0.7, dpr * 0.65); bloom.strength = 0.5; resize(); } }
     const t = clock.elapsedTime;
     state.px += (state.tx - state.px) * 0.06;
     state.py += (state.ty - state.py) * 0.06;
-    for (const m of mats) m.uniforms.uTime.value += dt;
+    // the hold: camera pushes in, bands twist and race their streak, bloom pumps, particles rush
+    state.h += (state.hold - state.h) * 0.12;
+    const H = state.h;
+    for (const m of mats) m.uniforms.uTime.value += dt * (1 + H * 6);
+    bloom.strength = 0.75 + H * 1.1;
     // ribbons: drift down and tilt as the hero scrolls away, tilt with the pointer
     const s = state.scroll;
     ribbons.position.y = -1.8 - s * 6.5;
-    ribbons.rotation.z = -0.08 * s + state.px * 0.06;
-    ribbons.rotation.x = state.py * 0.08;
-    ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04;
+    ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.25;
+    ribbons.rotation.x = state.py * 0.08 + H * 0.35;
+    ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.6;
+    ribbons.scale.setScalar((canvas.clientWidth < 760 ? 0.72 : 1) * (1 + H * 0.12));
     // globe: scale and fade with the dark-section progress
     const g = state.globe;
     globe.visible = g > 0.01;
@@ -228,7 +237,10 @@ export function createBackground(canvas, opts = {}) {
     particles.rotation.y = t * 0.01;
     particles.position.y = -s * 1.5 + Math.sin(t * 0.3) * 0.1;
     camera.position.x = state.px * 0.3;
-    camera.position.y = state.py * 0.2;
+    camera.position.y = state.py * 0.2 + H * 0.6;
+    camera.position.z = 13 - H * 3.2;
+    camera.fov = 38 + H * 10; camera.updateProjectionMatrix();
+    particles.scale.setScalar(1 + H * 0.5);
     camera.lookAt(0, 0, 0);
     composer.render();
   }
@@ -238,6 +250,7 @@ export function createBackground(canvas, opts = {}) {
     setScroll(p) { state.scroll = Math.max(0, Math.min(1.4, p)); },
     setGlobe(g) { state.globe = Math.max(0, Math.min(1, g)); },
     setPointer(x, y) { state.tx = x; state.ty = y; },
+    setHold(p) { state.hold = Math.max(0, Math.min(1, p)); },
     dispose() {
       state.running = false; cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize); document.removeEventListener("visibilitychange", onVis);

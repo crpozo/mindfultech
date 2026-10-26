@@ -56,33 +56,41 @@ export function Scramble({ text, className }: { text: string; className?: string
   return <span className={className} onMouseEnter={run} onFocus={run}>{shown}</span>;
 }
 
-export function HoldCursor({ label, onComplete, holdMs = 900 }: { label: string; onComplete: () => void; holdMs?: number }) {
+export function HoldCursor({ label, onProgress, holdMs = 1400 }: { label: string; onProgress: (p: number) => void; holdMs?: number }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   const [p, setP] = React.useState(0);
-  const start = React.useRef(0); const raf = React.useRef(0);
+  const prog = React.useRef(0); const dir = React.useRef(0); const raf = React.useRef(0); const last = React.useRef(0);
   React.useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches; if (!fine) return;
     const host = ref.current?.parentElement; if (!host) return;
     const move = (e: PointerEvent) => { const r = host.getBoundingClientRect(); const el = ref.current; if (!el) return; el.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`; };
-    const tick = () => { const k = Math.min(1, (performance.now() - start.current) / holdMs); setP(k); if (k >= 1) { onComplete(); setP(0); return; } raf.current = requestAnimationFrame(tick); };
-    const down = (e: PointerEvent) => { if ((e.target as HTMLElement).closest("a,button")) return; start.current = performance.now(); raf.current = requestAnimationFrame(tick); };
-    const up = () => { cancelAnimationFrame(raf.current); setP(0); };
+    // the hold charges up while pressed and eases back when released; the scene reads the progress
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last.current) / 1000); last.current = now;
+      const v = dir.current > 0 ? dt * (1000 / holdMs) : -dt * 1.8;
+      prog.current = Math.max(0, Math.min(1, prog.current + v));
+      setP(prog.current); onProgress(prog.current);
+      if (dir.current > 0 || prog.current > 0) raf.current = requestAnimationFrame(tick);
+    };
+    const start = () => { cancelAnimationFrame(raf.current); last.current = performance.now(); raf.current = requestAnimationFrame(tick); };
+    const down = (e: PointerEvent) => { if ((e.target as HTMLElement).closest("a,button")) return; dir.current = 1; start(); };
+    const up = () => { if (dir.current === 1) { dir.current = -1; start(); } };
     const enter = () => setVisible(true); const leave = () => { setVisible(false); up(); };
-    host.addEventListener("pointermove", move); host.addEventListener("pointerdown", down); host.addEventListener("pointerup", up);
+    host.addEventListener("pointermove", move); host.addEventListener("pointerdown", down); window.addEventListener("pointerup", up);
     host.addEventListener("pointerenter", enter); host.addEventListener("pointerleave", leave);
     host.classList.add("cb-nocursor");
-    return () => { host.removeEventListener("pointermove", move); host.removeEventListener("pointerdown", down); host.removeEventListener("pointerup", up); host.removeEventListener("pointerenter", enter); host.removeEventListener("pointerleave", leave); host.classList.remove("cb-nocursor"); cancelAnimationFrame(raf.current); };
-  }, [holdMs, onComplete]);
+    return () => { host.removeEventListener("pointermove", move); host.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up); host.removeEventListener("pointerenter", enter); host.removeEventListener("pointerleave", leave); host.classList.remove("cb-nocursor"); cancelAnimationFrame(raf.current); };
+  }, [holdMs, onProgress]);
   const R = 46, C = 2 * Math.PI * R;
   return (
-    <div ref={ref} className={`cb-cursor ${visible ? "on" : ""}`} aria-hidden="true">
-      <svg viewBox="0 0 100 100" width="100" height="100">
+    <div ref={ref} className={`cb-cursor ${visible ? "on" : ""}`} aria-hidden="true" style={{ ["--p" as string]: p }}>
+      <svg viewBox="0 0 100 100" width="100" height="100" style={{ transform: `scale(${1 + p * 0.35})` }}>
         <circle cx="50" cy="50" r={R} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
         <circle cx="50" cy="50" r={R} fill="none" stroke="#bff5cf" strokeWidth="2" strokeDasharray={C} strokeDashoffset={C * (1 - p)} transform="rotate(-90 50 50)" />
-        <circle cx="34" cy="50" r="1.8" fill="#fff" /><circle cx="66" cy="50" r="1.8" fill="#fff" />
+        <circle cx={34 + p * 10} cy="50" r="1.8" fill="#fff" /><circle cx={66 - p * 10} cy="50" r="1.8" fill="#fff" />
       </svg>
-      <span>{label}</span>
+      <span>{p > 0.98 ? "" : label}</span>
     </div>
   );
 }

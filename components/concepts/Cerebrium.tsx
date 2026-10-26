@@ -6,7 +6,6 @@ import { useLang } from "@/components/i18n";
 import { POSTS } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
-import { useRouter } from "next/navigation";
 import { Split, Scramble, HoldCursor, Dots, Typewriter, useInView } from "./CerebriumFx";
 import s from "./cerebrium.module.css";
 
@@ -68,41 +67,39 @@ export function Cerebrium() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const heroRef = React.useRef<HTMLElement>(null);
   const darkRef = React.useRef<HTMLElement>(null);
-  const router = useRouter();
   const [termRef, termOn] = useInView<HTMLPreElement>();
   const [barsRef, barsOn] = useInView<HTMLDivElement>();
   const [chartRef, chartOn] = useInView<HTMLDivElement>();
 
-  // WebGL background + smooth scroll; both are torn down on unmount
+  // Native scrolling (never blocked by the 3D); the WebGL scene is built in idle time after the first paint.
+  const bgRef = React.useRef<{ setScroll: (p: number) => void; setGlobe: (g: number) => void; setPointer: (x: number, y: number) => void; setHold: (p: number) => void; dispose: () => void } | null>(null);
   React.useEffect(() => {
-    let bg: { setScroll: (p: number) => void; setGlobe: (g: number) => void; setPointer: (x: number, y: number) => void; dispose: () => void } | null = null;
-    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
-    let raf = 0, alive = true;
-    const onMove = (e: PointerEvent) => bg?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    let raf = 0, alive = true, idle = 0;
+    const onMove = (e: PointerEvent) => bgRef.current?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
     const feed = () => {
-      if (!bg) return;
+      const bg = bgRef.current; if (!bg) return;
       const h = heroRef.current?.offsetHeight || window.innerHeight;
       bg.setScroll(window.scrollY / h);
       const d = darkRef.current;
       if (d) { const r = d.getBoundingClientRect(); const vh = window.innerHeight; const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
     };
-    (async () => {
-      const [{ createBackground }, { default: Lenis }] = await Promise.all([import("./cerebriumScene.js"), import("lenis")]);
+    const loop = () => { feed(); raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop);
+    const buildScene = async () => {
+      const { createBackground } = await import("./cerebriumScene.js");
       if (!alive || !canvasRef.current) return;
-      bg = createBackground(canvasRef.current, { accent: "#2f9c66", edge: "#bff5cf", base: "#0a2a1b" });
-      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
-        const loop = (t: number) => { lenis?.raf(t); feed(); raf = requestAnimationFrame(loop); };
-        raf = requestAnimationFrame(loop);
-      } else {
-        const loop = () => { feed(); raf = requestAnimationFrame(loop); };
-        raf = requestAnimationFrame(loop);
-      }
+      bgRef.current = createBackground(canvasRef.current, { accent: "#2f9c66", edge: "#bff5cf", base: "#0a2a1b" });
       window.addEventListener("pointermove", onMove);
-    })();
-    return () => { alive = false; cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); lenis?.destroy(); bg?.dispose(); };
+    };
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    if (typeof w.requestIdleCallback === "function") idle = w.requestIdleCallback(() => { buildScene(); }, { timeout: 1500 }); else idle = window.setTimeout(buildScene, 300) as unknown as number;
+    return () => {
+      alive = false; cancelAnimationFrame(raf);
+      if (typeof w.cancelIdleCallback === "function") w.cancelIdleCallback(idle); else window.clearTimeout(idle);
+      window.removeEventListener("pointermove", onMove); bgRef.current?.dispose(); bgRef.current = null;
+    };
   }, []);
-  const openDemo = React.useCallback(() => router.push("/office-demo"), [router]);
+  const onHold = React.useCallback((p: number) => bgRef.current?.setHold(p), []);
 
   React.useEffect(() => { const id = window.setInterval(() => setWord((w) => (w + 1) % 3), 1800); return () => window.clearInterval(id); }, []);
   React.useEffect(() => { const id = window.setInterval(() => setPin((p) => PINS[(PINS.findIndex((x) => x.id === p) + 1) % PINS.length].id), 1600); return () => window.clearInterval(id); }, []);
@@ -161,7 +158,7 @@ export function Cerebrium() {
       </header>
 
       <section className={s.hero} ref={heroRef}>
-        <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onComplete={openDemo} />
+        <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onProgress={onHold} />
         <div className={s.words} aria-hidden="true">{WORDS[lang].map((w, i) => <span key={w} className={word === i ? s.on : ""}>{w}</span>)}</div>
         <div className={s.heroIn}>
           <div>
