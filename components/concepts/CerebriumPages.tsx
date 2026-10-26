@@ -104,14 +104,18 @@ export function CbWork() {
           <div className={s.secHead}>
             <h2 className={s.h2}><Split text={es ? "Casos de estudio" : "Case studies"} /></h2>
           </div>
-          <div className={s.cases}>
-            {list.map((c) => (
-              <Link key={c.id} href={`/work/${c.id}`} className={s.caseCard}>
-                <div className={s.thumb} style={{ aspectRatio: "16 / 9", borderRadius: 8, overflow: "hidden", background: "#0f0f1c" }}>{c.image && /* eslint-disable-next-line @next/next/no-img-element */ <img src={c.image} alt="" width={1200} height={675} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}</div>
-                <div className={s.tags}>{c.tag[lang].split(" · ").slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
-                <b>{c.title[lang]}</b>
-                <div className={s.caseStats}>{c.stats.slice(0, 3).map(([v, l]) => <div key={l.en}><b>{typeof v === "string" ? v : v[lang]}</b><small>{l[lang]}</small></div>)}</div>
-                <span style={{ color: "#1f7a4d", fontSize: 14 }}>{es ? "Leer el caso →" : "Read case study →"}</span>
+          <div className={s.workGrid}>
+            {list.map((c, i) => (
+              <Link key={c.id} href={`/work/${c.id}`} className={s.workCard}>
+                <div className={s.mockThumb} style={{ ["--tint" as string]: ["#2a1a3a", "#1a2a3a", "#1f2d1a", "#3a2a1a", "#1a1f3a", "#2a1a1a", "#1a2f2a"][i % 7], borderRadius: 12, aspectRatio: "16 / 10" }}>
+                  {c.image ? <span className={s.win}><i /><i /><i />{/* eslint-disable-next-line @next/next/no-img-element */}<img src={c.image} alt="" width={1200} height={675} loading="lazy" /></span> : <span className={s.mono} style={{ color: "#8a8fa6" }}>{es ? "FOTO PRÓXIMAMENTE" : "PHOTO COMING SOON"}</span>}
+                </div>
+                <div className={s.workBody}>
+                  <div className={s.workTop}><span className={s.mono}>{c.brand[lang]}</span><span className={s.tags}>{c.tag[lang].split(" · ").slice(0, 2).map((t) => <span key={t}>{t}</span>)}</span></div>
+                  <b>{c.title[lang]}</b>
+                  <div className={s.workStats}>{c.stats.slice(0, 3).map(([v, l]) => <div key={l.en}><b>{typeof v === "string" ? v : v[lang]}</b><small>{l[lang]}</small></div>)}</div>
+                  <span className={s.workFoot}><span>{es ? "Leer el caso" : "Read case study"}</span><span>→</span></span>
+                </div>
               </Link>
             ))}
           </div>
