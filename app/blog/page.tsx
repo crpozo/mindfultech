@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { BlogPage } from "@/components/site/BlogPage";
+import { CbBlog } from "@/components/concepts/CerebriumPages";
 
 export const metadata: Metadata = {
-  title: "Blog: MindfulTech",
-  description: "Notes on AI agents, engineering, and how MindfulTech builds software people trust: the AI Management Office, case studies, and our research playbook.",
+  title: "MindfulTech",
+  description: "Notes on AI agents, engineering, and how MindfulTech builds software people trust.",
 };
 
-export default function BlogRoute() {
-  return <BlogPage />;
+export default function Route() {
+  return <CbBlog />;
 }

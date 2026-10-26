@@ -56,7 +56,7 @@ export function Scramble({ text, className }: { text: string; className?: string
   return <span className={className} onMouseEnter={run} onFocus={run}>{shown}</span>;
 }
 
-export function HoldCursor({ label, onProgress, holdMs = 3600 }: { label: string; onProgress: (p: number) => void; holdMs?: number }) {
+export function HoldCursor({ label, onProgress, holdMs = 4400 }: { label: string; onProgress: (p: number) => void; holdMs?: number }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   const [p, setP] = React.useState(0);

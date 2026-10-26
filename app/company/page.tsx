@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { CompanyPage } from "@/components/site/CompanyPage";
+import { CbCompany } from "@/components/concepts/CerebriumPages";
 
 export const metadata: Metadata = {
-  title: "Company: MindfulTech",
-  description: "A software lab focused on people.",
+  title: "MindfulTech",
+  description: "A software lab in Quito enabling companies to build AI software people love.",
 };
 
-export default function CompanyRoute() {
-  return <CompanyPage />;
+export default function Route() {
+  return <CbCompany />;
 }

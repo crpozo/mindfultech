@@ -15,10 +15,12 @@ const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq
 export function SiteChrome() {
   const pathname = usePathname();
   if (PRIVATE.some((p) => pathname?.startsWith(p))) return null;
+  const norm = (pathname || "/").replace(/\/+$/, "") || "/";
+  const dark = ["/", "/services", "/work", "/company", "/blog"].includes(norm);
   return (
     <>
-      <SiteFooter />
-      <WhatsAppBubble />
+      {!dark && <SiteFooter />}
+      {!dark && <WhatsAppBubble />}
       <PageLoader />
       <ContactForm />
     </>

@@ -152,7 +152,7 @@ export function Cerebrium() {
       <section className={s.hero} ref={heroRef}>
         <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onProgress={onHold} />
         <div className={s.cine} style={{ opacity: cine > 0.02 ? 1 : 0 }} aria-hidden="true">
-          {(es ? ["Rápido", "Escala", "Global"] : ["Quickly", "Scale", "Globally"]).map((w, i) => { const k = Math.max(0, Math.min(1, cine * 3 - i)); const on = cine * 3 >= i && cine * 3 < i + 1 || (i === 2 && cine >= 1); return <span key={w} className={`${s.cineWord} ${s[`cw${i}`]}`} style={{ opacity: on ? 1 : 0, transform: `translateY(${(1 - k) * 30}px)` }}>{w}</span>; })}
+          {(es ? ["Rápido", "Escala", "Global"] : ["Quickly", "Scale", "Globally"]).map((w, i) => { const ph = cine * 4; const k = Math.max(0, Math.min(1, ph - i)); const on = ph >= i && ph < i + 1; return <span key={w} className={`${s.cineWord} ${s[`cw${i}`]}`} style={{ opacity: on ? 1 : 0, transform: `translateY(${(1 - k) * 30}px)` }}>{w}</span>; })}
         </div>
         <div className={s.heroIn} style={{ opacity: cine > 0.02 ? 0 : 1, transition: "opacity 0.25s" }}>
           <div>

@@ -9,7 +9,7 @@ import s from "./cerebrium.module.css";
 /* Shared chrome for the Cerebrium concept pages: the fixed WebGL scene (three modes), the nav and the footer.
    CbPage wires scroll progress to the scene from data attributes, so pages need no refs. */
 
-export const CB = "/concept/cerebrium";
+export const CB = "";
 export type CbMode = "bands" | "globe" | "columns";
 
 export function CbScene({ mode }: { mode: CbMode }) {
@@ -49,7 +49,7 @@ export function CbNav({ active }: { active?: "home" | "services" | "work" | "com
   return (
     <header className={s.nav}>
       <div className={s.navIn}>
-        <Link href={CB} aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
+        <Link href="/" aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
         <nav className={s.navLinks}>{items.map(([k, href, label]) => <Link key={k} href={href} className={active === k ? s.navOn : ""}>{label}</Link>)}</nav>
         <div className={s.navRight}>
           <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
@@ -75,7 +75,7 @@ export function CbFooter() {
           </div>
           <div className={s.footCols}>
             <div><span>{es ? "Servicios" : "Services"}</span><Link href={`${CB}/services#ux`}>{es ? "Diseño UX" : "UX Design"}</Link><Link href={`${CB}/services#apps`}>{es ? "Apps web y móviles" : "Web & Mobile Apps"}</Link><Link href={`${CB}/services#custom`}>{es ? "Software a medida" : "Custom Software"}</Link><Link href={`${CB}/services#ai`}>{es ? "IA y automatización" : "AI & Automation"}</Link></div>
-            <div><span>MindfulTech</span><Link href={`${CB}/work`}>{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href={`${CB}/company`}>{es ? "Empresa" : "Company"}</Link><Link href={`${CB}/blog`}>Blog</Link><a href="mailto:carlos@mindfultech.ec">{es ? "Contacto" : "Contact"}</a><Link href="/concept">{es ? "Conceptos" : "Concepts"}</Link></div>
+            <div><span>MindfulTech</span><Link href={`${CB}/work`}>{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href={`${CB}/company`}>{es ? "Empresa" : "Company"}</Link><Link href={`${CB}/blog`}>Blog</Link><a href="mailto:carlos@mindfultech.ec">{es ? "Contacto" : "Contact"}</a></div>
           </div>
         </div>
         <div className={s.footClose}>

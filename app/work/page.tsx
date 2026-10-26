@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { WorkPage } from "@/components/site/WorkPage";
+import { CbWork } from "@/components/concepts/CerebriumPages";
 
 export const metadata: Metadata = {
-  title: "Work: MindfulTech",
+  title: "MindfulTech",
   description: "Case studies: real teams, measured outcomes.",
 };
 
-export default function WorkRoute() {
-  return <WorkPage />;
+export default function Route() {
+  return <CbWork />;
 }

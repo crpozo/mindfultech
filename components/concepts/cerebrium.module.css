@@ -1,7 +1,7 @@
 /* Concept 06, "Cerebrium" (after cerebrium.ai): deep navy, glowing ribbons, a sans headline with one gradient word,
    mono labels with a coloured dot, a light "why" section with a sticky feature list and product cards, a dark
    governance block, case cards, a feature cloud and the blog. Accent is MindfulTech green; swap --acc for pink. */
-.root { position: relative; isolation: isolate; --navy: #0b0b14; --navy2: #12121f; --acc: #3dbe7d; --acc2: #bff5cf; --ink: #0e1013; --paper: #f4f5f7; --line: rgba(255, 255, 255, 0.1); background: var(--navy); color: #fff; font-family: var(--font-outfit), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.root { position: relative; isolation: isolate; overflow-x: clip; --navy: #0b0b14; --navy2: #12121f; --acc: #3dbe7d; --acc2: #bff5cf; --ink: #0e1013; --paper: #f4f5f7; --line: rgba(255, 255, 255, 0.1); background: var(--navy); color: #fff; font-family: var(--font-outfit), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 .root a { color: inherit; text-decoration: none; }
 .mono { font-family: var(--font-jbmono), monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
 .wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
@@ -9,13 +9,15 @@
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: transparent; border-bottom: 0; pointer-events: none; }
 .nav > * { pointer-events: auto; }
 .navIn { display: flex; align-items: center; gap: 28px; padding: 20px 40px; max-width: 1360px; margin: 0 auto; }
-.navIn img { height: 40px; width: auto; filter: brightness(0) invert(1); mix-blend-mode: difference; }
-.navLinks { display: flex; gap: 6px; margin-left: auto; padding: 8px 10px; border-radius: 8px; background: rgba(18, 18, 31, 0.78); backdrop-filter: blur(10px); font-family: var(--font-jbmono), monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #e6e8ef; }
-.navLinks a { padding: 10px 14px; border-radius: 6px; }
+.navIn img { height: 46px; width: auto; filter: brightness(0) invert(1); mix-blend-mode: difference; }
+.navLinks { display: flex; gap: 10px; margin-left: auto; padding: 0 14px; height: 66px; align-items: center; border-radius: 10px; background: rgba(18, 18, 31, 0.82); backdrop-filter: blur(12px); font-family: var(--font-jbmono), monospace; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+.navLinks a { padding: 12px 16px; border-radius: 6px; }
 .navLinks a.navOn { text-decoration: underline; text-underline-offset: 4px; }
 .navLinks a:hover { color: #fff; }
-.navRight { margin-left: 10px; display: flex; gap: 10px; align-items: center; }
-.navRight .btnGhost { background: rgba(18, 18, 31, 0.78); backdrop-filter: blur(10px); }
+.navRight { margin-left: 14px; display: flex; gap: 14px; align-items: center; }
+.navRight .btn { height: 66px; padding: 0 28px; border-radius: 10px; font-size: 14px; letter-spacing: 0.06em; }
+.navRight .btnGhost { background: #dfe4ea; color: #1d2a5a; border-color: transparent; }
+.navRight .btnGhost:hover { background: #fff; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 7px; font-family: var(--font-jbmono), monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: transform 0.15s, background 0.15s; }
 .btn:hover { transform: translateY(-1px); }
 .btnAcc { background: var(--acc); color: var(--ink); }
@@ -130,6 +132,10 @@
 @media (max-width: 960px) {
   .wrap, .navIn, .darkIn, .heroIn, .logosIn, .footer, .cta { padding-left: 20px; padding-right: 20px; }
   .navLinks { display: none; }
+  .navIn { padding: 14px 16px; gap: 10px; }
+  .navIn img { height: 36px; }
+  .navRight { margin-left: auto; gap: 8px; }
+  .navRight .btn { height: 44px; padding: 0 14px; font-size: 11px; }
   .nav { position: sticky; background: rgba(11, 11, 20, 0.8); backdrop-filter: blur(10px); }
   .heroIn { padding-bottom: 72px; }
   .heroIn { grid-template-columns: 1fr; gap: 28px; padding-top: 120px; }
