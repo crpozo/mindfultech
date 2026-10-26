@@ -9,12 +9,13 @@
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: transparent; border-bottom: 0; pointer-events: none; }
 .nav > * { pointer-events: auto; }
 .navIn { display: flex; align-items: center; gap: 28px; padding: 20px 40px; max-width: 1360px; margin: 0 auto; }
-.navIn img { height: 28px; width: auto; filter: brightness(0) invert(1); }
+.navIn img { height: 40px; width: auto; filter: brightness(0) invert(1); mix-blend-mode: difference; }
 .navLinks { display: flex; gap: 6px; margin-left: auto; padding: 8px 10px; border-radius: 8px; background: rgba(18, 18, 31, 0.78); backdrop-filter: blur(10px); font-family: var(--font-jbmono), monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #e6e8ef; }
 .navLinks a { padding: 10px 14px; border-radius: 6px; }
 .navLinks a.navOn { text-decoration: underline; text-underline-offset: 4px; }
 .navLinks a:hover { color: #fff; }
 .navRight { margin-left: 10px; display: flex; gap: 10px; align-items: center; }
+.navRight .btnGhost { background: rgba(18, 18, 31, 0.78); backdrop-filter: blur(10px); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 7px; font-family: var(--font-jbmono), monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: transform 0.15s, background 0.15s; }
 .btn:hover { transform: translateY(-1px); }
 .btnAcc { background: var(--acc); color: var(--ink); }
@@ -37,7 +38,7 @@
 .words span.on { opacity: 1; background: linear-gradient(90deg, var(--acc2), var(--acc)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 /* logos */
 .logos { border-top: 1px solid rgba(255, 255, 255, 0.18); background: transparent; position: relative; }
-.logosIn { display: flex; justify-content: space-between; align-items: center; gap: 40px; padding: 26px 40px; max-width: 1280px; margin: 0 auto; flex-wrap: wrap; }
+.logosIn { display: flex; align-items: center; gap: 96px; padding: 26px 48px; flex: none; }
 .logosIn img { height: 28px; width: auto; filter: brightness(0) invert(1); opacity: 0.95; }
 .logosIn b { font-weight: 600; font-size: 20px; color: #fff; white-space: nowrap; }
 /* light why section */
@@ -255,3 +256,27 @@
   .specGrid, .whyRow { grid-template-columns: 1fr; }
   .copyRow { grid-template-columns: 1fr; gap: 8px; }
 }
+
+.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marqueeTrack { display: flex; width: max-content; animation: cbMarquee 38s linear infinite; }
+.marquee:hover .marqueeTrack { animation-play-state: paused; }
+@keyframes cbMarquee { to { transform: translateX(-50%); } }
+.arrows { display: flex; gap: 8px; }
+.arrows button { width: 56px; height: 56px; border-radius: 10px; border: 1px solid #d9dbe5; background: #fff; font-size: 20px; cursor: pointer; color: var(--ink); }
+.arrows button:hover { background: var(--ink); color: #fff; }
+.rail { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 0 24px; margin: 36px -40px 0; padding-left: 40px; padding-right: 40px; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.railCard { flex: 0 0 min(440px, 82vw); scroll-snap-align: start; background: #e5ebf3; border-radius: 16px; padding: 28px; min-height: 520px; display: flex; flex-direction: column; gap: 16px; color: #0e1013; position: relative; }
+.railCard .tags { position: absolute; left: 28px; top: 24px; display: flex; gap: 8px; }
+.railCard .tags span { font-family: var(--font-jbmono), monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #3b3f55; }
+.railLogo { flex: 1; display: grid; place-items: center; min-height: 220px; }
+.railLogo img { max-height: 48px; max-width: 70%; filter: brightness(0) saturate(100%) invert(12%) sepia(30%) saturate(1200%) hue-rotate(190deg); opacity: 0.9; }
+.railLogo b { font-size: 34px; font-weight: 600; color: #1d2a5a; }
+.railCard > b { font-weight: 400; font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; color: #1d2a5a; min-height: 90px; }
+.railFoot { display: flex; justify-content: space-between; font-size: 14px; color: #3b3f55; }
+/* cinematic hold: giant words on the scene while the UI fades */
+.cine { position: absolute; inset: 0; z-index: 2; pointer-events: none; transition: opacity 0.3s; }
+.cineWord { position: absolute; font-size: clamp(90px, 14vw, 220px); font-weight: 300; letter-spacing: -0.03em; line-height: 1; color: #fff; transition: opacity 0.45s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.cw0 { left: 6%; top: 42%; }
+.cw1 { left: 50%; top: 42%; transform: translateX(-50%); }
+.cw2 { right: 6%; top: 42%; }

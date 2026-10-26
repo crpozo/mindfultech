@@ -56,7 +56,7 @@ export function Scramble({ text, className }: { text: string; className?: string
   return <span className={className} onMouseEnter={run} onFocus={run}>{shown}</span>;
 }
 
-export function HoldCursor({ label, onProgress, holdMs = 1400 }: { label: string; onProgress: (p: number) => void; holdMs?: number }) {
+export function HoldCursor({ label, onProgress, holdMs = 3600 }: { label: string; onProgress: (p: number) => void; holdMs?: number }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
   const [p, setP] = React.useState(0);
@@ -68,7 +68,7 @@ export function HoldCursor({ label, onProgress, holdMs = 1400 }: { label: string
     // the hold charges up while pressed and eases back when released; the scene reads the progress
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last.current) / 1000); last.current = now;
-      const v = dir.current > 0 ? dt * (1000 / holdMs) : -dt * 1.8;
+      const v = dir.current > 0 ? dt * (1000 / holdMs) : -dt * 0.9;
       prog.current = Math.max(0, Math.min(1, prog.current + v));
       setP(prog.current); onProgress(prog.current);
       if (dir.current > 0 || prog.current > 0) raf.current = requestAnimationFrame(tick);
@@ -85,12 +85,12 @@ export function HoldCursor({ label, onProgress, holdMs = 1400 }: { label: string
   const R = 46, C = 2 * Math.PI * R;
   return (
     <div ref={ref} className={`cb-cursor ${visible ? "on" : ""}`} aria-hidden="true" style={{ ["--p" as string]: p }}>
-      <svg viewBox="0 0 100 100" width="100" height="100" style={{ transform: `scale(${1 + p * 0.35})` }}>
+      <svg viewBox="0 0 100 100" width="100" height="100" style={{ transform: `scale(${1 - p * 0.25})` }}>
         <circle cx="50" cy="50" r={R} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
-        <circle cx="50" cy="50" r={R} fill="none" stroke="#bff5cf" strokeWidth="2" strokeDasharray={C} strokeDashoffset={C * (1 - p)} transform="rotate(-90 50 50)" />
-        <circle cx={34 + p * 10} cy="50" r="1.8" fill="#fff" /><circle cx={66 - p * 10} cy="50" r="1.8" fill="#fff" />
+        
+        <line x1="30" y1="50" x2={34 + p * 4} y2="50" stroke="#fff" strokeWidth="1.5" /><line x1={66 - p * 4} y1="50" x2="70" y2="50" stroke="#fff" strokeWidth="1.5" />
       </svg>
-      <span>{p > 0.98 ? "" : label}</span>
+      <span style={{ opacity: p > 0.05 ? 0 : 1 }}>{label}</span>
     </div>
   );
 }

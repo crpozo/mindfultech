@@ -45,7 +45,7 @@ export function CbScene({ mode }: { mode: CbMode }) {
 export function CbNav({ active }: { active?: "home" | "services" | "work" | "company" | "blog" }) {
   const { lang, setLang } = useLang();
   const es = lang === "es";
-  const items: [string, string, string][] = [["services", `${CB}/services`, es ? "Servicios" : "Services"], ["work", `${CB}/work`, es ? "Proyectos" : "Work"], ["office", "/office-demo", "AI Office"], ["company", `${CB}/company`, es ? "Empresa" : "Company"], ["blog", `${CB}/blog`, "Blog"]];
+  const items: [string, string, string][] = [["services", `${CB}/services`, es ? "Servicios" : "Services"], ["work", `${CB}/work`, es ? "Proyectos" : "Work"], ["office", "/office-demo", "AI Office"], ["company", `${CB}/company`, es ? "Empresa" : "Company"]];
   return (
     <header className={s.nav}>
       <div className={s.navIn}>

@@ -243,10 +243,10 @@ export function createBackground(canvas, opts = {}) {
     const f = state.foot;
     ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
     ribbons.visible = defs.length > 0 && (s < 2.4 || f > 0.01);
-    ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.25;
-    ribbons.rotation.x = state.py * 0.08 + H * 0.35;
-    ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.6;
-    ribbons.scale.setScalar((canvas.clientWidth < 760 ? 0.72 : 1) * (1 + H * 0.12));
+    ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.5;
+    ribbons.rotation.x = state.py * 0.08 + H * 0.25;
+    ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.9;
+    ribbons.scale.setScalar((canvas.clientWidth < 760 ? 0.72 : 1) * (1 + H * 0.25));
     // globe: scale and fade with the dark-section progress
     const g = mode === "globe" ? Math.max(0.15, 1 - s * 0.6) : state.globe;
     globe.visible = g > 0.01;
@@ -259,10 +259,17 @@ export function createBackground(canvas, opts = {}) {
     globe.rotation.y = state.px * 0.25;
     particles.rotation.y = t * 0.01;
     particles.position.y = -s * 1.5 + Math.sin(t * 0.3) * 0.1;
-    camera.position.x = state.px * 0.3;
-    camera.position.y = state.py * 0.2 + H * 0.6;
-    camera.position.z = 13 - H * 3.2;
-    camera.fov = 38 + H * 10; camera.updateProjectionMatrix();
+    // cinematic hold: three looks, one per word (bands close-up, bands from above, the sliced globe)
+    const seg = Math.min(2.999, H * 3), si = Math.floor(seg), st = seg - si;
+    const looks = [[0, -1.5, 13, 38], [3.5, 1.5, 7.5, 46], [-2.5, 0.5, 9, 42], [2.6, -2.2, 5.5, 50]];
+    const L0 = looks[si], L1 = looks[si + 1];
+    const e = st * st * (3 - 2 * st);
+    const cx = L0[0] + (L1[0] - L0[0]) * e, cy = L0[1] + (L1[1] - L0[1]) * e, cz = L0[2] + (L1[2] - L0[2]) * e, cf = L0[3] + (L1[3] - L0[3]) * e;
+    camera.position.x = (H < 0.02 ? 0 : cx) + state.px * 0.3;
+    camera.position.y = (H < 0.02 ? -1.5 : cy) + state.py * 0.2;
+    camera.position.z = H < 0.02 ? 13 : cz;
+    camera.fov = H < 0.02 ? 38 : cf; camera.updateProjectionMatrix();
+    if (mode !== "globe") { const gh = Math.max(0, (H - 0.66) * 3); globe.visible = globe.visible || gh > 0.01; if (gh > 0) { globe.scale.setScalar(0.3 + gh * 0.9); shellMat.uniforms.uAlpha.value = Math.max(shellMat.uniforms.uAlpha.value, 0.6 * gh); } }
     particles.scale.setScalar(1 + H * 0.5);
     camera.lookAt(0, 0, 0);
     composer.render();

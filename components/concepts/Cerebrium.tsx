@@ -14,6 +14,7 @@ import s from "./cerebrium.module.css";
    gradient word, mono labels with a dot, a light "why" section (sticky list + product cards), a dark governance block,
    case cards, a feature cloud and the blog. All content is MindfulTech's. */
 
+const LOGO_OF: Record<string, string> = { usfq: "/logo-usfq.svg", themedmotion: "/portfolio/themedmotion-logo-m.webp", healthcare: "/helixona-logo-m.webp", fence: "/wfs-logo.svg", parc: "/parc-logo-m.webp" };
 const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
 const PINS = [{ id: "ec", lat: -0.18, lon: -78.47, k: "EC" }, { id: "ca", lat: 36.8, lon: -119.8, k: "US-W" }, { id: "il", lat: 41.9, lon: -87.6, k: "US-C" }, { id: "fl", lat: 26.6, lon: -81.9, k: "US-E" }, { id: "nl", lat: 52.4, lon: 4.9, k: "NL" }, { id: "de", lat: 51.2, lon: 10.4, k: "DE" }, { id: "es", lat: 40.4, lon: -3.7, k: "ES" }, { id: "gr", lat: 37.98, lon: 23.7, k: "GR" }];
 const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
@@ -61,6 +62,8 @@ export function Cerebrium() {
   const [bench, setBench] = React.useState(0);
   const [chart, setChart] = React.useState(0);
   const [built, setBuilt] = React.useState(0);
+  const railRef = React.useRef<HTMLDivElement>(null);
+  const [cine, setCine] = React.useState(0);
   const [pin, setPin] = React.useState("ec");
   const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -100,7 +103,7 @@ export function Cerebrium() {
       window.removeEventListener("pointermove", onMove); bgRef.current?.dispose(); bgRef.current = null;
     };
   }, []);
-  const onHold = React.useCallback((p: number) => bgRef.current?.setHold(p), []);
+  const onHold = React.useCallback((p: number) => { bgRef.current?.setHold(p); setCine(p); }, []);
 
   React.useEffect(() => { const id = window.setInterval(() => setPin((p) => PINS[(PINS.findIndex((x) => x.id === p) + 1) % PINS.length].id), 1600); return () => window.clearInterval(id); }, []);
   React.useEffect(() => {
@@ -144,11 +147,14 @@ export function Cerebrium() {
   return (
     <div className={s.root}>
       <canvas ref={canvasRef} className={s.bg} aria-hidden="true" />
-      <CbNav active="home" />
+      <div style={{ opacity: 1 - Math.min(1, cine * 2.5), transition: "opacity 0.3s", position: "relative", zIndex: 20 }}><CbNav active="home" /></div>
 
       <section className={s.hero} ref={heroRef}>
         <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onProgress={onHold} />
-        <div className={s.heroIn}>
+        <div className={s.cine} style={{ opacity: cine > 0.02 ? 1 : 0 }} aria-hidden="true">
+          {(es ? ["Rápido", "Escala", "Global"] : ["Quickly", "Scale", "Globally"]).map((w, i) => { const k = Math.max(0, Math.min(1, cine * 3 - i)); const on = cine * 3 >= i && cine * 3 < i + 1 || (i === 2 && cine >= 1); return <span key={w} className={`${s.cineWord} ${s[`cw${i}`]}`} style={{ opacity: on ? 1 : 0, transform: `translateY(${(1 - k) * 30}px)` }}>{w}</span>; })}
+        </div>
+        <div className={s.heroIn} style={{ opacity: 1 - Math.min(1, cine * 2.5), transition: "opacity 0.3s" }}>
           <div>
             <h1 className={s.h1}>{es ? <><Split text="Software con IA" /><br /><Split text="que" delay={240} /> <span className={s.grad}><Split text="escala" delay={300} /></span><br /><Split text="contigo" delay={420} /></> : <><Split text="AI software" /><br /><Split text="that" delay={240} /> <span className={s.grad}><Split text="scales" delay={300} /></span><br /><Split text="with you" delay={420} /></>}</h1>
           </div>
@@ -159,7 +165,7 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <div className={s.logos}><div className={s.logosIn}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div></div>
+      <div className={s.logos}><div className={s.marquee}><div className={s.marqueeTrack}>{[0, 1].map((k) => <div key={k} className={s.logosIn} aria-hidden={k === 1}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div>)}</div></div></div>
       <div className={s.dotBand}><Dots className={s.dots} squares /></div>
 
       <section className={s.light}>
@@ -263,26 +269,28 @@ export function Cerebrium() {
           </div>
         </div>
         <div className={s.wrap} style={{ paddingBottom: 110 }}>
-          <span className={`${s.mono} ${s.label}`}>{es ? "Industrias" : "Industries"}</span>
-          <h2 className={s.h2} style={{ margin: "18px 0 36px" }}><Split text={es ? "Trabajo real en IA" : "Powering real work with AI"} /><br /><Split text={es ? "en todas las industrias" : "across industries"} delay={260} /></h2>
-          <div className={s.cases}>
-            {CASES.slice(0, 6).map((c) => (
-              <div key={c.id} className={s.caseCard}>
+          <div className={s.secHead} style={{ alignItems: "flex-end" }}>
+            <div>
+              <span className={`${s.mono} ${s.label}`}>{es ? "Industrias" : "Industries"}</span>
+              <h2 className={s.h2} style={{ margin: "18px 0 0" }}><Split text={es ? "Trabajo real con" : "Powering real work with"} /> <span className={s.grad2}><Split text={es ? "IA" : "AI"} delay={200} /></span><br /><Split text={es ? "en todas las industrias" : "across industries"} delay={260} /></h2>
+            </div>
+            <div className={s.arrows}><button type="button" aria-label="prev" onClick={() => railRef.current?.scrollBy({ left: -420, behavior: "smooth" })}>←</button><button type="button" aria-label="next" onClick={() => railRef.current?.scrollBy({ left: 420, behavior: "smooth" })}>→</button></div>
+          </div>
+          <div className={s.rail} ref={railRef}>
+            {CASES.map((c) => (
+              <Link key={c.id} href={`/work/${c.id}`} className={s.railCard}>
+                <div className={s.railLogo}>{LOGO_OF[c.id] ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={LOGO_OF[c.id]} alt={c.brand.en} /> : <b>{c.brand[lang]}</b>}</div>
                 <div className={s.tags}>{c.tag[lang].split(" · ").slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
                 <b>{c.title[lang]}</b>
-                <Link href={`/work/${c.id}`}>{es ? "Leer el caso →" : "Read case study →"}</Link>
-              </div>
+                <span className={s.railFoot}><span>{es ? "Leer el caso" : "Read case study"}</span><span>→</span></span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
       <section className={`${s.dark} ${s.darkClear}`}>
-        <div className={`${s.wrap} ${s.section}`}>
-          <span className={`${s.mono} ${s.label}`} style={{ color: "#c9cbd6" }}>{es ? "Capacidades" : "Features"}</span>
-          <div className={s.cloud} style={{ marginTop: 24 }}>{FEATURES.map((f) => <span key={f}>{f}</span>)}</div>
-        </div>
-        <div className={`${s.wrap}`} style={{ paddingBottom: 110 }}>
+        <div className={`${s.wrap}`} style={{ padding: "110px 40px" }}>
           <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
           <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
