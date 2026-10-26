@@ -9,7 +9,7 @@
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: transparent; border-bottom: 0; pointer-events: none; }
 .nav > * { pointer-events: auto; }
 .navIn { display: flex; align-items: center; gap: 20px; padding: 14px 24px; margin: 0; }
-.navIn img { height: 36px; width: auto; filter: brightness(0) invert(1); mix-blend-mode: difference; }
+.navIn img { height: 44px; width: auto; filter: brightness(0) invert(1); mix-blend-mode: difference; }
 .navLinks { display: flex; gap: 8px; margin-left: auto; padding: 0 12px; height: 56px; align-items: center; border-radius: 6px; background: rgba(22, 22, 36, 0.86); backdrop-filter: blur(12px); font-family: var(--font-jbmono), monospace; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
 .navLinks a { padding: 10px 14px; border-radius: 4px; }
 .navLinks a.navOn { text-decoration: underline; text-underline-offset: 4px; }
