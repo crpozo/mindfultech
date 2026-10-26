@@ -14,7 +14,6 @@ export type NavKey = "home" | "services" | "work" | "blog" | "company";
 const NAV: { key: NavKey; href: string; en: string; es: string }[] = [
   { key: "services", href: "/services", en: "Services", es: "Servicios" },
   { key: "work", href: "/work", en: "Work", es: "Proyectos" },
-  { key: "blog", href: "/blog", en: "Blog", es: "Blog" },
   { key: "company", href: "/company", en: "Company", es: "Empresa" },
 ];
 
