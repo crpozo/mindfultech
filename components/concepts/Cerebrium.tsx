@@ -6,6 +6,8 @@ import { useLang } from "@/components/i18n";
 import { POSTS } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
+import { useRouter } from "next/navigation";
+import { Split, Scramble, HoldCursor, Dots, Typewriter, useInView } from "./CerebriumFx";
 import s from "./cerebrium.module.css";
 
 /* Concept 06, "Cerebrium" (Oct 2026), after cerebrium.ai: deep navy with glowing ribbons, a sans headline with one
@@ -16,30 +18,6 @@ const WORDS = { en: ["Quickly", "Scale", "Globally"], es: ["Rápido", "Escala", 
 const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
 const PINS = [{ id: "ec", lat: -0.18, lon: -78.47, k: "EC" }, { id: "ca", lat: 36.8, lon: -119.8, k: "US-W" }, { id: "il", lat: 41.9, lon: -87.6, k: "US-C" }, { id: "fl", lat: 26.6, lon: -81.9, k: "US-E" }, { id: "nl", lat: 52.4, lon: 4.9, k: "NL" }, { id: "de", lat: 51.2, lon: 10.4, k: "DE" }, { id: "es", lat: 40.4, lon: -3.7, k: "ES" }, { id: "gr", lat: 37.98, lon: 23.7, k: "GR" }];
 const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
-
-function Ribbons() {
-  return (
-    <div className={s.ribbons} aria-hidden="true">
-      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="cb-r1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1f7a4d" /><stop offset="0.5" stopColor="#3dbe7d" /><stop offset="1" stopColor="#0b0b14" /></linearGradient>
-          <linearGradient id="cb-r2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#0b0b14" /><stop offset="0.5" stopColor="#2a9a62" /><stop offset="1" stopColor="#bff5cf" /></linearGradient>
-          <radialGradient id="cb-glow" cx="0.7" cy="0.4" r="0.6"><stop offset="0" stopColor="#3dbe7d" stopOpacity="0.35" /><stop offset="1" stopColor="#0b0b14" stopOpacity="0" /></radialGradient>
-          <filter id="cb-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
-        </defs>
-        <rect width="1440" height="900" fill="url(#cb-glow)" />
-        <g filter="url(#cb-blur)" opacity="0.55">
-          <path d="M520 980 C 700 620, 980 560, 1180 160 L 1300 120 C 1100 560, 820 660, 660 1000 Z" fill="url(#cb-r1)" />
-        </g>
-        <path d="M620 980 C 820 600, 1060 540, 1240 140 L 1330 100 C 1160 540, 920 640, 740 1000 Z" fill="url(#cb-r1)" opacity="0.9" />
-        <path d="M760 980 C 940 640, 1200 560, 1400 220 L 1440 300 C 1260 620, 1040 700, 880 1000 Z" fill="url(#cb-r2)" opacity="0.85" />
-        <path d="M900 980 C 1080 700, 1300 640, 1440 460 L 1440 560 C 1320 700, 1140 760, 1010 1000 Z" fill="url(#cb-r1)" opacity="0.6" />
-        <g stroke="#ffffff" strokeOpacity="0.08" strokeWidth="1"><path d="M640 980 C 840 600, 1080 540, 1260 140" fill="none" /><path d="M790 980 C 970 640, 1230 560, 1440 240" fill="none" /></g>
-        <g fill="#bff5cf" opacity="0.5">{Array.from({ length: 60 }, (_, i) => <circle key={i} cx={(i * 173) % 1440} cy={(i * 97 + 40) % 900} r={i % 7 === 0 ? 1.6 : 0.8} />)}</g>
-      </svg>
-    </div>
-  );
-}
 
 function MiniMap({ active }: { active: string }) {
   const home = proj(PINS[0].lat, PINS[0].lon);
@@ -87,6 +65,44 @@ export function Cerebrium() {
   const [built, setBuilt] = React.useState(0);
   const [pin, setPin] = React.useState("ec");
   const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const heroRef = React.useRef<HTMLElement>(null);
+  const darkRef = React.useRef<HTMLElement>(null);
+  const router = useRouter();
+  const [termRef, termOn] = useInView<HTMLPreElement>();
+  const [barsRef, barsOn] = useInView<HTMLDivElement>();
+  const [chartRef, chartOn] = useInView<HTMLDivElement>();
+
+  // WebGL background + smooth scroll; both are torn down on unmount
+  React.useEffect(() => {
+    let bg: { setScroll: (p: number) => void; setGlobe: (g: number) => void; setPointer: (x: number, y: number) => void; dispose: () => void } | null = null;
+    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
+    let raf = 0, alive = true;
+    const onMove = (e: PointerEvent) => bg?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    const feed = () => {
+      if (!bg) return;
+      const h = heroRef.current?.offsetHeight || window.innerHeight;
+      bg.setScroll(window.scrollY / h);
+      const d = darkRef.current;
+      if (d) { const r = d.getBoundingClientRect(); const vh = window.innerHeight; const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
+    };
+    (async () => {
+      const [{ createBackground }, { default: Lenis }] = await Promise.all([import("./cerebriumScene.js"), import("lenis")]);
+      if (!alive || !canvasRef.current) return;
+      bg = createBackground(canvasRef.current, { accent: "#2f9c66", edge: "#bff5cf", base: "#0a2a1b" });
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+        const loop = (t: number) => { lenis?.raf(t); feed(); raf = requestAnimationFrame(loop); };
+        raf = requestAnimationFrame(loop);
+      } else {
+        const loop = () => { feed(); raf = requestAnimationFrame(loop); };
+        raf = requestAnimationFrame(loop);
+      }
+      window.addEventListener("pointermove", onMove);
+    })();
+    return () => { alive = false; cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); lenis?.destroy(); bg?.dispose(); };
+  }, []);
+  const openDemo = React.useCallback(() => router.push("/office-demo"), [router]);
 
   React.useEffect(() => { const id = window.setInterval(() => setWord((w) => (w + 1) % 3), 1800); return () => window.clearInterval(id); }, []);
   React.useEffect(() => { const id = window.setInterval(() => setPin((p) => PINS[(PINS.findIndex((x) => x.id === p) + 1) % PINS.length].id), 1600); return () => window.clearInterval(id); }, []);
@@ -130,6 +146,7 @@ export function Cerebrium() {
 
   return (
     <div className={s.root}>
+      <canvas ref={canvasRef} className={s.bg} aria-hidden="true" />
       <header className={s.nav}>
         <div className={s.navIn}>
           <Link href="/" aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
@@ -138,22 +155,22 @@ export function Cerebrium() {
           </nav>
           <div className={s.navRight}>
             <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
-            <a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empezar" : "Start a project"}</a>
+            <a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Start a project"} /></a>
           </div>
         </div>
       </header>
 
-      <section className={s.hero}>
-        <Ribbons />
+      <section className={s.hero} ref={heroRef}>
+        <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onComplete={openDemo} />
         <div className={s.words} aria-hidden="true">{WORDS[lang].map((w, i) => <span key={w} className={word === i ? s.on : ""}>{w}</span>)}</div>
         <div className={s.heroIn}>
           <div>
-            <h1 className={s.h1}>{es ? <>Software con IA que <span className={s.grad}>escala</span> contigo</> : <>AI software that <span className={s.grad}>scales</span> with you</>}</h1>
-            <Link href="/office-demo" className={s.play}><i>▶</i><span className={s.mono}>{es ? "Ver la demo" : "Open the demo"}</span></Link>
+            <h1 className={s.h1}>{es ? <><Split text="Software con IA que" /> <span className={s.grad}><Split text="escala" delay={400} /></span> <Split text="contigo" delay={520} /></> : <><Split text="AI software that" /> <span className={s.grad}><Split text="scales" delay={360} /></span> <Split text="with you" delay={480} /></>}</h1>
+            <Link href="/office-demo" className={s.play}><i>▶</i><Scramble className={s.mono} text={es ? "Ver la demo" : "Open the demo"} /></Link>
           </div>
           <div className={s.heroSide}>
             <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
-            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empieza ahora" : "Try it now"}</a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}>{es ? "Agenda una demo" : "Book a demo"}</Link></div>
+            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empieza ahora" : "Try it now"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>
           </div>
         </div>
       </section>
@@ -164,7 +181,7 @@ export function Cerebrium() {
         <div className={s.wrap}>
           <div className={s.whyHead}>
             <p>{es ? "Velocidad de producción sin la complejidad de producción." : "Production speed without the production complexity."}</p>
-            <h2 className={s.h2}>{es ? <>Hecho para equipos<br /><span className={s.grad2}>que empujan límites</span></> : <>Built for teams,<br /><span className={s.grad2}>pushing boundaries</span></>}</h2>
+            <h2 className={s.h2}><Split text={es ? "Hecho para equipos" : "Built for teams,"} /><br /><span className={s.grad2}><Split text={es ? "que empujan límites" : "pushing boundaries"} delay={300} /></span></h2>
           </div>
           <div className={s.why}>
             <div className={s.whyList}>
@@ -175,7 +192,7 @@ export function Cerebrium() {
               <div className={s.card} data-i={0} ref={(el) => { cardRefs.current[0] = el; }}>
                 <div className={s.stage}>
                   <div className={s.tabs}><button type="button" className={bench === 0 ? s.on : ""} onClick={() => setBench(0)}>{es ? "Agente de IA" : "AI agent"}</button><button type="button" className={bench === 1 ? s.on : ""} onClick={() => setBench(1)}>{es ? "App web" : "Web app"}</button></div>
-                  <div className={s.bars}>{(bench === 0 ? BENCH : BENCH2).map((b) => <div key={b.k} className={s.bar}><span className={s.mono}>{b.k}</span><i style={{ ["--w" as string]: `${b.w}%`, ["--c" as string]: b.c }} /><b>{b.v}</b></div>)}</div>
+                  <div className={`${s.bars} ${barsOn ? s.barsOn : ""}`} ref={barsRef}>{(bench === 0 ? BENCH : BENCH2).map((b) => <div key={b.k} className={s.bar}><span className={s.mono}>{b.k}</span><i style={{ ["--w" as string]: `${b.w}%`, ["--c" as string]: b.c }} /><b>{b.v}</b></div>)}</div>
                 </div>
                 <h3>{es ? "En producción desde la primera semana." : "In production from the first week."}</h3>
                 <p>{es ? "Empezamos con el flujo que más duele, lo automatizamos con un agente y lo dejamos corriendo con una persona que aprueba. Sin reescribir tu sistema ni esperar a la gran plataforma." : "We start with the flow that hurts most, automate it with an agent and leave it running with a person approving. No rewriting your system, no waiting for the big platform."}</p>
@@ -192,16 +209,16 @@ export function Cerebrium() {
               <div className={s.card} data-i={2} ref={(el) => { cardRefs.current[2] = el; }}>
                 <div className={`${s.stage} ${s.stagePad}`}>
                   <span className={`${s.chip} ${s.mono}`}>Terminal</span>
-                  <pre className={s.term}>{`carlos@mindfultech billing % `}<b>mindfultech run agent billing --role finance --tools odoo,gmail</b>{`
-
-`}<b>✓</b>{` Connected to Odoo (invoices, payments)
-`}<b>✓</b>{` Connected to Gmail (billing@clinic.ec)
-`}<b>✓</b>{` Policies loaded: approve > $500 by a person
-
-`}<em>09:12:04</em>{`  claim #4821 rejected by insurer → reason: missing code
-`}<em>09:12:06</em>{`  drafted correction, attached report, queued resend
-`}<em>09:12:07</em>{`  approval requested: María (finance) ........ `}<b>approved</b>{`
-`}<em>09:12:31</em>{`  claim #4821 resubmitted ✓   next check in 48h`}</pre>
+                  <pre className={s.term} ref={termRef}><Typewriter on={termOn} lines={[
+                    <>{`carlos@mindfultech billing % `}<b>mindfultech run agent billing --role finance --tools odoo,gmail</b>{`\n\n`}</>,
+                    <><b>✓</b>{` Connected to Odoo (invoices, payments)\n`}</>,
+                    <><b>✓</b>{` Connected to Gmail (billing@clinic.ec)\n`}</>,
+                    <><b>✓</b>{` Policies loaded: approve > $500 by a person\n\n`}</>,
+                    <><em>09:12:04</em>{`  claim #4821 rejected by insurer → reason: missing code\n`}</>,
+                    <><em>09:12:06</em>{`  drafted correction, attached report, queued resend\n`}</>,
+                    <><em>09:12:07</em>{`  approval requested: María (finance) ........ `}<b>approved</b>{`\n`}</>,
+                    <><em>09:12:31</em>{`  claim #4821 resubmitted ✓   next check in 48h`}</>,
+                  ]} /></pre>
                 </div>
                 <h3>{es ? "Tu código, tus herramientas. Nosotros lo hacemos correr." : "Your code, your tools. We make it run."}</h3>
                 <p>{es ? "Sin reescrituras ni SDKs propios. Los agentes se conectan a lo que ya usas: Odoo, Salesforce, Gmail, WhatsApp, tu base de datos. Versionado, reproducible y listo para escalar." : "No rewrites, no custom SDKs. Agents plug into what you already use: Odoo, Salesforce, Gmail, WhatsApp, your database. Versioned, reproducible and ready to scale."}</p>
@@ -209,7 +226,7 @@ export function Cerebrium() {
               <div className={s.card} data-i={3} ref={(el) => { cardRefs.current[3] = el; }}>
                 <div className={s.stage}>
                   <div className={s.tabs}>{(es ? ["Reclamos", "Tickets", "Uptime"] : ["Claims", "Tickets", "Uptime"]).map((t, i) => <button key={t} type="button" className={chart === i ? s.on : ""} onClick={() => setChart(i)}>{t}</button>)}</div>
-                  <div className={s.chart}><Chart mode={chart} /></div>
+                  <div className={`${s.chart} ${chartOn ? s.chartOn : ""}`} ref={chartRef}><Chart mode={chart} /></div>
                 </div>
                 <h3>{es ? "Observabilidad de punta a punta para cada agente." : "End-to-end observability for every agent."}</h3>
                 <p>{es ? "Cada acción, aprobación y excepción en un panel en tiempo real. Métricas por rol, alertas cuando algo se sale del guion y exportación a tu stack de monitoreo." : "Every action, approval and exception in a real-time panel. Metrics per role, alerts when something leaves the script, and export to your monitoring stack."}</p>
@@ -219,20 +236,34 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <section className={s.dark}>
-        <div className={s.sphere} aria-hidden="true" />
+      <section className={`${s.dark} ${s.darkClear}`} ref={darkRef}>
+        <Dots className={s.dots} />
         <div className={s.darkIn}>
           <div>
             <span className={`${s.mono} ${s.label}`} style={{ color: "#c9cbd6" }}>{es ? "Gobernanza" : "Governance"}</span>
-            <h2 className={s.h2} style={{ marginTop: 18 }}>{es ? <>Estable, <span className={s.grad}>segura</span> y gobernada</> : <>Stable, <span className={s.grad}>secure</span> and governed</>}</h2>
+            <h2 className={s.h2} style={{ marginTop: 18 }}><Split text={es ? "Estable," : "Stable,"} /> <span className={s.grad}><Split text={es ? "segura" : "secure"} delay={200} /></span> <Split text={es ? "y gobernada" : "and governed"} delay={320} /></h2>
             <div className={s.darkLinks}><Link href="/office-demo" className={`${s.btn} ${s.btnAcc}`}>{es ? "Ver la oficina" : "See the office"}</Link><Link href="/blog/ai-management-office" className={`${s.btn} ${s.btnGhost}`}>{es ? "Cómo funciona" : "How it works"}</Link></div>
           </div>
           <div className={s.gov}>{GOV.map(([t, d], i) => <div key={t}>{ICONS[i]}<b>{t}</b><p>{d}</p></div>)}</div>
         </div>
+        <div className={`${s.wrap} ${s.section}`} style={{ position: "relative", zIndex: 1, paddingTop: 0 }}>
+          <div className={s.secHead} style={{ justifyContent: "center", flexDirection: "column", alignItems: "center", gap: 18 }}>
+            <h2 className={s.h2}><Split text={es ? "Construido con MindfulTech" : "Built with MindfulTech"} /></h2>
+            <div className={`${s.pillTabs} ${s.pillTabsDark}`}>{(es ? ["Agentes", "Apps", "Otros"] : ["Agents", "Apps", "Other"]).map((t, i) => <button key={t} type="button" className={built === i ? s.on : ""} onClick={() => setBuilt(i)}>{t}</button>)}</div>
+          </div>
+          <div className={s.built}>
+            {BUILT.filter((b) => b.tab === built).map((b) => (
+              <Link key={b.t} href={b.href} className={`${s.builtCard} ${s.builtDark}`}>
+                <div className={s.thumb}>{b.img && /* eslint-disable-next-line @next/next/no-img-element */ <img src={b.img} alt="" width={1200} height={675} loading="lazy" />}</div>
+                <b>{b.t}</b><span>{b.d}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className={s.light} style={{ borderRadius: 0, marginTop: 0 }}>
-        <div className={`${s.wrap} ${s.section}`}>
+      <section className={s.light} style={{ borderRadius: "28px 28px 0 0", marginTop: 0 }}>
+        <div className={`${s.wrap} ${s.section}`} style={{ display: "none" }}>
           <div className={s.secHead}>
             <h2 className={s.h2}>{es ? "Construido con MindfulTech" : "Built with MindfulTech"}</h2>
             <div className={s.pillTabs}>{(es ? ["Agentes", "Apps", "Otros"] : ["Agents", "Apps", "Other"]).map((t, i) => <button key={t} type="button" className={built === i ? s.on : ""} onClick={() => setBuilt(i)}>{t}</button>)}</div>
@@ -248,7 +279,7 @@ export function Cerebrium() {
         </div>
         <div className={s.wrap} style={{ paddingBottom: 110 }}>
           <span className={`${s.mono} ${s.label}`}>{es ? "Industrias" : "Industries"}</span>
-          <h2 className={s.h2} style={{ margin: "18px 0 36px" }}>{es ? <>Trabajo real en IA<br />en todas las industrias</> : <>Powering real work with AI<br />across industries</>}</h2>
+          <h2 className={s.h2} style={{ margin: "18px 0 36px" }}><Split text={es ? "Trabajo real en IA" : "Powering real work with AI"} /><br /><Split text={es ? "en todas las industrias" : "across industries"} delay={260} /></h2>
           <div className={s.cases}>
             {CASES.slice(0, 6).map((c) => (
               <div key={c.id} className={s.caseCard}>
@@ -261,7 +292,7 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <section className={s.dark}>
+      <section className={`${s.dark} ${s.darkClear}`}>
         <div className={`${s.wrap} ${s.section}`}>
           <span className={`${s.mono} ${s.label}`} style={{ color: "#c9cbd6" }}>{es ? "Capacidades" : "Features"}</span>
           <div className={s.cloud} style={{ marginTop: 24 }}>{FEATURES.map((f) => <span key={f}>{f}</span>)}</div>
@@ -271,11 +302,10 @@ export function Cerebrium() {
           <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
         <div className={s.cta}>
-          <Ribbons />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <h2 className={s.h2}>{es ? <>Pon la IA a <span className={s.grad}>trabajar</span></> : <>Put AI to <span className={s.grad}>work</span></>}</h2>
+            <h2 className={s.h2}><Split text={es ? "Pon la IA a" : "Put AI to"} /> <span className={s.grad}><Split text={es ? "trabajar" : "work"} delay={240} /></span></h2>
             <p>{es ? "Cuéntanos el flujo que más duele. En una semana tienes el primer agente corriendo con una persona que firma." : "Tell us the flow that hurts most. In a week you have the first agent running with a person signing off."}</p>
-            <div className={s.ctas} style={{ justifyContent: "center" }}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empieza ahora" : "Try it now"}</a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnLight}`}>WhatsApp</a></div>
+            <div className={s.ctas} style={{ justifyContent: "center" }}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empieza ahora" : "Try it now"} /></a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnLight}`}><Scramble text="WhatsApp" /></a></div>
           </div>
         </div>
         <footer className={s.footer}><span>© 2026 MindfulTech, Quito</span><span>info@mindfultech.ec / +593 958 73 1994</span></footer>
