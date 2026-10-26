@@ -149,6 +149,17 @@ export function CbCompany() {
               <p>{es ? "No empezamos ajustando lo que ya existía. Rehicimos el proceso: investigación de campo, prototipos probados, ingeniería de producción y agentes por rol en un mismo roadmap. Fundada en Quito en 2016, MindfulTech hoy acompaña a equipos como USFQ, Helixona, ThemedMotion y PARC." : "We didn't start by tweaking what existed. We rebuilt the process: field research, tested prototypes, production engineering and agents per role on one roadmap. Founded in Quito in 2016, MindfulTech today supports teams like USFQ, Helixona, ThemedMotion and PARC."}</p>
             </div>
           </div>
+          <div className={s.nameBlock}>
+            <div>
+              <span className={`${s.mono} ${s.label}`}>{es ? "Por qué el nombre" : "Why the name"}</span>
+              <h2 className={s.h2} style={{ marginTop: 18 }}><span className={s.grad2}>Mindful</span>Tech</h2>
+            </div>
+            <div>
+              <p className={s.nameLead}>{es ? "Tecnología consciente." : "Mindful technology."}</p>
+              <p>{es ? "Le puse ese nombre porque la tecnología debería hacerse con intención: pensada y aplicada con criterio, no por moda. Primero entendemos tu negocio y los sistemas que ya usas, después integramos, y solo entonces aplicamos IA de forma deliberada, donde de verdad mejora la eficiencia." : "I chose the name because technology should be built with intention: considered and applied with judgment, not because it is fashionable. First we understand your business and the systems you already run, then we integrate, and only then do we apply AI deliberately, where it genuinely improves efficiency."}</p>
+              <p className={s.nameSign}>Carlos Pozo, {es ? "fundador" : "founder"}</p>
+            </div>
+          </div>
           <div className={`${s.statRow} ${on ? s.barsOn : ""}`} ref={ref}>
             {[["10", es ? "años lanzando" : "years shipping"], ["3", es ? "continentes con clientes" : "continents with clients"], ["1", es ? "semana al primer agente" : "week to the first agent"], ["24/7", es ? "agentes en producción" : "agents in production"]].map(([v, l]) => <div key={l}><b>{v}</b><span className={s.mono}>{l}</span></div>)}
           </div>
