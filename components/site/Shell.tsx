@@ -38,7 +38,7 @@ export function SiteNav({ active }: { active?: NavKey }) {
         <div className={s.navRight}>
           <button type="button" className={lang === "en" ? s.on : ""} onClick={() => setLang("en")}>EN</button>
           <button type="button" className={lang === "es" ? s.on : ""} onClick={() => setLang("es")}>ES</button>
-          <button type="button" onClick={openContact} className={s.navCta}>{lang === "es" ? "Empieza un proyecto" : "Start a project"}</button>
+          <button type="button" onClick={() => openContact()} className={s.navCta}>{lang === "es" ? "Empieza un proyecto" : "Start a project"}</button>
           <button type="button" className={s.navBurger} aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
             <i /><i /><i />
           </button>
@@ -77,7 +77,7 @@ export function CtaBand({ title, sub, cta }: { title?: string; sub?: string; cta
         <h2 className={s.ctaH2}>{title ?? (es ? "Empieza a construir con MindfulTech" : "Start building with MindfulTech")}</h2>
         <p className={s.ctaSub}>{sub ?? (es ? "De la primera sesión de investigación a la IA en producción: un laboratorio, de punta a punta." : "From the first research session to production AI: one lab, end to end.")}</p>
         <div className={s.ctas}>
-          <button type="button" onClick={openContact} className={`${s.btn} ${s.btnInk} ${s.btnInkWhite}`}>{cta ?? (es ? "Escríbenos" : "Get started now")}</button>
+          <button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnInk} ${s.btnInkWhite}`}>{cta ?? (es ? "Escríbenos" : "Get started now")}</button>
           <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnWhite}`}>WhatsApp →</a>
         </div>
       </div>
@@ -164,8 +164,8 @@ export function SectionHead({ label, title, sub, right }: { label?: string; titl
 
 /* ---- contact form: opened by the CTA buttons, sends the message to Carlos ---- */
 
-export function openContact() {
-  window.dispatchEvent(new CustomEvent("mt:contact"));
+export function openContact(mode: "project" | "join" = "project") {
+  window.dispatchEvent(new CustomEvent("mt:contact", { detail: { mode } }));
 }
 
 /** Modal contact form. Mounted once by SiteChrome; opens on the `mt:contact` event.
@@ -176,8 +176,9 @@ export function ContactForm() {
   const [open, setOpen] = React.useState(false);
   const [f, setF] = React.useState({ name: "", email: "", company: "", msg: "" });
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [mode, setMode] = React.useState<"project" | "join">("project");
   React.useEffect(() => {
-    const on = () => setOpen(true);
+    const on = (e: Event) => { setMode(((e as CustomEvent).detail?.mode as "project" | "join") || "project"); setOpen(true); };
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("mt:contact", on);
     window.addEventListener("keydown", esc);
@@ -186,7 +187,8 @@ export function ContactForm() {
   React.useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
   if (!open) return null;
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
-  const subject = es ? `Nuevo proyecto: ${f.company || f.name}` : `New project: ${f.company || f.name}`;
+  const join = mode === "join";
+  const subject = join ? (es ? `Quiero unirme: ${f.name}` : `Join the team: ${f.name}`) : (es ? `Nuevo proyecto: ${f.company || f.name}` : `New project: ${f.company || f.name}`);
   const mailto = () => {
     const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, "", f.msg].join("\n");
     window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -200,7 +202,7 @@ export function ContactForm() {
     try {
       const r = await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, {
         method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ name: f.name, email: f.email, company: f.company, message: f.msg, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }),
+        body: JSON.stringify({ type: join ? "join" : "project", name: f.name, email: f.email, [join ? "portfolio" : "company"]: f.company, message: f.msg, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }),
       });
       if (!r.ok) throw new Error(String(r.status));
       setState("sent");
@@ -217,8 +219,8 @@ export function ContactForm() {
         <div className={s.modal} onClick={(e) => e.stopPropagation()} role="status">
           <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={close}>×</button>
           <div className={s.sentMark} aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#3dbe7d" /><path d="M14 25 l7 7 l13 -14" fill="none" stroke="#0e1013" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
-          <h2>{es ? "Mensaje enviado" : "Message sent"}</h2>
-          <p>{es ? "Gracias. Te respondemos a tu correo en un día hábil." : "Thanks. We'll reply to your email within one business day."}</p>
+          <h2>{join ? (es ? "Recibido" : "Received") : (es ? "Mensaje enviado" : "Message sent")}</h2>
+          <p>{join ? (es ? "Gracias por escribir. Leemos cada portafolio y te respondemos a tu correo." : "Thanks for writing. We read every portfolio and will reply to your email.") : (es ? "Gracias. Te respondemos a tu correo en un día hábil." : "Thanks. We'll reply to your email within one business day.")}</p>
           <div className={s.ctas} style={{ justifyContent: "flex-start", marginTop: 6 }}>
             <button type="button" onClick={close} className={`${s.btn} ${s.btnInk}`}>{es ? "Listo" : "Done"}</button>
             <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnOutline}`}>WhatsApp →</a>
@@ -227,12 +229,12 @@ export function ContactForm() {
       ) : (
       <form className={s.modal} onClick={(e) => e.stopPropagation()} onSubmit={submit} aria-label={es ? "Formulario de contacto" : "Contact form"}>
         <button type="button" className={s.modalX} aria-label={es ? "Cerrar" : "Close"} onClick={close}>×</button>
-        <h2>{es ? "Cuéntanos tu proyecto" : "Tell us about your project"}</h2>
-        <p>{es ? "Te respondemos en un día hábil." : "We answer within one business day."}</p>
+        <h2>{join ? (es ? "Únete al equipo" : "Join the team") : (es ? "Cuéntanos tu proyecto" : "Tell us about your project")}</h2>
+        <p>{join ? (es ? "No hay vacantes abiertas ahora, pero siempre leemos portafolios de gente que construye con intención." : "No open roles right now, but we always read portfolios from people who build with intention.") : (es ? "Te respondemos en un día hábil." : "We answer within one business day.")}</p>
         <label><span>{es ? "Nombre" : "Name"}</span><input required value={f.name} onChange={set("name")} autoComplete="name" /></label>
         <label><span>Email</span><input required type="email" value={f.email} onChange={set("email")} autoComplete="email" /></label>
-        <label><span>{es ? "Empresa" : "Company"}</span><input value={f.company} onChange={set("company")} autoComplete="organization" /></label>
-        <label><span>{es ? "¿Qué quieres construir?" : "What do you want to build?"}</span><textarea required rows={5} value={f.msg} onChange={set("msg")} /></label>
+        <label><span>{join ? (es ? "Portafolio, LinkedIn o GitHub" : "Portfolio, LinkedIn or GitHub") : (es ? "Empresa" : "Company")}</span><input value={f.company} onChange={set("company")} autoComplete={join ? "url" : "organization"} placeholder={join ? "https://" : undefined} /></label>
+        <label><span>{join ? (es ? "¿Qué te gusta construir y por qué MindfulTech?" : "What do you like to build, and why MindfulTech?") : (es ? "¿Qué quieres construir?" : "What do you want to build?")}</span><textarea required rows={5} value={f.msg} onChange={set("msg")} /></label>
         <div className={s.ctas} style={{ justifyContent: "flex-start", marginTop: 6 }}>
           <button type="submit" className={`${s.btn} ${s.btnInk}`} disabled={state === "sending"}>{state === "sending" ? (es ? "Enviando…" : "Sending…") : (es ? "Enviar" : "Send")}</button>
           <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnOutline}`}>WhatsApp →</a>

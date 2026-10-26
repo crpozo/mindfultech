@@ -42,7 +42,7 @@ export function CbCase({ slug }: { slug: string }) {
   return (
     <CbPage mode={i % 2 ? "columns" : "bands"} active="work">
       <DetailBanner label={`${c.brand[lang]} / ${c.tag[lang].replace(/ · /g, " / ")}`} title={c.title[lang]} lead={c.body[lang]}
-        primary={c.live ? <a href={c.live.href} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Ver sitio en vivo" : "Visit live site"} /></a> : <button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Solicitar caso de estudio" : "Request case study"} /></button>}
+        primary={c.live ? <a href={c.live.href} target="_blank" rel="noopener noreferrer" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Ver sitio en vivo" : "Visit live site"} /></a> : <button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Solicitar caso de estudio" : "Request case study"} /></button>}
         secondary={<Link href="/work" className={`${s.btn} ${s.btnSolid}`}><Scramble text={es ? "Todos los proyectos" : "All projects"} /></Link>} />
       <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
@@ -86,7 +86,7 @@ export function CbService({ slug }: { slug: string }) {
   return (
     <CbPage mode="globe" active="services">
       <DetailBanner label={d.tag} title={d.title} grad={grad} lead={d.subtitle}
-        primary={<button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>}
+        primary={<button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>}
         secondary={<Link href="/services" className={`${s.btn} ${s.btnSolid}`}><Scramble text={es ? "Todos los servicios" : "All services"} /></Link>} />
       <section className={s.light} data-cb-light>
         <div className={`${s.wrap} ${s.section}`}>
@@ -144,7 +144,7 @@ export function CbArticle({ slug }: { slug: string }) {
           <article className={s.article}>
             <div className={s.articleMeta}><span className={s.mono}>{post.author[lang]}</span><span className={s.mono}>{post.dateLabel[lang]}</span></div>
             {post.body.map((b, i) => <BlockView key={i} block={b} lang={lang} />)}
-            <div className={s.ctas} style={{ marginTop: 40 }}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnDark}`}><Scramble text="AI Management Office" /></Link></div>
+            <div className={s.ctas} style={{ marginTop: 40 }}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnDark}`}><Scramble text="AI Management Office" /></Link></div>
           </article>
         </div>
       </section>

@@ -7,7 +7,7 @@ import { POSTS } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { SERVICES, SERVICES_ES } from "@/lib/site/serviceDetail";
 import { Split, Scramble, Dots, useInView } from "./CerebriumFx";
-import { CbPage, CopyEmail, CB } from "./CerebriumParts";
+import { CbPage, CB } from "./CerebriumParts";
 import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
@@ -29,7 +29,7 @@ function Banner({ label, title, grad, lead, cta, mode }: { label: string; title:
           <div className={s.heroSide}>
             <span className={`${s.mono} ${s.label} ${s.labelLight}`} style={{ marginBottom: 22 }}>{label}</span>
             {lead && <p>{lead}</p>}
-            {cta && <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>}
+            {cta && <div className={s.ctas}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>}
           </div>
         )}
       </div>
@@ -173,20 +173,11 @@ export function CbCompany() {
             <div>
               <p>{es ? "Empezamos MindfulTech después de vivir lo difícil que era lanzar buen software en equipos pequeños de Ecuador: herramientas fragmentadas, proveedores que desaparecían, diseño como un extra. Así que armamos un solo laboratorio de punta a punta." : "We started MindfulTech after living how hard it was to ship good software in small teams in Ecuador: fragmented tooling, vendors who disappeared, design as an afterthought. So we built one lab, end to end."}</p>
               <p>{es ? "Es un lugar para gente a la que le importa lo que construye, cómo lo construye y con quién. Valoramos claridad, velocidad y oficio, y damos responsabilidad completa sobre cada proyecto." : "This is a place for people who care about what they build, how they build it, and who they build it with. We value clarity, speed and craft, and give end-to-end ownership of every project."}</p>
-              <a href="mailto:carlos@mindfultech.ec?subject=Portfolio" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Únete al equipo" : "Join the team"} /></a>
+              <button type="button" onClick={() => openContact("join")} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Únete al equipo" : "Join the team"} /></button>
             </div>
           </div>
           <div className={s.values}>{values.map(([t, d]) => <div key={t}><b>{t}</b><p>{d}</p></div>)}</div>
           <div className={s.timeline}>{years.map(([y, t]) => <div key={y}><b>{y}</b><p>{t}</p></div>)}</div>
-        </div>
-      </section>
-      <section className={s.light} data-cb-light>
-        <div className={`${s.wrap} ${s.section}`}>
-          <div className={s.contactGrid}>
-            <CopyEmail label={es ? "Consultas generales" : "General inquiries"} email="info@mindfultech.ec" />
-            <CopyEmail label={es ? "Prensa" : "Media / press"} email="carlos@mindfultech.ec" />
-            <div className={s.copyRow}><span className={s.mono}>WhatsApp</span><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer">+593 958 73 1994</a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`}>{es ? "Escribir" : "Message"}</a></div>
-          </div>
         </div>
       </section>
     </CbPage>

@@ -60,7 +60,7 @@ const RIBBON_FRAG = /* glsl */ `
     /* soft rim on the long edges and film grain */
     float e = smoothstep(uEdgeW, 0.0, min(vUv.y, 1.0 - vUv.y));
     col += uEdge * e * 0.25;
-    col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.022;
+    col += (hash(gl_FragCoord.xy) - 0.5) * 0.02;
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -138,7 +138,7 @@ export function createBackground(canvas, opts = {}) {
   ];
   /* columns: tall bands leaning to the right, like a curtain (the company page) */
   const columnDefs = Array.from({ length: 6 }, (_, i) => {
-    const x = -2 + i * 2.6, z = -1.5 - i * 2.2, lean = 2.2 + i * 0.3;
+    const x = -3 + i * 3.1, z = -1.5 - i * 2.6, lean = 2.2 + i * 0.3;
     return { pts: [[x - lean, -12, z], [x - lean * 0.4, -5, z], [x + 0.2, 0, z], [x + lean * 0.5, 6, z], [x + lean, 12, z]], w: 1.6 + (i % 3) * 0.4, th: 0.5, amp: 0, mid: accent.clone().multiplyScalar(0.45 + 0.1 * (i % 3)), streak: i / 6 };
   });
   const defs = mode === "globe" ? [] : mode === "columns" ? columnDefs : archDefs;
@@ -146,7 +146,7 @@ export function createBackground(canvas, opts = {}) {
     const curve = new THREE.CatmullRomCurve3(d.pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)), false, "catmullrom", 0.6);
     const geo = bandGeometry(curve, d.w, d.th);
     const mat = new THREE.ShaderMaterial({
-      vertexShader: RIBBON_VERT, fragmentShader: RIBBON_FRAG, side: THREE.FrontSide,
+      vertexShader: RIBBON_VERT, fragmentShader: RIBBON_FRAG, side: THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
       uniforms: { uTime: { value: Math.random() * 10 }, uAmp: { value: reduced ? 0 : d.amp }, uBase: { value: base }, uMid: { value: d.mid }, uEdge: { value: edge }, uEdgeW: { value: 0.05 }, uStreak: { value: d.streak } },
     });
     mats.push(mat);

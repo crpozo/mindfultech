@@ -66,7 +66,7 @@ export function CbNav({ active }: { active?: "home" | "services" | "work" | "com
         <nav className={s.navLinks}>{items.map(([k, href, label]) => <Link key={k} href={href} className={active === k ? s.navOn : ""}>{label}</Link>)}</nav>
         <div className={s.navRight}>
           <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
-          <button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>
+          <button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>
         </div>
       </div>
     </header>
@@ -93,7 +93,7 @@ export function CbFooter() {
         </div>
         <div className={s.footClose}>
           <h2 className={s.h2}><Split text={es ? "Empieza a construir con IA hoy," : "Start building with AI today,"} /><br /><Split text={es ? "o cuéntanos tu flujo." : "or talk to us about your workflow."} delay={300} /></h2>
-          <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
+          <div className={s.ctas}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
         </div>
         <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>info@mindfultech.ec / +593 958 73 1994</span></div>
       </footer>

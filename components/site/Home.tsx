@@ -518,7 +518,7 @@ export function Home() {
           <p className={s.heroSub}>{t.heroSub}</p>
           <div className={s.ctas}>
             <a href="#work" className={`${s.btn} ${s.btnOutline}`}>{t.projects}</a>
-            <button type="button" onClick={openContact} className={`${s.btn} ${s.btnGreen}`}>{t.start}</button>
+            <button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnGreen}`}>{t.start}</button>
           </div>
         </div>
         <div className={s.band} aria-hidden="true">

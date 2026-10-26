@@ -167,7 +167,7 @@ export function Cerebrium() {
           </div>
           <div className={s.heroSide}>
             <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
-            <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
+            <div className={s.ctas}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
           </div>
         </div>
       </section>
