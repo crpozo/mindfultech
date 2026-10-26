@@ -45,21 +45,37 @@ function MiniMap({ active }: { active: string }) {
   );
 }
 
-function Chart({ mode }: { mode: number }) {
-  const n = 40;
-  const a = Array.from({ length: n }, (_, i) => 60 - 22 * Math.sin(i / 4 + mode) - (i > 26 && i < 31 ? 22 : 0) + (i % 5 === 0 ? 4 : 0));
-  const b = Array.from({ length: n }, (_, i) => 92 - 10 * Math.cos(i / 3 + mode));
-  const path = (arr: number[]) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${20 + (i * 560) / (n - 1)},${v * 1.8}`).join(" ");
+function Chart({ mode, es }: { mode: number; es: boolean }) {
+  // 24 h of an agent at work: bars = items handled per hour, line = median response time, a shaded band for the
+  // human sign-off share, and three stat tiles. Each tab reshapes the data.
+  const n = 24;
+  const seed = (i: number) => Math.abs(Math.sin(i * 12.9898 + mode * 78.233) * 43758.5453) % 1;
+  const bars = Array.from({ length: n }, (_, i) => Math.round(6 + 10 * Math.max(0, Math.sin((i - 6) / 24 * Math.PI * 2 + mode)) + seed(i) * 6));
+  const line = Array.from({ length: n }, (_, i) => 1.2 + 0.9 * Math.cos(i / 3.5 + mode) + seed(i + 50) * 0.4);
+  const human = Array.from({ length: n }, (_, i) => Math.round(bars[i] * (0.08 + 0.06 * seed(i + 9))));
+  const total = bars.reduce((a, b) => a + b, 0), hTotal = human.reduce((a, b) => a + b, 0);
+  const med = (line.reduce((a, b) => a + b, 0) / n).toFixed(1);
+  const X = (i: number) => 24 + i * (552 / (n - 1)), H = 150, Y0 = 170;
+  const maxB = Math.max(...bars);
+  const lp = line.map((v, i) => `${i ? "L" : "M"}${X(i)},${Y0 - (v / 2.6) * H}`).join(" ");
+  const tiles = [
+    [String(total), es ? "GESTIONADOS HOY" : "HANDLED TODAY"],
+    [`${med}s`, es ? "RESPUESTA MEDIA" : "MEDIAN RESPONSE"],
+    [`${Math.round((hTotal / total) * 100)}%`, es ? "FIRMADOS POR PERSONA" : "SIGNED BY A PERSON"],
+  ];
   return (
-    <svg viewBox="0 0 600 200" aria-hidden="true">
-      {[40, 80, 120, 160].map((y) => <line key={y} x1={20} y1={y} x2={580} y2={y} stroke="rgba(255,255,255,0.08)" />)}
-      {["P50", "P90", "MAX"].map((t, i) => <text key={t} x={590} y={40 + i * 40} textAnchor="end" fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">{t}</text>)}
-      <path d={path(b)} fill="none" stroke="rgba(191,245,207,0.5)" strokeWidth={1.5} strokeDasharray="3 4" />
-      <path d={path(a)} fill="none" stroke="#3dbe7d" strokeWidth={2} />
-      {a.map((v, i) => (i % 8 === 0 ? <circle key={i} cx={20 + (i * 560) / (n - 1)} cy={v * 1.8} r={2.5} fill="#bff5cf" /> : null))}
-      <text x={20} y={195} fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">00:00</text>
-      <text x={580} y={195} textAnchor="end" fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">23:59</text>
-    </svg>
+    <div>
+      <div className={s.tiles}>{tiles.map(([v, l]) => <div key={l}><b>{v}</b><span className={s.mono}>{l}</span></div>)}</div>
+      <svg viewBox="0 0 600 200" aria-hidden="true" className={s.chartSvg}>
+        <defs><linearGradient id="cbBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3dbe7d" /><stop offset="1" stopColor="#1f7a4d" /></linearGradient></defs>
+        {[0.25, 0.5, 0.75, 1].map((k) => <line key={k} x1={24} y1={Y0 - H * k} x2={576} y2={Y0 - H * k} stroke="rgba(255,255,255,0.07)" />)}
+        {bars.map((v, i) => { const h = (v / maxB) * H, hh = (human[i] / maxB) * H; return <g key={i}><rect x={X(i) - 7} y={Y0 - h} width={14} height={h} rx={3} fill="url(#cbBar)" opacity={0.85} className={s.barUp} style={{ transformOrigin: `${X(i)}px ${Y0}px`, animationDelay: `${i * 40}ms` }} /><rect x={X(i) - 7} y={Y0 - hh} width={14} height={hh} rx={3} fill="#bff5cf" className={s.barUp} style={{ transformOrigin: `${X(i)}px ${Y0}px`, animationDelay: `${i * 40 + 200}ms` }} /></g>; })}
+        <path d={lp} fill="none" stroke="#fff" strokeWidth={1.6} strokeLinejoin="round" opacity={0.9} />
+        {line.map((v, i) => (i % 6 === 3 ? <g key={i}><circle cx={X(i)} cy={Y0 - (v / 2.6) * H} r={3} fill="#0f0f1c" stroke="#fff" strokeWidth={1.4} /><text x={X(i)} y={Y0 - (v / 2.6) * H - 8} textAnchor="middle" fontFamily="var(--font-jbmono), monospace" fontSize="8.5" fill="#e6e8ef">{v.toFixed(1)}s</text></g> : null))}
+        {[0, 6, 12, 18, 23].map((i) => <text key={i} x={X(i)} y={190} textAnchor={i === 23 ? "end" : i === 0 ? "start" : "middle"} fontFamily="var(--font-jbmono), monospace" fontSize="8.5" fill="#8a8fa6">{String(i).padStart(2, "0")}:00</text>)}
+        <g transform="translate(24,8)" fontFamily="var(--font-jbmono), monospace" fontSize="8.5" fill="#8a8fa6"><rect x="0" y="-5" width="10" height="6" rx="1.5" fill="#3dbe7d" /><text x="14" y="0">{es ? "GESTIONADO POR EL AGENTE" : "HANDLED BY THE AGENT"}</text><rect x="170" y="-5" width="10" height="6" rx="1.5" fill="#bff5cf" /><text x="184" y="0">{es ? "FIRMADO POR UNA PERSONA" : "SIGNED BY A PERSON"}</text><line x1="330" y1="-2" x2="342" y2="-2" stroke="#fff" strokeWidth="1.6" /><text x="348" y="0">{es ? "RESPUESTA MEDIA" : "MEDIAN RESPONSE"}</text></g>
+      </svg>
+    </div>
   );
 }
 
@@ -183,7 +199,6 @@ export function Cerebrium() {
               </div>
               <div className={s.card} data-i={1} ref={(el) => { cardRefs.current[1] = el; }}>
                 <div className={s.stage}>
-                  <span className={`${s.chip} ${s.mono}`}>{es ? "Clientes : 3 continentes" : "Clients : 3 continents"}</span>
                   <div className={s.map}><MiniMap active={pin} /></div>
                   <div className={`${s.mapFoot} ${s.mono}`}>{es ? "Regiones : EC, US-W, US-C, US-E, NL, DE, ES, GR" : "Regions : EC, US-W, US-C, US-E, NL, DE, ES, GR"}</div>
                 </div>
@@ -200,7 +215,7 @@ export function Cerebrium() {
               <div className={s.card} data-i={3} ref={(el) => { cardRefs.current[3] = el; }}>
                 <div className={s.stage}>
                   <div className={s.tabs}>{(es ? ["Reclamos", "Tickets", "Uptime"] : ["Claims", "Tickets", "Uptime"]).map((t, i) => <button key={t} type="button" className={chart === i ? s.on : ""} onClick={() => setChart(i)}>{t}</button>)}</div>
-                  <div className={`${s.chart} ${chartOn ? s.chartOn : ""}`} ref={chartRef}><Chart mode={chart} /></div>
+                  <div className={`${s.chart} ${chartOn ? s.chartOn : ""}`} ref={chartRef}><Chart mode={chart} es={es} /></div>
                 </div>
                 <h3>{es ? "Observabilidad de punta a punta para cada agente." : "End-to-end observability for every agent."}</h3>
                 <p>{es ? "Cada acción, aprobación y excepción en un panel en tiempo real. Métricas por rol, alertas cuando algo se sale del guion y exportación a tu stack de monitoreo." : "Every action, approval and exception in a real-time panel. Metrics per role, alerts when something leaves the script, and export to your monitoring stack."}</p>

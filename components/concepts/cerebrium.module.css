@@ -173,6 +173,15 @@
 .barsOn i::after { width: var(--w); }
 .chart path { stroke-dasharray: 1400; stroke-dashoffset: 1400; }
 .chartOn path { animation: cbDraw 1.6s ease-out forwards; }
+.chart .barUp { transform: scaleY(0); }
+.chartOn .barUp { animation: cbBar 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+@keyframes cbBar { to { transform: scaleY(1); } }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 14px; }
+.tiles div { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.tiles b { font-weight: 300; font-size: 28px; line-height: 1; color: #fff; }
+.tiles .mono { color: #aeb2c2; font-size: 10px; }
+.chartSvg { width: 100%; height: auto; display: block; }
+@media (max-width: 720px) { .tiles { grid-template-columns: 1fr 1fr; } .tiles b { font-size: 22px; } }
 @keyframes cbDraw { to { stroke-dashoffset: 0; } }
 .root :global(.cb-split) { display: inline; }
 .root :global(.cb-word) { display: inline-block; white-space: nowrap; }

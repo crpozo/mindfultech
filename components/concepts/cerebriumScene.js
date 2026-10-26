@@ -138,13 +138,13 @@ export function createBackground(canvas, opts = {}) {
   const mats = [];
   /* arches: they rise from below the fold, crest around the upper right third and dive back down */
   const archDefs = [
-    { pts: [[-1, -11, 0.5], [1.5, -5, 0.5], [4, 0.5, 0.5], [5.4, 2.9, 0.5], [6.6, 3.7, 0.5], [7.8, 2.9, 0.5], [9.2, 0.6, 0.5], [11, -6, 0.5], [12, -12, 0.5]], w: 2.0, th: 0.45, amp: 0.05, mid: accent, streak: 0.0 },
-    { pts: [[3.5, -12, -3.5], [5.5, -6, -3.5], [7.8, -0.8, -3.5], [9, 2.2, -3.5], [10.2, 3.1, -3.5], [11.4, 2.2, -3.5], [12.4, -0.2, -3.5], [13.5, -6, -3.5], [14, -12, -3.5]], w: 2.4, th: 0.55, amp: 0.06, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
-    { pts: [[-5, -12, -7.5], [-2.5, -7, -7.5], [0.8, -2.6, -7.5], [2.6, -0.4, -7.5], [4.2, 0.3, -7.5], [5.8, -0.3, -7.5], [7.6, -1.8, -7.5], [10.5, -6, -7.5], [12, -12, -7.5]], w: 1.9, th: 0.4, amp: 0.04, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
+    { pts: [[-1, -11, 1.5], [1.5, -5, 1.5], [4, 0.5, 1.5], [5.4, 2.9, 1.5], [6.6, 3.7, 1.5], [7.8, 2.9, 1.5], [9.2, 0.6, 1.5], [11, -6, 1.5], [12, -12, 1.5]], w: 2.0, th: 0.45, amp: 0.05, mid: accent, streak: 0.0 },
+    { pts: [[3.5, -12, -4], [5.5, -6, -4], [7.8, -0.8, -4], [9, 2.2, -4], [10.2, 3.1, -4], [11.4, 2.2, -4], [12.4, -0.2, -4], [13.5, -6, -4], [14, -12, -4]], w: 2.4, th: 0.55, amp: 0.06, mid: accent.clone().multiplyScalar(0.78), streak: 0.45 },
+    { pts: [[-5, -12, -9.5], [-2.5, -7, -9.5], [0.8, -2.6, -9.5], [2.6, -0.4, -9.5], [4.2, 0.3, -9.5], [5.8, -0.3, -9.5], [7.6, -1.8, -9.5], [10.5, -6, -9.5], [12, -12, -9.5]], w: 1.9, th: 0.4, amp: 0.04, mid: accent.clone().multiplyScalar(0.5), streak: 0.8 },
   ];
   /* columns: tall bands leaning to the right, like a curtain (the company page) */
   const columnDefs = Array.from({ length: 6 }, (_, i) => {
-    const x = -3 + i * 3.1, z = -1.5 - i * 2.6, lean = 2.2 + i * 0.3;
+    const x = -3 + i * 3.1, z = -1.5 - i * 3.4, lean = 2.2 + i * 0.3;
     return { pts: [[x - lean, -12, z], [x - lean * 0.4, -5, z], [x + 0.2, 0, z], [x + lean * 0.5, 6, z], [x + lean, 12, z]], w: 1.6 + (i % 3) * 0.4, th: 0.5, amp: 0, mid: accent.clone().multiplyScalar(0.45 + 0.1 * (i % 3)), streak: i / 6 };
   });
   const defs = mode === "globe" ? [] : mode === "columns" ? columnDefs : archDefs;
@@ -156,7 +156,9 @@ export function createBackground(canvas, opts = {}) {
       uniforms: { uTime: { value: Math.random() * 10 }, uAmp: { value: reduced ? 0 : d.amp }, uBase: { value: base }, uMid: { value: d.mid }, uEdge: { value: edge }, uEdgeW: { value: 0.05 }, uStreak: { value: d.streak } },
     });
     mats.push(mat);
-    ribbons.add(new THREE.Mesh(geo, mat));
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.renderOrder = 10 - ribbons.children.length; // back to front, fixed
+    ribbons.add(mesh);
   }
 
   /* globe: a dim translucent shell with a stack of matte discs inside (some with a wedge cut), like a sliced core.
@@ -253,8 +255,8 @@ export function createBackground(canvas, opts = {}) {
     ribbons.visible = defs.length > 0 && (mode === "columns" || s < 2.4 || f > 0.01);
     ribbons.position.x += (-(canvas.clientWidth < 760 ? 3.5 : 1.5) - H * 5 - state.foot * 4.5 - ribbons.position.x) * 0.1;
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.5;
-    ribbons.rotation.x = state.py * 0.08 + H * 0.25;
-    ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.9;
+    ribbons.rotation.x = state.py * 0.05 + H * 0.25;
+    ribbons.rotation.y = state.px * 0.06 + H * 0.9;
     ribbons.scale.setScalar((canvas.clientWidth < 760 ? 0.72 : 1) * (1 + H * 0.25));
     // globe: scale and fade with the dark-section progress
     const g = mode === "globe" ? Math.max(0.15, 1 - s * 0.6) : state.globe;
