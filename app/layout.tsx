@@ -28,7 +28,7 @@ const jbmono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], vari
 // English, like the page it describes: the site opens in English (see
 // LanguageProvider) and the document title should match what loads.
 const SITE_TITLE = "MindfulTech";
-const OG_TITLE = "MindfulTech: AI agents that do the repetitive work";
+const OG_TITLE = "MindfulTech: AI systems designed for humans";
 const SITE_DESC =
   "One AI agent per area (billing, support, sales, operations), plugged into your CRM, ERP and inbox, working 24/7. First agent in production within a week. Quito, Ecuador.";
 
@@ -48,13 +48,13 @@ export const metadata: Metadata = {
     // tarjeta social: el logo sobre el fondo claro del sitio, 1200×630, el
     // formato que WhatsApp, LinkedIn y X muestran completo. Generada con
     // Pillow a partir de la geometría de components/Logo.tsx y Outfit 600.
-    images: [{ url: "/brand/og.png?v=4", width: 1200, height: 630, alt: "MindfulTech" }],
+    images: [{ url: "/brand/og.png?v=5", width: 1200, height: 630, alt: "MindfulTech" }],
   },
   twitter: {
     card: "summary_large_image",
     title: OG_TITLE,
     description: SITE_DESC,
-    images: ["/brand/og.png?v=4"],
+    images: ["/brand/og.png?v=5"],
   },
 };
 
