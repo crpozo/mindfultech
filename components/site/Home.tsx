@@ -197,15 +197,9 @@ const SVC = [
 /* hero collage slides: same composition, different claim, stat, photo and tints (Jasper-style rotation) */
 const SLIDES = [
   { en: "Ship an AI agent to production in 1 week", es: "Un agente de IA en producción en 1 semana", stat: "3,650+", statEn: "days shipping products", statEs: "días lanzando productos", img: "/art/team.webp", pos: "center top", gridL: "#3dbe7d", gridR: "#3dbe7d", bar: "#f4d98a", tri: "#c9c4f2", statBg: "#0e1013", statFg: "#bff5cf", col: "#bff5cf", dot: "#1f7a4d" },
-  { en: "Research, engineering and AI in one lab", es: "Investigación, ingeniería e IA en un solo laboratorio", stat: "10", statEn: "years shipping from Quito", statEs: "años lanzando desde Quito", img: "/art/ailab.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
+  { en: "Research, engineering and AI in one lab", es: "Investigación, ingeniería e IA en un solo laboratorio", stat: "10", statEn: "years shipping from Quito", statEs: "años lanzando desde Quito", img: "/art/product.webp", pos: "center", gridL: "#85bfe9", gridR: "#c9c4f2", bar: "#f4d98a", tri: "#bff5cf", statBg: "#1f7a4d", statFg: "#f4f5f3", col: "#e3f1fb", dot: "#85bfe9" },
   { en: "Web, mobile and custom software, maintained after launch", es: "Web, móvil y software a medida, con mantenimiento tras el lanzamiento", stat: "3", statEn: "continents with clients", statEs: "continentes con clientes", img: "/art/research.webp", pos: "center", gridL: "#f4d98a", gridR: "#f4d98a", bar: "#3dbe7d", tri: "#85bfe9", statBg: "#0e1013", statFg: "#f4d98a", col: "#c9c4f2", dot: "#0e1013" },
 ];
-const DIFF_COL = [
-  { bg: "#0e1013", fg: "#bff5cf", shadow: "#bff5cf" },
-  { bg: "#3dbe7d", fg: "#ffffff", shadow: "#c9c4f2" },
-  { bg: "#bff5cf", fg: "#1f7a4d", shadow: "#85bfe9" },
-];
-const DIFF_HREF = ["/work", "/work#healthcare", "/company#about"];
 const FEAT_IMG = ["/art/helixona-hero.webp", "/art/eventflow-login-wide.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp", "/art/parc-login.webp", "/art/internet-coaches.webp"];
 const LOGOS: [string, string][] = [
   ["USFQ", "/logo-usfq.svg"],
@@ -264,7 +258,7 @@ function WhyMock({ i }: { i: number }) {
               <div key={k as string} className={s.step}><span>{k}</span><i><b style={{ width: `${w}%` }} /></i><em>{v}</em></div>
             ))}
           </div>
-          <div className={s.log}><span>14:02:11</span> migrations: 2 applied · <span>14:02:14</span> cache warmed · <span>14:02:19</span> healthcheck 200 · <span>14:02:19</span> traffic shifted 100%</div>
+          <div className={s.log}><span>14:02:11</span> migrations: 2 applied / <span>14:02:14</span> cache warmed / <span>14:02:19</span> healthcheck 200 · <span>14:02:19</span> traffic shifted 100%</div>
         </div>
         <div className={s.mock} style={{ right: "5%", top: "50%", width: "46%", padding: 16, gap: 8 }}>
           <Lbl>UPTIME / 90 DAYS</Lbl>
@@ -319,7 +313,7 @@ function WhyMock({ i }: { i: number }) {
           {[["LC", "research", "#C9C4F2"], ["CP", "product", "#BFF5CF"], ["DM", "engineering", "#85BFE9"], ["AI", "agents", "#0E1013"]].map(([ini, role, bg]) => (
             <span key={ini}><i className={s.avatar} style={{ background: bg, color: bg === "#0E1013" ? "#fff" : "#0E1013" }}>{ini}</i>{role}</span>
           ))}
-          <span style={{ marginLeft: "auto", color: "#555" }}>No hand-offs · one Slack channel</span>
+          <span style={{ marginLeft: "auto", color: "#555" }}>No hand-offs / one Slack channel</span>
         </div>
       </div>
       <div className={s.quote} style={{ position: "absolute", right: "6%", bottom: "5%", border: "2px solid #0E1013", maxWidth: 330 }}>
@@ -345,7 +339,7 @@ function ArtDiscovery() {
       <div style={{ left: "30%", top: "76%", width: 22, height: 22, background: "#3DBE7D", clipPath: "polygon(0 0,100% 40%,45% 55%,30% 100%)", animation: "mtDrift 4s ease-in-out infinite" }} />
       <div style={{ left: "88%", top: "20%", width: 36, height: 36, background: "#C9C4F2", clipPath: "polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)", animation: "mtSpin 12s linear infinite" }} />
       <div style={{ left: "10%", top: "74%", width: 16, height: 16, border: "3px solid #0E1013", transform: "rotate(45deg)" }} />
-      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>22 interviews · 5 clinics · 1 problem</div>
+      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>22 interviews / 5 clinics / 1 problem</div>
     </div>
   );
 }
@@ -368,7 +362,7 @@ function ArtApps() {
       <div className={s.badge} style={{ left: "72%", top: "70%", animationDelay: "1.3s" }}>uptime 99.98%</div>
       <div style={{ left: "60%", top: "8%", width: 44, height: 44, borderRadius: "50%", background: "#1F7A4D", animation: "mtPulse 3s ease-in-out infinite" }} />
       <div style={{ left: "88%", top: "56%", width: 50, height: 44, background: "#3DBE7D", clipPath: "polygon(50% 0,100% 100%,0 100%)", animation: "mtDrift 5s ease-in-out .8s infinite" }} />
-      <div className={s.artLabel} style={{ right: "6%", bottom: "8%" }}>AWS · CI · tests · monitoring</div>
+      <div className={s.artLabel} style={{ right: "6%", bottom: "8%" }}>AWS / CI / tests / monitoring</div>
     </div>
   );
 }
@@ -390,7 +384,7 @@ function ArtAI() {
       <div style={{ left: "84%", top: "12%", width: 40, height: 34, background: "#1F3A8A", clipPath: "polygon(0 0,100% 50%,0 100%)", animation: "mtDrift 5s ease-in-out infinite" }} />
       <div style={{ left: "80%", top: "80%", width: 24, height: 24, background: "#1F3A8A", transform: "rotate(45deg)", animation: "mtFloat 4s ease-in-out 1s infinite" }} />
       <div style={{ left: "24%", top: "40%", width: 10, height: 10, borderRadius: "50%", background: "#0E1013" }} />
-      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>one agent per role · human sign-off</div>
+      <div className={s.artLabel} style={{ left: "8%", bottom: "8%" }}>one agent per role / human sign-off</div>
     </div>
   );
 }
@@ -492,7 +486,6 @@ export function Home() {
   const t = T[lang as Lang];
   const [why, setWhy] = React.useState(0);
   const [proj, setProj] = React.useState(0);
-  const [diff, setDiff] = React.useState(0);
   const [slide, setSlide] = React.useState(0);
   const slidePaused = React.useRef(false);
   React.useEffect(() => {
@@ -573,25 +566,20 @@ export function Home() {
         </div>
       </div>
 
-      {/* difference: split after the reference, stacked word blocks, no accordion */}
-      <section className={`${s.wrap} ${s.sectionFirst} ${s.diffSplit}`}>
-        <div className={s.diffText}>
-          <h2 className={s.h2}>{t.diffH2}</h2>
-          {t.diffP.map((p) => <p key={p}>{p}</p>)}
+      {/* services: first section after the logos */}
+      <section id="services" className={`${s.wrap} ${s.sectionFirst}`}>
+        <div className={s.svcHead}>
+          <h2 className={s.h2}>{t.svcH2a}<span style={{ color: "#1F7A4D" }}>{t.svcH2b}</span></h2>
+          <p className={s.sub}>{t.svcSub}</p>
         </div>
-        <div className={s.diffStack}>
-          <div className={s.diffBg} aria-hidden="true"><i /><i /><i /></div>
-          {t.diff.map(([kick, word], i) => (
-            <button key={kick} type="button" className={`${s.diffRow} ${diff === i ? s.diffOn : ""}`} onMouseEnter={() => setDiff(i)} onFocus={() => setDiff(i)} onClick={() => setDiff(i)} aria-pressed={diff === i}>
-              <span className={s.diffPlus} style={{ background: DIFF_COL[i].bg, color: DIFF_COL[i].fg }}>+</span>
-              <span className={s.diffWord} style={{ background: DIFF_COL[i].bg, color: DIFF_COL[i].fg }}>{word}</span>
-            </button>
+        <div className={s.cards3}>
+          {t.svc.map(([title, body], i) => (
+            <div key={title} className={s.svc} style={{ ["--tint" as string]: SVC[i].tint, ["--hot" as string]: SVC[i].hot }}>
+              <h3>{title}</h3>
+              {i === 0 ? <ArtDiscovery /> : i === 1 ? <ArtApps /> : <ArtAI />}
+              <Link href="/services" className={s.svcFoot}><span>{body}</span><span>→</span></Link>
+            </div>
           ))}
-          <div className={s.diffCard} style={{ boxShadow: `8px 8px 0 ${DIFF_COL[diff].shadow}` }}>
-            <span className={s.mono} style={{ color: "var(--dgreen)" }}>{t.diff[diff][0]}</span>
-            <p><b>{t.diff[diff][1]}</b> {t.diff[diff][2]}</p>
-            <Link href={DIFF_HREF[diff]}>{t.learnHow}</Link>
-          </div>
         </div>
       </section>
 
@@ -627,23 +615,6 @@ export function Home() {
         </div>
         <div className={s.panel}>
           <WhyMock key={why} i={why} />
-        </div>
-      </section>
-
-      {/* services */}
-      <section id="services" className={`${s.wrap} ${s.section}`}>
-        <div className={s.svcHead}>
-          <h2 className={s.h2}>{t.svcH2a}<span style={{ color: "#1F7A4D" }}>{t.svcH2b}</span></h2>
-          <p className={s.sub}>{t.svcSub}</p>
-        </div>
-        <div className={s.cards3}>
-          {t.svc.map(([title, body], i) => (
-            <div key={title} className={s.svc} style={{ ["--tint" as string]: SVC[i].tint, ["--hot" as string]: SVC[i].hot }}>
-              <h3>{title}</h3>
-              {i === 0 ? <ArtDiscovery /> : i === 1 ? <ArtApps /> : <ArtAI />}
-              <Link href="/services" className={s.svcFoot}><span>{body}</span><span>→</span></Link>
-            </div>
-          ))}
         </div>
       </section>
 

@@ -61,16 +61,16 @@
 .navCta:hover { background: var(--dgreen); color: #fff; }
 
 /* ---- hero ---- */
-.hero { position: relative; overflow: hidden; background: var(--bg); }
-.heroIn { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px; padding: 56px 40px 320px; max-width: 1440px; margin: 0 auto; }
-.pill { display: flex; align-items: center; gap: 14px; background: #fff; padding: 8px 18px 8px 8px; font-size: 17px; font-weight: 600; flex-wrap: wrap; justify-content: center; max-width: 100%; text-wrap: pretty; border: 1px solid var(--line); }
-.chip { background: var(--lime); color: var(--dgreen); padding: 6px 10px; font-weight: 600; }
+.hero { position: relative; overflow: hidden; background: var(--bg); --k: max(1, tan(atan2(100vw, 1440px))); }
+.heroIn { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px; padding: 56px 40px calc(60px + 260px * var(--k, 1)); max-width: 1440px; margin: 0 auto; }
+.pill { display: flex; align-items: center; gap: 12px; background: #fff; padding: 5px 14px 5px 5px; font-size: 15px; font-weight: 600; flex-wrap: wrap; justify-content: center; max-width: 100%; text-wrap: pretty; border: 1px solid var(--line); }
+.chip { background: var(--lime); color: var(--dgreen); padding: 5px 9px; font-weight: 600; font-size: 14px; }
 .pill a { color: var(--dgreen); white-space: nowrap; }
 .h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(60px, 9.4vw, 136px); line-height: 0.9; letter-spacing: -0.03em; max-width: 1180px; text-wrap: balance; margin-top: 8px; }
 .heroSub { font-size: clamp(18px, 1.7vw, 24px); line-height: 1.4; color: #2a2d3a; max-width: 820px; text-wrap: pretty; }
 .ctas { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.band { position: absolute; right: 0; bottom: 0; width: 1440px; max-width: 100%; height: 260px; overflow: hidden; pointer-events: none; }
-.bandInner { position: absolute; right: 0; bottom: 0; width: 1440px; height: 260px; }
+.band { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: calc(260px * var(--k, 1)); overflow: hidden; pointer-events: none; }
+.bandInner { position: absolute; left: 50%; bottom: 0; width: 1440px; height: 260px; transform: translateX(-50%) scale(var(--k, 1)); transform-origin: bottom center; }
 .bandInner > * { position: absolute; }
 .bandGridL { left: 60px; bottom: 0; width: 560px; height: 150px; }
 .bandGridR { right: 0; bottom: 0; width: 620px; height: 110px; }
@@ -266,7 +266,7 @@
   .heroIn { padding-bottom: 200px; }
   .band { height: 170px; }
   /* phones: scale the collage and slide it so the team photo and the stat stay in frame */
-  .bandInner { transform: scale(0.62); transform-origin: right bottom; right: -173px; }
+  .bandInner { left: auto; transform: scale(0.62); transform-origin: right bottom; right: -173px; }
   .band .slidePrev { transform: translateX(-300%); }
   .band .slideNext { transform: translateX(300%); }
   .svc h3 { font-size: 40px; }
@@ -552,7 +552,7 @@
 .bandPhoto { border: 2px solid var(--ink); box-sizing: border-box; }
 /* trusted by: serif title centred, big logos */
 .trustedIn { flex-direction: column; gap: 22px; padding: 40px 40px 36px; }
-.trustedTitle { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.2vw, 30px); color: var(--dgreen); letter-spacing: -0.01em; }
+.trustedTitle { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.2vw, 30px); color: var(--ink); letter-spacing: -0.01em; }
 .trustedIn .marquee { width: 100%; }
 .trustedIn img { height: 34px; filter: grayscale(1) brightness(0.2); opacity: 0.95; }
 .trustedIn b { font-size: 26px; color: #1d1f24; }
