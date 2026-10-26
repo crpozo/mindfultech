@@ -1,0 +1,286 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useLang } from "@/components/i18n";
+import { POSTS } from "@/lib/blog/posts";
+import { CASES } from "@/lib/site/cases";
+import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
+import s from "./cerebrium.module.css";
+
+/* Concept 06, "Cerebrium" (Oct 2026), after cerebrium.ai: deep navy with glowing ribbons, a sans headline with one
+   gradient word, mono labels with a dot, a light "why" section (sticky list + product cards), a dark governance block,
+   case cards, a feature cloud and the blog. All content is MindfulTech's. */
+
+const WORDS = { en: ["Quickly", "Scale", "Globally"], es: ["Rápido", "Escala", "Global"] };
+const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
+const PINS = [{ id: "ec", lat: -0.18, lon: -78.47, k: "EC" }, { id: "ca", lat: 36.8, lon: -119.8, k: "US-W" }, { id: "il", lat: 41.9, lon: -87.6, k: "US-C" }, { id: "fl", lat: 26.6, lon: -81.9, k: "US-E" }, { id: "nl", lat: 52.4, lon: 4.9, k: "NL" }, { id: "de", lat: 51.2, lon: 10.4, k: "DE" }, { id: "es", lat: 40.4, lon: -3.7, k: "ES" }, { id: "gr", lat: 37.98, lon: 23.7, k: "GR" }];
+const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
+
+function Ribbons() {
+  return (
+    <div className={s.ribbons} aria-hidden="true">
+      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="cb-r1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1f7a4d" /><stop offset="0.5" stopColor="#3dbe7d" /><stop offset="1" stopColor="#0b0b14" /></linearGradient>
+          <linearGradient id="cb-r2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#0b0b14" /><stop offset="0.5" stopColor="#2a9a62" /><stop offset="1" stopColor="#bff5cf" /></linearGradient>
+          <radialGradient id="cb-glow" cx="0.7" cy="0.4" r="0.6"><stop offset="0" stopColor="#3dbe7d" stopOpacity="0.35" /><stop offset="1" stopColor="#0b0b14" stopOpacity="0" /></radialGradient>
+          <filter id="cb-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
+        </defs>
+        <rect width="1440" height="900" fill="url(#cb-glow)" />
+        <g filter="url(#cb-blur)" opacity="0.55">
+          <path d="M520 980 C 700 620, 980 560, 1180 160 L 1300 120 C 1100 560, 820 660, 660 1000 Z" fill="url(#cb-r1)" />
+        </g>
+        <path d="M620 980 C 820 600, 1060 540, 1240 140 L 1330 100 C 1160 540, 920 640, 740 1000 Z" fill="url(#cb-r1)" opacity="0.9" />
+        <path d="M760 980 C 940 640, 1200 560, 1400 220 L 1440 300 C 1260 620, 1040 700, 880 1000 Z" fill="url(#cb-r2)" opacity="0.85" />
+        <path d="M900 980 C 1080 700, 1300 640, 1440 460 L 1440 560 C 1320 700, 1140 760, 1010 1000 Z" fill="url(#cb-r1)" opacity="0.6" />
+        <g stroke="#ffffff" strokeOpacity="0.08" strokeWidth="1"><path d="M640 980 C 840 600, 1080 540, 1260 140" fill="none" /><path d="M790 980 C 970 640, 1230 560, 1440 240" fill="none" /></g>
+        <g fill="#bff5cf" opacity="0.5">{Array.from({ length: 60 }, (_, i) => <circle key={i} cx={(i * 173) % 1440} cy={(i * 97 + 40) % 900} r={i % 7 === 0 ? 1.6 : 0.8} />)}</g>
+      </svg>
+    </div>
+  );
+}
+
+function MiniMap({ active }: { active: string }) {
+  const home = proj(PINS[0].lat, PINS[0].lon);
+  return (
+    <svg viewBox={`0 0 ${MAP_VIEW.w} ${MAP_VIEW.h}`} aria-hidden="true">
+      <path d={LAND_PATH} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={3.2} strokeLinecap="round" />
+      {PINS.slice(1).map((p, i) => { const q = proj(p.lat, p.lon); const dx = q.x - home.x; const lift = Math.abs(dx) * (0.1 + 0.07 * (i % 3)) + 10 * i; return <path key={p.id} d={`M${home.x},${home.y} C${home.x + dx * 0.2},${home.y - lift} ${home.x + dx * 0.75},${q.y - lift * 0.5} ${q.x},${q.y}`} fill="none" stroke={active === p.id ? "#bff5cf" : "rgba(61,190,125,0.45)"} strokeWidth={active === p.id ? 2 : 1} />; })}
+      {PINS.map((p) => { const q = proj(p.lat, p.lon); const on = active === p.id; return (
+        <g key={p.id}>
+          {on && <circle cx={q.x} cy={q.y} r={16} fill="rgba(61,190,125,0.25)" />}
+          <rect x={q.x - 5} y={q.y - 5} width={10} height={10} rx={2} fill={on ? "#bff5cf" : "#3dbe7d"} />
+          <rect x={q.x + 10} y={q.y - 11} width={p.k.length * 8 + 12} height={20} rx={4} fill={on ? "#bff5cf" : "rgba(255,255,255,0.1)"} />
+          <text x={q.x + 16} y={q.y + 3} fontFamily="var(--font-jbmono), monospace" fontSize="11" fill={on ? "#0e1013" : "#fff"}>{p.k}</text>
+        </g>
+      ); })}
+    </svg>
+  );
+}
+
+function Chart({ mode }: { mode: number }) {
+  const n = 40;
+  const a = Array.from({ length: n }, (_, i) => 60 - 22 * Math.sin(i / 4 + mode) - (i > 26 && i < 31 ? 22 : 0) + (i % 5 === 0 ? 4 : 0));
+  const b = Array.from({ length: n }, (_, i) => 92 - 10 * Math.cos(i / 3 + mode));
+  const path = (arr: number[]) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${20 + (i * 560) / (n - 1)},${v * 1.8}`).join(" ");
+  return (
+    <svg viewBox="0 0 600 200" aria-hidden="true">
+      {[40, 80, 120, 160].map((y) => <line key={y} x1={20} y1={y} x2={580} y2={y} stroke="rgba(255,255,255,0.08)" />)}
+      {["P50", "P90", "MAX"].map((t, i) => <text key={t} x={590} y={40 + i * 40} textAnchor="end" fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">{t}</text>)}
+      <path d={path(b)} fill="none" stroke="rgba(191,245,207,0.5)" strokeWidth={1.5} strokeDasharray="3 4" />
+      <path d={path(a)} fill="none" stroke="#3dbe7d" strokeWidth={2} />
+      {a.map((v, i) => (i % 8 === 0 ? <circle key={i} cx={20 + (i * 560) / (n - 1)} cy={v * 1.8} r={2.5} fill="#bff5cf" /> : null))}
+      <text x={20} y={195} fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">00:00</text>
+      <text x={580} y={195} textAnchor="end" fontFamily="var(--font-jbmono), monospace" fontSize="9" fill="#8a8fa6">23:59</text>
+    </svg>
+  );
+}
+
+export function Cerebrium() {
+  const { lang, setLang } = useLang();
+  const es = lang === "es";
+  const [word, setWord] = React.useState(0);
+  const [feat, setFeat] = React.useState(0);
+  const [bench, setBench] = React.useState(0);
+  const [chart, setChart] = React.useState(0);
+  const [built, setBuilt] = React.useState(0);
+  const [pin, setPin] = React.useState("ec");
+  const cardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+
+  React.useEffect(() => { const id = window.setInterval(() => setWord((w) => (w + 1) % 3), 1800); return () => window.clearInterval(id); }, []);
+  React.useEffect(() => { const id = window.setInterval(() => setPin((p) => PINS[(PINS.findIndex((x) => x.id === p) + 1) % PINS.length].id), 1600); return () => window.clearInterval(id); }, []);
+  React.useEffect(() => {
+    const obs = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) setFeat(Number((e.target as HTMLElement).dataset.i)); }, { rootMargin: "-40% 0px -45% 0px" });
+    cardRefs.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+  const go = (i: number) => { setFeat(i); cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "center" }); };
+
+  const FEATS = es
+    ? ["Primer agente en 1 semana", "Un equipo, tres continentes", "Tu código, tu stack", "Observabilidad de punta a punta"]
+    : ["First agent in 1 week", "One team, three continents", "Your code, your stack", "End-to-end observability"];
+  const BENCH = [
+    { k: "MINDFULTECH", v: es ? "1 sem" : "1 wk", w: 8, c: "#bff5cf" },
+    { k: es ? "AGENCIA" : "AGENCY", v: es ? "6 sem" : "6 wks", w: 40, c: "#3dbe7d" },
+    { k: "IN-HOUSE", v: es ? "12 sem" : "12 wks", w: 72, c: "rgba(255,255,255,0.5)" },
+    { k: "OFFSHORE", v: es ? "16 sem" : "16 wks", w: 100, c: "rgba(255,255,255,0.3)" },
+  ];
+  const BENCH2 = [
+    { k: "MINDFULTECH", v: es ? "6 sem" : "6 wks", w: 24, c: "#bff5cf" },
+    { k: es ? "AGENCIA" : "AGENCY", v: es ? "14 sem" : "14 wks", w: 56, c: "#3dbe7d" },
+    { k: "IN-HOUSE", v: es ? "20 sem" : "20 wks", w: 80, c: "rgba(255,255,255,0.5)" },
+    { k: "OFFSHORE", v: es ? "24 sem" : "24 wks", w: 100, c: "rgba(255,255,255,0.3)" },
+  ];
+  const GOV = es
+    ? [["Una persona firma", "Cada agente propone y una persona aprueba donde importa: pagos, contratos, salud. El criterio humano queda en el circuito."], ["Tus datos en tus herramientas", "Los agentes trabajan dentro de tu CRM, ERP y correo. Nada se copia a un sistema nuevo ni sale de tu región."], ["Aislamiento por agente", "Cada rol corre aislado, con sus propias credenciales y permisos mínimos. Un agente de ventas no ve finanzas."], ["Registro de auditoría", "Cada acción queda registrada: quién pidió, qué hizo el agente, quién aprobó. Exportable cuando lo necesites."]]
+    : [["A person signs off", "Every agent proposes and a person approves where it matters: payments, contracts, health. Human judgment stays in the loop."], ["Your data in your tools", "Agents work inside your CRM, ERP and inbox. Nothing is copied into a new system or leaves your region."], ["Isolation per agent", "Each role runs isolated, with its own credentials and least privilege. A sales agent never sees finance."], ["Audit trail", "Every action is logged: who asked, what the agent did, who approved. Exportable whenever you need it."]];
+  const BUILT: { tab: number; t: string; d: string; img?: string; href: string }[] = es
+    ? [{ tab: 0, t: "Agente de facturación médica, 24/7", d: "Reclamos, codificación y seguimientos dentro de las herramientas de la clínica.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Siete agentes para una oficina universitaria", d: "Finanzas, donantes y proyectos en una oficina 3D con dashboards reales.", img: "/art/panel-usfq.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow en el App Store", d: "Check-in, agendas y certificados para 10.000 estudiantes.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "De Excel a Odoo con rutas de entrega", d: "Cotizaciones, inventario y choferes en el teléfono.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "Portafolio 3D para animatrónicos", d: "React Three Fiber, Spline y scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "Dashboard de IA para concesionarios", d: "Un tablero que lee los números y responde en lenguaje claro.", img: "/art/internet-coaches.webp", href: "/work" }]
+    : [{ tab: 0, t: "Medical billing agent, 24/7", d: "Claims, coding and follow-ups inside the clinic's tools.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Seven agents for a university office", d: "Finance, donors and projects in a 3D office with real dashboards.", img: "/art/panel-usfq.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow on the App Store", d: "Check-in, agendas and certificates for 10,000 students.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "Excel to Odoo with delivery routes", d: "Quotes, inventory and drivers on their phones.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "3D portfolio for animatronics", d: "React Three Fiber, Spline and scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "AI dashboard for car dealerships", d: "A board that reads the numbers and answers in plain language.", img: "/art/internet-coaches.webp", href: "/work" }];
+  const FEATURES = es
+    ? ["Agentes por rol", "Firma humana", "Integración con CRM y ERP", "WhatsApp y correo", "Investigación UX", "Prototipos probados", "Apps iOS y Android", "Next.js y React", "AWS con CI/CD", "Monitoreo 24/7", "Multi-región", "Odoo y Salesforce", "Dashboards en tiempo real", "Documentación incluida", "Mantenimiento tras el launch", "Español e inglés"]
+    : ["Agents per role", "Human sign-off", "CRM & ERP integration", "WhatsApp & email", "UX research", "Tested prototypes", "iOS & Android apps", "Next.js & React", "AWS with CI/CD", "24/7 monitoring", "Multi-region", "Odoo & Salesforce", "Real-time dashboards", "Documentation included", "Maintained after launch", "Spanish & English"];
+  const ICONS = [
+    <svg key="a" viewBox="0 0 24 24" fill="none" stroke="#bff5cf" strokeWidth="1.6"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z" /><path d="M9 12l2 2 4-4" /></svg>,
+    <svg key="b" viewBox="0 0 24 24" fill="none" stroke="#bff5cf" strokeWidth="1.6"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18M8 4v6" /></svg>,
+    <svg key="c" viewBox="0 0 24 24" fill="none" stroke="#bff5cf" strokeWidth="1.6"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>,
+    <svg key="d" viewBox="0 0 24 24" fill="none" stroke="#bff5cf" strokeWidth="1.6"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
+  ];
+
+  return (
+    <div className={s.root}>
+      <header className={s.nav}>
+        <div className={s.navIn}>
+          <Link href="/" aria-label="MindfulTech">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} /></Link>
+          <nav className={s.navLinks}>
+            <Link href="/services">{es ? "Servicios" : "Services"}</Link><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/blog">Blog</Link>
+          </nav>
+          <div className={s.navRight}>
+            <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
+            <a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empezar" : "Start a project"}</a>
+          </div>
+        </div>
+      </header>
+
+      <section className={s.hero}>
+        <Ribbons />
+        <div className={s.words} aria-hidden="true">{WORDS[lang].map((w, i) => <span key={w} className={word === i ? s.on : ""}>{w}</span>)}</div>
+        <div className={s.heroIn}>
+          <div>
+            <h1 className={s.h1}>{es ? <>Software con IA que <span className={s.grad}>escala</span> contigo</> : <>AI software that <span className={s.grad}>scales</span> with you</>}</h1>
+            <Link href="/office-demo" className={s.play}><i>▶</i><span className={s.mono}>{es ? "Ver la demo" : "Open the demo"}</span></Link>
+          </div>
+          <div className={s.heroSide}>
+            <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
+            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empieza ahora" : "Try it now"}</a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}>{es ? "Agenda una demo" : "Book a demo"}</Link></div>
+          </div>
+        </div>
+      </section>
+
+      <div className={s.logos}><div className={s.logosIn}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div></div>
+
+      <section className={s.light}>
+        <div className={s.wrap}>
+          <div className={s.whyHead}>
+            <p>{es ? "Velocidad de producción sin la complejidad de producción." : "Production speed without the production complexity."}</p>
+            <h2 className={s.h2}>{es ? <>Hecho para equipos<br /><span className={s.grad2}>que empujan límites</span></> : <>Built for teams,<br /><span className={s.grad2}>pushing boundaries</span></>}</h2>
+          </div>
+          <div className={s.why}>
+            <div className={s.whyList}>
+              <span className={`${s.mono} ${s.label}`}>{es ? "Por qué MindfulTech" : "Why MindfulTech"}</span>
+              {FEATS.map((f, i) => <button key={f} type="button" className={feat === i ? s.on : ""} onClick={() => go(i)}>{f}</button>)}
+            </div>
+            <div className={s.cards}>
+              <div className={s.card} data-i={0} ref={(el) => { cardRefs.current[0] = el; }}>
+                <div className={s.stage}>
+                  <div className={s.tabs}><button type="button" className={bench === 0 ? s.on : ""} onClick={() => setBench(0)}>{es ? "Agente de IA" : "AI agent"}</button><button type="button" className={bench === 1 ? s.on : ""} onClick={() => setBench(1)}>{es ? "App web" : "Web app"}</button></div>
+                  <div className={s.bars}>{(bench === 0 ? BENCH : BENCH2).map((b) => <div key={b.k} className={s.bar}><span className={s.mono}>{b.k}</span><i style={{ ["--w" as string]: `${b.w}%`, ["--c" as string]: b.c }} /><b>{b.v}</b></div>)}</div>
+                </div>
+                <h3>{es ? "En producción desde la primera semana." : "In production from the first week."}</h3>
+                <p>{es ? "Empezamos con el flujo que más duele, lo automatizamos con un agente y lo dejamos corriendo con una persona que aprueba. Sin reescribir tu sistema ni esperar a la gran plataforma." : "We start with the flow that hurts most, automate it with an agent and leave it running with a person approving. No rewriting your system, no waiting for the big platform."}</p>
+              </div>
+              <div className={s.card} data-i={1} ref={(el) => { cardRefs.current[1] = el; }}>
+                <div className={s.stage}>
+                  <span className={`${s.chip} ${s.mono}`}>{es ? "Clientes : 3 continentes" : "Clients : 3 continents"}</span>
+                  <div className={s.map}><MiniMap active={pin} /></div>
+                  <div className={`${s.mapFoot} ${s.mono}`}>{es ? "Regiones : EC, US-W, US-C, US-E, NL, DE, ES, GR" : "Regions : EC, US-W, US-C, US-E, NL, DE, ES, GR"}</div>
+                </div>
+                <h3>{es ? "Un equipo en Quito, clientes en tres continentes." : "One team in Quito, clients on three continents."}</h3>
+                <p>{es ? "Diez años entregando para empresas de América y Europa, en tu zona horaria de trabajo y en tu idioma. Sin intermediarios ni agencias entre tú y la gente que construye." : "Ten years shipping for companies across the Americas and Europe, in your working hours and your language. No intermediaries or agencies between you and the people who build."}</p>
+              </div>
+              <div className={s.card} data-i={2} ref={(el) => { cardRefs.current[2] = el; }}>
+                <div className={`${s.stage} ${s.stagePad}`}>
+                  <span className={`${s.chip} ${s.mono}`}>Terminal</span>
+                  <pre className={s.term}>{`carlos@mindfultech billing % `}<b>mindfultech run agent billing --role finance --tools odoo,gmail</b>{`
+
+`}<b>✓</b>{` Connected to Odoo (invoices, payments)
+`}<b>✓</b>{` Connected to Gmail (billing@clinic.ec)
+`}<b>✓</b>{` Policies loaded: approve > $500 by a person
+
+`}<em>09:12:04</em>{`  claim #4821 rejected by insurer → reason: missing code
+`}<em>09:12:06</em>{`  drafted correction, attached report, queued resend
+`}<em>09:12:07</em>{`  approval requested: María (finance) ........ `}<b>approved</b>{`
+`}<em>09:12:31</em>{`  claim #4821 resubmitted ✓   next check in 48h`}</pre>
+                </div>
+                <h3>{es ? "Tu código, tus herramientas. Nosotros lo hacemos correr." : "Your code, your tools. We make it run."}</h3>
+                <p>{es ? "Sin reescrituras ni SDKs propios. Los agentes se conectan a lo que ya usas: Odoo, Salesforce, Gmail, WhatsApp, tu base de datos. Versionado, reproducible y listo para escalar." : "No rewrites, no custom SDKs. Agents plug into what you already use: Odoo, Salesforce, Gmail, WhatsApp, your database. Versioned, reproducible and ready to scale."}</p>
+              </div>
+              <div className={s.card} data-i={3} ref={(el) => { cardRefs.current[3] = el; }}>
+                <div className={s.stage}>
+                  <div className={s.tabs}>{(es ? ["Reclamos", "Tickets", "Uptime"] : ["Claims", "Tickets", "Uptime"]).map((t, i) => <button key={t} type="button" className={chart === i ? s.on : ""} onClick={() => setChart(i)}>{t}</button>)}</div>
+                  <div className={s.chart}><Chart mode={chart} /></div>
+                </div>
+                <h3>{es ? "Observabilidad de punta a punta para cada agente." : "End-to-end observability for every agent."}</h3>
+                <p>{es ? "Cada acción, aprobación y excepción en un panel en tiempo real. Métricas por rol, alertas cuando algo se sale del guion y exportación a tu stack de monitoreo." : "Every action, approval and exception in a real-time panel. Metrics per role, alerts when something leaves the script, and export to your monitoring stack."}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={s.dark}>
+        <div className={s.sphere} aria-hidden="true" />
+        <div className={s.darkIn}>
+          <div>
+            <span className={`${s.mono} ${s.label}`} style={{ color: "#c9cbd6" }}>{es ? "Gobernanza" : "Governance"}</span>
+            <h2 className={s.h2} style={{ marginTop: 18 }}>{es ? <>Estable, <span className={s.grad}>segura</span> y gobernada</> : <>Stable, <span className={s.grad}>secure</span> and governed</>}</h2>
+            <div className={s.darkLinks}><Link href="/office-demo" className={`${s.btn} ${s.btnAcc}`}>{es ? "Ver la oficina" : "See the office"}</Link><Link href="/blog/ai-management-office" className={`${s.btn} ${s.btnGhost}`}>{es ? "Cómo funciona" : "How it works"}</Link></div>
+          </div>
+          <div className={s.gov}>{GOV.map(([t, d], i) => <div key={t}>{ICONS[i]}<b>{t}</b><p>{d}</p></div>)}</div>
+        </div>
+      </section>
+
+      <section className={s.light} style={{ borderRadius: 0, marginTop: 0 }}>
+        <div className={`${s.wrap} ${s.section}`}>
+          <div className={s.secHead}>
+            <h2 className={s.h2}>{es ? "Construido con MindfulTech" : "Built with MindfulTech"}</h2>
+            <div className={s.pillTabs}>{(es ? ["Agentes", "Apps", "Otros"] : ["Agents", "Apps", "Other"]).map((t, i) => <button key={t} type="button" className={built === i ? s.on : ""} onClick={() => setBuilt(i)}>{t}</button>)}</div>
+          </div>
+          <div className={s.built}>
+            {BUILT.filter((b) => b.tab === built).map((b) => (
+              <Link key={b.t} href={b.href} className={s.builtCard}>
+                <div className={s.thumb}>{b.img && /* eslint-disable-next-line @next/next/no-img-element */ <img src={b.img} alt="" width={1200} height={675} loading="lazy" />}</div>
+                <b>{b.t}</b><span>{b.d}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+        <div className={s.wrap} style={{ paddingBottom: 110 }}>
+          <span className={`${s.mono} ${s.label}`}>{es ? "Industrias" : "Industries"}</span>
+          <h2 className={s.h2} style={{ margin: "18px 0 36px" }}>{es ? <>Trabajo real en IA<br />en todas las industrias</> : <>Powering real work with AI<br />across industries</>}</h2>
+          <div className={s.cases}>
+            {CASES.slice(0, 6).map((c) => (
+              <div key={c.id} className={s.caseCard}>
+                <div className={s.tags}>{c.tag[lang].split(" · ").slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
+                <b>{c.title[lang]}</b>
+                <Link href={`/work/${c.id}`}>{es ? "Leer el caso →" : "Read case study →"}</Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={s.dark}>
+        <div className={`${s.wrap} ${s.section}`}>
+          <span className={`${s.mono} ${s.label}`} style={{ color: "#c9cbd6" }}>{es ? "Capacidades" : "Features"}</span>
+          <div className={s.cloud} style={{ marginTop: 24 }}>{FEATURES.map((f) => <span key={f}>{f}</span>)}</div>
+        </div>
+        <div className={`${s.wrap}`} style={{ paddingBottom: 110 }}>
+          <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
+          <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
+        </div>
+        <div className={s.cta}>
+          <Ribbons />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <h2 className={s.h2}>{es ? <>Pon la IA a <span className={s.grad}>trabajar</span></> : <>Put AI to <span className={s.grad}>work</span></>}</h2>
+            <p>{es ? "Cuéntanos el flujo que más duele. En una semana tienes el primer agente corriendo con una persona que firma." : "Tell us the flow that hurts most. In a week you have the first agent running with a person signing off."}</p>
+            <div className={s.ctas} style={{ justifyContent: "center" }}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}>{es ? "Empieza ahora" : "Try it now"}</a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnLight}`}>WhatsApp</a></div>
+          </div>
+        </div>
+        <footer className={s.footer}><span>© 2026 MindfulTech, Quito</span><span>info@mindfultech.ec / +593 958 73 1994</span></footer>
+      </section>
+      <Link href="/concept" className={s.concept}>{es ? "Concepto 06 / Cerebrium" : "Concept 06 / Cerebrium"}</Link>
+    </div>
+  );
+}
