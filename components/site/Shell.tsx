@@ -9,12 +9,13 @@ import s from "./site.module.css";
    call-to-action band and footer. Pages render <Shell> around their body;
    SiteChrome appends <SiteFooter /> on every public route. */
 
-export type NavKey = "home" | "services" | "work" | "blog" | "company";
+export type NavKey = "home" | "services" | "work" | "blog" | "company" | "office";
 
 const NAV: { key: NavKey; href: string; en: string; es: string }[] = [
   { key: "services", href: "/services", en: "Services", es: "Servicios" },
   { key: "work", href: "/work", en: "Work", es: "Proyectos" },
   { key: "company", href: "/company", en: "Company", es: "Empresa" },
+  { key: "office", href: "/office-demo", en: "AI Office", es: "Oficina IA" },
 ];
 
 export const CONTACT = { email: "info@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
@@ -48,7 +49,6 @@ export function SiteNav({ active }: { active?: NavKey }) {
           {NAV.map((n) => (
             <Link key={n.key} href={n.href} onClick={() => setOpen(false)}>{lang === "es" ? n.es : n.en}</Link>
           ))}
-          <Link href="/office-demo" onClick={() => setOpen(false)}>AI Management Office</Link>
         </div>
       )}
     </div>

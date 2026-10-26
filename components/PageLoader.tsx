@@ -4,8 +4,8 @@ import * as React from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * Branded overlay shown briefly on in-app navigation — the pulsing brand mark
- * over the hero's blue wash, mirroring the prototype's nav-fix loader. It
+ * Branded overlay shown briefly on in-app navigation: a framed card with the
+ * brand mark, the serif wordmark and a sliding bar, on the site background. It
  * appears on a click that leads to another route and clears once the pathname
  * changes.
  */
@@ -39,18 +39,12 @@ export function PageLoader() {
 
   return (
     <div className={`mt-loader${show ? " show" : ""}`} aria-hidden={!show}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/logo-mark.webp" alt="" width={52} height={52} />
-
-      <div
-        style={{
-          fontFamily: "var(--mono)",
-          fontSize: 11,
-          letterSpacing: ".2em",
-          color: "#44424d",
-        }}
-      >
-        LOADING
+      <i className="mt-loader-sq" /><i className="mt-loader-circle" /><i className="mt-loader-tri" />
+      <div className="mt-loader-card">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/logo-mark.webp" alt="" width={40} height={40} />
+        <span className="mt-loader-word">MindfulTech</span>
+        <span className="mt-loader-bar"><i /></span>
       </div>
     </div>
   );
