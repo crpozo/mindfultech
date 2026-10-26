@@ -95,7 +95,7 @@ export function HoldCursor({ label, onProgress, holdMs = 1400 }: { label: string
   );
 }
 
-export function Dots({ className }: { className?: string }) {
+export function Dots({ className, squares = false }: { className?: string; squares?: boolean }) {
   const ref = React.useRef<HTMLCanvasElement>(null);
   React.useEffect(() => {
     const c = ref.current; if (!c) return;
@@ -105,14 +105,26 @@ export function Dots({ className }: { className?: string }) {
     const resize = () => { const r = c.getBoundingClientRect(); w = c.width = Math.floor(r.width * devicePixelRatio); h = c.height = Math.floor(r.height * devicePixelRatio); };
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
-      const gap = 28 * devicePixelRatio, R = 160 * devicePixelRatio;
-      for (let y = gap / 2; y < h; y += gap) for (let x = gap / 2; x < w; x += gap) {
+      const gap = (squares ? 40 : 28) * devicePixelRatio, R = 200 * devicePixelRatio, now = performance.now() / 1000;
+      let row = 0;
+      for (let y = gap / 2; y < h; y += gap, row++) { let col = 0; for (let x = gap / 2; x < w; x += gap, col++) {
         const dx = m.x - x, dy = m.y - y, d = Math.hypot(dx, dy);
         const k = Math.max(0, 1 - d / R);
+        // a few cells glow on their own in slow waves (their tetris-like clusters), the pointer lights the rest
+        const seed = Math.sin(col * 12.9898 + row * 78.233) * 43758.5453; const r = seed - Math.floor(seed);
+        const wave = squares ? Math.max(0, Math.sin(now * 0.6 + r * 6.283 + col * 0.35 - row * 0.5)) : 0;
+        const lit = squares ? Math.max(k, r > 0.9 ? wave * wave : 0) : k;
+        if (squares && lit > 0.35) {
+          const sz = gap * 0.78, rad = 6 * devicePixelRatio, x0 = x - sz / 2, y0 = y - sz / 2;
+          ctx.fillStyle = `rgba(61,190,125,${0.25 + lit * 0.6})`;
+          ctx.beginPath(); ctx.roundRect(x0, y0, sz, sz, rad); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.beginPath(); ctx.arc(x, y, 1.5 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+          continue;
+        }
         const px = x + dx * k * 0.18, py = y + dy * k * 0.18;
-        ctx.fillStyle = `rgba(191,245,207,${0.12 + k * 0.8})`;
-        ctx.beginPath(); ctx.arc(px, py, (1 + k * 1.8) * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
-      }
+        ctx.fillStyle = `rgba(230,232,239,${(squares ? 0.5 : 0.22) + k * 0.5})`;
+        ctx.beginPath(); ctx.arc(px, py, (1.1 + k * 1.6) * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+      } }
       if (running) raf = requestAnimationFrame(draw);
     };
     const move = (e: PointerEvent) => { const r = c.getBoundingClientRect(); m.x = (e.clientX - r.left) * devicePixelRatio; m.y = (e.clientY - r.top) * devicePixelRatio; };
@@ -121,7 +133,7 @@ export function Dots({ className }: { className?: string }) {
     obs.observe(c);
     window.addEventListener("resize", resize); c.parentElement?.addEventListener("pointermove", move); c.parentElement?.addEventListener("pointerleave", leave);
     return () => { running = false; cancelAnimationFrame(raf); obs.disconnect(); window.removeEventListener("resize", resize); c.parentElement?.removeEventListener("pointermove", move); c.parentElement?.removeEventListener("pointerleave", leave); };
-  }, []);
+  }, [squares]);
   return <canvas ref={ref} className={className} aria-hidden="true" />;
 }
 

@@ -67,12 +67,13 @@ export function Cerebrium() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const heroRef = React.useRef<HTMLElement>(null);
   const darkRef = React.useRef<HTMLElement>(null);
+  const footRef = React.useRef<HTMLElement>(null);
   const [termRef, termOn] = useInView<HTMLPreElement>();
   const [barsRef, barsOn] = useInView<HTMLDivElement>();
   const [chartRef, chartOn] = useInView<HTMLDivElement>();
 
   // Native scrolling (never blocked by the 3D); the WebGL scene is built in idle time after the first paint.
-  const bgRef = React.useRef<{ setScroll: (p: number) => void; setGlobe: (g: number) => void; setPointer: (x: number, y: number) => void; setHold: (p: number) => void; dispose: () => void } | null>(null);
+  const bgRef = React.useRef<{ setScroll: (p: number) => void; setGlobe: (g: number) => void; setFooter: (f: number) => void; setPointer: (x: number, y: number) => void; setHold: (p: number) => void; dispose: () => void } | null>(null);
   React.useEffect(() => {
     let raf = 0, alive = true, idle = 0;
     const onMove = (e: PointerEvent) => bgRef.current?.setPointer((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
@@ -82,6 +83,8 @@ export function Cerebrium() {
       bg.setScroll(window.scrollY / h);
       const d = darkRef.current;
       if (d) { const r = d.getBoundingClientRect(); const vh = window.innerHeight; const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0); bg.setGlobe(Math.max(0, Math.min(1, vis / (vh * 0.7)))); }
+      const ft = footRef.current;
+      if (ft) { const r = ft.getBoundingClientRect(); const vh = window.innerHeight; bg.setFooter(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.8)))); }
     };
     const loop = () => { feed(); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
@@ -173,16 +176,17 @@ export function Cerebrium() {
       </section>
 
       <div className={s.logos}><div className={s.logosIn}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div></div>
+      <div className={s.dotBand}><Dots className={s.dots} squares /></div>
 
       <section className={s.light}>
         <div className={s.wrap}>
           <div className={s.whyHead}>
-            <p>{es ? "Velocidad de producción sin la complejidad de producción." : "Production speed without the production complexity."}</p>
+            <span className={`${s.mono} ${s.label}`}>{es ? "Por qué MindfulTech" : "Why MindfulTech"}</span>
             <h2 className={s.h2}><Split text={es ? "Hecho para equipos" : "Built for teams,"} /><br /><span className={s.grad2}><Split text={es ? "que empujan límites" : "pushing boundaries"} delay={300} /></span></h2>
+            <p>{es ? "Velocidad de producción sin la complejidad de producción." : "Production speed without the production complexity."}</p>
           </div>
           <div className={s.why}>
             <div className={s.whyList}>
-              <span className={`${s.mono} ${s.label}`}>{es ? "Por qué MindfulTech" : "Why MindfulTech"}</span>
               {FEATS.map((f, i) => <button key={f} type="button" className={feat === i ? s.on : ""} onClick={() => go(i)}>{f}</button>)}
             </div>
             <div className={s.cards}>
@@ -298,14 +302,25 @@ export function Cerebrium() {
           <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
           <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
-        <div className={s.cta}>
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <h2 className={s.h2}><Split text={es ? "Pon la IA a" : "Put AI to"} /> <span className={s.grad}><Split text={es ? "trabajar" : "work"} delay={240} /></span></h2>
-            <p>{es ? "Cuéntanos el flujo que más duele. En una semana tienes el primer agente corriendo con una persona que firma." : "Tell us the flow that hurts most. In a week you have the first agent running with a person signing off."}</p>
-            <div className={s.ctas} style={{ justifyContent: "center" }}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empieza ahora" : "Try it now"} /></a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnLight}`}><Scramble text="WhatsApp" /></a></div>
+        <footer className={s.foot} ref={footRef}>
+          <div className={s.footTop}>
+            <div className={s.social}>
+              <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.5c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21H9z" /></svg></a>
+              <a href="https://github.com/crpozo" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z" /></svg></a>
+              <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 12 12 0 0 0 4.6 4.1c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z" /></svg></a>
+              <a href="mailto:carlos@mindfultech.ec" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg></a>
+            </div>
+            <div className={s.footCols}>
+              <div><span>{es ? "Servicios" : "Services"}</span><Link href="/services/ux">{es ? "Diseño UX" : "UX Design"}</Link><Link href="/services/apps">{es ? "Apps web y móviles" : "Web & Mobile Apps"}</Link><Link href="/services/custom">{es ? "Software a medida" : "Custom Software"}</Link><Link href="/services/ai">{es ? "IA y automatización" : "AI & Automation"}</Link></div>
+              <div><span>MindfulTech</span><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href="/company">{es ? "Empresa" : "Company"}</Link><Link href="/blog">Blog</Link><a href="mailto:carlos@mindfultech.ec">{es ? "Contacto" : "Contact"}</a><Link href="/concept">{es ? "Conceptos" : "Concepts"}</Link></div>
+            </div>
           </div>
-        </div>
-        <footer className={s.footer}><span>© 2026 MindfulTech, Quito</span><span>info@mindfultech.ec / +593 958 73 1994</span></footer>
+          <div className={s.footClose}>
+            <h2 className={s.h2}><Split text={es ? "Empieza a construir con IA hoy," : "Start building with AI today,"} /><br /><Split text={es ? "o cuéntanos tu flujo." : "or talk to us about your workflow."} delay={300} /></h2>
+            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Get started"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>
+          </div>
+          <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>info@mindfultech.ec / +593 958 73 1994</span></div>
+        </footer>
       </section>
       <Link href="/concept" className={s.concept}>{es ? "Concepto 06 / Cerebrium" : "Concept 06 / Cerebrium"}</Link>
     </div>

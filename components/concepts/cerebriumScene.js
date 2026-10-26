@@ -146,27 +146,38 @@ export function createBackground(canvas, opts = {}) {
     ribbons.add(new THREE.Mesh(geo, mat));
   }
 
-  /* globe: fresnel shell + stacked rings, hidden until the dark sections */
+  /* globe: a dim translucent shell with a stack of matte discs inside (some with a wedge cut), like a sliced core.
+     It stays dark on purpose so the copy in front of it keeps its contrast. */
   const globe = new THREE.Group();
   globe.visible = false;
   scene.add(globe);
-  const shellMat = new THREE.ShaderMaterial({ vertexShader: SHELL_VERT, fragmentShader: SHELL_FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uColor: { value: accent }, uAlpha: { value: 0.9 } } });
-  globe.add(new THREE.Mesh(new THREE.SphereGeometry(3.6, 48, 32), shellMat));
+  const shellMat = new THREE.ShaderMaterial({ vertexShader: SHELL_VERT, fragmentShader: SHELL_FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uColor: { value: accent.clone().multiplyScalar(0.75) }, uAlpha: { value: 0.75 } } });
+  globe.add(new THREE.Mesh(new THREE.SphereGeometry(3.8, 48, 32), shellMat));
+  const innerLight = new THREE.PointLight(accent.getHex(), 9, 14, 1.4);
+  innerLight.position.set(1.5, 2.5, 3);
+  globe.add(innerLight);
+  globe.add(new THREE.AmbientLight(0x2a4a38, 1.6));
   const rings = new THREE.Group();
-  for (let i = -3; i <= 3; i++) {
-    const y = i * 0.78;
-    const r = Math.sqrt(Math.max(3.1 * 3.1 - y * y, 0.3));
-    const mat = new THREE.ShaderMaterial({ vertexShader: RIBBON_VERT, fragmentShader: RIBBON_FRAG, side: THREE.FrontSide, uniforms: { uTime: { value: i }, uAmp: { value: 0 }, uBase: { value: base }, uMid: { value: accent.clone().multiplyScalar(0.7 + 0.1 * Math.abs(i)) }, uEdge: { value: edge }, uEdgeW: { value: 0.12 }, uStreak: { value: (i + 3) / 7 } } });
-    mats.push(mat);
-    const ringGeo = new THREE.TorusGeometry(r, 0.26, 8, 80);
-    ringGeo.setAttribute("aFace", new THREE.Float32BufferAttribute(new Float32Array(ringGeo.attributes.position.count), 1));
-    const ring = new THREE.Mesh(ringGeo, mat);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = y;
-    rings.add(ring);
+  const discMat = new THREE.MeshStandardMaterial({ color: new THREE.Color("#1d6b45"), roughness: 0.8, metalness: 0.1, emissive: new THREE.Color("#0f3d27"), emissiveIntensity: 0.9 });
+  const discMatCut = discMat.clone(); discMatCut.color = new THREE.Color("#2a9a62");
+  for (let i = -4; i <= 4; i++) {
+    const y = i * 0.62;
+    const r = Math.sqrt(Math.max(3.0 * 3.0 - y * y, 0.4));
+    const cut = (i + 7) % 3 === 0;
+    const geo = new THREE.CylinderGeometry(r, r, 0.46, 72, 1, false, cut ? 0.9 : 0, cut ? Math.PI * 1.55 : Math.PI * 2);
+    const disc = new THREE.Mesh(geo, cut ? discMatCut : discMat);
+    disc.position.y = y;
+    disc.rotation.y = i * 0.35;
+    rings.add(disc);
   }
-  rings.rotation.z = 0.35;
+  rings.rotation.z = 0.3;
+  rings.rotation.x = 0.15;
   globe.add(rings);
+  /* a dust of points inside the shell */
+  const dustN = 260; const dust = new Float32Array(dustN * 3);
+  for (let i = 0; i < dustN; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(2.2 + Math.random() * 1.5); dust[i * 3] = v.x; dust[i * 3 + 1] = v.y; dust[i * 3 + 2] = v.z; }
+  const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute("position", new THREE.BufferAttribute(dust, 3));
+  globe.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: edge, size: 0.035, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending })));
   globe.position.set(2.6, -2.2, -2.5);
 
   /* particles */
@@ -185,7 +196,7 @@ export function createBackground(canvas, opts = {}) {
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
-  const state = { scroll: 0, globe: 0, px: 0, py: 0, tx: 0, ty: 0, hold: 0, h: 0, running: true };
+  const state = { scroll: 0, globe: 0, foot: 0, px: 0, py: 0, tx: 0, ty: 0, hold: 0, h: 0, running: true };
   const resize = () => {
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
     renderer.setPixelRatio(dpr); composer.setPixelRatio(dpr);
@@ -220,7 +231,10 @@ export function createBackground(canvas, opts = {}) {
     bloom.strength = 0.75 + H * 1.1;
     // ribbons: drift down and tilt as the hero scrolls away, tilt with the pointer
     const s = state.scroll;
-    ribbons.position.y = -1.8 - s * 6.5;
+    // drift slowly out of the hero (still behind the logos and the dot band), come back for the footer
+    const f = state.foot;
+    ribbons.position.y = (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
+    ribbons.visible = s < 2.4 || f > 0.01;
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.25;
     ribbons.rotation.x = state.py * 0.08 + H * 0.35;
     ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.6;
@@ -230,9 +244,10 @@ export function createBackground(canvas, opts = {}) {
     globe.visible = g > 0.01;
     const k = 0.2 + 0.8 * g;
     globe.scale.setScalar(k * (canvas.clientWidth < 760 ? 0.8 : 1));
-    shellMat.uniforms.uAlpha.value = 0.9 * g;
-    rings.rotation.y += dt * 0.25;
-    rings.rotation.x = Math.sin(t * 0.2) * 0.12 + state.py * 0.15;
+    shellMat.uniforms.uAlpha.value = 0.75 * g;
+    discMat.opacity = discMatCut.opacity = g; discMat.transparent = discMatCut.transparent = g < 0.99;
+    rings.rotation.y += dt * 0.18;
+    rings.rotation.x = 0.15 + Math.sin(t * 0.2) * 0.1 + state.py * 0.12;
     globe.rotation.y = state.px * 0.25;
     particles.rotation.y = t * 0.01;
     particles.position.y = -s * 1.5 + Math.sin(t * 0.3) * 0.1;
@@ -247,8 +262,9 @@ export function createBackground(canvas, opts = {}) {
   loop();
 
   return {
-    setScroll(p) { state.scroll = Math.max(0, Math.min(1.4, p)); },
+    setScroll(p) { state.scroll = Math.max(0, p); },
     setGlobe(g) { state.globe = Math.max(0, Math.min(1, g)); },
+    setFooter(f) { state.foot = Math.max(0, Math.min(1, f)); },
     setPointer(x, y) { state.tx = x; state.ty = y; },
     setHold(p) { state.hold = Math.max(0, Math.min(1, p)); },
     dispose() {
