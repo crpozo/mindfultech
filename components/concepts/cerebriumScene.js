@@ -46,17 +46,17 @@ const RIBBON_FRAG = /* glsl */ `
     vec3 v = normalize(vViewDir);
     float fres = pow(1.0 - max(dot(n, v), 0.0), 2.5);
     vec3 L = normalize(vec3(-0.3, 0.9, 0.5));
-    float lambert = 0.22 + 0.78 * max(dot(n, L), 0.0);
-    float spec = pow(max(dot(reflect(-L, n), v), 0.0), 28.0) * 0.5;
+    float lambert = 0.18 + 0.62 * max(dot(n, L), 0.0);
+    float spec = pow(max(dot(reflect(-L, n), v), 0.0), 40.0) * 0.18;
     vec3 col = mix(uBase, uMid, smoothstep(0.0, 1.0, vUv.x)) * lambert;
     if (vFace > 1.5) col *= 0.55;            /* the sides sit in shadow */
     if (vFace > 0.5 && vFace < 1.5) col *= 0.7;
-    col = mix(col, uMid * 1.3, fres * 0.7) + spec * uEdge;
+    col = mix(col, uMid * 1.1, fres * 0.45) + spec * uEdge;
     /* a light streak travelling along the band, strongest on the top face */
     float head = fract(uTime * 0.07 + uStreak);
     float d = abs(vUv.x - head);
-    float streak = smoothstep(0.06, 0.0, d) * (vFace < 0.5 ? 1.0 : 0.35);
-    col += uEdge * streak * 2.2;
+    float streak = smoothstep(0.035, 0.0, d) * (vFace < 0.5 ? 1.0 : 0.3);
+    col += uEdge * streak * 1.1;
     /* soft rim on the long edges and film grain */
     float e = smoothstep(uEdgeW, 0.0, min(vUv.y, 1.0 - vUv.y));
     col += uEdge * e * 0.25;
@@ -200,7 +200,7 @@ export function createBackground(canvas, opts = {}) {
   /* post */
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.75, 0.6, 0.72);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.5, 0.8);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
@@ -212,7 +212,6 @@ export function createBackground(canvas, opts = {}) {
     bloom.resolution.set(w, h);
     const narrow = w < 760;
     if (mode === "globe") { globe.position.x = narrow ? 0.5 : 3.6; globe.position.y = narrow ? -3.5 : -0.8; }
-    ribbons.position.x = narrow ? -3.5 : -1.5;
     if (mode !== "globe") globe.position.x = narrow ? 0 : 2.6;
   };
   resize();
@@ -236,13 +235,14 @@ export function createBackground(canvas, opts = {}) {
     state.h += (state.hold - state.h) * 0.12;
     const H = state.h;
     for (const m of mats) m.uniforms.uTime.value += dt * (1 + H * 6);
-    bloom.strength = 0.75 + H * 1.1;
+    bloom.strength = 0.45 + H * 0.9;
     // ribbons: drift down and tilt as the hero scrolls away, tilt with the pointer
     const s = state.scroll;
     // drift slowly out of the hero (still behind the logos and the dot band), come back for the footer
     const f = state.foot;
     ribbons.position.y = mode === "columns" ? -s * 1.5 * (1 - f) : (-1.8 - Math.min(s, 1.8) * 2.6) * (1 - f) + (-2.6) * f;
-    ribbons.visible = defs.length > 0 && (s < 2.4 || f > 0.01) && H < 0.85;
+    ribbons.visible = defs.length > 0 && (s < 2.4 || f > 0.01);
+    ribbons.position.x += (-(canvas.clientWidth < 760 ? 3.5 : 1.5) - H * 5 - ribbons.position.x) * 0.1;
     ribbons.rotation.z = -0.08 * s + state.px * 0.06 - H * 0.5;
     ribbons.rotation.x = state.py * 0.08 + H * 0.25;
     ribbons.rotation.y = state.px * 0.1 + Math.sin(t * 0.12) * 0.04 + H * 0.9;
@@ -261,10 +261,10 @@ export function createBackground(canvas, opts = {}) {
     particles.position.y = -s * 1.5 + Math.sin(t * 0.3) * 0.1;
     // cinematic hold: three looks, one per word (bands close-up, bands from above, the sliced globe)
     const seg = Math.min(3.999, H * 4), si = Math.floor(seg), st = seg - si;
-    const looks = [[0, -1.5, 13, 38], [3.5, 1.5, 7.5, 46], [-2.5, 0.5, 9, 42], [2.6, -2.2, 6.5, 48], [2.6, -2.2, 6.5, 48]];
+    const looks = [[0, -1.5, 13, 38], [3.5, 1.5, 7.5, 46], [-2.5, 0.5, 9, 42], [1.2, -1.4, 12.5, 40], [1.2, -1.4, 12.5, 40]];
     // final phase: the sliced core alone, slowly turning in a loop
     const fin = Math.max(0, (H - 0.75) * 4);
-    if (fin > 0) { rings.rotation.y += dt * 0.35 * fin; globe.rotation.z = Math.sin(t * 0.4) * 0.15 * fin; }
+    if (fin > 0) { rings.rotation.y += dt * 0.35 * fin; globe.rotation.z = Math.sin(t * 0.4) * 0.15 * fin; globe.position.x = 2.6 - fin * 1.2; globe.position.y = -2.2 + fin * 1.0; }
     const L0 = looks[si], L1 = looks[si + 1];
     const e = st * st * (3 - 2 * st);
     const cx = L0[0] + (L1[0] - L0[0]) * e, cy = L0[1] + (L1[1] - L0[1]) * e, cz = L0[2] + (L1[2] - L0[2]) * e, cf = L0[3] + (L1[3] - L0[3]) * e;
@@ -272,7 +272,7 @@ export function createBackground(canvas, opts = {}) {
     camera.position.y = (H < 0.02 ? -1.5 : cy) + state.py * 0.2;
     camera.position.z = H < 0.02 ? 13 : cz;
     camera.fov = H < 0.02 ? 38 : cf; camera.updateProjectionMatrix();
-    if (mode !== "globe") { const gh = Math.max(0, (H - 0.5) * 2); globe.visible = globe.visible || gh > 0.01; if (gh > 0) { globe.scale.setScalar(0.3 + gh * 0.9); shellMat.uniforms.uAlpha.value = Math.max(shellMat.uniforms.uAlpha.value, 0.6 * gh); } }
+    if (mode !== "globe") { const gh = Math.max(0, (H - 0.5) * 2); globe.visible = globe.visible || gh > 0.01; if (gh > 0) { globe.scale.setScalar(0.3 + gh * 0.75); shellMat.uniforms.uAlpha.value = Math.max(shellMat.uniforms.uAlpha.value, 0.7 * gh); innerLight.intensity = 9 + gh * 10; } else innerLight.intensity = 9; }
     particles.scale.setScalar(1 + H * 0.5);
     camera.lookAt(0, 0, 0);
     composer.render();

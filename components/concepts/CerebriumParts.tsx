@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
 import { Split, Scramble } from "./CerebriumFx";
+import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
 /* Shared chrome for the Cerebrium concept pages: the fixed WebGL scene (three modes), the nav and the footer.
@@ -32,7 +33,7 @@ export function CbScene({ mode }: { mode: CbMode }) {
     const build = async () => {
       const { createBackground } = await import("./cerebriumScene.js");
       if (!alive || !canvasRef.current) return;
-      bg = createBackground(canvasRef.current, { accent: "#2f9c66", edge: "#bff5cf", base: "#0a2a1b", mode });
+      bg = createBackground(canvasRef.current, { accent: "#1f6b47", edge: "#9fe8be", base: "#07201a", mode });
       window.addEventListener("pointermove", onMove);
     };
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
@@ -53,7 +54,7 @@ export function CbNav({ active }: { active?: "home" | "services" | "work" | "com
         <nav className={s.navLinks}>{items.map(([k, href, label]) => <Link key={k} href={href} className={active === k ? s.navOn : ""}>{label}</Link>)}</nav>
         <div className={s.navRight}>
           <button type="button" className={`${s.btn} ${s.btnGhost}`} onClick={() => setLang(es ? "en" : "es")}>{es ? "EN" : "ES"}</button>
-          <a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Start a project"} /></a>
+          <button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button>
         </div>
       </div>
     </header>
@@ -80,7 +81,7 @@ export function CbFooter() {
         </div>
         <div className={s.footClose}>
           <h2 className={s.h2}><Split text={es ? "Empieza a construir con IA hoy," : "Start building with AI today,"} /><br /><Split text={es ? "o cuéntanos tu flujo." : "or talk to us about your workflow."} delay={300} /></h2>
-          <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empezar" : "Get started"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>
+          <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
         </div>
         <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>info@mindfultech.ec / +593 958 73 1994</span></div>
       </footer>

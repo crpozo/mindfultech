@@ -8,6 +8,7 @@ import { CASES } from "@/lib/site/cases";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { Split, Scramble, HoldCursor, Dots, Typewriter, useInView } from "./CerebriumFx";
 import { CbNav, CbFooter, CB } from "./CerebriumParts";
+import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
 /* Concept 06, "Cerebrium" (Oct 2026), after cerebrium.ai: deep navy with glowing ribbons, a sans headline with one
@@ -92,7 +93,7 @@ export function Cerebrium() {
     const buildScene = async () => {
       const { createBackground } = await import("./cerebriumScene.js");
       if (!alive || !canvasRef.current) return;
-      bgRef.current = createBackground(canvasRef.current, { accent: "#2f9c66", edge: "#bff5cf", base: "#0a2a1b" });
+      bgRef.current = createBackground(canvasRef.current, { accent: "#1f6b47", edge: "#9fe8be", base: "#07201a" });
       window.addEventListener("pointermove", onMove);
     };
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
@@ -131,9 +132,10 @@ export function Cerebrium() {
   const GOV = es
     ? [["Una persona firma", "Cada agente propone y una persona aprueba donde importa: pagos, contratos, salud. El criterio humano queda en el circuito."], ["Tus datos en tus herramientas", "Los agentes trabajan dentro de tu CRM, ERP y correo. Nada se copia a un sistema nuevo ni sale de tu región."], ["Aislamiento por agente", "Cada rol corre aislado, con sus propias credenciales y permisos mínimos. Un agente de ventas no ve finanzas."], ["Registro de auditoría", "Cada acción queda registrada: quién pidió, qué hizo el agente, quién aprobó. Exportable cuando lo necesites."]]
     : [["A person signs off", "Every agent proposes and a person approves where it matters: payments, contracts, health. Human judgment stays in the loop."], ["Your data in your tools", "Agents work inside your CRM, ERP and inbox. Nothing is copied into a new system or leaves your region."], ["Isolation per agent", "Each role runs isolated, with its own credentials and least privilege. A sales agent never sees finance."], ["Audit trail", "Every action is logged: who asked, what the agent did, who approved. Exportable whenever you need it."]];
-  const BUILT: { tab: number; t: string; d: string; img?: string; href: string }[] = es
+  const TINTS6 = ["#2a1a3a", "#1a2a3a", "#1f2d1a", "#3a2a1a", "#1a1f3a", "#2a1a1a"];
+  const BUILT: { tab: number; t: string; d: string; img?: string; href: string; tint?: string }[] = (es
     ? [{ tab: 0, t: "Agente de facturación médica, 24/7", d: "Reclamos, codificación y seguimientos dentro de las herramientas de la clínica.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Siete agentes para una oficina universitaria", d: "Finanzas, donantes y proyectos en una oficina 3D con dashboards reales.", img: "/art/panel-usfq.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow en el App Store", d: "Check-in, agendas y certificados para 10.000 estudiantes.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "De Excel a Odoo con rutas de entrega", d: "Cotizaciones, inventario y choferes en el teléfono.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "Portafolio 3D para animatrónicos", d: "React Three Fiber, Spline y scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "Dashboard de IA para concesionarios", d: "Un tablero que lee los números y responde en lenguaje claro.", img: "/art/internet-coaches.webp", href: "/work" }]
-    : [{ tab: 0, t: "Medical billing agent, 24/7", d: "Claims, coding and follow-ups inside the clinic's tools.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Seven agents for a university office", d: "Finance, donors and projects in a 3D office with real dashboards.", img: "/art/panel-usfq.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow on the App Store", d: "Check-in, agendas and certificates for 10,000 students.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "Excel to Odoo with delivery routes", d: "Quotes, inventory and drivers on their phones.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "3D portfolio for animatronics", d: "React Three Fiber, Spline and scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "AI dashboard for car dealerships", d: "A board that reads the numbers and answers in plain language.", img: "/art/internet-coaches.webp", href: "/work" }];
+    : [{ tab: 0, t: "Medical billing agent, 24/7", d: "Claims, coding and follow-ups inside the clinic's tools.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Seven agents for a university office", d: "Finance, donors and projects in a 3D office with real dashboards.", img: "/art/panel-usfq.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow on the App Store", d: "Check-in, agendas and certificates for 10,000 students.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "Excel to Odoo with delivery routes", d: "Quotes, inventory and drivers on their phones.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "3D portfolio for animatronics", d: "React Three Fiber, Spline and scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "AI dashboard for car dealerships", d: "A board that reads the numbers and answers in plain language.", img: "/art/internet-coaches.webp", href: "/work" }]).map((b, i) => ({ ...b, tint: TINTS6[i % TINTS6.length] }));
   const FEATURES = es
     ? ["Agentes por rol", "Firma humana", "Integración con CRM y ERP", "WhatsApp y correo", "Investigación UX", "Prototipos probados", "Apps iOS y Android", "Next.js y React", "AWS con CI/CD", "Monitoreo 24/7", "Multi-región", "Odoo y Salesforce", "Dashboards en tiempo real", "Documentación incluida", "Mantenimiento tras el launch", "Español e inglés"]
     : ["Agents per role", "Human sign-off", "CRM & ERP integration", "WhatsApp & email", "UX research", "Tested prototypes", "iOS & Android apps", "Next.js & React", "AWS with CI/CD", "24/7 monitoring", "Multi-region", "Odoo & Salesforce", "Real-time dashboards", "Documentation included", "Maintained after launch", "Spanish & English"];
@@ -160,7 +162,7 @@ export function Cerebrium() {
           </div>
           <div className={s.heroSide}>
             <p>{es ? "Investigación, ingeniería y agentes de IA en un solo laboratorio. Un agente por rol, dentro de tus herramientas, con una persona que firma donde importa." : "Research, engineering and AI agents in one lab. One agent per role, inside your tools, with a person signing off where it matters."}</p>
-            <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empieza ahora" : "Try it now"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>
+            <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
           </div>
         </div>
       </section>
@@ -245,7 +247,7 @@ export function Cerebrium() {
           <div className={s.built}>
             {BUILT.filter((b) => b.tab === built).map((b) => (
               <Link key={b.t} href={b.href} className={`${s.builtCard} ${s.builtDark}`}>
-                <div className={s.thumb}>{b.img && /* eslint-disable-next-line @next/next/no-img-element */ <img src={b.img} alt="" width={1200} height={675} loading="lazy" />}</div>
+                <div className={`${s.thumb} ${s.mockThumb}`} style={{ ["--tint" as string]: b.tint }}>{b.img && <span className={s.win}><i /><i /><i />{/* eslint-disable-next-line @next/next/no-img-element */}<img src={b.img} alt="" width={1200} height={675} loading="lazy" /></span>}</div>
                 <b>{b.t}</b><span>{b.d}</span>
               </Link>
             ))}
@@ -253,7 +255,7 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <section className={s.light} style={{ borderRadius: "28px 28px 0 0", marginTop: 0 }}>
+      <section className={s.light} style={{ display: "none" }}>
         <div className={`${s.wrap} ${s.section}`} style={{ display: "none" }}>
           <div className={s.secHead}>
             <h2 className={s.h2}>{es ? "Construido con MindfulTech" : "Built with MindfulTech"}</h2>
@@ -264,25 +266,6 @@ export function Cerebrium() {
               <Link key={b.t} href={b.href} className={s.builtCard}>
                 <div className={s.thumb}>{b.img && /* eslint-disable-next-line @next/next/no-img-element */ <img src={b.img} alt="" width={1200} height={675} loading="lazy" />}</div>
                 <b>{b.t}</b><span>{b.d}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div className={s.wrap} style={{ paddingBottom: 110 }}>
-          <div className={s.secHead} style={{ alignItems: "flex-end" }}>
-            <div>
-              <span className={`${s.mono} ${s.label}`}>{es ? "Industrias" : "Industries"}</span>
-              <h2 className={s.h2} style={{ margin: "18px 0 0" }}><Split text={es ? "Trabajo real con" : "Powering real work with"} /> <span className={s.grad2}><Split text={es ? "IA" : "AI"} delay={200} /></span><br /><Split text={es ? "en todas las industrias" : "across industries"} delay={260} /></h2>
-            </div>
-            <div className={s.arrows}><button type="button" aria-label="prev" onClick={() => railRef.current?.scrollBy({ left: -420, behavior: "smooth" })}>←</button><button type="button" aria-label="next" onClick={() => railRef.current?.scrollBy({ left: 420, behavior: "smooth" })}>→</button></div>
-          </div>
-          <div className={s.rail} ref={railRef}>
-            {CASES.map((c) => (
-              <Link key={c.id} href={`/work/${c.id}`} className={s.railCard}>
-                <div className={s.railLogo}>{LOGO_OF[c.id] ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={LOGO_OF[c.id]} alt={c.brand.en} /> : <b>{c.brand[lang]}</b>}</div>
-                <div className={s.tags}>{c.tag[lang].split(" · ").slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
-                <b>{c.title[lang]}</b>
-                <span className={s.railFoot}><span>{es ? "Leer el caso" : "Read case study"}</span><span>→</span></span>
               </Link>
             ))}
           </div>

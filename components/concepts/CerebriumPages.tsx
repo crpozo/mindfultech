@@ -8,6 +8,7 @@ import { CASES } from "@/lib/site/cases";
 import { SERVICES, SERVICES_ES } from "@/lib/site/serviceDetail";
 import { Split, Scramble, Dots, useInView } from "./CerebriumFx";
 import { CbPage, CopyEmail, CB } from "./CerebriumParts";
+import { openContact } from "@/components/site/Shell";
 import s from "./cerebrium.module.css";
 
 /* Inner pages of concept 06. Each opens with a tall banner on the WebGL scene (their use-case and about banners):
@@ -28,7 +29,7 @@ function Banner({ label, title, grad, lead, cta, mode }: { label: string; title:
           <div className={s.heroSide}>
             <span className={`${s.mono} ${s.label} ${s.labelLight}`} style={{ marginBottom: 22 }}>{label}</span>
             {lead && <p>{lead}</p>}
-            {cta && <div className={s.ctas}><a href="mailto:carlos@mindfultech.ec" className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Empieza ahora" : "Try it now"} /></a><Link href="/office-demo" className={`${s.btn} ${s.btnGhost}`}><Scramble text={es ? "Agenda una demo" : "Book a demo"} /></Link></div>}
+            {cta && <div className={s.ctas}><button type="button" onClick={openContact} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>}
           </div>
         )}
       </div>
