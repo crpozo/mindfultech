@@ -8,26 +8,44 @@ import * as React from "react";
 
 const GREEN = "#3DBE7D", LIME = "#BFF5CF", INK = "#0E1013";
 
-function Dot({ x, y, name, role, delay, shape }: { x: number; y: number; name: string; role: "doc" | "headset" | "chat"; delay: number; shape: 0 | 1 | 2 }) {
-  // Minimal, OpenAI-like: a soft rounded blob with a quiet gradient, two dot eyes, a faint glow. The role is a thin line icon.
-  const bodies = [
-    "M-26 -6 C-26 -28 -12 -36 0 -36 C14 -36 26 -26 26 -4 C26 16 16 28 0 28 C-16 28 -26 14 -26 -6Z",
-    "M-28 2 C-30 -22 -14 -34 2 -34 C20 -34 30 -20 28 0 C26 18 14 28 -2 28 C-18 28 -26 18 -28 2Z",
-    "M-24 -10 C-22 -30 -8 -36 4 -36 C20 -36 28 -22 26 -6 C24 12 18 28 0 28 C-14 28 -26 16 -24 -10Z",
-  ];
+type Kind = "blue" | "green" | "yellow" | "pink";
+const PAL: Record<Kind, [string, string, string]> = { blue: ["#7CC4FF", "#2E8BEA", "#1A5FB8"], green: ["#C8F57A", "#7ED321", "#4E9A12"], yellow: ["#FFE07A", "#F5B400", "#C98A00"], pink: ["#FF8BD6", "#F04FB3", "#B8277F"] };
+function Dot({ x, y, name, kind, delay }: { x: number; y: number; name: string; kind: Kind; delay: number }) {
+  // After the OpenAI Dots: soft plush blobs, each with its own shape, colour and one accessory.
+  const [hi, mid, lo] = PAL[kind];
+  const gid = `awB-${kind}`;
+  const body = {
+    blue: "M-30 20 C-34 -2 -26 -18 -14 -24 C-8 -34 6 -36 14 -28 C26 -24 32 -8 30 10 C28 24 16 30 0 30 C-14 30 -28 28 -30 20Z",
+    green: "M-28 22 C-32 2 -22 -20 -6 -28 C8 -34 24 -24 28 -8 C32 8 26 26 10 30 C-6 32 -24 30 -28 22Z",
+    yellow: "M-30 26 C-30 6 -18 -14 -4 -30 C2 -36 6 -34 10 -28 C22 -12 32 6 30 26 C30 30 26 32 20 32 L-20 32 C-26 32 -30 30 -30 26Z",
+    pink: "M-30 2 C-32 -16 -16 -30 0 -18 C16 -30 32 -16 30 2 C28 18 12 30 0 32 C-12 30 -28 18 -30 2Z",
+  }[kind];
   return (
     <g transform={`translate(${x},${y})`}>
-      <ellipse cx="0" cy="34" rx="20" ry="4" fill="#000" opacity="0.3" />
+      <defs><radialGradient id={gid} cx="0.35" cy="0.25" r="0.95"><stop offset="0" stopColor={hi} /><stop offset="0.5" stopColor={mid} /><stop offset="1" stopColor={lo} /></radialGradient></defs>
+      <ellipse cx="0" cy="36" rx="24" ry="4.5" fill="#000" opacity="0.32" />
       <g className="aw-bob" style={{ animationDelay: `${delay}s` }}>
-        <path d={bodies[shape]} fill="url(#awBody)" />
-        <path d={bodies[shape]} fill="url(#awSheen)" opacity="0.55" />
-        <circle cx="-7" cy="-6" r="2.6" fill="#0E1013" className="aw-eye" style={{ animationDelay: `${delay * 1.7}s` }} />
-        <circle cx="7" cy="-6" r="2.6" fill="#0E1013" className="aw-eye" style={{ animationDelay: `${delay * 1.7}s` }} />
-        {role === "doc" && <g transform="translate(22,-30)" stroke="#E8FFF2" strokeWidth="1.4" fill="none" strokeLinecap="round"><rect x="-6" y="-8" width="12" height="15" rx="2" /><path d="M-3 -3h6M-3 1h6M-3 5h4" /></g>}
-        {role === "headset" && <g stroke="#E8FFF2" strokeWidth="2.2" fill="none" strokeLinecap="round"><path d="M-22 -8 a22 22 0 0 1 44 0" /><rect x="-26" y="-10" width="6" height="11" rx="3" fill="#E8FFF2" stroke="none" /><rect x="20" y="-10" width="6" height="11" rx="3" fill="#E8FFF2" stroke="none" /></g>}
-        {role === "chat" && <g transform="translate(24,-30)"><path d="M-9 -8 h18 a4 4 0 0 1 4 4 v8 a4 4 0 0 1 -4 4 h-9 l-5 5 v-5 h-4 a4 4 0 0 1 -4 -4 v-8 a4 4 0 0 1 4 -4z" fill="#E8FFF2" />{[-4, 0, 4].map((cx) => <circle key={cx} cx={cx} cy="0" r="1.3" fill="#1F7A4D" />)}</g>}
+        <path d={body} fill={`url(#${gid})`} />
+        <path d={body} fill="url(#awSheen)" opacity="0.5" />
+        {kind === "blue" && <>
+          <path d="M-22 -22 C-26 -36 -2 -42 10 -36 C16 -33 14 -26 6 -26 C-6 -24 -14 -22 -22 -22Z" fill="#2B2B33" /><ellipse cx="-4" cy="-30" rx="18" ry="7" fill="#3A3A44" /><circle cx="2" cy="-39" r="3" fill="#2B2B33" />
+          <rect x="-10" y="2" width="4" height="8" rx="2" fill="#0E1013" /><rect x="6" y="2" width="4" height="8" rx="2" fill="#0E1013" />
+        </>}
+        {kind === "green" && <>
+          <circle cx="-9" cy="-24" r="8" fill="#fff" /><circle cx="9" cy="-24" r="8" fill="#fff" /><circle cx="-8" cy="-23" r="3.6" fill="#0E1013" className="aw-eye" style={{ animationDelay: `${delay}s` }} /><circle cx="10" cy="-23" r="3.6" fill="#0E1013" className="aw-eye" style={{ animationDelay: `${delay}s` }} />
+          <path d="M-6 8 q6 4 12 0" fill="none" stroke="#0E1013" strokeWidth="2" strokeLinecap="round" />
+        </>}
+        {kind === "yellow" && <>
+          <circle cx="-9" cy="2" r="8" fill="none" stroke="#0E1013" strokeWidth="2.4" /><circle cx="9" cy="2" r="8" fill="none" stroke="#0E1013" strokeWidth="2.4" /><path d="M-1 2 h2" stroke="#0E1013" strokeWidth="2.4" />
+          <path d="M-13 2 q4 -5 8 0 M5 2 q4 -5 8 0" fill="none" stroke="#0E1013" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M-5 14 q5 4 10 0" fill="none" stroke="#0E1013" strokeWidth="2" strokeLinecap="round" />
+        </>}
+        {kind === "pink" && <>
+          <ellipse cx="-10" cy="0" rx="9" ry="7" fill="#0E1013" /><ellipse cx="10" cy="0" rx="9" ry="7" fill="#0E1013" /><path d="M-1 0 h2" stroke="#0E1013" strokeWidth="2.4" /><circle cx="-13" cy="-2" r="2" fill="#fff" opacity="0.6" /><circle cx="7" cy="-2" r="2" fill="#fff" opacity="0.6" />
+          <path d="M-4 14 q4 3 8 0" fill="none" stroke="#0E1013" strokeWidth="2" strokeLinecap="round" />
+        </>}
       </g>
-      <text x="0" y="52" textAnchor="middle" fill="#C9D1CE" fontSize="9" fontFamily="var(--font-jbmono), monospace" letterSpacing="1.5">{name}</text>
+      <text x="0" y="54" textAnchor="middle" fill="#C9D1CE" fontSize="9" fontFamily="var(--font-jbmono), monospace" letterSpacing="1.5">{name}</text>
     </g>
   );
 }
@@ -61,12 +79,13 @@ export function AgentsAtWork({ es }: { es: boolean }) {
         <text x="0" y="-15" textAnchor="middle" fontSize="7" fontFamily="var(--font-jbmono), monospace" fill={INK}>OK</text>
       </g>
       <text x="556" y="44" textAnchor="middle" fill={LIME} fontSize="6.5" fontFamily="var(--font-jbmono), monospace" letterSpacing="1.2">{es ? "FIRMA HUMANA" : "HUMAN SIGN-OFF"}</text>
-      {desk(120, es ? "FACTURACIÓN" : "BILLING")}{desk(300, es ? "SOPORTE" : "SUPPORT")}{desk(480, es ? "VENTAS" : "SALES")}
-      <Dot x={120} y={146} name="FIN" role="doc" delay={0} shape={0} />
-      <Dot x={300} y={146} name="SOPO" role="headset" delay={0.5} shape={1} />
-      <Dot x={480} y={146} name="SAL" role="chat" delay={1} shape={2} />
+      {desk(110, es ? "FACTURACIÓN" : "BILLING")}{desk(300, es ? "SOPORTE" : "SUPPORT")}{desk(490, es ? "VENTAS" : "SALES")}
+      <Dot x={110} y={146} name="FIN" kind="yellow" delay={0} />
+      <Dot x={300} y={146} name="SOPO" kind="green" delay={0.5} />
+      <Dot x={490} y={146} name="SAL" kind="pink" delay={1} />
+      <g transform="translate(0,0) scale(0.7)" style={{ transformOrigin: "590px 180px" }}><Dot x={590} y={178} name="" kind="blue" delay={1.4} /></g>
       {/* status pills */}
-      {[[120, es ? "RECLAMO #4821 ✓" : "CLAIM #4821 ✓"], [300, es ? "3 TICKETS ✓ / 1 → PERSONA" : "3 TICKETS ✓ / 1 → PERSON"], [480, es ? "REUNIÓN AGENDADA" : "MEETING BOOKED"]].map(([x, t], i) => (
+      {[[110, es ? "RECLAMO #4821 ✓" : "CLAIM #4821 ✓"], [300, es ? "3 TICKETS ✓ / 1 → PERSONA" : "3 TICKETS ✓ / 1 → PERSON"], [490, es ? "REUNIÓN AGENDADA" : "MEETING BOOKED"]].map(([x, t], i) => (
         <g key={i} className="aw-pill" style={{ animationDelay: `${i * 1.3}s` }}><rect x={Number(x) - (i === 1 ? 78 : 56)} y="54" width={i === 1 ? 156 : 112} height="14" rx="7" fill="#16271F" stroke={GREEN} strokeWidth="0.6" /><text x={x} y="64" textAnchor="middle" fill={LIME} fontSize="7" fontFamily="var(--font-jbmono), monospace" letterSpacing="0.8">{t}</text></g>
       ))}
       <style>{`

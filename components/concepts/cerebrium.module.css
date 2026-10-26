@@ -44,8 +44,8 @@
 .words span.on { opacity: 1; background: linear-gradient(90deg, var(--acc2), var(--acc)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 /* logos */
 .logos { border-top: 1px solid rgba(255, 255, 255, 0.18); background: transparent; position: relative; }
-.logosIn { display: flex; align-items: center; gap: 96px; padding: 26px 48px; flex: none; }
-.logosIn img { height: 28px; width: auto; filter: brightness(0) invert(1); opacity: 0.95; }
+.logosIn { display: flex; align-items: center; gap: 120px; padding: 64px 60px; flex: none; }
+.logosIn img { height: 30px; width: auto; filter: brightness(0) invert(1); opacity: 0.95; }
 .logosIn b { font-weight: 600; font-size: 20px; color: #fff; white-space: nowrap; }
 /* light why section */
 .light { background: var(--paper); color: var(--ink); border-radius: 28px 28px 0 0; margin-top: -24px; position: relative; z-index: 2; }
@@ -185,7 +185,7 @@
 @media (max-width: 960px) { .root :global(.cb-cursor) { display: none; } }
 
 /* dots band under the logos, and the footer on the ribbons */
-.dotBand { position: relative; height: 300px; }
+.dotBand { position: relative; height: 340px; }
 .dotBand .dots { opacity: 1; }
 .foot { position: relative; z-index: 1; padding: 100px 40px 28px; max-width: 1480px; margin: 0 auto; }
 .footTop { display: grid; grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.4fr); gap: 40px; align-items: start; }
@@ -342,3 +342,7 @@
   .gov div { grid-template-columns: 24px 1fr; }
   .h2 { word-break: normal; overflow-wrap: normal; }
 }
+
+/* blog cards with icons */
+.post .postIcon { width: 40px; height: 40px; color: var(--acc2); margin-bottom: 4px; }
+.post .postIcon svg { width: 100%; height: 100%; }

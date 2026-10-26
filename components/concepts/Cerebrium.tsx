@@ -16,6 +16,11 @@ import s from "./cerebrium.module.css";
    gradient word, mono labels with a dot, a light "why" section (sticky list + product cards), a dark governance block,
    case cards, a feature cloud and the blog. All content is MindfulTech's. */
 
+const POST_ICONS = [
+  <svg key="office" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 32V14l14-8 14 8v18" /><path d="M6 32h28" /><rect x="14" y="20" width="12" height="12" /><path d="M20 20v12M14 26h12" /><circle cx="20" cy="12" r="1.6" fill="currentColor" stroke="none" /></svg>,
+  <svg key="lab" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 6h8M18 6v10L9 31a3 3 0 0 0 2.6 4.5h16.8A3 3 0 0 0 31 31l-9-15V6" /><path d="M13 26h14" /><circle cx="17" cy="30" r="1.2" fill="currentColor" stroke="none" /><circle cx="23" cy="31.5" r="1.6" fill="currentColor" stroke="none" /></svg>,
+  <svg key="app" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="12" y="4" width="16" height="32" rx="3" /><path d="M17 8h6" /><circle cx="20" cy="31" r="1.4" fill="currentColor" stroke="none" /><path d="M15 15h10M15 19h7M15 23h9" /></svg>,
+];
 const LOGO_OF: Record<string, string> = { usfq: "/logo-usfq.svg", themedmotion: "/portfolio/themedmotion-logo-m.webp", healthcare: "/helixona-logo-m.webp", fence: "/wfs-logo.svg", parc: "/parc-logo-m.webp" };
 const LOGOS: [string, string][] = [["USFQ", "/logo-usfq.svg"], ["ThemedMotion", "/portfolio/themedmotion-logo-m.webp"], ["Helixona", "/helixona-logo-m.webp"], ["Western Fence Supply", "/wfs-logo.svg"], ["PARC Home Care", "/parc-logo-m.webp"]];
 const PINS = [{ id: "ec", lat: -0.18, lon: -78.47, k: "EC" }, { id: "ca", lat: 36.8, lon: -119.8, k: "US-W" }, { id: "il", lat: 41.9, lon: -87.6, k: "US-C" }, { id: "fl", lat: 26.6, lon: -81.9, k: "US-E" }, { id: "nl", lat: 52.4, lon: 4.9, k: "NL" }, { id: "de", lat: 51.2, lon: 10.4, k: "DE" }, { id: "es", lat: 40.4, lon: -3.7, k: "ES" }, { id: "gr", lat: 37.98, lon: 23.7, k: "GR" }];
@@ -265,7 +270,7 @@ export function Cerebrium() {
       <section className={`${s.dark} ${s.darkClear}`}>
         <div className={`${s.wrap}`} style={{ padding: "110px 40px" }}>
           <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
-          <div className={s.posts}>{POSTS.slice(0, 3).map((p) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
+          <div className={s.posts}>{POSTS.slice(0, 3).map((p, i) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><span className={s.postIcon} aria-hidden="true">{POST_ICONS[i % POST_ICONS.length]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
       </section>
       <CbFooter />

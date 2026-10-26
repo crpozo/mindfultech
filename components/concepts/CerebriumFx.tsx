@@ -116,9 +116,9 @@ export function Dots({ className, squares = false }: { className?: string; squar
         const k = Math.max(0, 1 - d / R);
         // a few cells glow on their own in slow waves (their tetris-like clusters), the pointer lights the rest
         const seed = Math.sin(col * 12.9898 + row * 78.233) * 43758.5453; const r = seed - Math.floor(seed);
-        const wave = squares ? Math.max(0, Math.sin(now * 0.6 + r * 6.283 + col * 0.35 - row * 0.5)) : 0;
-        const lit = squares ? Math.max(k, r > 0.9 ? wave * wave : 0) : k;
-        if (squares && lit > 0.35) {
+        const wave = squares ? Math.max(0, Math.sin(now * 0.5 + r * 6.283 + col * 0.35 - row * 0.5)) : 0;
+        const lit = squares ? Math.max(k, r > 0.93 ? wave * wave : 0) : k;
+        if (squares && (lit > 0.72 || (r > 0.9 && wave * wave > 0.35))) {
           const sz = gap * 0.78, rad = 6 * devicePixelRatio, x0 = x - sz / 2, y0 = y - sz / 2;
           ctx.fillStyle = `rgba(61,190,125,${0.25 + lit * 0.6})`;
           ctx.beginPath(); ctx.roundRect(x0, y0, sz, sz, rad); ctx.fill();
