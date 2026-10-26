@@ -147,14 +147,14 @@ export function Cerebrium() {
   return (
     <div className={s.root}>
       <canvas ref={canvasRef} className={s.bg} aria-hidden="true" />
-      <div style={{ opacity: 1 - Math.min(1, cine * 2.5), transition: "opacity 0.3s", position: "relative", zIndex: 20 }}><CbNav active="home" /></div>
+      <div style={{ opacity: cine > 0.02 ? 0 : 1, transition: "opacity 0.25s", position: "relative", zIndex: 20 }}><CbNav active="home" /></div>
 
       <section className={s.hero} ref={heroRef}>
         <HoldCursor label={es ? "Mantén presionado" : "Click and hold"} onProgress={onHold} />
         <div className={s.cine} style={{ opacity: cine > 0.02 ? 1 : 0 }} aria-hidden="true">
           {(es ? ["Rápido", "Escala", "Global"] : ["Quickly", "Scale", "Globally"]).map((w, i) => { const k = Math.max(0, Math.min(1, cine * 3 - i)); const on = cine * 3 >= i && cine * 3 < i + 1 || (i === 2 && cine >= 1); return <span key={w} className={`${s.cineWord} ${s[`cw${i}`]}`} style={{ opacity: on ? 1 : 0, transform: `translateY(${(1 - k) * 30}px)` }}>{w}</span>; })}
         </div>
-        <div className={s.heroIn} style={{ opacity: 1 - Math.min(1, cine * 2.5), transition: "opacity 0.3s" }}>
+        <div className={s.heroIn} style={{ opacity: cine > 0.02 ? 0 : 1, transition: "opacity 0.25s" }}>
           <div>
             <h1 className={s.h1}>{es ? <><Split text="Software con IA" /><br /><Split text="que" delay={240} /> <span className={s.grad}><Split text="escala" delay={300} /></span><br /><Split text="contigo" delay={420} /></> : <><Split text="AI software" /><br /><Split text="that" delay={240} /> <span className={s.grad}><Split text="scales" delay={300} /></span><br /><Split text="with you" delay={420} /></>}</h1>
           </div>
