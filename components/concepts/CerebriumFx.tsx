@@ -68,7 +68,16 @@ export function HoldCursor({ label, onProgress, holdMs = 4400 }: { label: string
   React.useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches; if (!fine) return;
     const host = ref.current?.parentElement; if (!host) return;
-    const move = (e: PointerEvent) => { const r = host.getBoundingClientRect(); const el = ref.current; if (!el) return; el.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`; };
+    // The native cursor stays until the custom one knows where the pointer is (its first move over the
+    // hero), then takes over at that exact spot: no window with no cursor at all after hydration, and a
+    // pointer already resting over the hero at load (no pointerenter fires then) is covered too.
+    let taken = false;
+    const move = (e: PointerEvent) => {
+      const r = host.getBoundingClientRect(); const el = ref.current; if (!el) return;
+      el.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`;
+      if (!taken) { taken = true; host.classList.add("cb-nocursor"); }
+      setVisible(true);
+    };
     // the hold charges up while pressed and eases back when released; the scene reads the progress
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last.current) / 1000); last.current = now;
@@ -95,7 +104,6 @@ export function HoldCursor({ label, onProgress, holdMs = 4400 }: { label: string
     window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up); window.addEventListener("blur", up);
     host.addEventListener("dragstart", block); host.addEventListener("selectstart", block);
     host.addEventListener("pointerenter", enter); host.addEventListener("pointerleave", leave);
-    host.classList.add("cb-nocursor");
     return () => { host.removeEventListener("pointermove", move); host.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); window.removeEventListener("blur", up); host.removeEventListener("dragstart", block); host.removeEventListener("selectstart", block); host.removeEventListener("pointerenter", enter); host.removeEventListener("pointerleave", leave); host.classList.remove("cb-nocursor"); cancelAnimationFrame(raf.current); };
   }, [holdMs, onProgress]);
   const R = 46, C = 2 * Math.PI * R;
