@@ -8,6 +8,41 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
+/* Soft round stars: a ShaderMaterial so each point is a glowing disc (GL points are square by default),
+   with a per-star size and a slow twinkle. */
+function starMaterial(color, size, opacity) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uSize: { value: size }, uOpacity: { value: opacity }, uTime: { value: 0 }, uScale: { value: 450 } },
+    vertexShader: `
+      attribute float aSize; attribute float aPhase;
+      uniform float uSize; uniform float uTime; uniform float uScale;
+      varying float vTwinkle;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vTwinkle = 0.65 + 0.35 * sin(uTime * (0.6 + aPhase * 1.4) + aPhase * 6.2831);
+        gl_PointSize = uSize * aSize * (uScale / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor; uniform float uOpacity;
+      varying float vTwinkle;
+      void main() {
+        float d = length(gl_PointCoord - 0.5) * 2.0;
+        if (d > 1.0) discard;
+        float core = smoothstep(0.55, 0.0, d);
+        float halo = pow(1.0 - d, 1.8) * 0.7;
+        gl_FragColor = vec4(uColor, (core + halo) * uOpacity * vTwinkle);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+}
+function starAttributes(geo, n, minSize, maxSize) {
+  const sz = new Float32Array(n), ph = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const r = Math.random(); sz[i] = minSize + (maxSize - minSize) * r * r; ph[i] = Math.random(); }
+  geo.setAttribute("aSize", new THREE.BufferAttribute(sz, 1));
+  geo.setAttribute("aPhase", new THREE.BufferAttribute(ph, 1));
+}
+
 const RIBBON_VERT = /* glsl */ `
   uniform float uTime;
   uniform float uAmp;
@@ -192,7 +227,9 @@ export function createBackground(canvas, opts = {}) {
   const dustN = 260; const dust = new Float32Array(dustN * 3);
   for (let i = 0; i < dustN; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(2.2 + Math.random() * 1.5); dust[i * 3] = v.x; dust[i * 3 + 1] = v.y; dust[i * 3 + 2] = v.z; }
   const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute("position", new THREE.BufferAttribute(dust, 3));
-  globe.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: edge, size: 0.035, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending })));
+  starAttributes(dustGeo, dustN, 0.5, 1.6);
+  const dustMat = starMaterial(edge, 0.09, 0.6);
+  globe.add(new THREE.Points(dustGeo, dustMat));
   globe.position.set(2.6, -2.2, -2.5);
   if (mode === "globe") { globe.position.set(3.6, -0.8, -2); globe.scale.setScalar(1.45); }
 
@@ -202,7 +239,9 @@ export function createBackground(canvas, opts = {}) {
   for (let i = 0; i < N; i++) { pp[i * 3] = (Math.random() - 0.5) * 30; pp[i * 3 + 1] = (Math.random() - 0.5) * 20; pp[i * 3 + 2] = -Math.random() * 12; }
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pp, 3));
-  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: new THREE.Color("#e6fff0"), size: 0.065, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
+  starAttributes(pGeo, N, 0.4, 2.6);
+  const particlesMat = starMaterial("#e6fff0", 0.22, 0.9);
+  const particles = new THREE.Points(pGeo, particlesMat);
   scene.add(particles);
 
   /* post */
@@ -269,6 +308,8 @@ export function createBackground(canvas, opts = {}) {
     rings.rotation.x = 0.15 + Math.sin(t * 0.2) * 0.1 + state.py * 0.12;
     globe.rotation.y = state.px * 0.25;
     particles.rotation.y = t * 0.01;
+    particlesMat.uniforms.uTime.value = dustMat.uniforms.uTime.value = t;
+    particlesMat.uniforms.uScale.value = dustMat.uniforms.uScale.value = renderer.domElement.height * 0.5;
     particles.position.y = -s * 1.5 + Math.sin(t * 0.3) * 0.1;
     // cinematic hold: three looks, one per word (bands close-up, bands from above, the sliced globe)
     const seg = Math.min(3.999, H * 4), si = Math.floor(seg), st = seg - si;
