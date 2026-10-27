@@ -187,7 +187,8 @@
 .root :global(.cb-word) { display: inline-block; white-space: nowrap; }
 .root :global(.cb-ch) { display: inline-block; opacity: 0; transform: translateY(0.6em) rotate(4deg); transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .root :global(.cb-split-on .cb-ch) { opacity: 1; transform: none; }
-.root :global(.cb-nocursor) { cursor: none; }
+.root :global(.cb-nocursor) { cursor: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; touch-action: pan-y; }
+.root :global(.cb-nocursor) canvas, .root :global(.cb-nocursor) img, .root :global(.cb-nocursor) svg { -webkit-user-drag: none; user-select: none; }
 .root :global(.cb-nocursor a), .root :global(.cb-nocursor button) { cursor: pointer; }
 .root :global(.cb-cursor) { position: absolute; left: 0; top: 0; width: 100px; height: 100px; margin: -50px 0 0 -50px; pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.25s; display: flex; flex-direction: column; align-items: center; }
 .root :global(.cb-cursor.on) { opacity: 1; }

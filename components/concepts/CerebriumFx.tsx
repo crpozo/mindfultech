@@ -78,13 +78,25 @@ export function HoldCursor({ label, onProgress, holdMs = 4400 }: { label: string
       if (dir.current > 0 || prog.current > 0) raf.current = requestAnimationFrame(tick);
     };
     const start = () => { cancelAnimationFrame(raf.current); last.current = performance.now(); raf.current = requestAnimationFrame(tick); };
-    const down = (e: PointerEvent) => { if ((e.target as HTMLElement).closest("a,button")) return; dir.current = 1; start(); };
+    // Holding must survive a drag: the browser would otherwise start a text selection or a native
+    // drag of the content once the mouse moves (Windows is eager about this) and stop sending pointer
+    // events. So the press claims the pointer (capture keeps events flowing even outside the hero),
+    // the default action is blocked, and only a real release, a cancel or a lost window ends the hold.
+    const down = (e: PointerEvent) => {
+      if (e.button !== 0 || (e.target as HTMLElement).closest("a,button")) return;
+      e.preventDefault();
+      try { host.setPointerCapture(e.pointerId); } catch { /* not capturable; the window listeners still end the hold */ }
+      dir.current = 1; start();
+    };
     const up = () => { if (dir.current === 1) { dir.current = -1; start(); } };
-    const enter = () => setVisible(true); const leave = () => { setVisible(false); up(); };
-    host.addEventListener("pointermove", move); host.addEventListener("pointerdown", down); window.addEventListener("pointerup", up);
+    const block = (e: Event) => e.preventDefault();
+    const enter = () => setVisible(true); const leave = () => { setVisible(false); };
+    host.addEventListener("pointermove", move); host.addEventListener("pointerdown", down);
+    window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up); window.addEventListener("blur", up);
+    host.addEventListener("dragstart", block); host.addEventListener("selectstart", block);
     host.addEventListener("pointerenter", enter); host.addEventListener("pointerleave", leave);
     host.classList.add("cb-nocursor");
-    return () => { host.removeEventListener("pointermove", move); host.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up); host.removeEventListener("pointerenter", enter); host.removeEventListener("pointerleave", leave); host.classList.remove("cb-nocursor"); cancelAnimationFrame(raf.current); };
+    return () => { host.removeEventListener("pointermove", move); host.removeEventListener("pointerdown", down); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); window.removeEventListener("blur", up); host.removeEventListener("dragstart", block); host.removeEventListener("selectstart", block); host.removeEventListener("pointerenter", enter); host.removeEventListener("pointerleave", leave); host.classList.remove("cb-nocursor"); cancelAnimationFrame(raf.current); };
   }, [holdMs, onProgress]);
   const R = 46, C = 2 * Math.PI * R;
   return (
