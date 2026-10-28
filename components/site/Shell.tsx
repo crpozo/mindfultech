@@ -91,7 +91,7 @@ export function SiteFooter() {
   const { lang } = useLang();
   const es = lang === "es";
   const cols: [string, [string, string][]][] = [
-    [es ? "Servicios" : "Services", [[es ? "Diseño UX" : "UX Design", "/services/ux"], [es ? "Apps web y móviles" : "Web & Mobile Apps", "/services/apps"], [es ? "Software a medida" : "Custom Software", "/services/custom"], [es ? "IA y automatización" : "AI & Automation", "/services/ai"], ["AI Management Office", "/office-demo"]]],
+    [es ? "Servicios" : "Services", [[es ? "Diseño UX" : "UX Design", "/services/ux"], [es ? "Apps web y móviles" : "Web & Mobile Apps", "/services/apps"], [es ? "Software a medida" : "Custom Software", "/services/custom"], [es ? "IA y automatización" : "AI & Automation", "/services/ai"], [es ? "Ciberseguridad" : "Cybersecurity", "/services/security"], ["AI Management Office", "/office-demo"]]],
     [es ? "Proyectos" : "Work", [[es ? "Casos de estudio" : "Case studies", "/work"], ["ThemedMotion 3D", "/work#themedmotion"], [es ? "IA de facturación Helixona" : "Helixona billing AI", "/work#healthcare"], ["USFQ EventFlow", "/work#usfq"], [es ? "CRM Odoo y entregas" : "Odoo CRM & delivery", "/work#fence"]]],
     [es ? "Empresa" : "Company", [[es ? "Nosotros" : "About us", "/company#about"], ["Blog", "/blog"], [es ? "Carreras" : "Careers", "/company#careers"], [es ? "Prensa" : "Press", "/company#press"]]],
   ];

@@ -83,7 +83,7 @@ export function CbFooter() {
             <a href="mailto:carlos@mindfultech.ec" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg></a>
           </div>
           <div className={s.footCols}>
-            <div><span>{es ? "Servicios" : "Services"}</span><Link href={`${CB}/services#ux`}>{es ? "Diseño UX" : "UX Design"}</Link><Link href={`${CB}/services#apps`}>{es ? "Apps web y móviles" : "Web & Mobile Apps"}</Link><Link href={`${CB}/services#custom`}>{es ? "Software a medida" : "Custom Software"}</Link><Link href={`${CB}/services#ai`}>{es ? "IA y automatización" : "AI & Automation"}</Link></div>
+            <div><span>{es ? "Servicios" : "Services"}</span><Link href={`${CB}/services#ux`}>{es ? "Diseño UX" : "UX Design"}</Link><Link href={`${CB}/services#apps`}>{es ? "Apps web y móviles" : "Web & Mobile Apps"}</Link><Link href={`${CB}/services#custom`}>{es ? "Software a medida" : "Custom Software"}</Link><Link href={`${CB}/services#ai`}>{es ? "IA y automatización" : "AI & Automation"}</Link><Link href={`${CB}/services#security`}>{es ? "Ciberseguridad" : "Cybersecurity"}</Link></div>
             <div><span>MindfulTech</span><Link href={`${CB}/work`}>{es ? "Proyectos" : "Work"}</Link><Link href="/office-demo">AI Office</Link><Link href={`${CB}/company`}>{es ? "Empresa" : "Company"}</Link><Link href={`${CB}/blog`}>Blog</Link><a href="mailto:carlos@mindfultech.ec">{es ? "Contacto" : "Contact"}</a></div>
           </div>
         </div>

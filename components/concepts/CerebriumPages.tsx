@@ -43,7 +43,7 @@ export function CbServices() {
   const { lang } = useLang();
   const es = lang === "es";
   const data = es ? SERVICES_ES : SERVICES;
-  const ids = ["ux", "apps", "custom", "ai"] as const;
+  const ids = ["ux", "apps", "custom", "ai", "security"] as const;
   const [cur, setCur] = React.useState<string>("ux");
   const refs = React.useRef<Record<string, HTMLDivElement | null>>({});
   React.useEffect(() => {
@@ -53,7 +53,7 @@ export function CbServices() {
   }, []);
   return (
     <CbPage mode="globe" active="services">
-      <Banner mode="split" label={es ? "Servicios" : "Services"} title={es ? "Investigación, software y agentes de IA" : "Research, software and AI agents"} grad={es ? "agentes de IA" : "AI agents"} lead={es ? "Cuatro servicios, un solo equipo. Cada uno llega con investigación, documentación y gente que responde después del lanzamiento." : "Four services, one team. Each ships with research, documentation and people who answer after launch."} cta />
+      <Banner mode="split" label={es ? "Servicios" : "Services"} title={es ? "Investigación, software, IA y seguridad" : "Research, software, AI and security"} grad={es ? "IA y seguridad" : "AI and security"} lead={es ? "Cinco servicios, un solo equipo. Cada uno llega con investigación, documentación y gente que responde después del lanzamiento." : "Five services, one team. Each ships with research, documentation and people who answer after launch."} cta />
       <section className={s.light} data-cb-light>
         <div className={s.wrap}>
           <div className={s.why} style={{ paddingTop: 96 }}>

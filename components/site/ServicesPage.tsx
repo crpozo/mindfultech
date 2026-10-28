@@ -12,6 +12,7 @@ const TINTS = [
   { tint: "#E6F7EC", hot: "#8EF2B4" },
   { tint: "#E3F1FB", hot: "#8ED0FF" },
   { tint: "#F4F5F3", hot: "#E3E6E1" },
+  { tint: "#FBEDED", hot: "#F5B5B5" },
 ];
 
 export function ServicesPage() {
@@ -46,7 +47,7 @@ export function ServicesPage() {
 
       {/* what we build */}
       <section id="build" className={`${s.wrap} ${s.sectionFirst}`}>
-        <SectionHead title={es ? "Qué construimos" : "What we build"} sub={es ? "Cuatro servicios, un solo equipo. Cada uno llega con investigación, documentación y gente que responde." : "Four services, one team. Each ships with research, documentation and people who answer."} />
+        <SectionHead title={es ? "Qué construimos" : "What we build"} sub={es ? "Cinco servicios, un solo equipo. Cada uno llega con investigación, documentación y gente que responde." : "Five services, one team. Each ships with research, documentation and people who answer."} />
         <div className={s.cards4}>
           {SERVICE_CARDS.map((c, i) => (
             <Link key={c.id} href={`/services/${c.id}`} className={`${s.tile} ${s.tileTint}`} style={{ background: TINTS[i].tint, ["--hot" as string]: TINTS[i].hot }}>

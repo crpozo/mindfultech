@@ -257,6 +257,66 @@ export const SERVICES: Record<string, Service> = {
     ],
     tools: ["CLAUDE", "RAG", "LANGCHAIN", "AWS BEDROCK", "EVALS"],
   },
+  security: {
+    name: "Cybersecurity",
+    tag: "CYBERSECURITY",
+    title: "Security built into what you ship",
+    subtitle:
+      "Assessments, hardening and monitoring for your applications, cloud and AI systems, with findings your team can actually act on.",
+    specs: [
+      ["METHOD", "Assess, harden, monitor"],
+      ["BEST FOR", "Apps, cloud, AI systems, compliance"],
+      ["TIMELINE", "From 2 weeks"],
+    ],
+    why: [
+      { title: "Builders, not just auditors", desc: "We write production software every day, so every finding comes with a fix your engineers can ship, not a PDF to decode." },
+      { title: "AI systems included", desc: "Assistants and agents bring new risks: prompt injection, data leakage, over-permissioned tools. We test for them, aligned to the OWASP Top 10 for LLM applications." },
+      { title: "Compliance without the theatre", desc: "Controls mapped to ISO 27001, SOC 2 and Ecuador's data protection law (LOPDP), with evidence collected as you work." },
+    ],
+    highlight: {
+      stat: "100%",
+      label: "BUILDS REVIEWED",
+      title: "Every platform we ship passes a security review first",
+      desc: "Hardening is a fixed step in how we build: dependency audits, access review and a pass over the OWASP Top 10 before launch. The same practice is now available for systems we didn't build.",
+    },
+    steps: [
+      { title: "Scope", desc: "Assets, threat model and rules of engagement agreed in writing before anything is touched." },
+      { title: "Assess", desc: "Application and cloud testing, code review and configuration audit, prioritized by real impact." },
+      { title: "Harden", desc: "We fix with your team or hand over patches and configuration changes, verified with a re-test." },
+      { title: "Monitor", desc: "Alerting, logging and a response plan, so the next incident is handled in minutes, not days." },
+    ],
+    engage: [
+      {
+        title: "Security Assessment",
+        forLabel: "FOR A CLEAR PICTURE",
+        bullets: [
+          "Web, mobile and API penetration testing",
+          "Cloud configuration audit (AWS, GCP, Azure)",
+          "Findings ranked by exploitability and impact",
+          "2–4 weeks, fixed scope, re-test included",
+        ],
+      },
+      {
+        title: "Managed Security",
+        forLabel: "FOR ONGOING PEACE OF MIND",
+        bullets: [
+          "Monitoring, alerting and patch management",
+          "Secure code review on every release",
+          "Compliance evidence kept current",
+          "Monthly engagement, incident response on call",
+        ],
+      },
+    ],
+    includes: [
+      { title: "Penetration Testing", desc: "Manual testing of web, mobile and API surfaces, beyond what a scanner finds." },
+      { title: "Cloud Hardening", desc: "IAM, network, secrets and backup configuration reviewed and locked down on AWS, GCP or Azure." },
+      { title: "Secure Development", desc: "Code review, dependency audits and CI checks so vulnerabilities are caught before they ship." },
+      { title: "AI & LLM Security", desc: "Prompt injection, data leakage and tool-permission testing for assistants and agents, with guardrails that hold." },
+      { title: "Compliance Readiness", desc: "Gap analysis and controls for ISO 27001, SOC 2 and LOPDP, with evidence your auditor accepts." },
+      { title: "Incident Response", desc: "A tested playbook, logging that answers questions, and people who pick up when something goes wrong." },
+    ],
+    tools: ["OWASP", "BURP SUITE", "SEMGREP", "AWS IAM", "ISO 27001", "LOPDP"],
+  },
 };
 
 export const SERVICES_ES: Record<string, Service> = {
@@ -502,5 +562,65 @@ export const SERVICES_ES: Record<string, Service> = {
       { title: "Evaluación y Monitoreo", desc: "Métricas de calidad y guardrails para que la IA siga ganándose la confianza en producción." },
     ],
     tools: ["CLAUDE", "RAG", "LANGCHAIN", "AWS BEDROCK", "EVALS"],
+  },
+  security: {
+    name: "Ciberseguridad",
+    tag: "CIBERSEGURIDAD",
+    title: "Seguridad integrada en lo que publicas",
+    subtitle:
+      "Evaluaciones, endurecimiento y monitoreo para tus aplicaciones, nube y sistemas de IA, con hallazgos que tu equipo sí puede resolver.",
+    specs: [
+      ["MÉTODO", "Evaluar, endurecer, monitorear"],
+      ["IDEAL PARA", "Apps, nube, sistemas de IA, cumplimiento"],
+      ["TIEMPO", "Desde 2 semanas"],
+    ],
+    why: [
+      { title: "Constructores, no solo auditores", desc: "Escribimos software en producción todos los días, así que cada hallazgo llega con una solución que tus ingenieros pueden publicar, no un PDF por descifrar." },
+      { title: "Sistemas de IA incluidos", desc: "Asistentes y agentes traen riesgos nuevos: prompt injection, fuga de datos, herramientas con permisos de más. Los probamos, alineados al OWASP Top 10 para aplicaciones con LLM." },
+      { title: "Cumplimiento sin teatro", desc: "Controles mapeados a ISO 27001, SOC 2 y la Ley Orgánica de Protección de Datos Personales (LOPDP), con evidencia recogida mientras trabajas." },
+    ],
+    highlight: {
+      stat: "100%",
+      label: "BUILDS REVISADOS",
+      title: "Cada plataforma que publicamos pasa antes por una revisión de seguridad",
+      desc: "El endurecimiento es un paso fijo de cómo construimos: auditoría de dependencias, revisión de accesos y una pasada por el OWASP Top 10 antes del launch. La misma práctica ahora está disponible para sistemas que no construimos nosotros.",
+    },
+    steps: [
+      { title: "Alcance", desc: "Activos, modelo de amenazas y reglas de trabajo acordados por escrito antes de tocar nada." },
+      { title: "Evaluar", desc: "Pruebas de aplicaciones y nube, revisión de código y auditoría de configuración, priorizadas por impacto real." },
+      { title: "Endurecer", desc: "Corregimos con tu equipo o entregamos parches y cambios de configuración, verificados con un re-test." },
+      { title: "Monitorear", desc: "Alertas, logs y un plan de respuesta, para que el siguiente incidente se resuelva en minutos, no en días." },
+    ],
+    engage: [
+      {
+        title: "Evaluación de Seguridad",
+        forLabel: "PARA TENER UNA FOTO CLARA",
+        bullets: [
+          "Pentesting de web, móvil y APIs",
+          "Auditoría de configuración en la nube (AWS, GCP, Azure)",
+          "Hallazgos priorizados por explotabilidad e impacto",
+          "2–4 semanas, alcance fijo, re-test incluido",
+        ],
+      },
+      {
+        title: "Seguridad Gestionada",
+        forLabel: "PARA TRANQUILIDAD CONTINUA",
+        bullets: [
+          "Monitoreo, alertas y gestión de parches",
+          "Revisión de código seguro en cada release",
+          "Evidencia de cumplimiento siempre al día",
+          "Mensual, con respuesta a incidentes de guardia",
+        ],
+      },
+    ],
+    includes: [
+      { title: "Pentesting", desc: "Pruebas manuales sobre web, móvil y APIs, más allá de lo que encuentra un escáner." },
+      { title: "Endurecimiento en la Nube", desc: "IAM, red, secretos y respaldos revisados y asegurados en AWS, GCP o Azure." },
+      { title: "Desarrollo Seguro", desc: "Revisión de código, auditoría de dependencias y chequeos en CI para atrapar vulnerabilidades antes de publicar." },
+      { title: "Seguridad de IA y LLMs", desc: "Pruebas de prompt injection, fuga de datos y permisos de herramientas en asistentes y agentes, con guardrails que aguantan." },
+      { title: "Preparación para Cumplimiento", desc: "Análisis de brechas y controles para ISO 27001, SOC 2 y LOPDP, con evidencia que tu auditor acepta." },
+      { title: "Respuesta a Incidentes", desc: "Un playbook probado, logs que responden preguntas y gente que contesta cuando algo sale mal." },
+    ],
+    tools: ["OWASP", "BURP SUITE", "SEMGREP", "AWS IAM", "ISO 27001", "LOPDP"],
   },
 };

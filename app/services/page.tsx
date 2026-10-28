@@ -3,7 +3,7 @@ import { CbServices } from "@/components/concepts/CerebriumPages";
 
 export const metadata: Metadata = {
   title: "MindfulTech",
-  description: "Research, software and AI agents. Four services, one team.",
+  description: "Research, software, AI agents and cybersecurity. Five services, one team.",
 };
 
 export default function Route() {
