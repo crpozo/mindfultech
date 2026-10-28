@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { CbService } from "@/components/concepts/CerebriumDetail";
 
 const META: Record<string, { name: string; desc: string }> = {
-  ux: { name: "UX Design", desc: "Research-driven product design." },
-  apps: { name: "Web & Mobile Apps", desc: "Scalable platforms on modern stacks." },
+  security: { name: "Cybersecurity", desc: "Assessments, hardening and monitoring for apps, cloud and AI systems." },
+  discovery: { name: "Workshops & Requirements Mapping", desc: "Facilitated workshops that turn a need into mapped processes and buildable requirements." },
   custom: { name: "Custom Software", desc: "Software shaped around your workflows." },
   ai: { name: "AI & Automation", desc: "Grounded, human-reviewed AI." },
-  security: { name: "Cybersecurity", desc: "Assessments, hardening and monitoring for apps, cloud and AI systems." },
 };
 
 export function generateStaticParams() {

@@ -9,7 +9,7 @@ export const dynamic = "force-static";
 const BASE = "https://mindfultech.ec";
 
 // mirrors the META keys in app/services/[slug]/page.tsx
-const SERVICE_SLUGS = ["ux", "apps", "custom", "ai", "security"];
+const SERVICE_SLUGS = ["security", "discovery", "custom", "ai"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Public routes only — /tasks, /finance, /fitness and /fit are private
