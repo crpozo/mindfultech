@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 66;
+export const STATE_VERSION = 67;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -419,6 +419,25 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
       "Corte del 4 de septiembre de 2026: 2 709 en total, pagados desde Pichincha (confirmado el 7). Entra como 2 193 porque 516 ya viven aparte en el tablero: la ropa (190, movimiento propio) y el botox (326, prorrateado en su compromiso). Contra el corte de julio (2 118,67) son 590 más; contra lo que se estimó al cierre (~2 600) quedó 109 arriba. El estimado de gasto variable sigue en 2 150: el promedio ajustado de los dos cortes reales (2 029 y 2 193) da 2 111.",
     excluded: false,
   },
+  {
+    // Tercer estado de cuenta real. Dictado el 6 de noviembre: "debo pagar
+    // 3 157 de la tarjeta, mes de octubre". Es el consumo de octubre (corte
+    // de inicios de noviembre) y TODAVÍA NO ESTÁ PAGADO: entra con la fecha
+    // del corte para que noviembre lo cargue, como los cortes anteriores, y
+    // cuando lo pague desde Pichincha solo hay que releer ese saldo. No hay
+    // ajustes de ropa o botox esta vez. El corte de octubre (~2 500, dictado
+    // el 17 oct) nunca se anotó como movimiento: si lo pagó, falta.
+    id: "txn-2026-11-04-titanium",
+    sinceVersion: 67,
+    date: "2026-11-04T15:00:00-05:00",
+    amount: 3157,
+    kind: "expense",
+    category: "otros",
+    merchant: "Tarjeta Titanium: consumo del mes",
+    notes:
+      "Consumo de octubre de 2026, corte de inicios de noviembre: 3 157, PENDIENTE DE PAGO desde Pichincha (dictado el 6 nov). Es el corte más alto desde Orlando: 964 más que el de septiembre (2 193 ajustado) y mil por encima del estimado de 2 150. Cuando se pague, releer Pichincha; cuando llegue el detalle, ver qué lo subió.",
+    excluded: false,
+  },
 ];
 
 /**
@@ -432,6 +451,20 @@ const SEEDED_TXNS: (Txn & { sinceVersion: number })[] = [
  * que llegó después), y solo ocurre cuando publico una versión nueva.
  */
 const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
+  {
+    // La fila "Betan 400" del tablero inicial era de Martín Betancourt. El
+    // 6 de noviembre dictó "Martín me debe como 1 300 + 400 + 1 000": los
+    // 400 son esos mismos, así que la fila se reescribe con el total y no se
+    // crea otra. En el SRI aparecen tres facturas a BETANCOURT RODRIGUEZ
+    // anuladas (900 del 20 oct, 1 300 y 400 del 4 nov): la deuda existe
+    // pero sin factura vigente, hay que re-emitirlas para cobrar.
+    id: "betan",
+    sinceVersion: 67,
+    client: "Martín Betancourt",
+    amount: 2700,
+    status: "pending",
+    note: "Dictado el 6 nov 2026: \"como 1 300 + 400 + 1 000\" = $2 700, cifra aproximada. Las facturas 102 (900), 104 (1 300) y 105 (400) a su nombre están ANULADAS en el SRI: hay que emitirlas de nuevo antes de cobrar. Sin fecha comprometida.",
+  },
   {
     id: "usfq-familias",
     sinceVersion: 7,
@@ -499,30 +532,34 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     // factura emitida. Se anota igual porque el dinero es real y omitirlo
     // subestima el mes, pero la nota deja claro el estado — y que mandar la
     // factura es lo único que separa esto de un cobro a fin de septiembre.
+    // 6 nov 2026: él dice que Helixona le debe solo 4k (octubre). Esta fila
+    // era la factura por emitir de agosto; el SRI muestra la 91 del 1 sep por
+    // 3 948,29, que es justo lo que se cobró el 31 de agosto (fila
+    // "helixona"). Era la misma plata contada dos veces: se cierra.
     id: "helixona-ago",
-    sinceVersion: 48,
+    sinceVersion: 67,
     client: "Helixona · agosto",
     amount: 3800,
-    status: "pending",
+    status: "paid",
     note: "Segundo mes seguido, misma dosis (~$3 800). FALTA EMITIR LA FACTURA al 28 ago 2026. Si el patrón se repite, se cobra a fin de septiembre; cada día que la factura se retrasa corre el cobro. Con este mes, Helixona queda confirmado como ingreso recurrente mensual, no como proyecto suelto.",
   },
   {
     // Dictado el 17 de octubre. Andrew ya había saldado los dos pagos de
     // agosto; esto es trabajo nuevo.
     id: "andrew-3",
-    sinceVersion: 64,
+    sinceVersion: 67,
     client: "Andrew Sam Binno",
-    amount: 3000,
+    amount: 2500,
     status: "pending",
-    note: "Dictado el 17 oct 2026: me debe $3 000. Sin fecha de pago confirmada.",
+    note: "Dictado el 6 nov 2026: me debe $2 500 (el 17 oct eran $3 000; los ~500 de diferencia cuadran con la factura 101 de $494,93 del 12 oct, que habría llegado a Wise). Sin fecha de pago confirmada.",
   },
   {
     id: "helixona-oct",
-    sinceVersion: 64,
+    sinceVersion: 67,
     client: "Helixona · octubre",
     amount: 4000,
     status: "pending",
-    note: "Dictado el 17 oct 2026: ~$4 000 de este mes, a cobrar a fin de octubre. Mismo patrón de los meses anteriores (pagador puntual).",
+    note: "Reconfirmado el 6 nov 2026: \"Helixona me debe 4k\". La factura 100 del 12 oct es por $3 808,53; si eso es lo que llega, se cierra por ese valor. Ya pasó el fin de octubre que se esperaba: primera vez que se atrasa.",
   },
   {
     id: "otros-oct",
@@ -533,6 +570,9 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     note: "Dictado el 17 oct 2026 como \"1k de otros proyectos\", sin desglose por cliente.",
   },
   {
+    // 6 nov 2026: no la mencionó al repasar lo que le deben (solo Martín y
+    // Helixona). Sigue pendiente hasta que diga lo contrario; si ya la
+    // cobró, la subida de Wise lo explicaría.
     id: "cambridge",
     sinceVersion: 65,
     client: "Cambridge",
@@ -561,14 +601,19 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // desde el 31 de agosto, hay que releer el saldo.
   // Dictado el 17 de octubre: "1 800 + 4 000" en Wise, dos saldos que van
   // juntos en una sola cuenta. Reemplaza al 54,96 deducido de septiembre.
-  { id: "wise", sinceVersion: 64, name: "Wise", kind: "bank", balance: 5800 },
+  // Dictado el 6 de noviembre: 7 215,48. Subió 1 415 desde el 17 de octubre
+  // sin que se anotara qué entró: cobros del exterior (Andrew y Helixona
+  // pagan acá). Si uno de esos cobros fue una cuenta por cobrar, hay que
+  // marcarla pagada; él no lo dijo.
+  { id: "wise", sinceVersion: 67, name: "Wise", kind: "bank", balance: 7215.48 },
   // Los $2 000 eran el traslado, no el saldo: PayPal tenía más y quedó en
   // 4 500 - 2 000 = 2 500. Ese 2 500 era deducido, no dictado, y el saldo que
   // él reporta ahora lo confirma: 2 500 + los 500 devueltos dan justo 3 000.
   // 3 000 + los 500 de Scott acreditados el 25 de agosto
   // vaciada: los 3 500 pasaron a Pichincha, rumbo a la cooperativa
   // Dictado el 17 de octubre: 680.
-  { id: "paypal", sinceVersion: 64, name: "PayPal", kind: "bank", balance: 680 },
+  // Dictado el 6 de noviembre: 682. Sin movimiento real.
+  { id: "paypal", sinceVersion: 67, name: "PayPal", kind: "bank", balance: 682 },
   // Saldo dictado el 12 de agosto. Reemplaza al 2 381,33, que era deducido
   // (2 500 menos los 118,67 con que cerró el estado de cuenta): entre medio
   // hubo gasto corriente que no está anotado movimiento por movimiento.
@@ -583,6 +628,10 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // la tarjeta (~2 500, anotado como deuda), el IESS (170) y unos 200 de otras
   // salidas: quedarían ~730. Nada de eso está anotado como gasto todavía, y la
   // tarjeta no va como deuda: se paga completa cada mes (v66).
+  // 6 de noviembre: NO dictó Pichincha. El saldo de 3 600 es del 17 de
+  // octubre y desde entonces debió salir el corte de octubre (~2 500) y el
+  // IESS; está desactualizado hasta que lo lea. De acá sale también el corte
+  // de 3 157 que anotó hoy como pendiente de pago.
   { id: "pichincha", sinceVersion: 64, name: "Pichincha", kind: "bank", balance: 3600 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
@@ -596,7 +645,10 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // sobre el piso del arriendo y deja unos 4 300 de margen para octubre.
   // Dictado el 17 de octubre: 10 600. Confirma que los 3 991,54 de Wise
   // acreditaron en septiembre y que entró más desde entonces.
-  { id: "procredit", sinceVersion: 64, name: "ProCredit", kind: "bank", balance: 10600 },
+  // Dictado el 6 de noviembre: 10 597,47. Prácticamente igual al 17 de
+  // octubre (10 600): el arriendo de noviembre (571,50) no parece haber
+  // salido todavía, o entró algo que lo compensó.
+  { id: "procredit", sinceVersion: 67, name: "ProCredit", kind: "bank", balance: 10597.47 },
   // Ahorros a la Vista #2002084. El 1 de septiembre llegó a 13 525,59 con los
   // traslados desde ProCredit y Pichincha, y de ahí salió la precancelación
   // del quirografario en la primera semana de septiembre. Quedaron "como
@@ -708,11 +760,11 @@ const SEEDED_COMMITMENTS: (Commitment & { sinceVersion: number })[] = [
     // hasta enero de 2027, son cuatro pagos (oct, nov, dic, ene) y $3 200 en
     // total. Al terminar se retira con RETIRED_COMMITMENTS.
     id: "programador",
-    sinceVersion: 64,
-    name: "Programador (hasta enero 2027)",
+    sinceVersion: 67,
+    name: "Programador",
     amount: 800,
     category: "negocio",
-    note: "$800 al mes sin IVA, de octubre de 2026 a enero de 2027: $3 200 en total. Si factura con IVA (15 %), cada pago sube a $920 y el total a $3 680.",
+    note: "$800 al mes sin IVA. Dictado el 17 oct 2026 como octubre a enero de 2027 ($3 200); el 6 nov lo repitió como \"cada mes\" sin fecha de fin, así que se queda abierto hasta que diga que terminó. Si factura con IVA (15 %), cada pago sube a $920.",
   },
   COWORKING_COMMITMENT,
 ];
