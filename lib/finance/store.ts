@@ -466,16 +466,6 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     note: "Dictado el 6 nov 2026: \"como 1 300 + 400 + 1 000\" = $2 700, cifra aproximada. Las facturas 102 (900), 104 (1 300) y 105 (400) a su nombre están ANULADAS en el SRI: hay que emitirlas de nuevo antes de cobrar. Sin fecha comprometida.",
   },
   {
-    // Quitada en v70 (WRITTEN_OFF); se deja acá para que la migración de
-    // tableros viejos siga teniendo el id que borrar.
-    id: "usfq-familias",
-    sinceVersion: 7,
-    client: "USFQ · Familias",
-    amount: 5150,
-    status: "pending",
-    note: "Valor neto del proyecto, cerrado el 4 ago 2026. Cobro en dos tramos: el 15 de septiembre y las horas en diciembre (reparto por confirmar). Pagador institucional, riesgo de impago bajo.",
-  },
-  {
     id: "andrew",
     sinceVersion: 19,
     client: "Andrew Sam Binno",
