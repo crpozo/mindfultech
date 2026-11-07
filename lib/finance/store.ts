@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 67;
+export const STATE_VERSION = 68;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -628,11 +628,12 @@ const SEEDED_ACCOUNTS: (Account & { sinceVersion: number })[] = [
   // la tarjeta (~2 500, anotado como deuda), el IESS (170) y unos 200 de otras
   // salidas: quedarían ~730. Nada de eso está anotado como gasto todavía, y la
   // tarjeta no va como deuda: se paga completa cada mes (v66).
-  // 6 de noviembre: NO dictó Pichincha. El saldo de 3 600 es del 17 de
-  // octubre y desde entonces debió salir el corte de octubre (~2 500) y el
-  // IESS; está desactualizado hasta que lo lea. De acá sale también el corte
-  // de 3 157 que anotó hoy como pendiente de pago.
-  { id: "pichincha", sinceVersion: 64, name: "Pichincha", kind: "bank", balance: 3600 },
+  // Dictado el 6 de noviembre: 2 407. Bajó 1 193 desde el 17 de octubre,
+  // menos que el corte de ~2 500 que debía salir a fin de octubre: o ese
+  // corte fue menor, o entró algo. El de 3 157 (consumo de octubre) todavía
+  // no ha salido de acá: cuando lo pague, Pichincha queda en negativo salvo
+  // que mueva plata desde ProCredit o Wise antes.
+  { id: "pichincha", sinceVersion: 68, name: "Pichincha", kind: "bank", balance: 2407 },
   // Saldo leído el 19 de agosto, con el arriendo de agosto ya pagado. De
   // acá sale el arriendo cada mes, así que nunca debe quedar por debajo de
   // una mensualidad ($571,50).
