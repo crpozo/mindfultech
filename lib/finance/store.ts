@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 69;
+export const STATE_VERSION = 70;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -466,6 +466,8 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     note: "Dictado el 6 nov 2026: \"como 1 300 + 400 + 1 000\" = $2 700, cifra aproximada. Las facturas 102 (900), 104 (1 300) y 105 (400) a su nombre están ANULADAS en el SRI: hay que emitirlas de nuevo antes de cobrar. Sin fecha comprometida.",
   },
   {
+    // Quitada en v70 (WRITTEN_OFF); se deja acá para que la migración de
+    // tableros viejos siga teniendo el id que borrar.
     id: "usfq-familias",
     sinceVersion: 7,
     client: "USFQ · Familias",
@@ -585,11 +587,11 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
   },
   {
     id: "cambridge",
-    sinceVersion: 65,
+    sinceVersion: 70,
     client: "Cambridge",
     amount: 5000,
     status: "pending",
-    note: "Dictado el 17 oct 2026: me debe $5 000. Sin fecha de pago confirmada.",
+    note: "Dictado el 17 oct 2026 y reconfirmado el 6 nov: me toca cobrar $5 000. Sin fecha de pago confirmada ni factura a la vista en el SRI.",
   },
 ];
 
@@ -942,6 +944,11 @@ function normalize(s: Partial<FinanceState> | null): FinanceState {
     // Con esto WFS sale del tablero entero: $4 700 facturados que nunca
     // llegaron a cobrarse.
     { id: "wfs-1", sinceVersion: 34 },
+    // 6 nov 2026: "USFQ familias quita". Las facturas 81 y 82 del 4 de agosto
+    // (2 750 + 2 400 netos = los 5 150) están autorizadas, así que lo más
+    // probable es que ya se cobró y la fila quedó vieja; él no dijo cuál de
+    // las dos cosas, solo que salga. Se quita sin registrar ingreso.
+    { id: "usfq-familias", sinceVersion: 70 },
   ];
   if (Array.isArray(s.receivables)) {
     const drop = new Set(
