@@ -99,7 +99,7 @@ export interface FinanceState {
   settings: Settings;
 }
 
-export const STATE_VERSION = 68;
+export const STATE_VERSION = 69;
 export const STATE_KEY = "mt_fin_state_v1";
 export const AUTH_KEY = "mt_fin_auth_v1";
 export const UNLOCK_KEY = "mt_fin_unlocked_v1"; // sessionStorage
@@ -573,6 +573,17 @@ const SEEDED_RECEIVABLES: (Receivable & { sinceVersion: number })[] = [
     // 6 nov 2026: no la mencionó al repasar lo que le deben (solo Martín y
     // Helixona). Sigue pendiente hasta que diga lo contrario; si ya la
     // cobró, la subida de Wise lo explicaría.
+    // Dictado el 6 de noviembre: "Anto me debe 1 300 + 500". Cliente nuevo
+    // en el tablero; no sé a qué proyecto corresponde ni si ya está
+    // facturado (no hay factura a ese nombre en el SRI al 6 nov).
+    id: "anto",
+    sinceVersion: 69,
+    client: "Anto",
+    amount: 1800,
+    status: "pending",
+    note: "Dictado el 6 nov 2026: \"1 300 + 500\" = $1 800. Sin factura emitida a la vista y sin fecha de pago.",
+  },
+  {
     id: "cambridge",
     sinceVersion: 65,
     client: "Cambridge",
