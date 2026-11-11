@@ -1,12 +1,14 @@
 /**
- * CommandInstinct yard: an isometric distribution centre where every truck
- * is a delivery. A truck stops at the licence gate, is cleared or pulled into
- * the holding bay, loads at a dock and leaves; the delivery then continues
- * "in transit" as data only. The simulation lives here and React only reads
- * snapshots, so the list and the 3D yard can never disagree.
+ * Command Instinct transit node: an isometric hub where every truck is a
+ * shipment bound for (or from) Venezuela under an OFAC general license. At
+ * the verdict gate the real per-license logic (engine.js) decides it: a pass
+ * goes to the dock, a fail is pulled into the hold bay until the engine's
+ * compliant substitute moves instead. The simulation lives here and React
+ * only reads snapshots, so the list and the yard can never disagree.
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { SCENARIOS, evaluate, substitutes } from "./engine";
 
 const DOCK_X = [-3.5, 3, 9.5, 16];
 const ROAD_Z = 14;
@@ -15,19 +17,12 @@ const DOCK_Z = 6.2;
 const GATE_X = -31.5;
 const BAY = { x: -19.5, z: 20 };
 
-export const SUPPLIERS = [
-  { name: "Andes Fresh Produce", color: 0x34b27b, cargo: "produce", special: "sanitary" },
-  { name: "Pacifico Seafood", color: 0x22b8cf, cargo: "seafood", special: "coldchain" },
-  { name: "Quito Pharma Labs", color: 0x7c6cf2, cargo: "pharma", special: "health" },
-  { name: "Volcan Chemicals", color: 0xf2994a, cargo: "solvents", special: "hazmat" },
-  { name: "Sierra Building Supply", color: 0xe7b53c, cargo: "construction", special: "oversize" },
-  { name: "Costa Beverages", color: 0xea5a5a, cargo: "beverages", special: "excise" },
-];
-const DESTS = [
-  ["Guayaquil", 420], ["Cuenca", 460], ["Manta", 390], ["Ambato", 150],
-  ["Loja", 640], ["Ibarra", 115], ["Riobamba", 190], ["Santo Domingo", 150],
-];
-const DRIVERS = ["L. Andrade", "M. Cevallos", "J. Paredes", "D. Zambrano", "R. Mora", "S. Guaman", "P. Villacis", "A. Chiriboga"];
+const C = { green: 0x00c71b, soft: 0x3fdd57, red: 0xe5654b, amber: 0xe6a12e, blue: 0x4a9ed6 };
+// the order shipments arrive in: about three passes for every two fails
+const ORDER = [0, 1, 2, 4, 3, 6, 8, 5, 10, 13, 7, 15, 0, 9, 2, 11, 4, 12, 6, 14];
+const PASS_IDX = SCENARIOS.map((x, i) => i).filter((i) => !evaluate(SCENARIOS[i]).fail);
+const FAIL_IDX = SCENARIOS.map((x, i) => i).filter((i) => evaluate(SCENARIOS[i]).fail);
+const CARRIERS = ["Caribe Overland", "Magdalena Freight", "Andes Linehaul", "Istmo Logistics", "Bolivar Cargo"];
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -41,7 +36,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-50, 50, 30, -30, 1, 400);
-  const target = new THREE.Vector3(small ? 4 : -6, 0, 3);
+  const target = new THREE.Vector3(small ? 4 : -9, 0, 4);
   camera.position.set(target.x + 60, 52, target.z + 60);
   camera.lookAt(target);
 
@@ -57,8 +52,8 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   controls.minPolarAngle = polar;
   controls.maxPolarAngle = polar;
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xcfdcf2, 1.9));
-  const sun = new THREE.DirectionalLight(0xffffff, 2.3);
+  scene.add(new THREE.HemisphereLight(0xdff5e6, 0x0d1210, 2.4));
+  const sun = new THREE.DirectionalLight(0xf2fff5, 2.6);
   sun.position.set(-38, 64, 42);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -113,86 +108,86 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   const world = new THREE.Group();
   scene.add(world);
 
-  box(world, 88, 0.8, 64, 0xd5deeb, 0, -1.6, 0, { cast: false });
-  box(world, 86, 0.8, 62, 0xeef2f8, 0, -0.8, 0, { cast: false });
+  box(world, 88, 0.8, 64, 0x070b09, 0, -1.6, 0, { cast: false });
+  box(world, 86, 0.8, 62, 0x1a231e, 0, -0.8, 0, { cast: false });
   // roads sit on their own heights so nothing shares a plane with the ground
-  box(world, 86, 0.05, 5.4, 0xc7d0de, 0, 0, ROAD_Z, { cast: false });
-  box(world, 86, 0.05, 4.6, 0xc7d0de, 0, 0, -22, { cast: false });
-  box(world, 44, 0.04, 9.6, 0xdce3ee, 4, 0, 6.6, { cast: false });
+  box(world, 86, 0.05, 5.4, 0x0f1512, 0, 0, ROAD_Z, { cast: false });
+  box(world, 86, 0.05, 4.6, 0x0f1512, 0, 0, -22, { cast: false });
+  box(world, 44, 0.04, 9.6, 0x232e28, 4, 0, 6.6, { cast: false });
   for (let x = -41; x <= 41; x += 4) {
-    box(world, 1.8, 0.03, 0.18, 0xffffff, x, 0.05, ROAD_Z, { cast: false });
-    box(world, 1.8, 0.03, 0.18, 0xffffff, x, 0.05, -22, { cast: false });
+    box(world, 1.8, 0.03, 0.18, 0x4a5a50, x, 0.05, ROAD_Z, { cast: false });
+    box(world, 1.8, 0.03, 0.18, 0x4a5a50, x, 0.05, -22, { cast: false });
   }
   // dock bays painted on the apron
   DOCK_X.forEach((x) => {
-    box(world, 0.14, 0.03, 4.2, 0xffffff, x - 3.2, 0.04, 5.4, { cast: false });
-    box(world, 0.14, 0.03, 4.2, 0xffffff, x + 3.2, 0.04, 5.4, { cast: false });
+    box(world, 0.14, 0.03, 4.2, 0x1f8a35, x - 3.2, 0.04, 5.4, { cast: false });
+    box(world, 0.14, 0.03, 4.2, 0x1f8a35, x + 3.2, 0.04, 5.4, { cast: false });
   });
   // holding bay, hatched in amber
-  box(world, 15, 0.04, 5.4, 0xe7ebf2, BAY.x - 0.5, 0, BAY.z, { cast: false });
-  for (let i = 0; i < 7; i++) box(world, 0.22, 0.03, 4.6, 0xf2b84b, BAY.x - 7 + i * 2.2, 0.04, BAY.z, { cast: false }).rotation.y = 0.5;
+  box(world, 15, 0.04, 5.4, 0x231d12, BAY.x - 0.5, 0, BAY.z, { cast: false });
+  for (let i = 0; i < 7; i++) box(world, 0.22, 0.03, 4.6, 0xe6a12e, BAY.x - 7 + i * 2.2, 0.04, BAY.z, { cast: false }).rotation.y = 0.5;
 
   // warehouse
   const wh = new THREE.Group();
   world.add(wh);
-  box(wh, 26, 6, 14, 0x3d74f2, 6, 0, -5);
-  box(wh, 26.8, 0.45, 14.8, 0x6f9cff, 6, 6, -5);
-  for (let x = -6; x <= 18; x += 2) box(wh, 0.22, 0.16, 14.2, 0x5a8af5, x, 6.45, -5, { cast: false });
-  for (let i = 0; i < 4; i++) box(wh, 3.2, 0.2, 1.6, 0xdff0ff, -2 + i * 5.4, 6.45, -8, { cast: false, mat: { emissive: 0x9fd0ff, emissiveIntensity: 0.25 } });
-  box(wh, 26.4, 0.28, 2.6, 0xf4f7fb, 6, 4.5, 3.1); // canopy over the docks
-  for (let x = -6.6; x <= 18.6; x += 6.3) box(wh, 0.18, 4.5, 0.18, 0xdfe6f0, x, 0, 4.2);
-  box(wh, 26, 0.9, 0.5, 0x2c58c9, 6, 0, 2.2); // dock platform
+  box(wh, 26, 6, 14, 0x2a3a31, 6, 0, -5);
+  box(wh, 26.8, 0.45, 14.8, 0x1e2a24, 6, 6, -5);
+  for (let x = -6; x <= 18; x += 2) box(wh, 0.22, 0.16, 14.2, 0x33443a, x, 6.45, -5, { cast: false });
+  for (let i = 0; i < 4; i++) box(wh, 3.2, 0.2, 1.6, 0x0d3d1a, -2 + i * 5.4, 6.45, -8, { cast: false, mat: { emissive: 0x00c71b, emissiveIntensity: 0.9 } });
+  box(wh, 26.4, 0.28, 2.6, 0x3a4a40, 6, 4.5, 3.1); // canopy over the docks
+  for (let x = -6.6; x <= 18.6; x += 6.3) box(wh, 0.18, 4.5, 0.18, 0x4a5a50, x, 0, 4.2);
+  box(wh, 26, 0.9, 0.5, 0x0d3d1a, 6, 0, 2.2); // dock platform
   const doors = DOCK_X.map((x, i) => {
-    box(wh, 3.5, 3.9, 0.12, 0xffffff, x, 0.9, 2.02, { cast: false });
-    box(wh, 3.1, 3.6, 0.1, 0x16233f, x, 0.9, 2.06, { cast: false });
-    const door = box(wh, 3.1, 3.6, 0.1, 0xb9c8e6, x, 0.9, 2.12, { cast: false });
-    for (let k = 1; k < 5; k++) box(door, 3.1, 0.05, 0.02, 0x8fa5cf, 0, -1.8 + k * 0.72 - 0.025, 0.06, { cast: false });
-    const n = textPlane(String(i + 1), 0.9, 0.9, "#ffffff", "#2c58c9");
+    box(wh, 3.5, 3.9, 0.12, 0x1f8a35, x, 0.9, 2.02, { cast: false });
+    box(wh, 3.1, 3.6, 0.1, 0x050806, x, 0.9, 2.06, { cast: false });
+    const door = box(wh, 3.1, 3.6, 0.1, 0x93a89c, x, 0.9, 2.12, { cast: false });
+    for (let k = 1; k < 5; k++) box(door, 3.1, 0.05, 0.02, 0x607064, 0, -1.8 + k * 0.72 - 0.025, 0.06, { cast: false });
+    const n = textPlane(String(i + 1), 0.9, 0.9, "#3fdd57", "#08260f");
     n.position.set(x, 5.25, 2.03);
     wh.add(n);
     return { mesh: door, open: 0 };
   });
-  const sign = textPlane("COMMANDINSTINCT", 11, 1.25, "#ffffff");
+  const sign = textPlane("COMMAND INSTINCT", 11.5, 1.2, "#3fdd57");
   sign.position.set(19.02, 4.2, -5);
   sign.rotation.y = Math.PI / 2;
   wh.add(sign);
-  for (let i = 0; i < 5; i++) box(wh, 0.08, 1.1, 1.7, 0xcfe4ff, 19.03, 1.4, -10.4 + i * 2.7, { cast: false });
+  for (let i = 0; i < 5; i++) box(wh, 0.08, 1.1, 1.7, 0x0d3d1a, 19.03, 1.4, -10.4 + i * 2.7, { cast: false });
   // office annex
-  box(wh, 6, 3.8, 7, 0xf6f8fc, -10, 0, -6);
-  box(wh, 6.4, 0.3, 7.4, 0xdfe6f1, -10, 3.8, -6);
-  for (let i = 0; i < 3; i++) box(wh, 1.3, 1.5, 0.08, 0x8fc0ff, -11.8 + i * 1.8, 1.5, -2.47, { cast: false });
-  box(wh, 1.2, 2.2, 0.08, 0x2c58c9, -8.2, 0, -2.47, { cast: false });
+  box(wh, 6, 3.8, 7, 0x33443a, -10, 0, -6);
+  box(wh, 6.4, 0.3, 7.4, 0x1e2a24, -10, 3.8, -6);
+  for (let i = 0; i < 3; i++) box(wh, 1.3, 1.5, 0.08, 0x0d3d1a, -11.8 + i * 1.8, 1.5, -2.47, { cast: false, mat: { emissive: 0x3fdd57, emissiveIntensity: 0.5 } });
+  box(wh, 1.2, 2.2, 0.08, 0x0d1210, -8.2, 0, -2.47, { cast: false });
 
   // licence gate: booth + scanner arch + traffic light bar
   const gate = new THREE.Group();
   world.add(gate);
-  box(gate, 2.6, 2.6, 2.6, 0xf6f8fc, -28, 0, 18.4);
-  box(gate, 3, 0.3, 3, 0x3d74f2, -28, 2.6, 18.4);
-  box(gate, 1.6, 1, 0.08, 0x8fc0ff, -28, 1.2, 17.06, { cast: false });
-  box(gate, 0.45, 5.6, 0.45, 0x2b3a5c, -28, 0, 10.9);
-  box(gate, 0.45, 5.6, 0.45, 0x2b3a5c, -28, 0, 17.0);
-  box(gate, 0.6, 0.6, 6.6, 0x2b3a5c, -28, 5.4, 13.95);
-  const scanMat = new THREE.MeshStandardMaterial({ color: 0x4f8cff, emissive: 0x4f8cff, emissiveIntensity: 1.4 });
+  box(gate, 2.6, 2.6, 2.6, 0x33443a, -28, 0, 18.4);
+  box(gate, 3, 0.3, 3, 0x0d3d1a, -28, 2.6, 18.4);
+  box(gate, 1.6, 1, 0.08, 0x0d3d1a, -28, 1.2, 17.06, { cast: false, mat: { emissive: 0x3fdd57, emissiveIntensity: 0.5 } });
+  box(gate, 0.45, 5.6, 0.45, 0x3a4a40, -28, 0, 10.9);
+  box(gate, 0.45, 5.6, 0.45, 0x3a4a40, -28, 0, 17.0);
+  box(gate, 0.6, 0.6, 6.6, 0x3a4a40, -28, 5.4, 13.95);
+  const scanMat = new THREE.MeshStandardMaterial({ color: C.blue, emissive: C.blue, emissiveIntensity: 1.4 });
   box(gate, 0.2, 0.22, 5.4, scanMat, -27.66, 5.55, 13.95, { cast: false });
-  const gateSign = textPlane("LICENCE GATE", 5.2, 0.62, "#ffffff", "#2b3a5c");
+  const gateSign = textPlane("VERDICT GATE", 5.2, 0.62, "#3fdd57", "#141b18");
   gateSign.position.set(-27.68, 6.5, 13.95);
   gateSign.rotation.y = Math.PI / 2;
   gate.add(gateSign);
-  box(gate, 0.6, 0.7, 6.6, 0x2b3a5c, -28, 6.15, 13.95, { cast: false });
+  box(gate, 0.6, 0.7, 6.6, 0x141b18, -28, 6.15, 13.95, { cast: false });
   let scanState = "idle";
   let scanUntil = 0;
 
   // container stacks
-  const CONT = [0x3d74f2, 0xf2994a, 0x2fb6a3, 0xf6f8fc, 0xea5a5a, 0x7c6cf2];
+  const CONT = [0x1f6b2c, 0x7a5a1c, 0x2c5f80, 0x4a5a50, 0x7a3325, 0x0d3d1a];
   [[-36, -6], [-36, -9.2], [-29, -6], [-29, -9.2], [-22.5, -9.2]].forEach(([x, z], i) => {
     box(world, 6, 2.5, 2.5, CONT[i % CONT.length], x, 0, z);
     if (i !== 2 && i !== 4) box(world, 6, 2.5, 2.5, CONT[(i + 3) % CONT.length], x, 2.5, z);
   });
   // pallet yard
-  const carton = [0xd8a868, 0xcf9b58, 0xe3b97c];
+  const carton = [0x8a6c42, 0x7a5d36, 0x9a7b4e];
   for (const px of [25, 29, 33, 37]) {
     for (let pz = -9; pz <= 0; pz += 3) {
-      box(world, 1.9, 0.18, 1.9, 0xb98b52, px, 0, pz);
+      box(world, 1.9, 0.18, 1.9, 0x5a4428, px, 0, pz);
       const h = 1 + Math.floor(Math.random() * 3);
       for (let k = 0; k < h; k++) {
         box(world, 0.85, 0.8, 0.85, carton[(k + px) % 3], px - 0.45, 0.18 + k * 0.8, pz - 0.45);
@@ -204,8 +199,8 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   }
   // trees and lamps
   const tree = (x, z, s = 1) => {
-    box(world, 0.3 * s, 0.9 * s, 0.3 * s, 0x9a7650, x, 0, z);
-    const top = new THREE.Mesh(new THREE.ConeGeometry(1.1 * s, 2.6 * s, 7), mat(0x58c08b));
+    box(world, 0.3 * s, 0.9 * s, 0.3 * s, 0x3a3026, x, 0, z);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(1.1 * s, 2.6 * s, 7), mat(0x1f7a33));
     top.position.set(x, 0.9 * s + 1.3 * s, z);
     top.castShadow = true;
     world.add(top);
@@ -214,14 +209,14 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   for (let x = 2; x <= 40; x += 5.5) tree(x, 26 + rand(-1, 1), rand(0.8, 1.15));
   [[-40, 26], [-36, 27.5], [-40, -15], [-16, -15], [-18, -3]].forEach(([x, z]) => tree(x, z));
   for (const x of [-20, -2, 16, 34]) {
-    box(world, 0.16, 5, 0.16, 0x9aa7bd, x, 0, 17.4);
-    box(world, 0.9, 0.14, 0.3, 0xffffff, x, 4.9, 17.0, { mat: { emissive: 0xfff3c4, emissiveIntensity: 0.6 } });
+    box(world, 0.16, 5, 0.16, 0x4a5a50, x, 0, 17.4);
+    box(world, 0.9, 0.14, 0.3, 0xe8f0eb, x, 4.9, 17.0, { mat: { emissive: 0xc8ffd2, emissiveIntensity: 1.2 } });
   }
   // staff cars by the office
-  [0xffffff, 0x2b3a5c, 0xea5a5a].forEach((c, i) => {
+  [0x93a89c, 0x33443a, 0x607064].forEach((c, i) => {
     const g = new THREE.Group();
     box(g, 2.3, 0.6, 1.2, c, 0, 0.25, 0);
-    box(g, 1.2, 0.5, 1.1, 0x9fc2f5, -0.1, 0.85, 0);
+    box(g, 1.2, 0.5, 1.1, 0x0d1210, -0.1, 0.85, 0);
     g.position.set(-15.5 + i * 2.0, 0, -0.4);
     g.rotation.y = Math.PI / 2;
     world.add(g);
@@ -231,36 +226,37 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.34, 14);
   wheelGeo.rotateX(Math.PI / 2);
   const wheel = (parent, x, z, r = 1) => {
-    const m = new THREE.Mesh(wheelGeo, mat(0x1c2232));
+    const m = new THREE.Mesh(wheelGeo, mat(0x050806));
     m.scale.setScalar(r);
     m.position.set(x, 0.5 * r, z);
     m.castShadow = true;
     parent.add(m);
   };
-  const makeTruck = (color) => {
+  const makeTruck = () => {
     const g = new THREE.Group();
-    box(g, 8.2, 0.3, 1.5, 0x2b3142, -0.3, 0.55, 0);
-    box(g, 6.3, 2.55, 2.3, 0xffffff, -1.25, 0.95, 0);
-    box(g, 6.32, 0.5, 2.32, color, -1.25, 1.3, 0, { cast: false });
-    box(g, 6.32, 0.08, 2.32, 0xdfe6f1, -1.25, 3.5, 0, { cast: false });
-    box(g, 1.9, 2.25, 2.2, color, 3.0, 0.7, 0);
-    box(g, 0.08, 0.9, 1.9, 0x1e2a44, 3.96, 1.8, 0, { cast: false });
-    box(g, 1.2, 0.8, 2.22, 0x1e2a44, 3.1, 1.85, 0, { cast: false });
-    box(g, 0.3, 0.35, 2.25, 0x2b3142, 3.9, 0.55, 0, { cast: false });
+    // the stripe carries the verdict: amber pending, green cleared, red blocked, blue rerouted
+    const stripe = new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.55, roughness: 0.6 });
+    box(g, 8.2, 0.3, 1.5, 0x0d1210, -0.3, 0.55, 0);
+    box(g, 6.3, 2.55, 2.3, 0xc9d4cd, -1.25, 0.95, 0);
+    box(g, 6.32, 0.5, 2.32, stripe, -1.25, 1.3, 0, { cast: false });
+    box(g, 6.32, 0.08, 2.32, 0x93a89c, -1.25, 3.5, 0, { cast: false });
+    box(g, 1.9, 2.25, 2.2, 0x4a5a50, 3.0, 0.7, 0);
+    box(g, 0.08, 0.9, 1.9, 0x0d1210, 3.96, 1.8, 0, { cast: false });
+    box(g, 1.2, 0.8, 2.22, 0x0d1210, 3.1, 1.85, 0, { cast: false });
+    box(g, 0.3, 0.35, 2.25, 0x1a231e, 3.9, 0.55, 0, { cast: false });
     for (const x of [-3.5, -2.4, 2.9]) {
       wheel(g, x, 1.02);
       wheel(g, x, -1.02);
     }
-    const beaconMat = new THREE.MeshStandardMaterial({ color: 0x9aa7bd, emissive: 0x000000 });
-    box(g, 0.5, 0.22, 0.5, beaconMat, 3.0, 2.95, 0, { cast: false });
-    g.userData.beacon = beaconMat;
+    box(g, 0.5, 0.22, 0.5, stripe, 3.0, 2.95, 0, { cast: false });
+    g.userData.stripe = stripe;
     return g;
   };
   const makeForklift = () => {
     const g = new THREE.Group();
-    box(g, 1.5, 0.75, 1.0, 0xf5a623, -0.2, 0.25, 0);
-    box(g, 0.7, 0.9, 0.9, 0x2b3142, -0.5, 1.0, 0);
-    box(g, 0.12, 2.1, 0.9, 0x2b3142, 0.62, 0.15, 0);
+    box(g, 1.5, 0.75, 1.0, 0xe6a12e, -0.2, 0.25, 0);
+    box(g, 0.7, 0.9, 0.9, 0x1a231e, -0.5, 1.0, 0);
+    box(g, 0.12, 2.1, 0.9, 0x1a231e, 0.62, 0.15, 0);
     box(g, 0.9, 0.07, 0.14, 0x565f75, 1.1, 0.22, 0.28);
     box(g, 0.9, 0.07, 0.14, 0x565f75, 1.1, 0.22, -0.28);
     wheel(g, 0.25, 0.5, 0.55);
@@ -268,8 +264,8 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
     wheel(g, -0.7, 0.5, 0.5);
     wheel(g, -0.7, -0.5, 0.5);
     const load = new THREE.Group();
-    box(load, 0.95, 0.12, 0.95, 0xb98b52, 1.1, 0.3, 0);
-    box(load, 0.85, 0.75, 0.85, 0xd8a868, 1.1, 0.42, 0);
+    box(load, 0.95, 0.12, 0.95, 0x5a4428, 1.1, 0.3, 0);
+    box(load, 0.85, 0.75, 0.85, 0x9a7b4e, 1.1, 0.42, 0);
     g.add(load);
     g.userData.load = load;
     return g;
@@ -277,7 +273,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   const makeVan = (color) => {
     const g = new THREE.Group();
     box(g, 3.2, 1.5, 1.5, color, 0, 0.4, 0);
-    box(g, 0.9, 0.6, 1.52, 0x1e2a44, 1.0, 1.2, 0, { cast: false });
+    box(g, 0.9, 0.6, 1.52, 0x0d1210, 1.0, 1.2, 0, { cast: false });
     for (const x of [-1, 1]) {
       wheel(g, x, 0.7, 0.62);
       wheel(g, x, -0.7, 0.62);
@@ -285,46 +281,44 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
     return g;
   };
 
-  const ring = new THREE.Mesh(new THREE.RingGeometry(4.9, 5.4, 48), new THREE.MeshBasicMaterial({ color: 0x2f6bff, transparent: true, opacity: 0.85, depthWrite: false }));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(4.9, 5.4, 48), new THREE.MeshBasicMaterial({ color: C.soft, transparent: true, opacity: 0.9, depthWrite: false }));
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.12;
   ring.visible = false;
   world.add(ring);
 
   // -------------------------------------------------------------- simulation
-  let seq = 2040;
-  let deliveredToday = 128;
+  let seq = 4410;
+  let turn = 0;
+  let verdictsToday = 212;
+  let clearedToday = 131;
+  let whToday = 3.07;
   const docks = [null, null, null, null];
   const trucks = [];
   let selected = null;
 
-  const newLicences = (sup, issue) => {
-    const list = [
-      { key: "transport", days: Math.round(rand(60, 330)) },
-      { key: "insurance", days: Math.round(rand(40, 300)) },
-      { key: "driver", days: Math.round(rand(90, 900)) },
-      { key: sup.special, days: Math.round(rand(35, 240)) },
-    ];
-    if (issue === "expired") list[pick([0, 3])].days = -Math.round(rand(1, 6));
-    else if (issue === "expiring") list[pick([0, 1, 3])].days = Math.round(rand(3, 21));
-    return list;
-  };
-  const newDelivery = (wait, issue) => {
-    // rotate through the suppliers so the list never fills up with one name
-    const si = (seq * 5 + 1) % SUPPLIERS.length;
-    const [dest, km] = pick(DESTS);
-    const r = Math.random();
-    const kind = issue !== undefined ? issue : r < 0.2 ? "expired" : r < 0.42 ? "expiring" : null;
+  const newDelivery = (wait, want) => {
+    // `want` forces a pass or a fail for the opening state; otherwise follow ORDER
+    let idx;
+    if (want === true) idx = pick(PASS_IDX);
+    else if (want === false) idx = pick(FAIL_IDX);
+    else idx = ORDER[turn++ % ORDER.length];
+    const sc = SCENARIOS[idx];
+    const verdict = evaluate(sc);
+    const tokens = Math.round(rand(340, 520));
     return {
       id: `CI-${++seq}`,
-      si,
-      dest,
-      km,
-      driver: pick(DRIVERS),
-      plate: `P${pick("ABCGT")}${pick("ABDKX")}-${Math.floor(rand(1000, 9999))}`,
-      pallets: Math.floor(rand(8, 22)),
-      weight: Math.floor(rand(42, 180)) * 100,
-      licences: newLicences(SUPPLIERS[si], kind),
+      sc,
+      verdict,
+      option: verdict.fail ? substitutes(sc)[0] : null,
+      carrier: pick(CARRIERS),
+      plate: `${pick("KTVW")}${pick("ABDKX")}${pick("LMRS")}-${Math.floor(rand(100, 999))}`,
+      units: Math.floor(rand(6, 20)),
+      tokens,
+      wh: +(tokens * rand(0.000028, 0.000036)).toFixed(4),
+      peakW: Math.round(rand(96, 142)),
+      evaluated: false,
+      rerouted: false,
       state: "scheduled",
       t: 0,
       wait,
@@ -335,10 +329,16 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
     };
   };
   const deliveries = [];
-  const emit = (kind, d, extra) => hooks.onEvent && hooks.onEvent({ kind, id: d.id, supplier: SUPPLIERS[d.si].name, at: Date.now(), ...extra });
+  const emit = (kind, d, extra) => hooks.onEvent && hooks.onEvent({ kind, id: d.id, gl: d.verdict.license.name, at: Date.now(), ...extra });
+  const mark = (d) => {
+    d.evaluated = true;
+    verdictsToday++;
+    whToday += d.wh;
+    if (!d.verdict.fail) clearedToday++;
+  };
 
   const spawnTruck = (d, x = -47, z = ROAD_Z) => {
-    const g = makeTruck(SUPPLIERS[d.si].color);
+    const g = makeTruck();
     world.add(g);
     const el = document.createElement("button");
     el.type = "button";
@@ -367,22 +367,26 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
 
   // opening state: the yard is already busy when the page loads
   {
-    const mk = (issue) => newDelivery(0, issue);
-    const a = mk(null);
-    a.state = "loading"; a.dock = 1; docks[1] = a; a.dur = a.pallets * 1.3; a.t = a.dur * 0.45;
-    Object.assign(spawnTruck(a, DOCK_X[1] + 1.2, DOCK_Z), {});
-    const b = mk("expiring");
-    b.state = "loading"; b.dock = 3; docks[3] = b; b.dur = b.pallets * 1.3; b.t = b.dur * 0.1;
+    const mk = (pass) => {
+      const d = newDelivery(0, pass);
+      d.evaluated = true;
+      return d;
+    };
+    const a = mk(true);
+    a.state = "loading"; a.dock = 1; docks[1] = a; a.dur = a.units * 1.3; a.t = a.dur * 0.45;
+    spawnTruck(a, DOCK_X[1] + 1.2, DOCK_Z);
+    const b = mk(true);
+    b.state = "loading"; b.dock = 3; docks[3] = b; b.dur = b.units * 1.3; b.t = b.dur * 0.1;
     spawnTruck(b, DOCK_X[3] + 1.2, DOCK_Z);
-    const c = mk(null);
+    const c = mk(true);
     c.state = "toDock"; c.dock = 0; docks[0] = c;
     spawnTruck(c, -22, ROAD_Z).path = dockPath(0);
-    const e = mk("expired");
+    const e = newDelivery(0, false);
     e.state = "inbound";
     spawnTruck(e, -43, ROAD_Z).path = [{ x: GATE_X, z: ROAD_Z, stop: true }];
-    const f = mk(null); f.state = "transit"; f.dur = 46; f.progress = 0.55;
-    const h = mk("expiring"); h.state = "transit"; h.dur = 52; h.progress = 0.2;
-    const j = mk(null); j.state = "delivered"; j.progress = 1; j.t = 4;
+    const f = mk(true); f.state = "transit"; f.dur = 46; f.progress = 0.55;
+    const h = mk(false); h.rerouted = true; h.state = "transit"; h.dur = 52; h.progress = 0.2;
+    const j = mk(true); j.state = "delivered"; j.progress = 1; j.t = 4;
     deliveries.push(a, b, c, e, f, h, j, newDelivery(7), newDelivery(16), newDelivery(27));
   }
 
@@ -393,7 +397,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
     return { g, x: aisle + (i === 1 ? 0.01 : 0), z: 3.4 - i * 3.2, heading: 0, path: [], job: -1, aisle, carrying: i % 2 === 0, pause: 0 };
   });
   const vans = [0, 1, 2, 3].map((i) => {
-    const g = makeVan([0xffffff, 0xf2994a, 0x2fb6a3, 0x2b3a5c][i]);
+    const g = makeVan([0x93a89c, 0x4a5a50, 0x607064, 0x33443a][i]);
     world.add(g);
     const dir = i % 2 ? -1 : 1;
     g.rotation.y = dir > 0 ? 0 : Math.PI;
@@ -469,15 +473,18 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
       case "gate": {
         d.t += dt;
         if (d.t < 2.4) break;
-        const bad = d.licences.find((l) => l.days < 0);
-        if (bad) {
-          d.state = "held";
-          d.phase = "toBay";
-          t.path = [{ x: -27, z: 14.7 }, { x: -23.8, z: 18.6 }, { x: BAY.x, z: BAY.z, stop: true }];
-          scanState = "red";
-          scanUntil = now + 3200;
-          emit("held", d, { licence: bad.key, days: -bad.days });
-          break;
+        if (!d.evaluated) {
+          mark(d);
+          if (d.verdict.fail) {
+            const why = d.verdict.checks.find((k) => k[0] === "no");
+            d.state = "held";
+            d.phase = "toBay";
+            t.path = [{ x: -27, z: 14.7 }, { x: -23.8, z: 18.6 }, { x: BAY.x, z: BAY.z, stop: true }];
+            scanState = "red";
+            scanUntil = now + 3200;
+            emit("blocked", d, { why: why[1] });
+            break;
+          }
         }
         const k = freeDock();
         if (k < 0) break;
@@ -487,9 +494,8 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
         t.path = dockPath(k);
         scanState = "green";
         scanUntil = now + 3200;
-        const soon = d.licences.find((l) => l.days <= 30);
-        if (soon) emit("warn", d, { licence: soon.key, days: soon.days });
-        else emit("cleared", d);
+        const note = d.verdict.checks.find((x) => x[0] === "wn");
+        emit(note ? "note" : "cleared", d, note ? { why: note[1] } : undefined);
         break;
       }
       case "held":
@@ -502,15 +508,13 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
           d.t += dt;
           const k = freeDock();
           if (d.t > 13 && k >= 0 && mergeClear()) {
-            d.licences.forEach((l) => {
-              if (l.days < 0) l.days = 365;
-            });
+            d.rerouted = true;
             docks[k] = d;
             d.dock = k;
             d.state = "toDock";
             d.phase = "";
             t.path = [{ x: -15.2, z: 19.4 }, { x: -13, z: 14.6 }, ...dockPath(k).slice(1)];
-            emit("renewed", d);
+            emit("rerouted", d, { option: d.option[0] });
           }
         }
         break;
@@ -518,7 +522,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
         if (!t.path.length) {
           d.state = "loading";
           d.t = 0;
-          d.dur = d.pallets * 1.3;
+          d.dur = d.units * 1.3;
           emit("dock", d, { dock: d.dock + 1 });
         }
         break;
@@ -531,7 +535,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
           d.state = "leaving";
           d.progress = 0;
           t.path = [{ x: x + 8.5, z: LANE_Z }, { x: 23, z: LANE_Z }, { x: 28.5, z: ROAD_Z }, { x: 47.5, z: ROAD_Z }];
-          emit("loaded", d, { pallets: d.pallets, dest: d.dest });
+          emit("loaded", d, { units: d.units, dest: d.sc.to });
         }
         break;
       case "leaving":
@@ -549,8 +553,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
           d.progress = 1;
           d.state = "delivered";
           d.t = 0;
-          deliveredToday++;
-          emit("delivered", d, { dest: d.dest });
+          emit("delivered", d, { dest: d.sc.to });
         }
         break;
       case "delivered":
@@ -653,7 +656,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
   canvas.addEventListener("pointerdown", onDown);
   canvas.addEventListener("pointerup", onUp);
 
-  const TAG = { inbound: "go", gate: "scan", held: "held", toDock: "go", loading: "load", leaving: "go" };
+  
   let last = performance.now();
   let snapAt = 0;
   let raf = 0;
@@ -671,10 +674,13 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
       t.g.position.set(t.x, 0, t.z);
       t.g.rotation.y = t.heading;
       t.g.scale.setScalar(fade(t.x));
-      const held = t.d.state === "held";
+      const d = t.d;
       const blink = Math.sin(now / 160) > 0;
-      t.g.userData.beacon.emissive.setHex(held ? (blink ? 0xff3b3b : 0x330000) : t.d.state === "loading" ? 0x2f6bff : 0x000000);
-      t.g.userData.beacon.color.setHex(held ? 0xff5a5a : 0x9aa7bd);
+      const col = !d.evaluated ? C.amber : d.state === "held" ? C.red : d.rerouted ? C.blue : C.green;
+      const st = t.g.userData.stripe;
+      st.color.setHex(col);
+      st.emissive.setHex(col);
+      st.emissiveIntensity = d.state === "held" ? (blink ? 1.3 : 0.25) : d.state === "gate" ? 0.5 + Math.sin(now / 110) * 0.4 : 0.55;
     }
     forklifts.forEach((f) => stepForklift(f, dt));
     for (const v of vans) {
@@ -694,7 +700,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
     });
     if (scanState !== "scan" && scanState !== "idle" && wall > scanUntil) scanState = trucks.some((t) => t.d.state === "gate") ? "scan" : "idle";
     if (scanState === "scan" && !trucks.some((t) => t.d.state === "gate")) scanState = "idle";
-    const sc = scanState === "green" ? 0x2fd47f : scanState === "red" ? 0xff4d4d : scanState === "scan" ? 0xffb020 : 0x4f8cff;
+    const sc = scanState === "green" ? C.green : scanState === "red" ? C.red : scanState === "scan" ? C.amber : C.blue;
     scanMat.color.setHex(sc);
     scanMat.emissive.setHex(sc);
     scanMat.emissiveIntensity = scanState === "scan" ? 1.2 + Math.sin(now / 90) * 0.8 : 1.5;
@@ -715,7 +721,7 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
       const y = (-v3.y * 0.5 + 0.5) * h;
       t.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
       t.el.style.opacity = fade(t.x) > 0.6 ? "1" : "0";
-      const tag = TAG[t.d.state] || "go";
+      const tag = !t.d.evaluated ? "scan" : t.d.state === "held" ? "held" : t.d.rerouted ? "sub" : "ok";
       if (t.el.dataset.s !== tag) t.el.dataset.s = tag;
       const on = t.d.id === selected ? "1" : "0";
       if (t.el.dataset.on !== on) t.el.dataset.on = on;
@@ -725,20 +731,28 @@ export function createSupplyScene(container, canvas, labelLayer, hooks) {
       snapAt = now;
       hooks.onSnapshot &&
         hooks.onSnapshot({
-          deliveredToday,
+          verdictsToday,
+          clearedToday,
+          whToday,
           deliveries: deliveries.map((d) => ({
             id: d.id,
-            si: d.si,
-            dest: d.dest,
-            km: d.km,
-            driver: d.driver,
+            sc: d.sc,
+            gl: d.verdict.license.name,
+            china: d.verdict.license.china,
+            scope: d.verdict.license.scope,
+            checks: d.evaluated ? d.verdict.checks : null,
+            fail: d.evaluated ? d.verdict.fail : null,
+            option: d.evaluated ? d.option : null,
+            rerouted: d.rerouted,
+            carrier: d.carrier,
             plate: d.plate,
-            pallets: d.pallets,
-            weight: d.weight,
+            units: d.units,
+            tokens: d.tokens,
+            wh: d.wh,
+            peakW: d.peakW,
             state: d.state,
             progress: d.progress,
             dock: d.dock,
-            licences: d.licences.map((l) => ({ ...l })),
           })),
         });
     }

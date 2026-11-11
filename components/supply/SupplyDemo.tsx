@@ -1,186 +1,86 @@
 "use client";
 
 import * as React from "react";
-import { useLang, type Lang } from "@/components/i18n";
-import { SUPPLIERS } from "./scene";
+import { ORIGIN_NAME, OWNER_NAME, PAYMENT_NAME, SHIPPER_NAME, VENUE_NAME } from "./engine";
 import s from "./supply.module.css";
 
-type Licence = { key: string; days: number };
-type Delivery = {
+type Scenario = {
+  license: string;
+  origin: keyof typeof ORIGIN_NAME;
+  owner: keyof typeof OWNER_NAME;
+  diluent: "yes" | "no";
+  payment: keyof typeof PAYMENT_NAME;
+  shipper: keyof typeof SHIPPER_NAME;
+  venue: keyof typeof VENUE_NAME;
+  jv: "yes" | "no";
+  cargo: string;
+  shipper_co: string;
+  dist: string;
+  to: string;
+};
+type State = "scheduled" | "inbound" | "gate" | "held" | "toDock" | "loading" | "leaving" | "transit" | "delivered";
+type Shipment = {
   id: string;
-  si: number;
-  dest: string;
-  km: number;
-  driver: string;
+  sc: Scenario;
+  gl: string;
+  china: "categorical" | "nexus" | "none";
+  scope: string;
+  checks: [string, string, string][] | null;
+  fail: boolean | null;
+  option: [string, string, string] | null;
+  rerouted: boolean;
+  carrier: string;
   plate: string;
-  pallets: number;
-  weight: number;
-  state: "scheduled" | "inbound" | "gate" | "held" | "toDock" | "loading" | "leaving" | "transit" | "delivered";
+  units: number;
+  tokens: number;
+  wh: number;
+  peakW: number;
+  state: State;
   progress: number;
   dock: number;
-  licences: Licence[];
 };
-type Snapshot = { deliveredToday: number; deliveries: Delivery[] };
-type Ev = { kind: string; id: string; supplier: string; at: number; licence?: string; days?: number; dock?: number; pallets?: number; dest?: string };
+type Snapshot = { verdictsToday: number; clearedToday: number; whToday: number; deliveries: Shipment[] };
+type Ev = { kind: string; id: string; gl: string; at: number; why?: string; option?: string; dock?: number; units?: number; dest?: string };
+type Tone = "ok" | "warn" | "bad" | "info" | "idle";
 
-const T = {
-  en: {
-    live: "Live",
-    yard: "Main distribution centre, Quito",
-    kActive: "Active deliveries",
-    kOnTime: "On-time rate",
-    kLic: "Licences valid",
-    kHeld: "Held at gate",
-    kToday: "delivered today",
-    kLast30: "last 30 days",
-    kDocs: "documents checked",
-    kNone: "all clear",
-    kAction: "needs action",
-    tabDeliveries: "Deliveries",
-    tabLicences: "Licences",
-    detail: "Delivery",
-    supplier: "Supplier",
-    cargo: "Cargo",
-    driver: "Driver",
-    plate: "Plate",
-    dest: "Destination",
-    load: "Load",
-    pallets: "pallets",
-    licences: "Licences and permits",
-    feed: "Activity",
-    hint: "Drag to rotate, scroll to zoom, click a truck",
-    built: "Demo built by MindfulTech",
-    valid: "Valid",
-    expiring: "Expiring",
-    expired: "Expired",
-    days: (n: number) => (n < 0 ? `expired ${-n} d ago` : n > 364 ? "renewed today" : `${n} days left`),
-    steps: ["Gate check", "Loading", "In transit", "Delivered"],
-    state: {
-      scheduled: "Scheduled",
-      inbound: "Arriving",
-      gate: "Licence check",
-      held: "Held at gate",
-      toDock: "Cleared, to dock",
-      loading: "Loading",
-      leaving: "Departing",
-      transit: "In transit",
-      delivered: "Delivered",
-    },
-    lic: {
-      transport: "Transport permit",
-      insurance: "Cargo insurance",
-      driver: "Driver licence",
-      sanitary: "Sanitary certificate",
-      coldchain: "Cold-chain certificate",
-      health: "Health registry",
-      hazmat: "Hazmat permit",
-      oversize: "Oversize load permit",
-      excise: "Excise stamp",
-    },
-    cargoName: { produce: "Fresh produce", seafood: "Frozen seafood", pharma: "Pharmaceuticals", solvents: "Industrial solvents", construction: "Construction materials", beverages: "Bottled beverages" },
-    ev: {
-      arrive: () => "arrived at the licence gate",
-      cleared: () => "all licences verified, cleared to dock",
-      warn: (e: Ev, l: string) => `cleared, but ${l.toLowerCase()} expires in ${e.days} days`,
-      held: (e: Ev, l: string) => `held: ${l.toLowerCase()} expired ${e.days} d ago`,
-      renewed: () => "permit renewed online, released from the bay",
-      dock: (e: Ev) => `docked at bay ${e.dock}, loading started`,
-      loaded: (e: Ev) => `${e.pallets} pallets loaded, left for ${e.dest}`,
-      delivered: (e: Ev) => `delivered in ${e.dest}, proof of delivery signed`,
-    },
-  },
-  es: {
-    live: "En vivo",
-    yard: "Centro de distribución principal, Quito",
-    kActive: "Entregas activas",
-    kOnTime: "Puntualidad",
-    kLic: "Licencias vigentes",
-    kHeld: "Retenidos en garita",
-    kToday: "entregadas hoy",
-    kLast30: "últimos 30 días",
-    kDocs: "documentos revisados",
-    kNone: "todo en orden",
-    kAction: "requiere acción",
-    tabDeliveries: "Entregas",
-    tabLicences: "Licencias",
-    detail: "Entrega",
-    supplier: "Proveedor",
-    cargo: "Carga",
-    driver: "Conductor",
-    plate: "Placa",
-    dest: "Destino",
-    load: "Carga",
-    pallets: "pallets",
-    licences: "Licencias y permisos",
-    feed: "Actividad",
-    hint: "Arrastra para rotar, rueda para acercar, clic en un camión",
-    built: "Demo hecho por MindfulTech",
-    valid: "Vigente",
-    expiring: "Por vencer",
-    expired: "Vencida",
-    days: (n: number) => (n < 0 ? `venció hace ${-n} d` : n > 364 ? "renovada hoy" : `quedan ${n} días`),
-    steps: ["Garita", "Carga", "En tránsito", "Entregado"],
-    state: {
-      scheduled: "Programada",
-      inbound: "Llegando",
-      gate: "Revisión de licencias",
-      held: "Retenido en garita",
-      toDock: "Aprobado, al muelle",
-      loading: "Cargando",
-      leaving: "Saliendo",
-      transit: "En tránsito",
-      delivered: "Entregado",
-    },
-    lic: {
-      transport: "Permiso de transporte",
-      insurance: "Seguro de carga",
-      driver: "Licencia del conductor",
-      sanitary: "Certificado sanitario",
-      coldchain: "Certificado de cadena de frío",
-      health: "Registro sanitario",
-      hazmat: "Permiso de materiales peligrosos",
-      oversize: "Permiso de carga sobredimensionada",
-      excise: "Sello fiscal",
-    },
-    cargoName: { produce: "Productos frescos", seafood: "Mariscos congelados", pharma: "Farmacéuticos", solvents: "Solventes industriales", construction: "Materiales de construcción", beverages: "Bebidas embotelladas" },
-    ev: {
-      arrive: () => "llegó a la garita de licencias",
-      cleared: () => "licencias verificadas, aprobado al muelle",
-      warn: (e: Ev, l: string) => `aprobado, pero ${l.toLowerCase()} vence en ${e.days} días`,
-      held: (e: Ev, l: string) => `retenido: ${l.toLowerCase()} venció hace ${e.days} d`,
-      renewed: () => "permiso renovado en línea, liberado",
-      dock: (e: Ev) => `en el muelle ${e.dock}, inició la carga`,
-      loaded: (e: Ev) => `${e.pallets} pallets cargados, salió a ${e.dest}`,
-      delivered: (e: Ev) => `entregado en ${e.dest}, recepción firmada`,
-    },
-  },
-} as const;
-
-const TONE: Record<string, "ok" | "warn" | "bad" | "info"> = {
-  arrive: "info", cleared: "ok", warn: "warn", held: "bad", renewed: "ok", dock: "info", loaded: "info", delivered: "ok",
+const STATE: Record<State, string> = {
+  scheduled: "Scheduled",
+  inbound: "Approaching node",
+  gate: "Evaluating",
+  held: "Blocked, resolving",
+  toDock: "Cleared to dock",
+  loading: "Transloading",
+  leaving: "Departing node",
+  transit: "In transit",
+  delivered: "Landed",
 };
-const STATE_TONE: Record<Delivery["state"], "ok" | "warn" | "bad" | "info" | "idle"> = {
-  scheduled: "idle", inbound: "info", gate: "warn", held: "bad", toDock: "info", loading: "info", leaving: "info", transit: "info", delivered: "ok",
+const ORDER: State[] = ["held", "gate", "loading", "toDock", "inbound", "leaving", "transit", "delivered", "scheduled"];
+const tone = (d: Shipment): Tone =>
+  d.state === "scheduled" ? "idle" : d.fail === null ? "warn" : d.state === "held" ? "bad" : d.rerouted ? "info" : "ok";
+const verdictOf = (d: Shipment) =>
+  d.fail === null ? "PENDING" : d.state === "held" ? "FAIL" : d.rerouted ? "REROUTED" : "PASS";
+const EV: Record<string, { tone: Tone; text: (e: Ev) => string }> = {
+  arrive: { tone: "warn", text: (e) => `at the verdict gate, resolving against ${e.gl}` },
+  cleared: { tone: "ok", text: (e) => `PASS under ${e.gl}, cleared to dock` },
+  note: { tone: "ok", text: (e) => `PASS under ${e.gl}. ${e.why}: origin is not the trigger` },
+  blocked: { tone: "bad", text: (e) => `FAIL under ${e.gl}: ${e.why?.toLowerCase()}` },
+  rerouted: { tone: "info", text: (e) => `substitute moves instead: ${e.option?.toLowerCase()}` },
+  dock: { tone: "idle", text: (e) => `at dock ${e.dock}, transloading` },
+  loaded: { tone: "idle", text: (e) => `${e.units} units loaded, left for ${e.dest}` },
+  delivered: { tone: "ok", text: (e) => `landed at ${e.dest}, audit memo filed` },
 };
-const ORDER: Delivery["state"][] = ["held", "gate", "loading", "toDock", "inbound", "leaving", "transit", "delivered", "scheduled"];
-const licTone = (days: number) => (days < 0 ? "bad" : days <= 30 ? "warn" : "ok");
-const hex = (n: number) => `#${n.toString(16).padStart(6, "0")}`;
-const stepOf = (d: Delivery) =>
+const DELTAS = [
+  { gl: "GL 46E", from: "46D → 46E", tag: "SUP", text: "Supersedes GL 46D. Venezuelan-origin oil and petrochemical products into the U.S. Nexus PRC bar retained at (b)(3).", effect: "Nexus set re-points 46D to 46E; no logic rewrite" },
+  { gl: "GL 48D", from: "48C → 48D", tag: "SUP", text: "Supply of goods and services for O&G, petrochem and electricity. Categorical CN/RU/IR/KP/CU bar at (b)(2); diluents barred at (b)(6).", effect: "Categorical set updated 48C to 48D" },
+  { gl: "GL 49B", from: "Sep 28 2026", tag: "NEW", text: "Negotiations of and entry into contingent contracts for certain investment in Venezuela.", effect: "Contingent path now selectable in the routing engine" },
+  { gl: "Established U.S. entity", from: "46E Note 1", tag: "CHG", text: "46E authorizes only a U.S. entity organized on or before January 29, 2025.", effect: "Gate on the shipper, not the shipment" },
+  { gl: "No new JVs", from: "48D (b)(5)", tag: "CHG", text: "48D does not authorize forming new joint ventures in Venezuela for O&G, petrochem or electricity.", effect: "Contract screen at the node" },
+];
+const stepOf = (d: Shipment) =>
   d.state === "delivered" ? 4 : d.state === "transit" ? 2 : d.state === "loading" || d.state === "leaving" ? 1 : d.state === "scheduled" ? -1 : 0;
-
-function Mark() {
-  return (
-    <svg viewBox="0 0 28 28" width="28" height="28" aria-hidden>
-      <rect width="28" height="28" rx="8" fill="#2f6bff" />
-      <path d="M8 9.5 13.5 14 8 18.5" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14.5 18.5H20" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
-    </svg>
-  );
-}
+const STEPS = ["Verdict gate", "Transload", "In transit", "Landed"];
 
 export function SupplyDemo() {
-  const { lang, setLang } = useLang();
-  const t = T[lang as Lang];
   const stageRef = React.useRef<HTMLDivElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const labelsRef = React.useRef<HTMLDivElement>(null);
@@ -188,8 +88,7 @@ export function SupplyDemo() {
   const [snap, setSnap] = React.useState<Snapshot | null>(null);
   const [events, setEvents] = React.useState<Ev[]>([]);
   const [selected, setSelected] = React.useState<string | null>(null);
-  const [tab, setTab] = React.useState<"deliveries" | "licences">("deliveries");
-  const [clock, setClock] = React.useState("");
+  const [tab, setTab] = React.useState<"shipments" | "deltas">("shipments");
 
   React.useEffect(() => {
     let dead = false;
@@ -210,18 +109,11 @@ export function SupplyDemo() {
     };
   }, []);
 
-  React.useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString(lang === "es" ? "es-EC" : "en-US", { hour: "2-digit", minute: "2-digit" }));
-    tick();
-    const id = window.setInterval(tick, 20000);
-    return () => window.clearInterval(id);
-  }, [lang]);
-
   const list = React.useMemo(
     () => (snap ? [...snap.deliveries].sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state) || a.id.localeCompare(b.id)) : []),
     [snap]
   );
-  // always keep something selected: prefer what the visitor can see in the yard
+  // always keep something selected: prefer what the visitor can see at the node
   React.useEffect(() => {
     if (!list.length) return;
     if (selected && list.some((d) => d.id === selected)) return;
@@ -235,99 +127,96 @@ export function SupplyDemo() {
     apiRef.current?.select(id);
   };
 
-  const active = list.filter((d) => d.state !== "scheduled" && d.state !== "delivered");
+  const atNode = list.filter((d) => ["inbound", "gate", "held", "toDock", "loading", "leaving"].includes(d.state)).length;
   const held = list.filter((d) => d.state === "held").length;
-  const lics = list.filter((d) => d.state !== "scheduled").flatMap((d) => d.licences.map((l) => ({ ...l, d })));
-  const licOk = lics.length ? Math.round((lics.filter((l) => l.days >= 0).length / lics.length) * 100) : 100;
+  const verdicts = snap?.verdictsToday ?? 212;
+  const passRate = snap ? Math.round((snap.clearedToday / snap.verdictsToday) * 100) : 62;
+  const avgWh = snap ? snap.whToday / snap.verdictsToday : 0.0145;
   const sel = list.find((d) => d.id === selected) || null;
-  const licName = (k: string) => (t.lic as Record<string, string>)[k] || k;
-  const evText = (e: Ev) => (t.ev as Record<string, (e: Ev, l: string) => string>)[e.kind]?.(e, licName(e.licence || "")) || e.kind;
-  const time = (at: number) => new Date(at).toLocaleTimeString(lang === "es" ? "es-EC" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const time = (at: number) => new Date(at).toLocaleTimeString("en-US", { hour12: false });
 
   return (
     <main className={s.root}>
       <header className={s.top}>
         <div className={s.brand}>
-          <Mark />
-          <span>
-            Command<b>Instinct</b>
-          </span>
+          <i />
+          COMMAND INSTINCT
         </div>
         <div className={s.site}>
-          <i className={s.pulse} />
-          {t.live}
-          <em>{t.yard}</em>
+          <span className={s.live}>
+            <i /> LIVE
+          </span>
+          <em>TRANSIT NODE CTG-01 · VENEZUELA PROVING GROUND</em>
         </div>
-        <div className={s.topRight}>
-          <span className={s.clock}>{clock}</span>
-          <div className={s.lang} role="group" aria-label="Language">
-            {(["en", "es"] as const).map((l) => (
-              <button key={l} type="button" data-on={lang === l} onClick={() => setLang(l)}>
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className={s.feedTag}>OFAC RULEBOOK · AS OF 2026-09-28 · SIMULATED SHIPMENTS</div>
       </header>
 
       <div className={s.stage} ref={stageRef}>
         <canvas ref={canvasRef} />
         <div className={s.labels} ref={labelsRef} />
-        <p className={s.hint}>{t.hint}</p>
+        <div className={s.legend}>
+          <span data-t="warn">Pending</span>
+          <span data-t="ok">Pass</span>
+          <span data-t="bad">Fail</span>
+          <span data-t="info">Substitute</span>
+        </div>
       </div>
 
       <aside className={s.left}>
+        <div className={s.headline}>
+          <small>Node-level compliance execution</small>
+          <h1>Does this shipment clear this license right now?</h1>
+        </div>
         <div className={s.kpis}>
           <div className={s.kpi}>
-            <small>{t.kActive}</small>
-            <strong>{active.length}</strong>
-            <span>
-              {snap?.deliveredToday ?? 128} {t.kToday}
-            </span>
+            <small>At the node</small>
+            <strong>{atNode}</strong>
+            <span>{held ? `${held} blocked, resolving` : "none blocked"}</span>
           </div>
           <div className={s.kpi}>
-            <small>{t.kOnTime}</small>
-            <strong>
-              97.2<u>%</u>
-            </strong>
-            <span>{t.kLast30}</span>
+            <small>Verdicts today</small>
+            <strong>{verdicts}</strong>
+            <span>per-license test</span>
           </div>
-          <div className={s.kpi} data-tone={licOk < 100 ? "warn" : "ok"}>
-            <small>{t.kLic}</small>
+          <div className={s.kpi}>
+            <small>First-pass clear</small>
             <strong>
-              {licOk}
+              {passRate}
               <u>%</u>
             </strong>
-            <span>
-              {lics.length} {t.kDocs}
-            </span>
+            <span>rest rerouted</span>
           </div>
-          <div className={s.kpi} data-tone={held ? "bad" : "ok"}>
-            <small>{t.kHeld}</small>
-            <strong>{held}</strong>
-            <span>{held ? t.kAction : t.kNone}</span>
+          <div className={s.kpi}>
+            <small>Energy / verdict</small>
+            <strong>
+              {avgWh.toFixed(4)}
+              <u>Wh</u>
+            </strong>
+            <span data-t="sample">sample curve</span>
           </div>
         </div>
 
         <section className={s.card}>
           <div className={s.tabs}>
-            <button type="button" data-on={tab === "deliveries"} onClick={() => setTab("deliveries")}>
-              {t.tabDeliveries}
+            <button type="button" data-on={tab === "shipments"} onClick={() => setTab("shipments")}>
+              Shipments
             </button>
-            <button type="button" data-on={tab === "licences"} onClick={() => setTab("licences")}>
-              {t.tabLicences}
+            <button type="button" data-on={tab === "deltas"} onClick={() => setTab("deltas")}>
+              License deltas <b>5</b>
             </button>
           </div>
-          {tab === "deliveries" ? (
+          {tab === "shipments" ? (
             <ul className={s.rows}>
               {list.map((d) => (
                 <li key={d.id}>
-                  <button type="button" className={s.row} data-on={d.id === selected} onClick={() => choose(d.id)}>
-                    <i style={{ background: hex(SUPPLIERS[d.si].color) }} />
+                  <button type="button" className={s.row} data-on={d.id === selected} data-tone={tone(d)} onClick={() => choose(d.id)}>
+                    <i />
                     <span className={s.rowMain}>
-                      <b>{d.id}</b>
+                      <b>
+                        {d.id} <u>{d.gl}</u>
+                      </b>
                       <em>
-                        {SUPPLIERS[d.si].name} → {d.dest}
+                        {d.sc.cargo} → {d.sc.to}
                       </em>
                       {(d.state === "loading" || d.state === "transit") && (
                         <span className={s.bar}>
@@ -335,34 +224,28 @@ export function SupplyDemo() {
                         </span>
                       )}
                     </span>
-                    <span className={s.pill} data-tone={STATE_TONE[d.state]}>
-                      {t.state[d.state]}
+                    <span className={s.pill} data-tone={tone(d)}>
+                      {STATE[d.state]}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <ul className={s.rows}>
-              {[...lics]
-                .sort((a, b) => a.days - b.days)
-                .slice(0, 14)
-                .map((l) => (
-                  <li key={l.d.id + l.key}>
-                    <button type="button" className={s.row} data-on={l.d.id === selected} onClick={() => choose(l.d.id)}>
-                      <i style={{ background: hex(SUPPLIERS[l.d.si].color) }} />
-                      <span className={s.rowMain}>
-                        <b>{licName(l.key)}</b>
-                        <em>
-                          {l.d.id} · {SUPPLIERS[l.d.si].name}
-                        </em>
-                      </span>
-                      <span className={s.pill} data-tone={licTone(l.days)}>
-                        {t.days(l.days)}
-                      </span>
-                    </button>
-                  </li>
-                ))}
+            <ul className={s.deltas}>
+              {DELTAS.map((x) => (
+                <li key={x.gl}>
+                  <div>
+                    <b>{x.gl}</b>
+                    <em>{x.from}</em>
+                    <span className={s.tag} data-k={x.tag}>
+                      {x.tag}
+                    </span>
+                  </div>
+                  <p>{x.text}</p>
+                  <small>{x.effect}</small>
+                </li>
+              ))}
             </ul>
           )}
         </section>
@@ -370,19 +253,21 @@ export function SupplyDemo() {
 
       <aside className={s.right}>
         {sel && (
-          <section className={s.card}>
+          <section className={`${s.card} ${s.detail}`}>
             <div className={s.detailHead}>
               <div>
-                <small>{t.detail}</small>
+                <small>
+                  {sel.gl} · {sel.china === "none" ? "no China bar" : `${sel.china} China test`}
+                </small>
                 <h2>{sel.id}</h2>
               </div>
-              <span className={s.pill} data-tone={STATE_TONE[sel.state]}>
-                {t.state[sel.state]}
-                {sel.state === "loading" && sel.dock >= 0 ? ` · ${sel.dock + 1}` : ""}
+              <span className={s.verdict} data-tone={tone(sel)}>
+                {verdictOf(sel)}
               </span>
             </div>
+            <p className={s.scope}>{sel.scope}</p>
             <ol className={s.steps}>
-              {t.steps.map((name, i) => {
+              {STEPS.map((name, i) => {
                 const at = stepOf(sel);
                 return (
                   <li key={name} data-s={at > i ? "done" : at === i ? (sel.state === "held" ? "bad" : "now") : "next"}>
@@ -392,84 +277,113 @@ export function SupplyDemo() {
                 );
               })}
             </ol>
-            {(sel.state === "loading" || sel.state === "transit") && (
-              <div className={s.progress}>
-                <span style={{ width: `${Math.round(sel.progress * 100)}%` }} />
-                <b>
-                  {sel.state === "transit"
-                    ? `${Math.round(sel.progress * sel.km)} / ${sel.km} km`
-                    : `${Math.round(sel.progress * sel.pallets)} / ${sel.pallets} ${t.pallets}`}
-                </b>
-              </div>
-            )}
             <dl className={s.facts}>
               <div>
-                <dt>{t.supplier}</dt>
-                <dd>{SUPPLIERS[sel.si].name}</dd>
+                <dt>Cargo</dt>
+                <dd>{sel.sc.cargo}</dd>
               </div>
               <div>
-                <dt>{t.cargo}</dt>
-                <dd>{(t.cargoName as Record<string, string>)[SUPPLIERS[sel.si].cargo]}</dd>
+                <dt>Component origin</dt>
+                <dd>{ORIGIN_NAME[sel.sc.origin]}</dd>
               </div>
               <div>
-                <dt>{t.dest}</dt>
+                <dt>Authorized party</dt>
+                <dd>{sel.sc.shipper_co}</dd>
+              </div>
+              <div>
+                <dt>Distributor</dt>
+                <dd>{sel.sc.dist}</dd>
+              </div>
+              <div>
+                <dt>Distributor ownership</dt>
+                <dd>{OWNER_NAME[sel.sc.owner]}</dd>
+              </div>
+              <div>
+                <dt>Payment channel</dt>
+                <dd>{PAYMENT_NAME[sel.sc.payment]}</dd>
+              </div>
+              <div>
+                <dt>Carrier</dt>
                 <dd>
-                  {sel.dest}, {sel.km} km
+                  {sel.carrier} · {sel.plate}
                 </dd>
               </div>
               <div>
-                <dt>{t.load}</dt>
-                <dd>
-                  {sel.pallets} {t.pallets}, {sel.weight.toLocaleString(lang === "es" ? "es-EC" : "en-US")} kg
-                </dd>
-              </div>
-              <div>
-                <dt>{t.driver}</dt>
-                <dd>{sel.driver}</dd>
-              </div>
-              <div>
-                <dt>{t.plate}</dt>
-                <dd>{sel.plate}</dd>
+                <dt>Destination</dt>
+                <dd>{sel.sc.to}</dd>
               </div>
             </dl>
-            <h3 className={s.sub}>{t.licences}</h3>
-            <ul className={s.lics}>
-              {sel.licences.map((l) => (
-                <li key={l.key} data-tone={licTone(l.days)}>
-                  <i />
-                  <span>
-                    <b>{licName(l.key)}</b>
-                    <em>{t.days(l.days)}</em>
-                  </span>
-                  <span className={s.pill} data-tone={licTone(l.days)}>
-                    {l.days < 0 ? t.expired : l.days <= 30 ? t.expiring : t.valid}
-                  </span>
-                </li>
-              ))}
-            </ul>
+
+            <h3 className={s.sub}>Per-license checks</h3>
+            {sel.checks ? (
+              <ul className={s.checks}>
+                {sel.checks.map(([k, title, text]) => (
+                  <li key={title + text} data-k={k}>
+                    <i>{k === "ok" ? "✓" : k === "no" ? "✕" : "!"}</i>
+                    <span>
+                      <b>{title}</b>
+                      {text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={s.wait}>awaiting the verdict gate_</p>
+            )}
+
+            {sel.option && sel.fail && (
+              <div className={s.option} data-done={sel.rerouted}>
+                <small>{sel.rerouted ? "Substitute moved instead" : "Node option A · resolving"}</small>
+                <b>{sel.option[0]}</b>
+                <p>{sel.option[1]}</p>
+                <em>{sel.option[2]}</em>
+              </div>
+            )}
+            {sel.checks && (
+              <div className={s.energy}>
+                <span>
+                  <small>This verdict</small>
+                  <b>{sel.wh.toFixed(4)} Wh</b>
+                </span>
+                <span>
+                  <small>Tokens</small>
+                  <b>{sel.tokens}</b>
+                </span>
+                <span>
+                  <small>Peak draw</small>
+                  <b>{sel.peakW} W</b>
+                </span>
+                <span>
+                  <small>Node</small>
+                  <b data-t="sample">Sample</b>
+                </span>
+              </div>
+            )}
           </section>
         )}
 
         <section className={`${s.card} ${s.feed}`}>
-          <h3 className={s.sub}>{t.feed}</h3>
+          <h3 className={s.sub}>Node log</h3>
           <ul>
-            {events.slice(0, 9).map((e) => (
-              <li key={e.at + e.id + e.kind} data-tone={TONE[e.kind]}>
-                <i />
-                <span>
-                  <b>{e.id}</b> {evText(e)}
-                </span>
+            {events.slice(0, 7).map((e) => (
+              <li key={e.at + e.id + e.kind} data-tone={EV[e.kind]?.tone}>
                 <time>{time(e.at)}</time>
+                <span>
+                  <b>{e.id}</b> {EV[e.kind]?.text(e)}
+                </span>
               </li>
             ))}
-            {!events.length && <li className={s.quiet}>…</li>}
+            {!events.length && <li className={s.wait}>awaiting shipment input_</li>}
           </ul>
         </section>
       </aside>
 
-      <a className={s.credit} href="/" target="_blank" rel="noreferrer">
-        {t.built}
-      </a>
+      <p className={s.foot}>
+        Prototype demo with simulated shipments. Verdict logic follows the per-license tests published on commandinstinct.com. Decision support, not legal advice.
+        <a href="/" target="_blank" rel="noreferrer">
+          Built by MindfulTech
+        </a>
+      </p>
     </main>
   );
 }
