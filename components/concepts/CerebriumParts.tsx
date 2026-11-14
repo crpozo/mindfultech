@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
 import { Split, Scramble } from "./CerebriumFx";
-import { openContact } from "@/components/site/Shell";
+import { openContact } from "@/components/site/openContact";
 import s from "./cerebrium.module.css";
 
 /* Shared chrome for the Cerebrium concept pages: the fixed WebGL scene (three modes), the nav and the footer.

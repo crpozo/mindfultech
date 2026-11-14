@@ -5,9 +5,9 @@ const nextConfig = {
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
-  // The 14KB stylesheet was the last render-blocking request; inlining it
-  // saves a round trip on every page (GitHub Pages, no HTTP push available).
-  experimental: { inlineCss: true },
+  // No inlineCss: the stylesheets grew to ~160KB and Next inlines them twice
+  // (in <style> and again in the RSC payload), on every page and every client
+  // navigation. As external files they are fetched once and cached.
 };
 
 export default nextConfig;

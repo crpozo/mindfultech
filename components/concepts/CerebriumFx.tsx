@@ -21,6 +21,13 @@ export function useInView<T extends HTMLElement>(margin = "-15% 0px -15% 0px", o
   return [ref, on] as const;
 }
 
+/** Mounts heavy decorative children (big animated SVGs) only once they come near the viewport, keeping them out of
+    the prerendered HTML and the first render. The box keeps its aspect ratio meanwhile, so nothing shifts. */
+export function LazyMount({ ratio, children }: { ratio: string; children: React.ReactNode }) {
+  const [ref, on] = useInView<HTMLDivElement>("400px 0px 400px 0px");
+  return <div ref={ref} style={on ? undefined : { aspectRatio: ratio, width: "100%" }}>{on ? children : null}</div>;
+}
+
 export function Split({ text, as: Tag = "span", className, delay = 0 }: { text: string; as?: "span" | "h1" | "h2" | "p"; className?: string; delay?: number }) {
   const [ref, on] = useInView<HTMLElement>("-10% 0px -10% 0px");
   // phones: plain text (per-letter spans break kerning and word spacing on small screens)

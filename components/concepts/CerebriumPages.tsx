@@ -8,7 +8,7 @@ import { CASES } from "@/lib/site/cases";
 import { SERVICES, SERVICES_ES } from "@/lib/site/serviceDetail";
 import { Split, Scramble, Dots, useInView } from "./CerebriumFx";
 import { CbPage, CB } from "./CerebriumParts";
-import { openContact } from "@/components/site/Shell";
+import { openContact } from "@/components/site/openContact";
 import s from "./cerebrium.module.css";
 
 /* Inner pages of concept 06. Each opens with a tall banner on the WebGL scene (their use-case and about banners):

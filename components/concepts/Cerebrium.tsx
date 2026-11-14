@@ -3,14 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
-import { POSTS } from "@/lib/blog/posts";
-import { CASES } from "@/lib/site/cases";
-import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
-import { Split, Scramble, HoldCursor, Dots, useInView } from "./CerebriumFx";
+import { MAP_VIEW } from "@/lib/map/land";
+import { Split, Scramble, HoldCursor, Dots, useInView, LazyMount } from "./CerebriumFx";
 import { CbNav, CbFooter, CB } from "./CerebriumParts";
 import { AgentsAtWork } from "./AgentsAtWork";
 import { AgentCity } from "./AgentCity";
-import { openContact } from "@/components/site/Shell";
+import { openContact } from "@/components/site/openContact";
 import s from "./cerebrium.module.css";
 
 /* Concept 06, "Cerebrium" (Oct 2026), after cerebrium.ai: deep navy with glowing ribbons, a sans headline with one
@@ -31,7 +29,9 @@ function MiniMap({ active }: { active: string }) {
   const home = proj(PINS[0].lat, PINS[0].lon);
   return (
     <svg viewBox={`0 0 ${MAP_VIEW.w} ${MAP_VIEW.h}`} aria-hidden="true">
-      <path d={LAND_PATH} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={3.2} strokeLinecap="round" />
+      {/* the 3,700-dot basemap is a static, cached file (public/map/land-dots.svg, generated from LAND_PATH)
+          instead of 44KB of path data inlined in the HTML and the JS bundle */}
+      <image href="/map/land-dots.svg" x={0} y={0} width={MAP_VIEW.w} height={MAP_VIEW.h} />
       {PINS.slice(1).map((p, i) => { const q = proj(p.lat, p.lon); const dx = q.x - home.x; const lift = Math.abs(dx) * (0.1 + 0.07 * (i % 3)) + 10 * i; return <path key={p.id} d={`M${home.x},${home.y} C${home.x + dx * 0.2},${home.y - lift} ${home.x + dx * 0.75},${q.y - lift * 0.5} ${q.x},${q.y}`} fill="none" stroke={active === p.id ? "#bff5cf" : "rgba(61,190,125,0.45)"} strokeWidth={active === p.id ? 2 : 1} />; })}
       {PINS.map((p) => { const q = proj(p.lat, p.lon); const on = active === p.id; return (
         <g key={p.id}>
@@ -79,7 +79,11 @@ function Chart({ mode, es }: { mode: number; es: boolean }) {
   );
 }
 
-export function Cerebrium() {
+/** The home only shows the latest three post cards; the page (a server component) passes just these fields so the
+    full article bodies in lib/blog/posts never reach the client bundle. */
+export type PostCard = { slug: string; dateLabel: { en: string; es: string }; tag: { en: string; es: string }; title: { en: string; es: string } };
+
+export function Cerebrium({ posts }: { posts: PostCard[] }) {
   const { lang, setLang } = useLang();
   const es = lang === "es";
   const [feat, setFeat] = React.useState(0);
@@ -142,8 +146,8 @@ export function Cerebrium() {
     : [["A person signs off", "Every agent proposes and a person approves where it matters: payments, contracts, health. Human judgment stays in the loop."], ["Your data in your tools", "Agents work inside your CRM, ERP and inbox. Nothing is copied into a new system or leaves your region."], ["Isolation per agent", "Each role runs isolated, with its own credentials and least privilege. A sales agent never sees finance."], ["Audit trail", "Every action is logged: who asked, what the agent did, who approved. Exportable whenever you need it."]];
   const TINTS6 = ["#2a1a3a", "#1a2a3a", "#1f2d1a", "#3a2a1a", "#1a1f3a", "#2a1a1a"];
   const BUILT: { tab: number; t: string; d: string; img?: string; href: string; tint?: string }[] = (es
-    ? [{ tab: 0, t: "Agente de facturación médica, 24/7", d: "Reclamos, codificación y seguimientos dentro de las herramientas de la clínica.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Siete agentes para una oficina universitaria", d: "Finanzas, donantes y proyectos en una oficina 3D con dashboards reales.", img: "/office-demo-preview.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow en el App Store", d: "Check-in, agendas y certificados para 10.000 estudiantes.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "De Excel a Odoo con rutas de entrega", d: "Cotizaciones, inventario y choferes en el teléfono.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "Portafolio 3D para animatrónicos", d: "React Three Fiber, Spline y scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "Dashboard de IA para concesionarios", d: "Un tablero que lee los números y responde en lenguaje claro.", img: "/art/internet-coaches.webp", href: "/work" }]
-    : [{ tab: 0, t: "Medical billing agent, 24/7", d: "Claims, coding and follow-ups inside the clinic's tools.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Seven agents for a university office", d: "Finance, donors and projects in a 3D office with real dashboards.", img: "/office-demo-preview.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow on the App Store", d: "Check-in, agendas and certificates for 10,000 students.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "Excel to Odoo with delivery routes", d: "Quotes, inventory and drivers on their phones.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "3D portfolio for animatronics", d: "React Three Fiber, Spline and scroll storytelling.", img: "/art/themedmotion-wide.webp", href: "/work/themedmotion" }, { tab: 2, t: "AI dashboard for car dealerships", d: "A board that reads the numbers and answers in plain language.", img: "/art/internet-coaches.webp", href: "/work" }]).map((b, i) => ({ ...b, tint: TINTS6[i % TINTS6.length] }));
+    ? [{ tab: 0, t: "Agente de facturación médica, 24/7", d: "Reclamos, codificación y seguimientos dentro de las herramientas de la clínica.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Siete agentes para una oficina universitaria", d: "Finanzas, donantes y proyectos en una oficina 3D con dashboards reales.", img: "/art/office-demo-wide.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow en el App Store", d: "Check-in, agendas y certificados para 10.000 estudiantes.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "De Excel a Odoo con rutas de entrega", d: "Cotizaciones, inventario y choferes en el teléfono.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "Portafolio 3D para animatrónicos", d: "React Three Fiber, Spline y scroll storytelling.", img: "/art/themedmotion-card.webp", href: "/work/themedmotion" }, { tab: 2, t: "Dashboard de IA para concesionarios", d: "Un tablero que lee los números y responde en lenguaje claro.", img: "/art/internet-coaches.webp", href: "/work" }]
+    : [{ tab: 0, t: "Medical billing agent, 24/7", d: "Claims, coding and follow-ups inside the clinic's tools.", img: "/art/helixona-hero.webp", href: "/work/healthcare" }, { tab: 0, t: "Seven agents for a university office", d: "Finance, donors and projects in a 3D office with real dashboards.", img: "/art/office-demo-wide.webp", href: "/office-usfq" }, { tab: 1, t: "EventFlow on the App Store", d: "Check-in, agendas and certificates for 10,000 students.", img: "/art/eventflow-login-wide.webp", href: "/work/usfq" }, { tab: 1, t: "Excel to Odoo with delivery routes", d: "Quotes, inventory and drivers on their phones.", img: "/art/wfs-hero.webp", href: "/work/fence" }, { tab: 2, t: "3D portfolio for animatronics", d: "React Three Fiber, Spline and scroll storytelling.", img: "/art/themedmotion-card.webp", href: "/work/themedmotion" }, { tab: 2, t: "AI dashboard for car dealerships", d: "A board that reads the numbers and answers in plain language.", img: "/art/internet-coaches.webp", href: "/work" }]).map((b, i) => ({ ...b, tint: TINTS6[i % TINTS6.length] }));
   const FEATURES = es
     ? ["Agentes por rol", "Firma humana", "Integración con CRM y ERP", "WhatsApp y correo", "Investigación UX", "Prototipos probados", "Apps iOS y Android", "Next.js y React", "AWS con CI/CD", "Monitoreo 24/7", "Multi-región", "Odoo y Salesforce", "Dashboards en tiempo real", "Documentación incluida", "Mantenimiento tras el launch", "Español e inglés"]
     : ["Agents per role", "Human sign-off", "CRM & ERP integration", "WhatsApp & email", "UX research", "Tested prototypes", "iOS & Android apps", "Next.js & React", "AWS with CI/CD", "24/7 monitoring", "Multi-region", "Odoo & Salesforce", "Real-time dashboards", "Documentation included", "Maintained after launch", "Spanish & English"];
@@ -175,7 +179,7 @@ export function Cerebrium() {
         </div>
       </section>
 
-      <div className={s.logos}><div className={s.marquee}><div className={s.marqueeTrack}>{[0, 1].map((k) => <div key={k} className={s.logosIn} aria-hidden={k === 1}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div>)}</div></div></div>
+      <div className={s.logos}><div className={s.marquee}><div className={s.marqueeTrack}>{[0, 1].map((k) => <div key={k} className={s.logosIn} aria-hidden={k === 1}>{LOGOS.map(([n, src]) => /* eslint-disable-next-line @next/next/no-img-element */ <img key={n} src={src} alt={n} title={n} loading="lazy" decoding="async" />)}<b>CarCompraCorp</b><b>The Internet Coaches</b></div>)}</div></div></div>
       <div className={s.dotBand}><Dots className={s.dots} squares /></div>
 
       <section className={s.light} data-cb-light>
@@ -192,7 +196,7 @@ export function Cerebrium() {
             <div className={s.cards}>
               <div className={s.card} data-i={0} ref={(el) => { cardRefs.current[0] = el; }}>
                 <div className={s.stage} style={{ padding: 0, overflow: "hidden" }}>
-                  <AgentCity es={es} />
+                  <LazyMount ratio="600 / 380"><AgentCity es={es} /></LazyMount>
                 </div>
                 <h3>{es ? "Toda tu operación, agentizada." : "Your whole operation, agentized."}</h3>
                 <p>{es ? "Ventas, soporte, facturación y operaciones reciben cada uno un agente. Se mueven entre tus sistemas como un equipo por una ciudad: los datos fluyen, el trabajo se hace y las luces siguen encendidas a las 3 AM. Y cuando algo requiere criterio, una persona firma." : "Sales, support, billing and operations each get an agent. They move between your systems like a team across a city: data flows, work gets done and the lights stay on at 3 AM. And when something needs judgment, a person signs off."}</p>
@@ -207,7 +211,7 @@ export function Cerebrium() {
               </div>
               <div className={s.card} data-i={2} ref={(el) => { cardRefs.current[2] = el; }}>
                 <div className={s.stage} style={{ padding: 0, overflow: "hidden" }}>
-                  <AgentsAtWork es={es} />
+                  <LazyMount ratio="600 / 230"><AgentsAtWork es={es} /></LazyMount>
                 </div>
                 <h3>{es ? "Un agente por rol, dentro de tus herramientas." : "One agent per role, inside your tools."}</h3>
                 <p>{es ? "Fin factura, Sopo responde, Sal agenda. Trabajan en tu CRM, tu ERP y tu correo, sin reescribir nada, y cuando algo requiere criterio lo pasan a una persona que firma." : "Fin bills, Sopo answers, Sal books. They work inside your CRM, your ERP and your inbox, nothing rewritten, and when something needs judgment they hand it to a person who signs off."}</p>
@@ -271,7 +275,7 @@ export function Cerebrium() {
       <section className={`${s.dark} ${s.darkClear}`}>
         <div className={`${s.wrap}`} style={{ padding: "110px 40px" }}>
           <div className={s.secHead}><h2 className={s.h2}>{es ? "Lo último del blog" : "Latest from our blog"}</h2><Link href="/blog" className={`${s.btn} ${s.btnGhost}`}>{es ? "Ver todo" : "See all"}</Link></div>
-          <div className={s.posts}>{POSTS.slice(0, 3).map((p, i) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><span className={s.postIcon} aria-hidden="true">{POST_ICONS[i % POST_ICONS.length]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
+          <div className={s.posts}>{posts.map((p, i) => <Link key={p.slug} href={`/blog/${p.slug}`} className={s.post}><span className={s.mono}>{p.dateLabel[lang]} / {p.tag[lang]}</span><span className={s.postIcon} aria-hidden="true">{POST_ICONS[i % POST_ICONS.length]}</span><b>{p.title[lang]}</b><span className={s.mono} style={{ color: "#bff5cf" }}>{es ? "Leer →" : "Read →"}</span></Link>)}</div>
         </div>
       </section>
       <CbFooter />

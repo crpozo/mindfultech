@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
 import s from "./site.module.css";
+import { openContact, takePendingContact } from "./openContact";
 
 /* Shared chrome of the redesigned site (Oct 2026): tokens root, sticky nav,
    call-to-action band and footer. Pages render <Shell> around their body;
@@ -166,9 +167,7 @@ export function SectionHead({ label, title, sub, right }: { label?: string; titl
 
 /* ---- contact form: opened by the CTA buttons, sends the message to Carlos ---- */
 
-export function openContact(mode: "project" | "join" = "project") {
-  window.dispatchEvent(new CustomEvent("mt:contact", { detail: { mode } }));
-}
+export { openContact };
 
 /** Modal contact form. Mounted once by SiteChrome; opens on the `mt:contact` event.
     Submitting composes the email to CONTACT.formTo in the visitor's mail app (static site, no server). */
@@ -180,7 +179,9 @@ export function ContactForm() {
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
   const [mode, setMode] = React.useState<"project" | "join">("project");
   React.useEffect(() => {
-    const on = (e: Event) => { setMode(((e as CustomEvent).detail?.mode as "project" | "join") || "project"); setOpen(true); };
+    const on = (e: Event) => { takePendingContact(); setMode(((e as CustomEvent).detail?.mode as "project" | "join") || "project"); setOpen(true); };
+    const pending = takePendingContact();
+    if (pending) { setMode(pending); setOpen(true); }
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("mt:contact", on);
     window.addEventListener("keydown", esc);

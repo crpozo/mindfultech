@@ -6,7 +6,7 @@ import { useLang } from "@/components/i18n";
 import { CASES } from "@/lib/site/cases";
 import { SERVICES, SERVICES_ES } from "@/lib/site/serviceDetail";
 import { POSTS, getPost, type Block } from "@/lib/blog/posts";
-import { openContact } from "@/components/site/Shell";
+import { openContact } from "@/components/site/openContact";
 import { Split, Scramble, Dots } from "./CerebriumFx";
 import { CbPage } from "./CerebriumParts";
 import s from "./cerebrium.module.css";
