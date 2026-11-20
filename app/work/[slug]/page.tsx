@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CASES } from "@/lib/site/cases";
-import { CbCase } from "@/components/concepts/CerebriumDetail";
+import { SpCase } from "@/components/mt/SparkPages";
 
 export const dynamicParams = false;
 
@@ -18,5 +18,5 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function CaseRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!CASES.some((c) => c.id === slug)) notFound();
-  return <CbCase slug={slug} />;
+  return <SpCase slug={slug} />;
 }

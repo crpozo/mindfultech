@@ -1,5 +1,5 @@
-import { Cerebrium } from "@/components/concepts/Cerebrium";
+import { SparkHome } from "@/components/mt/Spark";
 
 export default function HomePage() {
-  return <Cerebrium />;
+  return <SparkHome />;
 }

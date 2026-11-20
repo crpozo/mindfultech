@@ -4,19 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
 import { POSTS } from "@/lib/blog/posts";
-import { CONTACT, WEB3FORMS_KEY } from "@/components/site/Shell";
+import { SparkPage, ContactBlock, Arrow, TALK, type Bi } from "./SparkChrome";
 import s from "./spark.module.css";
-
-type Bi = { en: string; es: string };
-const TALK: Bi = { en: "Talk to us", es: "Hablemos" };
-
-const NAV: { href: string; label: Bi }[] = [
-  { href: "/services/", label: { en: "Services", es: "Servicios" } },
-  { href: "/work/", label: { en: "Work", es: "Casos" } },
-  { href: "/office-demo/", label: { en: "AI Office", es: "Oficina IA" } },
-  { href: "/company/", label: { en: "Company", es: "Empresa" } },
-  { href: "/blog/", label: { en: "Blog", es: "Blog" } },
-];
 
 const LOGOS = [
   { src: "/logo-usfq.svg", alt: "USFQ", h: "2.5rem" },
@@ -100,117 +89,78 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
   },
 ];
 
+const SLIDES: { video?: string; img: string; alt: Bi }[] = [
+  { video: "/mt/office-loop.mp4", img: "/mt/office-poster.webp", alt: { en: "Recording of the AI Management Office with agents at work", es: "Grabación de la AI Management Office con agentes trabajando" } },
+  { img: "/office-demo-preview.webp", alt: { en: "The 3D office seen from above, with every agent at a desk", es: "La oficina 3D vista desde arriba, con cada agente en su escritorio" } },
+  { img: "/art/internet-coaches.webp", alt: { en: "Dashboard with tasks and results for several locations", es: "Panel con tareas y resultados de varias sedes" } },
+];
+
 const STRIP = ["/art/internet-coaches.webp", "/art/eventflow-login-wide.webp", "/art/helixona-hero.webp", "/art/wfs-hero.webp", "/art/themedmotion-wide.webp"];
 
-function ContactCard({ es }: { es: boolean }) {
-  const [f, setF] = React.useState({ name: "", email: "", company: "", msg: "" });
-  const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (state === "sending") return;
-    setState("sending");
-    const subject = `mindfultech.ec: ${f.name}`;
-    const payload = { type: "project", name: f.name, email: f.email, company: f.company, message: f.msg };
-    try {
-      const ctrl = new AbortController();
-      const timer = window.setTimeout(() => ctrl.abort(), 8000);
-      const r = WEB3FORMS_KEY
-        ? await fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject, from_name: "mindfultech.ec", replyto: f.email, ...payload }) })
-        : await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ ...payload, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }) });
-      window.clearTimeout(timer);
-      if (!r.ok) throw new Error(String(r.status));
-      setState("sent");
-      setF({ name: "", email: "", company: "", msg: "" });
-    } catch {
-      // the form service did not answer: hand the same message to the visitor's mail app
-      setState("error");
-      const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, "", f.msg].join("\n");
-      window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
-  };
-  return (
-    <form className={s.form} onSubmit={submit}>
-      <h3>{es ? "Escríbenos" : "Send us a message"}</h3>
-      <label>
-        {es ? "Nombre" : "Name"}
-        <input required value={f.name} onChange={set("name")} autoComplete="name" />
-      </label>
-      <label>
-        Email
-        <input required type="email" value={f.email} onChange={set("email")} autoComplete="email" />
-      </label>
-      <label className={s.full}>
-        {es ? "Empresa" : "Company"}
-        <input value={f.company} onChange={set("company")} autoComplete="organization" />
-      </label>
-      <label className={s.full}>
-        {es ? "Qué quieres automatizar" : "What you want to automate"}
-        <textarea required value={f.msg} onChange={set("msg")} />
-      </label>
-      <button type="submit" className={`${s.pill} ${s.pillInk}`} disabled={state === "sending"}>
-        {state === "sending" ? (es ? "Enviando mensaje" : "Sending message") : es ? "Enviar mensaje" : "Send message"}
-      </button>
-      {state === "sent" && <p className={s.formNote} role="status">{es ? "Mensaje enviado. Te respondemos por correo." : "Message sent. We will reply by email."}</p>}
-      {state === "error" && <p className={s.formNote} role="status">{es ? "No se pudo enviar desde aquí. Se abrió tu correo con el mensaje listo." : "It could not be sent from here. Your mail app opened with the message ready."}</p>}
-    </form>
-  );
-}
-
 export function SparkHome() {
-  const { lang, setLang } = useLang();
+  const { lang } = useLang();
   const es = lang === "es";
   const t = (v: Bi) => v[lang];
-  const [open, setOpen] = React.useState(false);
   const video = React.useRef<HTMLVideoElement>(null);
+  const [slide, setSlide] = React.useState(0);
   React.useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (slide !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     video.current?.play().catch(() => {});
-  }, []);
+  }, [slide]);
+  const go = (d: number) => setSlide((v) => (v + d + SLIDES.length) % SLIDES.length);
   const band = es ? "Conectamos tus sistemas. Los agentes hacen el trabajo. " : "We connect your systems. Agents do the work. ";
 
   return (
-    <div className={s.page}>
-      <header className={`${s.wrap} ${s.header}`}>
-        <Link href="/" className={s.logo} aria-label="MindfulTech">
-          <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
-        </Link>
-        <nav id="sp-nav" className={s.nav} data-open={open} aria-label={es ? "Principal" : "Main"}>
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href}>{t(n.label)}</Link>
-          ))}
-        </nav>
-        <button type="button" className={`${s.pill} ${s.pillLine} ${s.pillSmall} ${s.menuBtn}`} aria-expanded={open} aria-controls="sp-nav" onClick={() => setOpen((v) => !v)}>
-          {open ? (es ? "Cerrar" : "Close") : es ? "Menú" : "Menu"}
-        </button>
-        <a href="#contact" className={`${s.pill} ${s.pillInk} ${s.pillSmall}`}>{t(TALK)}</a>
-      </header>
-
-      <main>
-        <section className={`${s.wrap} ${s.hero}`}>
-          <div>
-            <h1>{es ? "Conectamos tus sistemas. Los agentes hacen el trabajo." : "We connect your systems. Agents do the work."}</h1>
+    <SparkPage active="home">
+        <section className={`${s.heroWrap} ${s.hero}`}>
+          <div className={s.heroPanel}>
+            <h1>
+              <span>{es ? "Conectamos" : "We connect"}</span>
+              <span>{es ? "tus sistemas." : "your systems."}</span>
+              <span>{es ? "Los agentes trabajan." : "Agents do the work."}</span>
+            </h1>
             <p>
               {es
-                ? "MindfulTech es un laboratorio de software con IA. Entendemos cómo opera tu negocio, unimos tus datos y herramientas en una sola plataforma y automatizamos la rutina con agentes hechos para cada tarea."
-                : "MindfulTech is an AI software lab. We learn how your business runs, join your data and tools in one platform, and automate the routine with agents built for each job."}
+                ? "Entendemos cómo opera tu negocio, unimos tus datos y herramientas en una sola plataforma y automatizamos la rutina con agentes hechos para cada tarea."
+                : "We learn how your business runs, join your data and tools in one platform, and automate the routine with agents built for each job."}
             </p>
-            <a href="#contact" className={`${s.pill} ${s.pillSage}`}>{t(TALK)}</a>
+            <Link href="/services/" className={`${s.pill} ${s.pillSage}`}>
+              {es ? "Ver nuestros servicios" : "Explore our services"}
+              <Arrow />
+            </Link>
           </div>
           <div className={s.heroMedia}>
-            <video ref={video} muted loop playsInline preload="metadata" poster="/mt/office-poster.webp" aria-label={es ? "Grabación de la AI Management Office con agentes trabajando" : "Recording of the AI Management Office with agents at work"}>
-              <source src="/mt/office-loop.mp4" type="video/mp4" />
-            </video>
+            {SLIDES[slide].video ? (
+              <video key="v" ref={video} muted loop playsInline preload="metadata" poster={SLIDES[slide].img} aria-label={t(SLIDES[slide].alt)}>
+                <source src={SLIDES[slide].video} type="video/mp4" />
+              </video>
+            ) : (
+              <img key={SLIDES[slide].img} src={SLIDES[slide].img} alt={t(SLIDES[slide].alt)} />
+            )}
+            <Link href="/office-demo/" className={s.play} aria-label={es ? "Abrir la Oficina IA en vivo" : "Open the live AI Office"}>
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 7l8 5-8 5z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+            </Link>
+            <div className={s.arrows}>
+              <button type="button" onClick={() => go(-1)} aria-label={es ? "Imagen anterior" : "Previous image"}>
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <button type="button" onClick={() => go(1)} aria-label={es ? "Imagen siguiente" : "Next image"}>
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            </div>
           </div>
         </section>
 
-        <section className={s.wrap} aria-label={es ? "Clientes" : "Clients"}>
-          <ul className={s.logos}>
-            {LOGOS.map((l) => (
-              <li key={l.alt}><img src={l.src} alt={l.alt} style={{ "--h": l.h } as React.CSSProperties} loading="lazy" /></li>
-            ))}
+        <section className={s.logoRail} aria-label={es ? "Clientes" : "Clients"}>
+          <ul className={s.logoTrack}>
+            {[0, 1, 2, 3].map((k) =>
+              LOGOS.map((l) => (
+                <li key={k + l.alt} aria-hidden={k > 0}>
+                  <img src={l.src} alt={k === 0 ? l.alt : ""} style={{ "--h": l.h } as React.CSSProperties} />
+                </li>
+              ))
+            )}
           </ul>
-          <p className={s.logosNote}>{es ? "Empresas en Estados Unidos, Europa y Latinoamérica trabajan con nosotros." : "Companies in the United States, Europe and Latin America work with us."}</p>
         </section>
 
         <section className={`${s.wrap} ${s.section}`}>
@@ -329,19 +279,9 @@ export function SparkHome() {
           ))}
         </ul>
 
-        <section id="contact" className={`${s.night} ${s.section}`} style={{ marginTop: "var(--space)" }}>
-          <div className={`${s.wrap} ${s.contact}`}>
-            <div>
-              <h2 className={s.h2} style={{ maxWidth: "14ch" }}>{es ? "Cuéntanos qué quieres automatizar." : "Tell us what you want to automate."}</h2>
-              <p className={s.sub}>{es ? "Escríbenos por el formulario, por WhatsApp o por correo. Te responde una persona del equipo." : "Write through the form, WhatsApp or email. A person on the team replies."}</p>
-              <ul className={s.ways}>
-                <li><b>WhatsApp</b><a href={CONTACT.wa} target="_blank" rel="noreferrer">{CONTACT.phone}</a></li>
-                <li><b>Email</b><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></li>
-              </ul>
-            </div>
-            <ContactCard es={es} />
-          </div>
-        </section>
+        <div style={{ marginTop: "var(--space)" }}>
+          <ContactBlock id="contact" />
+        </div>
 
         <section className={`${s.wrap} ${s.section}`}>
           <div className={s.blogHead}>
@@ -361,48 +301,6 @@ export function SparkHome() {
             ))}
           </ul>
         </section>
-      </main>
-
-      <footer className={s.footer}>
-        <div className={s.wrap}>
-          <div className={s.footGrid}>
-            <div className={s.footBrand}>
-              <span className={s.footLogo}><img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} loading="lazy" /></span>
-              <p>AI Software Lab. Quito, Ecuador.</p>
-            </div>
-            <div>
-              <h2>{es ? "Servicios" : "Services"}</h2>
-              <ul>
-                {SERVICES.slice(0, 4).map((v) => (
-                  <li key={v.href}><Link href={v.href}>{t(v.title)}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2>{es ? "Empresa" : "Company"}</h2>
-              <ul>
-                {NAV.slice(1).map((n) => (
-                  <li key={n.href}><Link href={n.href}>{t(n.label)}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2>{es ? "Contacto" : "Contact"}</h2>
-              <ul>
-                <li><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></li>
-                <li><a href={CONTACT.wa} target="_blank" rel="noreferrer">WhatsApp {CONTACT.phone}</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className={s.footBase}>
-            <span>© 2026 MindfulTech</span>
-            <div className={s.lang} role="group" aria-label={es ? "Idioma" : "Language"}>
-              <button type="button" aria-pressed={!es} onClick={() => setLang("en")}>English</button>
-              <button type="button" aria-pressed={es} onClick={() => setLang("es")}>Español</button>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </SparkPage>
   );
 }

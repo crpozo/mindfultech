@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CbWork } from "@/components/concepts/CerebriumPages";
+import { SpWork } from "@/components/mt/SparkPages";
 
 export const metadata: Metadata = {
   title: "MindfulTech",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Route() {
-  return <CbWork />;
+  return <SpWork />;
 }

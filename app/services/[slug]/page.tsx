@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CbService } from "@/components/concepts/CerebriumDetail";
+import { SpService } from "@/components/mt/SparkPages";
 
 const META: Record<string, { name: string; desc: string }> = {
   security: { name: "Cybersecurity", desc: "Assessments, hardening and monitoring for apps, cloud and AI systems." },
@@ -28,5 +28,5 @@ export default async function ServicePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <CbService slug={slug} />;
+  return <SpService slug={slug} />;
 }

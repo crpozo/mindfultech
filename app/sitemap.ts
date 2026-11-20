@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/services",
     ...SERVICE_SLUGS.map((s) => `/services/${s}`),
     "/company",
+    "/contact",
     "/blog",
     ...POSTS.map((p) => `/blog/${p.slug}`),
   ];

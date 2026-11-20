@@ -1,31 +1,10 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { PageLoader } from "@/components/PageLoader";
-import { SiteFooter, ContactForm } from "@/components/site/Shell";
-import { WhatsAppBubble } from "@/components/home/WhatsAppBubble";
-
 /**
- * Marketing chrome (contact footer, WhatsApp bubble, route loader) shown on
- * every public page — but not on the private tools (/tasks, /finance,
- * /fitness) or the /office-demo client demo, which are standalone screens.
+ * Since the Nov 2026 redesign every public page brings its own header, footer
+ * and contact block (components/mt/SparkChrome), and the private tools and
+ * demos are standalone screens. Nothing global is left to mount here.
  */
-const PRIVATE = ["/tasks", "/finance", "/fitness", "/office-demo", "/office-usfq", "/supply-demo", "/concepts", "/concept"];
-
 export function SiteChrome() {
-  const pathname = usePathname();
-  if (PRIVATE.some((p) => pathname?.startsWith(p))) return null;
-  const norm = (pathname || "/").replace(/\/+$/, "") || "/";
-  const dark = !norm.startsWith("/staging");
-  // /staging previews the Nov 2026 redesign, which brings its own header and
-  // footer: it only needs the contact form behind "Talk to us".
-  if (!dark) return <ContactForm />;
-  return (
-    <>
-      {!dark && <SiteFooter />}
-      {!dark && <WhatsAppBubble />}
-      <PageLoader />
-      <ContactForm />
-    </>
-  );
+  return null;
 }
