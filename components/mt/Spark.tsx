@@ -90,6 +90,7 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
 ];
 
 const SLIDES: { img: string; alt: Bi }[] = [
+  { img: "/mt/hero-3d.webp", alt: { en: "Abstract 3D woven bands in sage green", es: "Cintas tejidas en 3D, en verde salvia" } },
   { img: "/mt/hero-a.webp", alt: { en: "The 3D AI Management Office, with one agent's live screen beside it", es: "La AI Management Office en 3D, con la pantalla en vivo de un agente al lado" } },
   { img: "/mt/hero-b.webp", alt: { en: "A dashboard that joins results from every location", es: "Un panel que une los resultados de todas las sedes" } },
   { img: "/mt/hero-c.webp", alt: { en: "An agent's panel: watch its screen, chat with it, approve its work", es: "El panel de un agente: mira su pantalla, conversa y aprueba su trabajo" } },
