@@ -2767,3 +2767,200 @@
     padding: 2.25rem 1.5rem;
   }
 }
+
+/* ================= phones: room to breathe =================
+   The shorter page above ended up packed. Wider side margins, more air
+   between sections and inside every card, and dark blocks whose text no
+   longer sits against their edge. */
+@media (max-width: 620px) {
+  .page {
+    --gutter: 1.25rem;
+    --space: 4.5rem;
+  }
+  .header {
+    padding-block: 1rem;
+  }
+
+  /* hero and menu share the page margin */
+  .heroWrap {
+    width: calc(100% - 2 * var(--gutter));
+  }
+  .hero {
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  .heroPanel {
+    padding: 2.75rem 1.6rem 2.5rem;
+  }
+  .hero p {
+    margin-top: 1.25rem;
+  }
+  .heroPanel .pill {
+    margin-top: 2rem;
+  }
+  .logoRail {
+    padding-block: 3.75rem 1rem;
+  }
+
+  /* rails: a little more between cards */
+  .svcGrid,
+  .control,
+  .wall,
+  .places,
+  .cards3,
+  .steps,
+  .timeline,
+  .gallery {
+    gap: 1rem;
+  }
+  .svcGrid,
+  .wall {
+    margin-top: 2.25rem;
+  }
+
+  /* services */
+  .svc {
+    padding: 1.75rem 1.6rem 1.6rem;
+  }
+  .svcIcon {
+    margin: 1.4rem 0;
+  }
+  .svcFoot {
+    margin-top: 2.25rem;
+  }
+
+  /* dark blocks: their own inner margin */
+  .night > .wrap {
+    width: calc(100% - 3rem);
+  }
+  .controlBlock {
+    padding-block: 3.75rem 3.25rem;
+  }
+  .control {
+    width: auto;
+    margin-top: 2.25rem;
+    padding-inline: 1.5rem;
+    scroll-padding-inline: 1.5rem;
+  }
+  .night > .control {
+    width: 100%;
+  }
+  .control > .glass {
+    flex-basis: 78%;
+  }
+  .glass {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+    padding: 1.6rem 1.5rem 1.75rem;
+  }
+
+  /* split + figures */
+  .oneView {
+    gap: 2.25rem;
+    padding-block: 4.5rem 0;
+  }
+  .split {
+    gap: 2.25rem;
+  }
+  .oneView .strong {
+    margin-top: 1.1rem;
+  }
+  .oneView .btnRow {
+    margin-top: 1.75rem;
+  }
+  .oneView .checks {
+    margin-top: 2rem;
+  }
+  .oneView .checks li + li {
+    margin-top: 0.9rem;
+  }
+  .stats {
+    padding-block: 1.75rem 0;
+  }
+  .stats div {
+    padding: 0 0.75rem;
+  }
+  .stats div:first-child {
+    padding-left: 0;
+  }
+  .stats dd,
+  .oneView .stats dd {
+    margin-top: 0.6rem;
+  }
+  .bands {
+    margin-top: 2.75rem;
+  }
+
+  /* cases */
+  .wall a {
+    padding: 1.75rem 1.6rem;
+  }
+
+  /* contact */
+  .contact {
+    gap: 2.5rem;
+  }
+  .contactLead {
+    margin-top: 1.1rem;
+  }
+  .form {
+    gap: 0.9rem;
+    padding: 1.75rem 1.4rem;
+  }
+
+  /* map */
+  .mapBlock {
+    gap: 1.25rem;
+    margin-top: 2.25rem;
+  }
+  .places > li {
+    padding: 1.5rem 1.4rem;
+  }
+
+  /* footer */
+  .footer {
+    padding-block: 3.5rem 4rem;
+  }
+  .footIn {
+    width: calc(100% - 3.5rem);
+  }
+  .footGrid {
+    gap: 2.25rem 1.25rem;
+  }
+  .footBase {
+    margin-top: 2.25rem;
+  }
+
+  /* inner pages */
+  .steps li {
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.75rem 1.5rem;
+  }
+  .talkBand {
+    margin-bottom: 2.5rem;
+  }
+  .svcRow {
+    padding: 1.75rem 1.5rem;
+  }
+  .workList {
+    gap: 3rem;
+  }
+  .talkBand {
+    padding: 2.75rem 1.75rem;
+  }
+}
+
+/* founder text: the two paragraphs need a gap between them */
+.member .sub {
+  margin-top: 1rem;
+}
+/* breadcrumb: only the current page shortens, never the middle step */
+.crumbs li:not(:last-child) {
+  flex: none;
+}
+.crumbs li:last-child {
+  min-width: 0;
+  white-space: nowrap;
+}
