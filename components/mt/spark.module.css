@@ -126,7 +126,7 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding-block: 0.9rem;
+  padding-block: 1.25rem;
 }
 .logo img {
   height: 2.4rem;
@@ -162,6 +162,8 @@
   grid-template-columns: minmax(0, 37fr) minmax(0, 61fr);
   gap: 0.75rem;
   min-height: clamp(26rem, 44vw, 39rem);
+  /* breathing room under the menu, so the panels do not sit against it */
+  margin-top: clamp(1rem, 2.2vw, 2rem);
 }
 .heroPanel {
   display: flex;
@@ -174,7 +176,7 @@
   clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
 }
 .hero h1 {
-  font-size: clamp(2.1rem, 1.1rem + 2.6vw, 3.4rem);
+  font-size: clamp(2.1rem, 1.1rem + 2.3vw, 3.25rem);
   font-weight: 400;
   line-height: 1.14;
   letter-spacing: -0.02em;
