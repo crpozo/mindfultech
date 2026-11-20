@@ -3656,3 +3656,19 @@
     margin-top: 0.2rem;
   }
 }
+
+/* menu logo a little larger; the bar grows with it so banners still line up */
+.logo img {
+  height: 2.95rem;
+}
+.page {
+  --header-h: 5.45rem;
+}
+@media (max-width: 620px) {
+  .logo img {
+    height: 2.6rem;
+  }
+  .page {
+    --header-h: 4.6rem;
+  }
+}
