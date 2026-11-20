@@ -17,6 +17,9 @@ export function SiteChrome() {
   if (PRIVATE.some((p) => pathname?.startsWith(p))) return null;
   const norm = (pathname || "/").replace(/\/+$/, "") || "/";
   const dark = !norm.startsWith("/staging");
+  // /staging previews the Nov 2026 redesign, which brings its own header and
+  // footer: it only needs the contact form behind "Talk to us".
+  if (!dark) return <ContactForm />;
   return (
     <>
       {!dark && <SiteFooter />}
