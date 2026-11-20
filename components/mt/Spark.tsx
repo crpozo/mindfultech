@@ -204,8 +204,14 @@ export function SparkHome() {
     const onFs = () => {
       if (!document.fullscreenElement && dialog.current?.open) dialog.current.close();
     };
+    const big = film.current;
+    const onEnd = () => dialog.current?.open && dialog.current.close();
     document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    big?.addEventListener("webkitendfullscreen", onEnd);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFs);
+      big?.removeEventListener("webkitendfullscreen", onEnd);
+    };
   }, []);
   const [place, setPlace] = React.useState<string | null>(null);
   const band = es ? "AI Software Lab. Construimos los agentes que hacen el trabajo. " : "AI Software Lab. We build the agents that do the work. ";
@@ -250,15 +256,20 @@ export function SparkHome() {
         </dialog>
 
         <section className={s.logoRail} aria-label={es ? "Clientes" : "Clients"}>
-          <ul className={s.logoTrack}>
-            {[0, 1, 2, 3].map((k) =>
-              LOGOS.map((l) => (
-                <li key={k + l.alt} aria-hidden={k > 0}>
-                  <img src={l.src} alt={k === 0 ? l.alt : ""} style={{ "--h": l.h } as React.CSSProperties} />
-                </li>
-              ))
-            )}
-          </ul>
+          {/* two identical groups, each at least as wide as the screen: when the
+              first slides out the second is already in its place, so the rail
+              never shows a gap at any width */}
+          {[0, 1].map((g) => (
+            <ul key={g} className={s.logoTrack} aria-hidden={g === 1}>
+              {[0, 1].map((k) =>
+                LOGOS.map((l) => (
+                  <li key={k + l.alt}>
+                    <img src={l.src} alt={g === 0 && k === 0 ? l.alt : ""} style={{ "--h": l.h } as React.CSSProperties} decoding="sync" />
+                  </li>
+                ))
+              )}
+            </ul>
+          ))}
         </section>
 
         <section className={`${s.wrap} ${s.section}`}>

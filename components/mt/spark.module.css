@@ -225,7 +225,7 @@
   position: relative;
   border-radius: var(--r-card);
   overflow: hidden;
-  background: var(--night);
+  background: var(--night) url("/mt/promo-poster.webp") center / cover no-repeat;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
 }
 .heroMedia > img,
@@ -328,16 +328,20 @@
 
 /* logos: one rail that never stops */
 .logoRail {
+  display: flex;
   overflow: hidden;
   padding-block: clamp(3.5rem, 6vw, 5rem) clamp(2.25rem, 4vw, 3.25rem);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 .logoTrack {
+  flex: none;
   display: flex;
   align-items: center;
-  width: max-content;
-  animation: rail 44s linear infinite;
+  justify-content: space-around;
+  min-width: 100%;
+  animation: rail 36s linear infinite;
+  will-change: transform;
 }
 .logoTrack li {
   flex: none;
@@ -351,7 +355,7 @@
 }
 @keyframes rail {
   to {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2528,7 +2532,7 @@
     padding-inline: 1.25rem;
   }
   .logoRail {
-    padding-block: 2.25rem 1.5rem;
+    padding-block: 3.5rem 1.75rem;
   }
   .sound {
     left: 0.85rem;
