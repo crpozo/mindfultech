@@ -13,6 +13,10 @@ import s from "./spark.module.css";
 const SERVICE_ORDER = ["ai", "custom", "security", "discovery"];
 /** The data files keep labels in capitals for the old design; show them in sentence case. */
 const sentence = (v: string) => (v === v.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{2}/.test(v) ? v.charAt(0) + v.slice(1).toLowerCase() : v);
+/** Tool names arrive in capitals: title-case them, keeping acronyms as acronyms. */
+const ACRONYMS = new Set(["AWS", "SSO", "API", "RAG", "LLM", "SQL", "CI", "CD", "OWASP", "SOC", "IAM", "GCP", "UX", "UI", "ERP", "CRM", "SIEM", "MFA", "ISO", "AI", "IOS", "QA", "REST", "LOPDP", "BPMN"]);
+const SPELLED: Record<string, string> = { IOS: "iOS", APIS: "APIs", LANGCHAIN: "LangChain", FIGJAM: "FigJam" };
+const toolName = (v: string) => (v !== v.toUpperCase() ? v : v.split(" ").map((w) => (SPELLED[w] ?? (ACRONYMS.has(w) ? w : w.charAt(0) + w.slice(1).toLowerCase()))).join(" "));
 const internal = (href: string) => href.replace(/^\/work#(.+)$/, "/work/$1/").replace("/work/helixona/", "/work/healthcare/");
 
 /* ------------------------------------------------------------- services */
@@ -60,72 +64,122 @@ export function SpServices() {
   );
 }
 
+/** Picture set of each service page: its 3D object and the photo beside the accordion. */
+const SVC_ART: Record<string, { icon: string; photo: string }> = {
+  ai: { icon: "ai", photo: "/mt/strip-4.webp" },
+  custom: { icon: "software", photo: "/mt/strip-1.webp" },
+  security: { icon: "security", photo: "/mt/strip-5.webp" },
+  discovery: { icon: "workshops", photo: "/mt/strip-3.webp" },
+};
+
 export function SpService({ slug }: { slug: string }) {
   const { lang } = useLang();
   const es = lang === "es";
   const v = (es ? SERVICES_ES : SERVICES)[slug];
   if (!v) return <SpNotFound />;
+  const art = SVC_ART[slug] ?? SVC_ART.ai;
+  const tools = v.tools.map(toolName);
   return (
     <SparkPage active="services">
       <Banner title={v.title} lead={v.subtitle} art="b" crumbs={[[es ? "Servicios" : "Services", "/services/"], [v.name]]} />
+
+      {/* what it solves: the service's object in the stepped frame, the three answers beside it */}
+      <section className={`${s.wrap} ${s.section} ${s.split} ${s.svcIntro}`}>
+        <div className={s.splitMedia}>
+          <div className={s.artTile}><img src={`/mt/icon-${art.icon}-lg.webp`} alt="" width={640} height={640} /></div>
+          {v.why[0] && <span className={`${s.chip} ${s.chipA}`}>{v.why[0].title}</span>}
+          {v.why[1] && <span className={`${s.chip} ${s.chipB}`}>{v.why[1].title}</span>}
+          {v.why[2] && <span className={`${s.chip} ${s.chipC}`}>{v.why[2].title}</span>}
+        </div>
+        <div>
+          <p className={s.eyebrow}>{v.name}</p>
+          <h2 className={s.h2}>{es ? "Qué resuelve." : "What it solves."}</h2>
+          <ul className={s.answers}>
+            {v.why.map((w) => (
+              <li key={w.title}><b>{w.title}</b><span>{w.desc}</span></li>
+            ))}
+          </ul>
+          <div className={s.btnRow}>
+            <Link href="/contact/" className={`${s.pill} ${s.pillSage}`}>{TALK[lang]}<Arrow /></Link>
+            <Link href="/work/" className={`${s.pill} ${s.pillLine}`}>{es ? "Ver proyectos" : "See our work"}</Link>
+          </div>
+        </div>
+      </section>
       <section className={s.wrap}>
-        <dl className={s.specs}>
+        <dl className={`${s.stats} ${s.specStats}`}>
           {v.specs.map(([k, val]) => (
-            <div key={k}><dt>{sentence(k)}</dt><dd>{val}</dd></div>
+            <div key={k}><dt>{val}</dt><dd>{sentence(k)}</dd></div>
           ))}
         </dl>
       </section>
 
-      <section className={`${s.wrap} ${s.section}`}>
-        <h2 className={s.h2}>{es ? "Qué resuelve" : "What it solves"}</h2>
-        <ul className={s.cards3}>
-          {v.why.map((w) => (
-            <li key={w.title} className={s.card}><h3>{w.title}</h3><p>{w.desc}</p></li>
-          ))}
-        </ul>
-      </section>
-
-      <section className={`${s.night} ${s.section}`}>
-        <div className={`${s.wrap} ${s.highlight}`}>
-          <p className={s.bigStat}>{v.highlight.stat}</p>
-          <div>
-            <h2 className={s.h2}>{v.highlight.title}</h2>
-            <p className={s.sub}>{v.highlight.desc}</p>
-            {v.highlight.caseHref && <Link href={internal(v.highlight.caseHref)} className={`${s.pill} ${s.pillSage}`}>{es ? "Leer el caso" : "Read the case"}</Link>}
+      {/* how it is delivered: the steps as columns on the dark block, the featured result under them */}
+      <section className={`${s.night} ${s.notched} ${s.section} ${s.delivery}`}>
+        <div className={s.wrap}>
+          <p className={s.kicker}>{es ? "Cómo se entrega" : "How we deliver it"}</p>
+          <h2 className={s.h2}>{es ? "De entender el trabajo a tenerlo en producción." : "From understanding the work to running it in production."}</h2>
+          <ol className={s.stepCols}>
+            {v.steps.map((w, i) => (
+              <li key={w.title}><span>{i + 1}</span><h3>{w.title}</h3><p>{w.desc}</p></li>
+            ))}
+          </ol>
+          <div className={s.result}>
+            <p className={s.bigStat}>{v.highlight.stat}</p>
+            <div>
+              <h3>{v.highlight.title}</h3>
+              <p>{v.highlight.desc}</p>
+              {v.highlight.caseHref && <Link href={internal(v.highlight.caseHref)} className={`${s.pill} ${s.pillInk}`}>{es ? "Leer el caso" : "Read the case"}<Arrow /></Link>}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className={`${s.wrap} ${s.section}`}>
-        <h2 className={s.h2}>{es ? "Cómo se entrega" : "How we deliver it"}</h2>
-        <ol className={s.steps}>
-          {v.steps.map((w, i) => (
-            <li key={w.title}><span>{i + 1}</span><div><h3>{w.title}</h3><p>{w.desc}</p></div></li>
-          ))}
-        </ol>
+      {/* what is included: a photo and an accordion, one item open */}
+      <section className={`${s.wrap} ${s.section} ${s.split} ${s.included}`}>
+        <div className={s.photoFrame}>
+          <img src={art.photo} alt="" width={900} height={1260} loading="lazy" />
+          <p className={s.photoNote}><b>{v.specs[2]?.[1]}</b><span>{sentence(v.specs[2]?.[0] ?? "")}</span></p>
+        </div>
+        <div>
+          <p className={s.eyebrow}>{es ? "Qué incluye" : "What is included"}</p>
+          <h2 className={s.h2}>{es ? "Todo lo que cubre el servicio." : "Everything the service covers."}</h2>
+          <div className={s.accordion}>
+            {v.includes.map((w, i) => (
+              <details key={w.title} name={`inc-${slug}`} open={i === 0}>
+                <summary>{w.title}<i aria-hidden="true" /></summary>
+                <p>{w.desc}</p>
+              </details>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className={`${s.wrap} ${s.sectionFlush}`}>
-        <h2 className={s.h2}>{es ? "Qué incluye" : "What is included"}</h2>
-        <ul className={s.cards3}>
-          {v.includes.map((w) => (
-            <li key={w.title} className={s.card}><h3>{w.title}</h3><p>{w.desc}</p></li>
-          ))}
-        </ul>
-      </section>
+      {/* the tools we build with, as a moving band */}
+      <div className={s.tagRail} aria-label={es ? "Herramientas" : "Tools"}>
+        {[0, 1].map((row) => (
+          <div key={row} className={s.tagRow} data-rev={row === 1}>
+            {[0, 1].map((g) => (
+              <ul key={g} aria-hidden={row + g > 0}>
+                {[0, 1, 2, 3].map((k) => tools.map((tl) => <li key={k + tl}>{tl}</li>))}
+              </ul>
+            ))}
+          </div>
+        ))}
+      </div>
 
       <section className={`${s.wrap} ${s.section}`}>
-        <h2 className={s.h2}>{es ? "Formas de trabajar con nosotros" : "Ways to work with us"}</h2>
-        <ul className={s.cards3}>
-          {v.engage.map((w) => (
-            <li key={w.title} className={s.card}>
+        <div className={s.center}>
+          <h2 className={s.h2}>{es ? "Formas de trabajar con nosotros." : "Ways to work with us."}</h2>
+        </div>
+        <ul className={`${s.cards3} ${s.engage}`}>
+          {v.engage.map((w, i) => (
+            <li key={w.title} className={s.card} data-on={i === 1}>
               <h3>{w.title}</h3>
               <p>{sentence(w.forLabel)}</p>
               <ul className={s.dots}>{w.bullets.map((b) => <li key={b}>{b}</li>)}</ul>
             </li>
           ))}
         </ul>
-        <p className={s.tools}>{es ? "Herramientas: " : "Tools: "}{v.tools.map(sentence).join(", ")}.</p>
       </section>
       <TalkBand />
     </SparkPage>
