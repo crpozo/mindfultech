@@ -930,7 +930,7 @@
   break-inside: avoid;
   margin-bottom: 1.25rem;
 }
-.wall a {
+.wall .wallCard {
   position: relative;
   display: block;
   padding: 1.75rem;
@@ -939,15 +939,15 @@
   color: var(--ink);
   transition: background-color 0.25s ease, color 0.25s ease;
 }
-.wall a:hover,
-.wall a:focus-visible {
+.wall .wallCard:hover,
+.wall .wallCard:focus-visible {
   background: var(--night);
   color: #fff;
 }
-.wall a:hover small,
-.wall a:hover em,
-.wall a:focus-visible small,
-.wall a:focus-visible em {
+.wall .wallCard:hover small,
+.wall .wallCard:hover em,
+.wall .wallCard:focus-visible small,
+.wall .wallCard:focus-visible em {
   color: var(--on-night);
 }
 .wallGo {
@@ -968,13 +968,13 @@
 .wallGo svg {
   margin: 0;
 }
-.wall a:hover .wallGo,
-.wall a:focus-visible .wallGo {
+.wall .wallCard:hover .wallGo,
+.wall .wallCard:focus-visible .wallGo {
   opacity: 1;
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .wall a,
+  .wall .wallCard,
   .wallGo {
     transition: none;
   }
@@ -2592,7 +2592,7 @@
   .wall > li {
     display: flex;
   }
-  .wall a {
+  .wall .wallCard {
     flex: 1;
   }
   .places > li {
@@ -2877,7 +2877,7 @@
   }
 
   /* cases */
-  .wall a {
+  .wall .wallCard {
     padding: 1.75rem 1.6rem;
   }
 
@@ -3007,4 +3007,105 @@
 }
 .bite {
   display: none;
+}
+
+/* home banner: the text block sat a little low next to the film; lift it so it
+   reads as centred (the kicker is light, so the optical centre is higher) */
+@media (min-width: 961px) {
+  .heroPanel {
+    padding-bottom: calc(clamp(2rem, 5.5vw, 5rem) + 2rem);
+  }
+}
+
+/* the featured (dark) service card keeps its white title on hover */
+.page a.svcDark:hover,
+.page a.svcDark:focus-visible {
+  color: #fff;
+}
+
+/* live 3D knot: the canvas replaces the still once it is drawing */
+.mark[data-live="true"] img {
+  visibility: hidden;
+}
+
+/* crossing bands: a wider angle, so the two read as separate strips */
+.bands {
+  height: clamp(11rem, 21vw, 17rem);
+}
+.bandA {
+  transform: translateY(-50%) rotate(-3.8deg);
+}
+.bandB {
+  transform: translateY(-50%) rotate(3.8deg);
+}
+@media (max-width: 620px) {
+  .bands {
+    height: 8.5rem;
+  }
+}
+
+/* service cards: a small 3D object instead of a line icon */
+.svcArt {
+  display: block;
+  width: 7.5rem;
+  height: 7.5rem;
+  margin: 0.75rem 0 0.75rem -0.6rem;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.svcArt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0.9rem 1rem rgba(27, 27, 27, 0.16));
+}
+.svc:hover .svcArt,
+.svc:focus-visible .svcArt {
+  transform: translateY(-6px) rotate(-5deg) scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .svcArt {
+    transition: none;
+  }
+  .svc:hover .svcArt {
+    transform: none;
+  }
+}
+@media (max-width: 620px) {
+  .svcArt {
+    width: 6rem;
+    height: 6rem;
+    margin-block: 0.5rem;
+  }
+}
+
+/* case cards are plain cards now: no link, no hover change, a flag by the place */
+.wall .wallCard:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+.wall .wallCard:hover small,
+.wall .wallCard:hover em {
+  color: var(--muted);
+}
+.wall em {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+.wall em img {
+  flex: none;
+  width: 1.45rem;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(27, 27, 27, 0.1);
+}
+
+/* office split: less to read, more room before the figures */
+.oneView .btnRow {
+  margin-top: clamp(1.5rem, 3.4vh, 2.5rem);
+}
+.oneView .stats {
+  padding-top: clamp(1.75rem, 4vh, 3rem);
 }

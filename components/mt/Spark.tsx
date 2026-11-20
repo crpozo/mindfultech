@@ -1,5 +1,6 @@
 "use client";
 
+import { Knot3D } from "./Knot3D";
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
@@ -74,7 +75,7 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
   {
     id: "fence", client: "Western Fence Supply", where: { en: "Fence distributor, United States", es: "Distribuidor de cercas, Estados Unidos" },
     title: { en: "From Excel to a CRM that routes its own leads.", es: "De Excel a un CRM que reparte sus propios leads." },
-    text: { en: "A full move to Odoo, with leads assigned by each rep's language and a delivery module for multi-stop truck routes.", es: "Migración completa a Odoo, con leads asignados según el idioma de cada vendedor y un módulo de entregas con varias paradas." },
+    text: { en: "An Odoo integration: leads assigned by each rep's language, and multi-stop truck deliveries planned on 3D maps.", es: "Integración con Odoo: leads asignados según el idioma de cada vendedor y entregas de varias paradas planificadas sobre mapas 3D." },
   },
   {
     id: "carcompra-crm", client: "CarCompra", where: { en: "Car dealership, Ecuador", es: "Concesionaria, Ecuador" },
@@ -153,7 +154,19 @@ function WorldMap({ active, onPick }: { active: string | null; onPick: (id: stri
   );
 }
 
-const STRIP = ["/art/leads.webp", "/art/product.webp", "/art/ailab.webp", "/art/homecare.webp", "/art/healthcare.webp"];
+const STRIP = [1, 2, 3, 4, 5].map((n) => `/mt/strip-${n}.webp`);
+/** 3D icon of each service card, in SERVICES order (rendered by scripts/icons3d-*.js). */
+const ART = ["ai", "software", "security", "workshops", "integration", "office"];
+/** Country flag of each case card. */
+const FLAG: Record<string, { code: string; name: Bi }> = {
+  healthcare: { code: "us", name: { en: "United States", es: "Estados Unidos" } },
+  usfq: { code: "ec", name: { en: "Ecuador", es: "Ecuador" } },
+  fence: { code: "us", name: { en: "United States", es: "Estados Unidos" } },
+  "carcompra-crm": { code: "ec", name: { en: "Ecuador", es: "Ecuador" } },
+  parc: { code: "us", name: { en: "United States", es: "Estados Unidos" } },
+  themedmotion: { code: "nl", name: { en: "Netherlands", es: "Países Bajos" } },
+};
+const SHOW_MAP = false;
 
 export function SparkHome() {
   const { lang } = useLang();
@@ -279,7 +292,7 @@ export function SparkHome() {
               <li key={v.href + v.title.en}>
                 <Link href={v.href} className={`${s.svc} ${i === 0 ? s.svcDark : ""}`}>
                   <h3>{t(v.title)}</h3>
-                  <span className={s.svcIcon}><v.icon size={30} strokeWidth={1.5} aria-hidden="true" /></span>
+                  <span className={s.svcArt}><img src={`/mt/icon-${ART[i]}.webp`} alt="" width={360} height={360} loading="lazy" /></span>
                   <p>{t(v.text)}</p>
                   <span className={`${s.pill} ${s.pillSmall} ${s.svcBtn}`}>
                     {es ? "Ver más" : "Explore more"}
@@ -301,7 +314,7 @@ export function SparkHome() {
             <h2 className={s.h2}>{es ? "Automatización que te mantiene en control." : "Automation that keeps you in control."}</h2>
           </div>
           <div className={`${s.wrap} ${s.control}`}>
-            <div className={s.mark} aria-hidden="true"><img src="/mt/knot.webp" alt="" width={1200} height={1200} loading="lazy" /></div>
+            <Knot3D className={s.mark} />
             {CONTROL.map((c, i) => {
               const Icon = CONTROL_ICONS[i];
               return (
@@ -326,16 +339,10 @@ export function SparkHome() {
             <p className={s.eyebrow}>{es ? "Conoce la AI Management Office de MindfulTech" : "Meet the AI Management Office by MindfulTech"}</p>
             <h2 className={s.h2}>{es ? "Mira, conversa y aprueba el trabajo de tu equipo de IA." : "Watch, chat with and approve the work of your AI team."}</h2>
             <p className={s.strong}>{es ? "Cada agente tiene un rol y un escritorio. Abres su pantalla, le escribes y decides lo que necesita tu firma." : "Every agent has a role and a desk. You open its screen, write to it, and decide what needs your sign-off."}</p>
-            <p className={s.sub}>{es ? "Los agentes trabajan dentro de tus herramientas reales, y cada acción queda registrada." : "Agents work inside your real tools, and every action is logged."}</p>
             <div className={s.btnRow}>
               <Link href="/office-demo/" className={`${s.pill} ${s.pillSage}`}>{es ? "Abrir la Oficina IA" : "Open the AI Office"}<Arrow /></Link>
               <a href="#contact" className={`${s.pill} ${s.pillLine}`}>{t(TALK)}</a>
             </div>
-            <ul className={s.checks}>
-              <li>{es ? "La pantalla de cada agente, en vivo" : "Every agent's screen, live"}</li>
-              <li>{es ? "Chat directo con cualquier agente" : "Direct chat with any agent"}</li>
-              <li>{es ? "Registro de cada acción, listo para auditar" : "A log of every action, ready to audit"}</li>
-            </ul>
           </div>
         </section>
 
@@ -360,13 +367,15 @@ export function SparkHome() {
           <ul className={s.wall}>
             {CASES.map((c) => (
               <li key={c.id}>
-                <Link href={`/work/${c.id}/`}>
+                <div className={s.wallCard}>
                   <p>{t(c.title)}</p>
                   {c.text && <small>{t(c.text)}</small>}
                   <b>{c.client}</b>
-                  <em>{t(c.where)}</em>
-                  <span className={s.wallGo}><Arrow /></span>
-                </Link>
+                  <em>
+                    <img src={`/flags/${FLAG[c.id].code}.webp`} alt={t(FLAG[c.id].name)} width={80} height={53} loading="lazy" />
+                    {t(c.where)}
+                  </em>
+                </div>
               </li>
             ))}
           </ul>
@@ -382,6 +391,8 @@ export function SparkHome() {
           <ContactBlock id="contact" />
         </div>
 
+        {/* world map removed from the home at Carlos's request (2026-11-20); kept for reuse */}
+        {SHOW_MAP && (
         <section className={`${s.wrap} ${s.section}`}>
           <p className={s.eyebrow}>{es ? "MindfulTech en el mundo" : "MindfulTech around the world"}</p>
           <h2 className={s.h2} style={{ maxWidth: "20ch" }}>{es ? "Un laboratorio en Quito, proyectos en tres continentes." : "One lab in Quito, projects on three continents."}</h2>
@@ -411,6 +422,7 @@ export function SparkHome() {
             </ul>
           </div>
         </section>
+        )}
     </SparkPage>
   );
 }
