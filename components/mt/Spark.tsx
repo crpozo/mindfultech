@@ -89,13 +89,11 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
   },
 ];
 
-const SLIDES: { img: string; video?: string; alt: Bi }[] = [
-  { img: "/mt/promo-poster.webp", video: "/mt/promo.mp4", alt: { en: "MindfulTech film: a person hands her messages, billing and reports to AI agents", es: "Video de MindfulTech: una persona delega sus mensajes, cobros y reportes a agentes de IA" } },
-  { img: "/mt/hero-3d.webp", alt: { en: "Abstract 3D woven bands in sage green", es: "Cintas tejidas en 3D, en verde salvia" } },
-  { img: "/mt/hero-a.webp", alt: { en: "The 3D AI Management Office, with one agent's live screen beside it", es: "La AI Management Office en 3D, con la pantalla en vivo de un agente al lado" } },
-  { img: "/mt/hero-b.webp", alt: { en: "A dashboard that joins results from every location", es: "Un panel que une los resultados de todas las sedes" } },
-  { img: "/mt/hero-c.webp", alt: { en: "An agent's panel: watch its screen, chat with it, approve its work", es: "El panel de un agente: mira su pantalla, conversa y aprueba su trabajo" } },
-];
+const FILM = {
+  src: "/mt/promo.mp4",
+  poster: "/mt/promo-poster.webp",
+  alt: { en: "MindfulTech film: a person hands her messages, billing and reports to AI agents", es: "Video de MindfulTech: una persona delega sus mensajes, cobros y reportes a agentes de IA" } as Bi,
+};
 
 /** Blog tags are stored in capitals; show them as words, keeping "AI" and "IA" as acronyms. */
 const tagLabel = (v: string) => v.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase()).replace(/\b(Ai|Ia)\b/g, (m) => m.toUpperCase());
@@ -106,32 +104,54 @@ export function SparkHome() {
   const { lang } = useLang();
   const es = lang === "es";
   const t = (v: Bi) => v[lang];
-  const [slide, setSlide] = React.useState(0);
   const loop = React.useRef<HTMLVideoElement>(null);
   const film = React.useRef<HTMLVideoElement>(null);
   const dialog = React.useRef<HTMLDialogElement>(null);
-  // The silent loop only runs while its slide is showing, and never for
-  // visitors who asked for less motion: they get the still and the play button.
+  const [sound, setSound] = React.useState(false);
+  const calm = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // The banner film starts silent. Visitors who asked for less motion get the
+  // still, and can start it themselves with either button.
   React.useEffect(() => {
+    if (!calm()) loop.current?.play().catch(() => {});
+  }, []);
+  const toggleSound = () => {
     const v = loop.current;
     if (!v) return;
-    if (slide === 0 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) v.play().catch(() => {});
-    else v.pause();
-  }, [slide]);
+    const on = !sound;
+    v.muted = !on;
+    if (on) v.play().catch(() => {});
+    setSound(on);
+  };
+  // Play means "big": the film opens full screen with sound, from the start.
+  // If the browser refuses full screen, it still opens in a dialog that fills the window.
   const openFilm = () => {
-    loop.current?.pause();
-    dialog.current?.showModal();
-    const v = film.current;
+    const v = loop.current;
     if (v) {
-      v.currentTime = 0;
-      v.play().catch(() => {});
+      v.pause();
+      v.muted = true;
     }
+    setSound(false);
+    dialog.current?.showModal();
+    const big = film.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
+    if (!big) return;
+    big.currentTime = 0;
+    big.play().catch(() => {});
+    if (big.requestFullscreen) big.requestFullscreen().catch(() => {});
+    else big.webkitEnterFullscreen?.();
   };
   const closeFilm = () => {
     film.current?.pause();
-    if (slide === 0 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) loop.current?.play().catch(() => {});
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (!calm()) loop.current?.play().catch(() => {});
   };
-  const go = (d: number) => setSlide((v) => (v + d + SLIDES.length) % SLIDES.length);
+  // leaving full screen (Esc, or the browser's own button) closes the film too
+  React.useEffect(() => {
+    const onFs = () => {
+      if (!document.fullscreenElement && dialog.current?.open) dialog.current.close();
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
   const rail = React.useRef<HTMLUListElement>(null);
   const slidePosts = (d: number) => {
     const el = rail.current;
@@ -156,27 +176,20 @@ export function SparkHome() {
               <Arrow />
             </Link>
           </div>
-          <div className={s.heroMedia} data-film={slide === 0}>
-            {SLIDES.map((sl, i) =>
-              sl.video ? (
-                <video key={sl.video} ref={loop} muted loop playsInline preload="metadata" poster={sl.img} data-on={i === slide} aria-label={t(sl.alt)}>
-                  <source src={sl.video} type="video/mp4" />
-                </video>
-              ) : (
-                <img key={sl.img} src={sl.img} alt={i === slide ? t(sl.alt) : ""} data-on={i === slide} loading="lazy" />
-              )
-            )}
-            <button type="button" className={s.play} onClick={openFilm} aria-label={es ? "Ver el video con sonido" : "Play the film with sound"}>
+          <div className={s.heroMedia}>
+            <video ref={loop} muted loop playsInline preload="metadata" poster={FILM.poster} aria-label={t(FILM.alt)}>
+              <source src={FILM.src} type="video/mp4" />
+            </video>
+            <button type="button" className={s.play} onClick={openFilm} aria-label={es ? "Ver el video a pantalla completa" : "Watch the film full screen"}>
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 7l8 5-8 5z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
             </button>
-            <div className={s.arrows}>
-              <button type="button" onClick={() => go(-1)} aria-label={es ? "Imagen anterior" : "Previous image"}>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-              <button type="button" onClick={() => go(1)} aria-label={es ? "Imagen siguiente" : "Next image"}>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-            </div>
+            <button type="button" className={s.sound} onClick={toggleSound} aria-pressed={sound}>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
+                {sound ? <path d="M15.5 9a4.2 4.2 0 010 6M18 6.5a8 8 0 010 11" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
+              </svg>
+              <span>{sound ? (es ? "Quitar sonido" : "Sound off") : es ? "Activar sonido" : "Sound on"}</span>
+            </button>
           </div>
         </section>
 
