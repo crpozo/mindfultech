@@ -306,9 +306,14 @@
   font-weight: 500;
   cursor: pointer;
 }
-.sound:hover,
-.sound[aria-pressed="true"] {
+.sound:hover {
   background: #fff;
+  color: var(--ink);
+}
+/* sound playing: the button turns sage, so its state reads at a glance */
+.sound[aria-pressed="true"] {
+  border-color: var(--sage);
+  background: var(--sage);
   color: var(--ink);
 }
 

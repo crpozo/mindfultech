@@ -188,7 +188,7 @@ export function SparkHome() {
                 <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
                 {sound ? <path d="M15.5 9a4.2 4.2 0 010 6M18 6.5a8 8 0 010 11" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
               </svg>
-              <span>{sound ? (es ? "Quitar sonido" : "Sound off") : es ? "Activar sonido" : "Sound on"}</span>
+              <span>{sound ? (es ? "Silenciar" : "Mute") : es ? "Activar sonido" : "Turn sound on"}</span>
             </button>
           </div>
         </section>
