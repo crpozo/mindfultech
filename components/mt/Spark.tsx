@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
-import { POSTS } from "@/lib/blog/posts";
+import { AppWindow, Bot, Building2, FileClock, KeyRound, MapPin, Play, ShieldCheck, UserCheck, Users, Volume2, VolumeX, Workflow, type LucideIcon } from "lucide-react";
+import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { SparkPage, ContactBlock, Arrow, TALK, type Bi } from "./SparkChrome";
 import s from "./spark.module.css";
 
@@ -15,9 +16,9 @@ const LOGOS = [
   { src: "/portfolio/themedmotion-logo.webp", alt: "ThemedMotion", h: "2.1rem" },
 ];
 
-const SERVICES: { href: string; img?: string; title: Bi; text: Bi }[] = [
+const SERVICES: { href: string; icon: LucideIcon; title: Bi; text: Bi }[] = [
   {
-    href: "/services/ai/", img: "/art/healthcare.webp",
+    href: "/services/ai/", icon: Bot,
     title: { en: "AI and automation", es: "IA y automatización" },
     text: {
       en: "Agents built for one job each, working inside your real tools, with a person approving what matters.",
@@ -25,31 +26,33 @@ const SERVICES: { href: string; img?: string; title: Bi; text: Bi }[] = [
     },
   },
   {
-    href: "/services/custom/", img: "/art/product.webp",
+    href: "/services/custom/", icon: AppWindow,
     title: { en: "Custom software", es: "Software a medida" },
     text: { en: "Web and mobile apps built around how your team already works.", es: "Aplicaciones web y móviles hechas alrededor de cómo ya trabaja tu equipo." },
   },
   {
-    href: "/services/security/", img: "/art/research.webp",
+    href: "/services/security/", icon: ShieldCheck,
     title: { en: "Cybersecurity", es: "Ciberseguridad" },
     text: { en: "We assess, harden and monitor your apps, cloud and AI systems.", es: "Evaluamos, reforzamos y monitoreamos tus apps, tu nube y tus sistemas de IA." },
   },
   {
-    href: "/services/discovery/", img: "/art/team.webp",
+    href: "/services/discovery/", icon: Users,
     title: { en: "Workshops and requirements", es: "Workshops y requerimientos" },
     text: { en: "Facilitated sessions that turn how you operate into a clear build plan.", es: "Sesiones facilitadas que convierten tu operación en un plan claro de construcción." },
   },
   {
-    href: "/work/", img: "/art/leads.webp",
+    href: "/work/", icon: Workflow,
     title: { en: "Systems integration", es: "Integración de sistemas" },
     text: { en: "Your CRM, billing, channels and data joined so one record follows the customer.", es: "Tu CRM, facturación, canales y datos unidos para que un solo registro siga al cliente." },
   },
   {
-    href: "/office-demo/", img: "/art/ailab.webp",
+    href: "/office-demo/", icon: Building2,
     title: { en: "AI Management Office", es: "AI Management Office" },
     text: { en: "A 3D office where you watch every agent work and sign off on its decisions.", es: "Una oficina 3D donde ves trabajar a cada agente y apruebas sus decisiones." },
   },
 ];
+
+const CONTROL_ICONS: LucideIcon[] = [UserCheck, MapPin, KeyRound, FileClock];
 
 const CONTROL: { t: Bi; d: Bi }[] = [
   { t: { en: "A person approves", es: "Una persona aprueba" }, d: { en: "Agents prepare. A person signs off on payments, customer messages and anything that cannot be undone.", es: "Los agentes preparan. Una persona aprueba pagos, mensajes a clientes y lo que no se puede deshacer." } },
@@ -95,8 +98,60 @@ const FILM = {
   alt: { en: "MindfulTech film: a person hands her messages, billing and reports to AI agents", es: "Video de MindfulTech: una persona delega sus mensajes, cobros y reportes a agentes de IA" } as Bi,
 };
 
-/** Blog tags are stored in capitals; show them as words, keeping "AI" and "IA" as acronyms. */
-const tagLabel = (v: string) => v.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase()).replace(/\b(Ai|Ia)\b/g, (m) => m.toUpperCase());
+/* Where the work is. Quito is home; every other pin is a client location.
+   `at` is nudged so labels do not collide on the small map. */
+type Place = { id: string; lat: number; lon: number; city: Bi; projects: { name: string; href?: string; what: Bi }[] };
+const HOME: Place = {
+  id: "quito", lat: -0.18, lon: -78.47, city: { en: "Quito, Ecuador", es: "Quito, Ecuador" },
+  projects: [
+    { name: "MindfulTech", what: { en: "Where the lab works from", es: "Desde donde trabaja el laboratorio" } },
+    { name: "USFQ", href: "/work/usfq/", what: { en: "EventFlow, campus events platform and iOS app", es: "EventFlow, plataforma de eventos y app iOS" } },
+    { name: "CarCompra", href: "/work/carcompra-crm/", what: { en: "CRM with AI and Meta ads", es: "CRM con IA y pautas de Meta" } },
+  ],
+};
+const PLACES: Place[] = [
+  { id: "us-w", lat: 36.8, lon: -119.8, city: { en: "United States, West", es: "Estados Unidos, oeste" }, projects: [{ name: "Helixona", href: "/work/healthcare/", what: { en: "Medical billing agent", es: "Agente de facturación médica" } }] },
+  { id: "us-c", lat: 41.9, lon: -87.6, city: { en: "United States, Midwest", es: "Estados Unidos, medio oeste" }, projects: [{ name: "PARC Home Care", href: "/work/parc/", what: { en: "Client portal in both app stores", es: "Portal de clientes en ambas tiendas" } }] },
+  { id: "us-e", lat: 26.6, lon: -81.9, city: { en: "Florida, United States", es: "Florida, Estados Unidos" }, projects: [{ name: "Western Fence Supply", href: "/work/fence/", what: { en: "CRM migration to Odoo", es: "Migración de CRM a Odoo" } }] },
+  { id: "nl", lat: 52.4, lon: 4.9, city: { en: "Netherlands", es: "Países Bajos" }, projects: [{ name: "ThemedMotion", href: "/work/themedmotion/", what: { en: "Immersive 3D portfolio", es: "Portafolio 3D inmersivo" } }] },
+];
+/** Countries with clients we do not name on the site. */
+const MORE: { id: string; lat: number; lon: number }[] = [{ id: "de", lat: 51.2, lon: 10.4 }, { id: "es", lat: 40.4, lon: -3.7 }, { id: "gr", lat: 37.98, lon: 23.7 }];
+const proj = (lat: number, lon: number) => ({ x: ((lon - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * MAP_VIEW.w, y: ((MAP_VIEW.lat1 - lat) / (MAP_VIEW.lat1 - MAP_VIEW.lat0)) * MAP_VIEW.h });
+
+function WorldMap({ active, onPick }: { active: string | null; onPick: (id: string | null) => void }) {
+  const h = proj(HOME.lat, HOME.lon);
+  const arc = (lat: number, lon: number, i: number) => {
+    const q = proj(lat, lon);
+    const dx = q.x - h.x;
+    const lift = Math.abs(dx) * 0.16 + 26 + i * 9;
+    return `M${h.x},${h.y} C${h.x + dx * 0.25},${Math.min(h.y, q.y) - lift} ${h.x + dx * 0.75},${Math.min(h.y, q.y) - lift} ${q.x},${q.y}`;
+  };
+  return (
+    <svg viewBox={`0 0 ${MAP_VIEW.w} ${MAP_VIEW.h}`} className={s.mapSvg} role="img" aria-label="World map with MindfulTech in Quito and its client locations in the United States and Europe">
+      <path d={LAND_PATH} fill="none" stroke="#c3cccb" strokeWidth={3.1} strokeLinecap="round" />
+      {MORE.map((m, i) => <path key={m.id} d={arc(m.lat, m.lon, i + 4)} fill="none" stroke="#9fb9b4" strokeWidth={1.2} strokeDasharray="3 5" />)}
+      {PLACES.map((pl, i) => <path key={pl.id} d={arc(pl.lat, pl.lon, i)} fill="none" stroke={active === pl.id ? "#1b1b1b" : "#2b6a60"} strokeWidth={active === pl.id ? 2.6 : 1.6} />)}
+      {MORE.map((m) => { const q = proj(m.lat, m.lon); return <circle key={m.id} cx={q.x} cy={q.y} r={4.5} fill="#fff" stroke="#2b6a60" strokeWidth={1.6} />; })}
+      {PLACES.map((pl) => {
+        const q = proj(pl.lat, pl.lon);
+        const on = active === pl.id;
+        return (
+          <g key={pl.id} onMouseEnter={() => onPick(pl.id)} onMouseLeave={() => onPick(null)} style={{ cursor: "pointer" }}>
+            <circle cx={q.x} cy={q.y} r={16} fill="transparent" />
+            {on && <circle cx={q.x} cy={q.y} r={15} fill="rgba(129,197,185,0.45)" />}
+            <circle cx={q.x} cy={q.y} r={7} fill={on ? "#1b1b1b" : "#81c5b9"} stroke="#1b1b1b" strokeWidth={1.6} />
+          </g>
+        );
+      })}
+      <g onMouseEnter={() => onPick(HOME.id)} onMouseLeave={() => onPick(null)}>
+        <circle cx={h.x} cy={h.y} r={active === HOME.id ? 22 : 17} fill="rgba(27,27,27,0.14)" />
+        <circle cx={h.x} cy={h.y} r={9.5} fill="#1b1b1b" />
+        <circle cx={h.x} cy={h.y} r={3.5} fill="#81c5b9" />
+      </g>
+    </svg>
+  );
+}
 
 const STRIP = ["/art/leads.webp", "/art/product.webp", "/art/ailab.webp", "/art/homecare.webp", "/art/healthcare.webp"];
 
@@ -152,24 +207,19 @@ export function SparkHome() {
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
-  const rail = React.useRef<HTMLUListElement>(null);
-  const slidePosts = (d: number) => {
-    const el = rail.current;
-    if (!el) return;
-    const card = el.querySelector("li");
-    el.scrollBy({ left: d * ((card?.clientWidth || 320) + 24), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-  };
-  const band = es ? "Conectamos tus sistemas. Los agentes hacen el trabajo. " : "We connect your systems. Agents do the work. ";
+  const [place, setPlace] = React.useState<string | null>(null);
+  const band = es ? "AI Software Lab. Construimos los agentes que hacen el trabajo. " : "AI Software Lab. We build the agents that do the work. ";
 
   return (
-    <SparkPage active="home">
+    <SparkPage active="home" over={false}>
         <section className={`${s.heroWrap} ${s.hero}`}>
           <div className={s.heroPanel}>
-            <h1>{es ? "Conectamos tus sistemas. Los agentes hacen el trabajo." : "We connect your systems. Agents do the work."}</h1>
+            <p className={s.heroKicker}>MindfulTech, AI Software Lab</p>
+            <h1>{es ? "El laboratorio de software que construye tu IA." : "The software lab that builds your AI."}</h1>
             <p>
               {es
-                ? "Entendemos cómo opera tu negocio, unimos tus datos y herramientas en una sola plataforma y automatizamos la rutina con agentes hechos para cada tarea."
-                : "We learn how your business runs, join your data and tools in one platform, and automate the routine with agents built for each job."}
+                ? "Diseñamos, construimos y operamos software con IA para tu empresa: agentes que hacen el trabajo rutinario, conectados a los sistemas que ya usas."
+                : "We design, build and run AI software for your company: agents that do the routine work, connected to the systems you already use."}
             </p>
             <Link href="/services/" className={`${s.pill} ${s.pillSage}`}>
               {es ? "Ver nuestros servicios" : "Explore our services"}
@@ -181,13 +231,10 @@ export function SparkHome() {
               <source src={FILM.src} type="video/mp4" />
             </video>
             <button type="button" className={s.play} onClick={openFilm} aria-label={es ? "Ver el video a pantalla completa" : "Watch the film full screen"}>
-              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 7l8 5-8 5z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+              <Play size={24} strokeWidth={1.6} aria-hidden="true" />
             </button>
             <button type="button" className={s.sound} onClick={toggleSound} aria-pressed={sound}>
-              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
-                {sound ? <path d="M15.5 9a4.2 4.2 0 010 6M18 6.5a8 8 0 010 11" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
-              </svg>
+              {sound ? <Volume2 size={20} strokeWidth={1.8} aria-hidden="true" /> : <VolumeX size={20} strokeWidth={1.8} aria-hidden="true" />}
               <span>{sound ? (es ? "Silenciar" : "Mute") : es ? "Activar sonido" : "Turn sound on"}</span>
             </button>
           </div>
@@ -221,9 +268,9 @@ export function SparkHome() {
               <li key={v.href + v.title.en}>
                 <Link href={v.href} className={`${s.svc} ${i === 0 ? s.svcDark : ""}`}>
                   <h3>{t(v.title)}</h3>
-                  {v.img && <img src={v.img} alt="" loading="lazy" />}
+                  <span className={s.svcIcon}><v.icon size={30} strokeWidth={1.5} aria-hidden="true" /></span>
                   <p>{t(v.text)}</p>
-                  <span className={`${s.pill} ${s.pillSmall} ${i === 0 ? s.pillWhite : s.pillInk}`}>
+                  <span className={`${s.pill} ${s.pillSmall} ${s.svcBtn}`}>
                     {es ? "Ver más" : "Explore more"}
                     <Arrow />
                   </span>
@@ -243,18 +290,16 @@ export function SparkHome() {
             <h2 className={s.h2}>{es ? "Automatización que te mantiene en control." : "Automation that keeps you in control."}</h2>
           </div>
           <div className={`${s.wrap} ${s.control}`}>
-            <div className={s.mark} aria-hidden="true"><img src="/brand/logo-mark.webp" alt="" width={220} height={220} loading="lazy" /></div>
-            {CONTROL.map((c, i) => (
-              <div key={c.t.en} className={s.glass}>
-                <svg viewBox="0 0 32 32" width="34" height="34" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {i === 0 && <><circle cx="13" cy="11" r="5" /><path d="M4 27c0-5 4-8 9-8 2 0 3.8.5 5.2 1.3M20 24l3 3 6-7" /></>}
-                  {i === 1 && <><path d="M16 29s9-8.5 9-15a9 9 0 10-18 0c0 6.500 9 15 9 15z" /><circle cx="16" cy="14" r="3.5" /></>}
-                  {i === 2 && <><circle cx="11" cy="20" r="6" /><path d="M15.5 15.5L27 4M22 9l4 4M18.5 12.5l3 3" /></>}
-                  {i === 3 && <><rect x="6" y="4" width="20" height="24" rx="3" /><path d="M11 11h10M11 16h10M11 21h6" /></>}
-                </svg>
-                <div><h3>{t(c.t)}</h3><p>{t(c.d)}</p></div>
-              </div>
-            ))}
+            <div className={s.mark} aria-hidden="true"><img src="/mt/knot.webp" alt="" width={1200} height={1200} loading="lazy" /></div>
+            {CONTROL.map((c, i) => {
+              const Icon = CONTROL_ICONS[i];
+              return (
+                <div key={c.t.en} className={s.glass}>
+                  <Icon size={34} strokeWidth={1.4} aria-hidden="true" />
+                  <div><h3>{t(c.t)}</h3><p>{t(c.d)}</p></div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -297,24 +342,6 @@ export function SparkHome() {
           <div className={`${s.band} ${s.bandB}`}><span>{band.repeat(4)}</span><span>{band.repeat(4)}</span></div>
         </div>
 
-        <section className={`${s.night} ${s.section} ${s.officeBlock}`}>
-          <div className={s.wrap}>
-            <p className={s.kicker}>{es ? "La AI Management Office, nuestro producto" : "The AI Management Office, our own product"}</p>
-            <h2 className={`${s.h2} ${s.officeHead}`}>{es ? "Una oficina donde ves trabajar a tu IA." : "An office where you can see your AI at work."}</h2>
-            <Link href="/office-demo/" className={s.officeShot}>
-              <img src="/office-demo-preview.webp" alt={es ? "Vista de la oficina 3D con los agentes en sus escritorios" : "View of the 3D office with agents at their desks"} width={2000} height={1125} loading="lazy" />
-              <span className={s.officeCard}>
-                <span className={s.tags}><i>{es ? "Demo en vivo" : "Live demo"}</i><i>{es ? "12 agentes" : "12 agents"}</i></span>
-                <b>{es ? "Entra, abre la pantalla de cualquier agente y conversa con él." : "Step in, open any agent's screen and chat with it."}</b>
-              </span>
-            </Link>
-            <div className={s.officeFoot}>
-              <p>{es ? "Agentes con roles de ventas, soporte, finanzas, marketing y operaciones, trabajando dentro de herramientas reales." : "Agents in sales, support, finance, marketing and operations roles, working inside real tools."}</p>
-              <Link href="/office-demo/" className={`${s.pill} ${s.pillSage}`}>{es ? "Abrir la Oficina IA" : "Open the AI Office"}<Arrow /></Link>
-            </div>
-          </div>
-        </section>
-
         <section className={`${s.wrap} ${s.section}`}>
           <div className={s.center}>
             <h2 className={s.h2} style={{ maxWidth: "16ch" }}>{es ? "Lo que construimos para nuestros clientes." : "What we built for our clients."}</h2>
@@ -345,39 +372,33 @@ export function SparkHome() {
         </div>
 
         <section className={`${s.wrap} ${s.section}`}>
-          <div className={s.blogHead}>
-            <div>
-              <p className={s.eyebrow}>{es ? "Lo último del laboratorio" : "The latest from the lab"}</p>
-              <h2 className={s.h2}>{es ? "Ideas y aprendizajes sobre IA aplicada." : "Ideas and lessons on applied AI."}</h2>
+          <p className={s.eyebrow}>{es ? "MindfulTech en el mundo" : "MindfulTech around the world"}</p>
+          <h2 className={s.h2} style={{ maxWidth: "20ch" }}>{es ? "Un laboratorio en Quito, proyectos en tres continentes." : "One lab in Quito, projects on three continents."}</h2>
+          <div className={s.mapBlock}>
+            <div className={s.mapPanel}>
+              <WorldMap active={place} onPick={setPlace} />
+              <p className={s.mapKey}>
+                <span><i data-k="home" />{es ? "Laboratorio" : "The lab"}</span>
+                <span><i data-k="client" />{es ? "Proyectos con cliente nombrado" : "Projects with a named client"}</span>
+                <span><i data-k="more" />{es ? "Otros clientes: Alemania, España y Grecia" : "Other clients: Germany, Spain and Greece"}</span>
+              </p>
             </div>
-            <div className={s.railBtns}>
-              <button type="button" onClick={() => slidePosts(-1)} aria-label={es ? "Artículos anteriores" : "Previous articles"}>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-              <button type="button" onClick={() => slidePosts(1)} aria-label={es ? "Artículos siguientes" : "Next articles"}>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-            </div>
+            <ul className={s.places}>
+              {[HOME, ...PLACES].map((pl) => (
+                <li key={pl.id} data-on={place === pl.id} onMouseEnter={() => setPlace(pl.id)} onMouseLeave={() => setPlace(null)}>
+                  <h3>{t(pl.city)}</h3>
+                  <ul>
+                    {pl.projects.map((pr) => (
+                      <li key={pr.name}>
+                        {pr.href ? <Link href={pr.href} onFocus={() => setPlace(pl.id)} onBlur={() => setPlace(null)}>{pr.name}</Link> : <b>{pr.name}</b>}
+                        <span>{t(pr.what)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className={s.postRail} ref={rail}>
-            {POSTS.map((p) => (
-              <li key={p.slug}>
-                <Link href={`/blog/${p.slug}/`} className={s.post}>
-                  <span className={s.postImg}>
-                    <img src={p.coverCard || p.cover} alt="" width={800} height={450} />
-                    <span className={s.postTag}><i>{tagLabel(p.tag[lang])}</i></span>
-                  </span>
-                  <span className={s.postBody}>
-                    <b>{t(p.title)}</b>
-                    <span>{t(p.excerpt)}</span>
-                    <small>{p.author[lang].split(" · ")[0]}<i />{t(p.dateLabel)}</small>
-                    <span className={s.postGo}><Arrow /></span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className={s.allPosts}><Link href="/blog/">{es ? "Ver todos los artículos" : "Check all posts"}<Arrow /></Link></p>
         </section>
     </SparkPage>
   );

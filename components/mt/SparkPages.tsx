@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
+import { Linkedin } from "./SparkChrome";
 import { POSTS, getPost, relatedPosts } from "@/lib/blog/posts";
 import { CASES } from "@/lib/site/cases";
 import { SERVICES, SERVICES_ES } from "@/lib/site/serviceDetail";
@@ -10,7 +11,6 @@ import { SparkPage, Banner, TalkBand, ContactBlock, Arrow, TALK } from "./SparkC
 import s from "./spark.module.css";
 
 const SERVICE_ORDER = ["ai", "custom", "security", "discovery"];
-const SERVICE_IMG: Record<string, string> = { ai: "/mt/agent-panel.webp", custom: "/art/eventflow-login-wide.webp", security: "/art/research.webp", discovery: "/art/team.webp" };
 /** The data files keep labels in capitals for the old design; show them in sentence case. */
 const sentence = (v: string) => (v === v.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{2}/.test(v) ? v.charAt(0) + v.slice(1).toLowerCase() : v);
 const internal = (href: string) => href.replace(/^\/work#(.+)$/, "/work/$1/").replace("/work/helixona/", "/work/healthcare/");
@@ -25,8 +25,7 @@ export function SpServices() {
       <Banner
         title={es ? "Cuatro servicios, un solo equipo." : "Four services, one team."}
         lead={es ? "Entendemos tu operación, construimos el software, lo protegemos y lo automatizamos con agentes. Puedes contratar un servicio o el recorrido completo." : "We learn how you operate, build the software, secure it and automate it with agents. Hire one service or the whole path."}
-        img="/office-demo-preview.webp"
-        alt={es ? "La oficina 3D con agentes trabajando" : "The 3D office with agents at work"}
+        crumbs={[[es ? "Servicios" : "Services"]]}
       />
       <section className={`${s.wrap} ${s.section}`}>
         <ul className={s.svcList}>
@@ -66,9 +65,7 @@ export function SpService({ slug }: { slug: string }) {
   if (!v) return <SpNotFound />;
   return (
     <SparkPage active="services">
-      <Banner title={v.title} lead={v.subtitle} img={SERVICE_IMG[slug]} alt="">
-        <Link href="/contact/" className={`${s.pill} ${s.pillSage}`}>{TALK[lang]}</Link>
-      </Banner>
+      <Banner title={v.title} lead={v.subtitle} art="b" crumbs={[[es ? "Servicios" : "Services", "/services/"], [v.name]]} />
       <section className={s.wrap}>
         <dl className={s.specs}>
           {v.specs.map(([k, val]) => (
@@ -142,7 +139,11 @@ export function SpWork() {
       <Banner
         title={es ? "Trabajo que podemos mostrarte." : "Work we can show you."}
         lead={es ? "Clientes con nombre, el problema que tenían y lo que construimos para resolverlo." : "Named clients, the problem they had and what we built to solve it."}
-      />
+        crumbs={[[es ? "Casos" : "Work"]]}
+      >
+        <Link href="/contact/" className={`${s.pill} ${s.pillSage}`}>{TALK[lang]}<Arrow /></Link>
+        <Link href="/services/" className={`${s.pill} ${s.pillWhite}`}>{es ? "Ver los servicios" : "See the services"}</Link>
+      </Banner>
       <section className={`${s.wrap} ${s.section}`}>
         <ul className={s.workList}>
           {CASES.map((c, i) => (
@@ -174,9 +175,11 @@ export function SpCase({ slug }: { slug: string }) {
   const next = CASES[(i + 1) % CASES.length];
   return (
     <SparkPage active="work">
-      <Banner title={c.title[lang]} lead={c.brand[lang]} img={c.image} alt="">
-        {c.live && <a href={c.live.href} target="_blank" rel="noreferrer" className={`${s.pill} ${s.pillSage}`}>{es ? "Abrir el sitio" : "Open the site"}</a>}
+      <Banner title={c.title[lang]} lead={c.brand[lang]} art="b" crumbs={[[es ? "Casos" : "Work", "/work/"], [c.brand[lang]]]}>
+        {c.live && <a href={c.live.href} target="_blank" rel="noreferrer" className={`${s.pill} ${s.pillSage}`}>{es ? "Abrir el sitio" : "Open the site"}<Arrow /></a>}
+        <Link href="/contact/" className={`${s.pill} ${s.pillWhite}`}>{TALK[lang]}</Link>
       </Banner>
+      {c.image && <div className={`${s.wrap} ${s.caseHero}`}><img src={c.image} alt="" /></div>}
       <section className={`${s.wrap} ${s.section} ${s.caseBody}`}>
         <div>
           <h2 className={s.h3}>{es ? "Qué hicimos" : "What we did"}</h2>
@@ -231,19 +234,63 @@ export function SpCompany() {
   return (
     <SparkPage active="company">
       <Banner
-        title={es ? "Un laboratorio de software con IA en Quito." : "An AI software lab in Quito."}
-        lead={es ? "Somos un equipo pequeño y senior que trabaja para clientes de América y Europa desde 2016. Construimos el software y los agentes que cambian cómo opera un negocio, con una persona que firma donde importa." : "We are a small senior team working for clients across the Americas and Europe since 2016. We build the software and the agents that change how a business operates, with a person signing off where it matters."}
-      />
-      <section className={`${s.wrap} ${s.section} ${s.split}`}>
-        <div>
-          <h2 className={s.h2}>{es ? "Por qué empezamos." : "Why we started."}</h2>
-          <p className={s.sub}>{es ? "Empezamos MindfulTech después de vivir lo difícil que era lanzar buen software en equipos pequeños de Ecuador: herramientas fragmentadas, proveedores que desaparecían, diseño como un extra. Así que armamos un solo laboratorio de punta a punta." : "We started MindfulTech after living how hard it was to ship good software in small teams in Ecuador: fragmented tooling, vendors who disappeared, design as an afterthought. So we built one lab, end to end."}</p>
+        title={es ? "Sobre nosotros" : "About us"}
+        lead={es ? "Un equipo pequeño y senior en Quito que diseña, construye y opera software con IA para empresas de América y Europa desde 2016." : "A small senior team in Quito that designs, builds and runs AI software for companies across the Americas and Europe since 2016."}
+        crumbs={[[es ? "Empresa" : "Company"]]}
+      >
+        <Link href="/services/" className={`${s.pill} ${s.pillSage}`}>{es ? "Cómo trabajamos" : "How we work"}<Arrow /></Link>
+        <Link href="/contact/" className={`${s.pill} ${s.pillWhite}`}>{TALK[lang]}</Link>
+      </Banner>
+
+      <div className={s.oneView}>
+        <section className={`${s.wrap} ${s.split}`}>
+          <div className={`${s.splitMedia} ${s.splitPhoto}`}>
+            <img src="/office-demo-preview.webp" alt={es ? "La AI Management Office, la oficina 3D de MindfulTech" : "The AI Management Office, MindfulTech's 3D office"} width={2000} height={1125} loading="lazy" />
+            <span className={`${s.chip} ${s.chipA}`}>Quito, Ecuador</span>
+            <span className={`${s.chip} ${s.chipB}`}>{es ? "Desde 2016" : "Since 2016"}</span>
+            <span className={`${s.chip} ${s.chipC}`}>AI Software Lab</span>
+          </div>
+          <div>
+            <p className={s.eyebrow}>{es ? "Conoce a MindfulTech" : "Meet MindfulTech"}</p>
+            <h2 className={s.h2}>{es ? "Un laboratorio de software con IA, de punta a punta." : "An AI software lab, end to end."}</h2>
+            <p className={s.strong}>{es ? "Construimos el software y los agentes que cambian cómo opera un negocio, con una persona que firma donde importa." : "We build the software and the agents that change how a business operates, with a person signing off where it matters."}</p>
+            <p className={s.sub}>{es ? "Empezamos MindfulTech después de vivir lo difícil que era lanzar buen software en equipos pequeños de Ecuador: herramientas fragmentadas, proveedores que desaparecían, diseño como un extra. Así que armamos un solo laboratorio." : "We started MindfulTech after living how hard it was to ship good software in small teams in Ecuador: fragmented tooling, vendors who disappeared, design as an afterthought. So we built one lab."}</p>
+            <div className={s.btnRow}>
+              <Link href="/work/" className={`${s.pill} ${s.pillSage}`}>{es ? "Ver nuestro trabajo" : "See our work"}<Arrow /></Link>
+              <Link href="/contact/" className={`${s.pill} ${s.pillLine}`}>{TALK[lang]}</Link>
+            </div>
+            <ul className={s.checks}>
+              {VALUES.map(([a, , c]) => <li key={a}>{es ? c : a}</li>)}
+            </ul>
+          </div>
+        </section>
+        <section className={s.wrap}>
+          <dl className={s.stats}>
+            <div><dt>10</dt><dd>{es ? "años construyendo software centrado en las personas" : "years building human-centered software"}</dd></div>
+            <div><dt>3</dt><dd>{es ? "continentes con clientes activos" : "continents with active clients"}</dd></div>
+            <div><dt>24/7</dt><dd>{es ? "un agente de facturación en producción para Helixona" : "a billing agent in production for Helixona"}</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <section className={`${s.wrap} ${s.section} ${s.member}`}>
+        <div className={s.portrait}>
+          <div className={s.todo}>{es ? "TODO: foto real de Carlos Pozo" : "TODO: real photo of Carlos Pozo"}</div>
         </div>
-        <figure className={s.nameCard}>
-          <figcaption>{es ? "Por qué el nombre" : "Why the name"}</figcaption>
-          <blockquote>{es ? "Le puse ese nombre porque la tecnología debería hacerse con intención: pensada y aplicada con criterio, no por moda. Primero entendemos tu negocio y los sistemas que ya usas, después integramos, y solo entonces aplicamos IA de forma deliberada, donde de verdad mejora la eficiencia." : "I chose the name because technology should be built with intention: considered and applied with judgment, not because it is fashionable. First we understand your business and the systems you already run, then we integrate, and only then do we apply AI deliberately, where it genuinely improves efficiency."}</blockquote>
-          <p>Carlos Pozo, {es ? "fundador" : "founder"}</p>
-        </figure>
+        <div>
+          <h2 className={s.h2}>Carlos Pozo</h2>
+          <p className={s.role}>{es ? "Fundador" : "Founder"}</p>
+          <p className={s.strong}>{es ? "Le puse MindfulTech porque la tecnología debería hacerse con intención: pensada y aplicada con criterio, no por moda." : "I named it MindfulTech because technology should be built with intention: considered and applied with judgment, not because it is fashionable."}</p>
+          <p className={s.sub}>{es ? "Primero entendemos tu negocio y los sistemas que ya usas, después integramos, y solo entonces aplicamos IA de forma deliberada, donde de verdad mejora la eficiencia." : "First we understand your business and the systems you already run, then we integrate, and only then do we apply AI deliberately, where it genuinely improves efficiency."}</p>
+          <div className={s.memberSocial}>
+            <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin /></a>
+          </div>
+          <dl className={s.memberFacts}>
+            <div><dt>{es ? "Rol" : "Responsibility"}</dt><dd>{es ? "Fundador" : "Founder"}</dd></div>
+            <div><dt>{es ? "En MindfulTech" : "At MindfulTech"}</dt><dd>{es ? "Desde 2016" : "Since 2016"}</dd></div>
+            <div><dt>Email</dt><dd><a href="mailto:info@mindfultech.ec">info@mindfultech.ec</a></dd></div>
+          </dl>
+        </div>
       </section>
 
       <section className={`${s.night} ${s.section}`}>
@@ -298,6 +345,7 @@ export function SpBlog() {
       <Banner
         title={es ? "Ideas y aprendizajes sobre IA aplicada." : "Ideas and lessons on applied AI."}
         lead={es ? "Notas sobre agentes, ingeniería y cómo construimos software en el que la gente confía." : "Notes on agents, engineering and how we build software people trust."}
+        crumbs={[["Blog"]]}
       />
       <section className={`${s.wrap} ${s.section}`}>
         {POSTS.length ? (
@@ -330,12 +378,11 @@ export function SpArticle({ slug }: { slug: string }) {
   const more = relatedPosts(slug, 2);
   return (
     <SparkPage active="blog">
+      <Banner title={p.title[lang]} lead={`${p.dateLabel[lang]}. ${p.readMins} ${es ? "min de lectura" : "min read"}. ${p.author[lang].replace(" · ", ", ")}`} art="b" crumbs={[["Blog", "/blog/"], [es ? "Artículo" : "Article"]]}>
+        <Link href="/blog/" className={`${s.pill} ${s.pillWhite}`}>{es ? "Todos los artículos" : "All articles"}</Link>
+      </Banner>
       <article className={s.article}>
-        <header className={s.wrap}>
-          <p className={s.meta}>{p.dateLabel[lang]}. {p.readMins} {es ? "min de lectura" : "min read"}. {p.author[lang].replace(" · ", ", ")}</p>
-          <h1>{p.title[lang]}</h1>
-          <p className={s.standfirst}>{p.excerpt[lang]}</p>
-        </header>
+        <p className={`${s.wrap} ${s.standfirst}`}>{p.excerpt[lang]}</p>
         <div className={`${s.heroWrap} ${s.articleCover}`}><img src={p.cover} alt="" /></div>
         <div className={`${s.wrap} ${s.articleBody}`}>
           {p.body.map((b, i) =>
@@ -369,9 +416,15 @@ export function SpArticle({ slug }: { slug: string }) {
 
 /* -------------------------------------------------------- contact + 404 */
 export function SpContact() {
+  const { lang } = useLang();
+  const es = lang === "es";
   return (
     <SparkPage>
-      <div style={{ paddingTop: "0.75rem" }}><ContactBlock h1 /></div>
+      <Banner title={es ? "Contacto" : "Contact us"} lead={es ? "Cuéntanos qué quieres automatizar. Te responde una persona del equipo." : "Tell us what you want to automate. A person on the team replies."} crumbs={[[es ? "Contacto" : "Contact"]]}>
+        <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.pill} ${s.pillSage}`}>{es ? "Escribir por WhatsApp" : "Chat on WhatsApp"}<Arrow /></a>
+        <a href="mailto:info@mindfultech.ec" className={`${s.pill} ${s.pillWhite}`}>{es ? "Enviar un correo" : "Send an email"}</a>
+      </Banner>
+      <div style={{ paddingTop: "var(--space)" }}><ContactBlock /></div>
       <div style={{ height: "var(--gutter)" }} />
     </SparkPage>
   );
@@ -385,12 +438,10 @@ export function SpNotFound() {
       <Banner
         title={es ? "Esta página no existe." : "This page doesn't exist."}
         lead={es ? "El enlace puede estar mal escrito o la página se movió. Desde aquí puedes seguir." : "The link may be mistyped or the page has moved. You can carry on from here."}
+        crumbs={[["404"]]}
       >
-        <div className={s.btnRow}>
-          <Link href="/" className={`${s.pill} ${s.pillSage}`}>{es ? "Ir al inicio" : "Go to the home page"}</Link>
-          <Link href="/work/" className={`${s.pill} ${s.pillLine}`}>{es ? "Ver los casos" : "See our work"}</Link>
-          <Link href="/contact/" className={`${s.pill} ${s.pillLine}`}>{TALK[lang]}</Link>
-        </div>
+        <Link href="/" className={`${s.pill} ${s.pillSage}`}>{es ? "Ir al inicio" : "Go to the home page"}<Arrow /></Link>
+        <Link href="/work/" className={`${s.pill} ${s.pillWhite}`}>{es ? "Ver los casos" : "See our work"}</Link>
       </Banner>
       <div style={{ height: "var(--space)" }} />
     </SparkPage>

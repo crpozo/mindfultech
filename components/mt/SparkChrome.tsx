@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { ArrowRight, ArrowUp, MapPin, MessagesSquare } from "lucide-react";
 import { useLang } from "@/components/i18n";
 import { CONTACT, WEB3FORMS_KEY } from "@/components/site/Shell";
 import s from "./spark.module.css";
@@ -25,10 +26,12 @@ export const SERVICE_LINKS: { slug: string; label: Bi }[] = [
 ];
 
 export function Arrow() {
+  return <ArrowRight size={17} strokeWidth={1.8} aria-hidden="true" />;
+}
+
+export function Linkedin() {
   return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zM8.7 17H6.4V9.7h2.3zM7.5 8.7a1.3 1.3 0 110-2.7 1.3 1.3 0 010 2.7zM17.7 17h-2.3v-3.6c0-.9 0-2-1.2-2s-1.4 1-1.4 1.9V17h-2.3V9.7h2.2v1c.3-.6 1-1.2 2.2-1.2 2.3 0 2.8 1.5 2.8 3.5z" /></svg>
   );
 }
 
@@ -121,11 +124,11 @@ export function ContactBlock({ id, h1 = false }: { id?: string; h1?: boolean }) 
           </div>
           <ul className={s.ways}>
             <li>
-              <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 27l1.7-5.5A11 11 0 1111 25.6z" /><path d="M12 13c0 4 3 7 7 7l1.5-2-2.5-1.5-1 1c-1.2-.5-2.3-1.6-2.8-2.8l1-1L13.7 11z" /></svg>
+              <MessagesSquare size={38} strokeWidth={1.3} aria-hidden="true" />
               <div><b>{es ? "Primero entendemos tu operación" : "We start by understanding how you operate"}</b><p>{es ? "La primera conversación es para conocer tu proceso, no para venderte una herramienta." : "The first conversation is about your process, not about selling you a tool."}</p></div>
             </li>
             <li>
-              <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 29s9-8.5 9-15a9 9 0 10-18 0c0 6.5 9 15 9 15z" /><circle cx="16" cy="14" r="3.5" /></svg>
+              <MapPin size={38} strokeWidth={1.3} aria-hidden="true" />
               <div><b>{es ? "Equipo en Quito, Ecuador" : "A team in Quito, Ecuador"}</b><p>{CONTACT.phone}. {CONTACT.email}</p></div>
             </li>
           </ul>
@@ -148,30 +151,49 @@ export function TalkBand() {
   );
 }
 
-/** Page banner: the grey panel with one cut corner, alone or beside an image. */
-export function Banner({ title, lead, img, alt, children }: { title: string; lead?: string; img?: string; alt?: string; children?: React.ReactNode }) {
+/**
+ * Banner of every inner page: a 3D render edge to edge with the menu laid over
+ * it, the title, one line, two actions, and the breadcrumb in a tab cut into
+ * its bottom edge. `crumbs` are the steps after Home; the last one is this page.
+ */
+export function Banner({ title, lead, crumbs, art = "a", children }: { title: string; lead?: string; crumbs: [string, string?][]; art?: "a" | "b"; children?: React.ReactNode }) {
+  const { lang } = useLang();
+  const es = lang === "es";
   return (
-    <section className={`${s.heroWrap} ${s.hero} ${s.banner}`} data-solo={!img}>
-      <div className={s.heroPanel}>
+    <section className={`${s.heroWrap} ${s.pageBanner}`} style={{ backgroundImage: `url(${art === "a" ? "/mt/hero-3d.webp" : "/mt/hero-3d-b.webp"})` }}>
+      <div className={s.pageBannerIn}>
         <h1>{title}</h1>
         {lead && <p>{lead}</p>}
-        {children}
-      </div>
-      {img && (
-        <div className={s.heroMedia}>
-          <img src={img} alt={alt || ""} />
+        <div className={s.btnRow}>
+          {children || (
+            <>
+              <Link href="/contact/" className={`${s.pill} ${s.pillSage}`}>{TALK[lang]}<Arrow /></Link>
+              <Link href="/work/" className={`${s.pill} ${s.pillWhite}`}>{es ? "Ver nuestro trabajo" : "See our work"}</Link>
+            </>
+          )}
         </div>
-      )}
+      </div>
+      <nav className={s.crumbs} aria-label={es ? "Ruta" : "Breadcrumb"}>
+        <ol>
+          <li><Link href="/">{es ? "Inicio" : "Home"}</Link></li>
+          {crumbs.map(([label, href], i) => (
+            <li key={label} aria-current={i === crumbs.length - 1 ? "page" : undefined}>
+              {href && i < crumbs.length - 1 ? <Link href={href}>{label}</Link> : label}
+            </li>
+          ))}
+        </ol>
+      </nav>
     </section>
   );
 }
 
-export function SparkPage({ active, children }: { active?: string; children: React.ReactNode }) {
+/** `over` lays the menu on top of the page banner (every inner page); the home keeps it on white. */
+export function SparkPage({ active, over = true, children }: { active?: string; over?: boolean; children: React.ReactNode }) {
   const { lang, setLang } = useLang();
   const es = lang === "es";
   const [open, setOpen] = React.useState(false);
   return (
-    <div className={s.page} id="top">
+    <div className={s.page} id="top" data-over={over}>
       <header className={`${s.heroWrap} ${s.header}`}>
         <Link href="/" className={s.logo} aria-label="MindfulTech">
           <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
@@ -196,7 +218,7 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
           <div className={s.footGrid}>
             <div className={s.footBrand}>
               <span className={s.footLogo}><img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} loading="lazy" /></span>
-              <p>AI Software Lab. {es ? "Conectamos tus sistemas y los agentes hacen el trabajo." : "We connect your systems and agents do the work."}</p>
+              <p>AI Software Lab. {es ? "Diseñamos, construimos y operamos software con IA." : "We design, build and run AI software."}</p>
               <a href={`mailto:${CONTACT.email}`} className={s.footMail}>{CONTACT.email}</a>
               <a href={CONTACT.tel}>{CONTACT.phone}</a>
             </div>
@@ -230,7 +252,7 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
               <Link href="/contact/" className={s.footField}><span>{TALK[lang]}</span><i><Arrow /></i></Link>
               <div className={s.social}>
                 <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn">
-                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zM8.7 17H6.4V9.7h2.3zM7.5 8.7a1.3 1.3 0 110-2.7 1.3 1.3 0 010 2.7zM17.7 17h-2.3v-3.6c0-.9 0-2-1.2-2s-1.4 1-1.4 1.9V17h-2.3V9.7h2.2v1c.3-.6 1-1.2 2.2-1.2 2.3 0 2.8 1.5 2.8 3.5z" /></svg>
+                  <Linkedin />
                 </a>
                 <a href="https://github.com/crpozo" target="_blank" rel="noreferrer" aria-label="GitHub">
                   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 00-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.2-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0012 2z" /></svg>
@@ -247,7 +269,7 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
           </div>
         </div>
         <a href="#top" className={s.toTop} aria-label={es ? "Volver arriba" : "Back to top"}>
-          <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          <ArrowUp size={19} strokeWidth={1.8} aria-hidden="true" />
         </a>
       </footer>
     </div>

@@ -101,6 +101,9 @@
   background: #fff;
   color: var(--ink);
 }
+.pill {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
 .pill svg {
   flex: none;
   margin-left: 0.5rem;
@@ -195,8 +198,14 @@
   letter-spacing: -0.02em;
 }
 .hero h1 {
-  max-width: 11.5ch;
+  max-width: 12ch;
   text-wrap: balance;
+}
+.hero .heroKicker {
+  margin: 0 0 1.1rem;
+  color: var(--sage-deep);
+  font-size: 1rem;
+  font-weight: 500;
 }
 .banner h1 {
   max-width: 18ch;
@@ -340,9 +349,6 @@
   filter: brightness(0);
   opacity: 0.85;
 }
-.logoRail:hover .logoTrack {
-  animation-play-state: paused;
-}
 @keyframes rail {
   to {
     transform: translateX(-50%);
@@ -380,12 +386,48 @@
   line-height: 1.25;
   max-width: 13ch;
 }
-.svc img {
-  width: 5.5rem;
-  height: 5.5rem;
+.svcIcon {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
   margin: 1.75rem 0;
-  border-radius: 1.25rem;
-  object-fit: cover;
+  border-radius: 1.2rem;
+  background: #fff;
+  color: var(--ink);
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.svcBtn {
+  background: var(--ink);
+  color: #fff;
+}
+/* hovering a card lights its icon tile and its button in sage */
+.svc:hover .svcIcon,
+.svc:focus-visible .svcIcon {
+  background: var(--sage);
+  color: var(--ink);
+  transform: translateY(-3px);
+}
+.svc:hover .svcBtn,
+.svc:focus-visible .svcBtn {
+  background: var(--sage);
+  color: var(--ink);
+}
+.svc {
+  transition: background-color 0.25s ease;
+}
+.svc:hover {
+  background: #ecefef;
+}
+@media (prefers-reduced-motion: reduce) {
+  .svcIcon,
+  .svc,
+  .pill {
+    transition: none;
+  }
+  .svc:hover .svcIcon {
+    transform: none;
+  }
 }
 .svc p {
   color: var(--muted);
@@ -407,9 +449,18 @@
 }
 /* the featured card: near-black, with a notch bitten out of its right edge
    and a step out of its bottom-right corner, like the template */
-.svcDark {
+.svcDark,
+.svcDark:hover {
   background: var(--night);
   color: #fff;
+}
+.svcDark .svcIcon {
+  background: var(--night-2);
+  color: #fff;
+}
+.svcDark .svcBtn {
+  background: #fff;
+  color: var(--ink);
 }
 .svcDark p {
   color: #e4e7e7;
@@ -502,7 +553,7 @@
   padding: 1.6rem 1.75rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--r-card);
-  background: linear-gradient(120deg, rgba(58, 60, 64, 0.92), rgba(70, 104, 98, 0.55) 62%, rgba(40, 41, 44, 0.9));
+  background: linear-gradient(120deg, rgba(58, 60, 64, 0.86), rgba(70, 104, 98, 0.42) 62%, rgba(40, 41, 44, 0.84));
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
@@ -523,21 +574,27 @@
   font-size: 0.9375rem;
   line-height: 1.5;
 }
+/* a 3D figure sits behind the four cards, the way the template does it */
 .mark {
   position: absolute;
   z-index: 0;
   left: 50%;
   top: 50%;
-  display: grid;
-  place-items: center;
-  width: clamp(11rem, 22vw, 17rem);
+  width: clamp(17rem, 36vw, 29rem);
   aspect-ratio: 1;
-  transform: translate(-50%, -45%);
+  transform: translate(-50%, -48%);
+  pointer-events: none;
+}
+.mark::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(129, 197, 185, 0.38), rgba(129, 197, 185, 0) 70%);
+  background: radial-gradient(circle, rgba(129, 197, 185, 0.34), rgba(129, 197, 185, 0) 68%);
 }
 .mark img {
-  width: 62%;
+  position: relative;
+  width: 100%;
   height: auto;
 }
 
@@ -975,6 +1032,90 @@
 }
 .strip li:nth-child(3) img {
   aspect-ratio: 5 / 5.6;
+}
+
+/* world map */
+.mapBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+.mapPanel {
+  padding: clamp(1rem, 3vw, 2.5rem);
+  border-radius: var(--r-block);
+  background: var(--wash);
+}
+.mapSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.mapKey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.mapKey span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mapKey i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: var(--sage);
+}
+.mapKey i[data-k="home"] {
+  background: var(--ink);
+}
+.mapKey i[data-k="more"] {
+  border-color: var(--sage-deep);
+  background: #fff;
+}
+.places > li {
+  padding: 1.1rem 1.25rem;
+  border-radius: 1rem;
+  transition: background-color 0.2s ease;
+}
+.places > li + li {
+  margin-top: 0.25rem;
+}
+.places > li[data-on="true"] {
+  background: var(--wash);
+}
+.places h3 {
+  color: var(--sage-deep);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.places ul li {
+  margin-top: 0.55rem;
+}
+.places a,
+.places b {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+.places a {
+  text-decoration: underline;
+  text-decoration-color: var(--sage);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+.places a:hover {
+  text-decoration-color: var(--ink);
+}
+.places span {
+  color: var(--muted);
+  font-size: 0.9375rem;
 }
 
 /* contact block */
@@ -1447,8 +1588,14 @@
 }
 .social {
   display: flex;
-  gap: 0.9rem;
-  margin-top: 1.5rem;
+  gap: 0.25rem;
+  margin: 1rem 0 0 -0.65rem;
+}
+.social a {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
 }
 .social a:hover {
   color: var(--sage);
@@ -1532,8 +1679,17 @@
   }
   .hero,
   .split,
-  .contact {
+  .contact,
+  .mapBlock {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .places {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+  }
+  .places > li + li {
+    margin-top: 0;
   }
   .hero {
     min-height: 0;
@@ -1613,6 +1769,9 @@
   .wall {
     columns: 1;
   }
+  .places {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .postRail {
     grid-auto-columns: 86%;
   }
@@ -1624,6 +1783,19 @@
   }
   .toTop {
     display: none;
+  }
+  /* comfortable targets for a thumb */
+  .footer li + li {
+    margin-top: 0;
+  }
+  .footer li a,
+  .footBrand a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .footBrand a + a {
+    margin-top: 0;
   }
   .form {
     grid-template-columns: minmax(0, 1fr);
@@ -1805,12 +1977,13 @@
 }
 .highlight {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 2rem clamp(2rem, 5vw, 5rem);
   align-items: center;
 }
 .bigStat {
-  font-size: clamp(4rem, 2rem + 9vw, 9rem);
+  white-space: nowrap;
+  font-size: clamp(3.5rem, 1.5rem + 6.5vw, 8rem);
   line-height: 1;
   letter-spacing: -0.04em;
   color: var(--sage);
@@ -2099,5 +2272,277 @@
   .svcCols,
   .posts2 {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ================= inner-page banner (image, menu on top, breadcrumb tab) ================= */
+.pageBanner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: clamp(27rem, 40vw, 34rem);
+  margin-top: clamp(0.5rem, 1.2vw, 1rem);
+  padding: clamp(6.5rem, 10vw, 8.5rem) clamp(1.5rem, 9vw, 9rem) clamp(4.5rem, 7vw, 6rem);
+  border-radius: var(--r-block);
+  background: #0c1513 center / cover no-repeat;
+  color: #fff;
+  isolation: isolate;
+}
+.pageBanner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(8, 16, 14, 0.86) 0%, rgba(8, 16, 14, 0.55) 46%, rgba(8, 16, 14, 0.12) 100%);
+}
+.pageBannerIn {
+  max-width: 40rem;
+}
+.pageBanner h1 {
+  font-size: clamp(2.4rem, 1.3rem + 3.4vw, 4rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.pageBanner p {
+  margin-top: 1.1rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  max-width: 32rem;
+}
+.pageBanner .pillWhite:hover {
+  background: var(--sage);
+}
+.crumbs {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 4rem);
+  padding: 0.25rem 1.75rem 0;
+  border-radius: 1.4rem 1.4rem 0 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.crumbs ol {
+  display: flex;
+  align-items: center;
+  min-height: 2.6rem;
+  overflow: hidden;
+}
+.crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+}
+.crumbs li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crumbs li + li::before {
+  content: "\203A";
+  margin-inline: 0.6rem;
+  color: var(--muted);
+}
+.crumbs li[aria-current="page"] {
+  color: var(--muted);
+  font-weight: 400;
+}
+.crumbs a:hover {
+  color: var(--sage-deep);
+}
+
+/* menu laid over the banner */
+.page[data-over="true"] {
+  position: relative;
+}
+.page[data-over="true"] .header {
+  position: absolute;
+  z-index: 6;
+  top: clamp(0.5rem, 1.2vw, 1rem);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1.25rem clamp(1.25rem, 2.4vw, 2.25rem);
+  color: #fff;
+}
+.page[data-over="true"] .logo img {
+  filter: brightness(0) invert(1);
+}
+.page[data-over="true"] .nav a:hover {
+  color: var(--sage);
+}
+.page[data-over="true"] .nav a[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.page[data-over="true"] .header > .pillInk {
+  border-color: #fff;
+  background: transparent;
+  color: #fff;
+}
+.page[data-over="true"] .header > .pillInk:hover {
+  background: #fff;
+  color: var(--ink);
+}
+@media (max-width: 960px) {
+  .page[data-over="true"] .nav[data-open="true"] {
+    color: var(--ink);
+  }
+  .page[data-over="true"] .nav[data-open="true"] a[aria-current="page"] {
+    color: var(--sage-deep);
+  }
+  .pageBanner {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* company: wide photo in the stepped frame, and the founder block */
+.splitPhoto {
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+.oneView .splitPhoto img,
+.splitPhoto img {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.member {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+.portrait {
+  position: relative;
+}
+.portrait .todo {
+  min-height: 0;
+  margin: 0;
+  aspect-ratio: 5 / 4.6;
+  border-radius: var(--r-card);
+}
+.portrait::before,
+.portrait::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  background: var(--paper);
+}
+.portrait::before {
+  left: -1px;
+  top: -1px;
+  width: 13%;
+  height: 22%;
+  border-radius: 0 0 1.25rem 0;
+}
+.portrait::after {
+  right: -1px;
+  bottom: -1px;
+  width: 48%;
+  height: 10%;
+  border-radius: 1.25rem 0 0 0;
+}
+.role {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+.memberSocial {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+.memberSocial a {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+.memberSocial a:hover {
+  background: var(--ink);
+  color: #fff;
+}
+.memberFacts {
+  margin-top: 2rem;
+  padding-block: 1.75rem;
+  border-block: 1px solid var(--line);
+}
+.memberFacts div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1rem;
+}
+.memberFacts div + div {
+  margin-top: 0.4rem;
+}
+.memberFacts dt {
+  font-weight: 500;
+}
+.memberFacts dd {
+  color: var(--muted);
+}
+.memberFacts a:hover {
+  color: var(--sage-deep);
+}
+.caseHero {
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+}
+.caseHero img {
+  width: 100%;
+  max-height: 38rem;
+  object-fit: cover;
+  object-position: top;
+  border-radius: var(--r-block);
+}
+.article .standfirst {
+  max-width: 44rem;
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+}
+@media (max-width: 960px) {
+  .member {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .portrait {
+    max-width: 26rem;
+  }
+}
+
+/* phones: smaller client logos, and the sound button moves to the top-left so
+   it never sits on the film's subtitles */
+@media (max-width: 620px) {
+  .logoTrack img {
+    height: calc(var(--h, 2rem) * 0.68);
+  }
+  .logoTrack li {
+    padding-inline: 1.25rem;
+  }
+  .logoRail {
+    padding-block: 2.25rem 1.5rem;
+  }
+  .sound {
+    left: 0.85rem;
+    top: 0.85rem;
+    bottom: auto;
+    width: 2.75rem;
+    padding: 0;
+    justify-content: center;
+  }
+  .sound span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 }
