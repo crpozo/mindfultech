@@ -38,7 +38,7 @@ export function Linkedin() {
 export function ContactCard() {
   const { lang } = useLang();
   const es = lang === "es";
-  const [f, setF] = React.useState({ name: "", email: "", company: "", phone: "", service: "", msg: "" });
+  const [f, setF] = React.useState({ name: "", email: "", msg: "" });
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
   const submit = async (e: React.FormEvent) => {
@@ -46,22 +46,20 @@ export function ContactCard() {
     if (state === "sending") return;
     setState("sending");
     const subject = `mindfultech.ec: ${f.name}`;
-    const payload = { type: "project", name: f.name, email: f.email, company: f.company, phone: f.phone, service: f.service, message: f.msg };
+    const payload = { type: "project", name: f.name, email: f.email, message: f.msg };
     try {
       const ctrl = new AbortController();
-      const timer = window.setTimeout(() => ctrl.abort(), 8000);
+      const timer = window.setTimeout(() => ctrl.abort(), 15000);
       const r = WEB3FORMS_KEY
         ? await fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject, from_name: "mindfultech.ec", replyto: f.email, ...payload }) })
         : await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ ...payload, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }) });
       window.clearTimeout(timer);
       if (!r.ok) throw new Error(String(r.status));
       setState("sent");
-      setF({ name: "", email: "", company: "", phone: "", service: "", msg: "" });
+      setF({ name: "", email: "", msg: "" });
     } catch {
-      // the form service did not answer: hand the same message to the visitor's mail app
+      // nothing opens on the visitor's side: the form says it failed and offers the direct channels
       setState("error");
-      const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, `${es ? "Teléfono" : "Phone"}: ${f.phone}`, `${es ? "Servicio" : "Service"}: ${f.service}`, "", f.msg].join("\n");
-      window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
   };
   return (
@@ -76,22 +74,6 @@ export function ContactCard() {
         <span>Email</span>
         <input required type="email" value={f.email} onChange={set("email")} autoComplete="email" placeholder={es ? "Correo electrónico" : "Email address"} />
       </label>
-      <label>
-        <span>{es ? "Empresa" : "Company"}</span>
-        <input value={f.company} onChange={set("company")} autoComplete="organization" placeholder={es ? "Empresa" : "Company name"} />
-      </label>
-      <label>
-        <span>{es ? "Teléfono" : "Phone"}</span>
-        <input type="tel" value={f.phone} onChange={set("phone")} autoComplete="tel" placeholder={es ? "Teléfono" : "Phone number"} />
-      </label>
-      <label className={s.full}>
-        <span>{es ? "Servicio" : "Service"}</span>
-        <select value={f.service} onChange={set("service")}>
-          <option value="">{es ? "Qué servicio te interesa" : "Which service you need"}</option>
-          {SERVICE_LINKS.map((v) => <option key={v.slug} value={v.label.en}>{v.label[lang]}</option>)}
-          <option value="AI Management Office">AI Management Office</option>
-        </select>
-      </label>
       <label className={s.full}>
         <span>{es ? "Qué quieres automatizar" : "What you want to automate"}</span>
         <textarea required value={f.msg} onChange={set("msg")} placeholder={es ? "Cuéntanos qué quieres automatizar" : "Tell us what you want to automate"} />
@@ -101,7 +83,14 @@ export function ContactCard() {
         <Arrow />
       </button>
       {state === "sent" && <p className={s.formNote} role="status">{es ? "Mensaje enviado. Te respondemos por correo." : "Message sent. We will reply by email."}</p>}
-      {state === "error" && <p className={s.formNote} role="status">{es ? "No se pudo enviar desde aquí. Se abrió tu correo con el mensaje listo." : "It could not be sent from here. Your mail app opened with the message ready."}</p>}
+      {state === "error" && (
+        <p className={s.formNote} role="alert">
+          {es ? "No se pudo enviar el mensaje. Inténtalo de nuevo o escríbenos por " : "The message could not be sent. Try again or reach us on "}
+          <a href={CONTACT.wa} target="_blank" rel="noreferrer">WhatsApp</a>
+          {es ? " o a " : " or at "}
+          <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+        </p>
+      )}
     </form>
   );
 }

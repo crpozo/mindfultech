@@ -32,9 +32,9 @@ const SERVICES: { href: string; icon: LucideIcon; title: Bi; text: Bi }[] = [
     text: { en: "Web and mobile apps built around how your team already works.", es: "Aplicaciones web y móviles hechas alrededor de cómo ya trabaja tu equipo." },
   },
   {
-    href: "/services/security/", icon: ShieldCheck,
-    title: { en: "Cybersecurity", es: "Ciberseguridad" },
-    text: { en: "We assess, harden and monitor your apps, cloud and AI systems.", es: "Evaluamos, reforzamos y monitoreamos tus apps, tu nube y tus sistemas de IA." },
+    href: "/services/", icon: ShieldCheck,
+    title: { en: "Cloud and infrastructure", es: "Nube e infraestructura" },
+    text: { en: "We set up, migrate and run your cloud: servers, deployments, monitoring and backups.", es: "Montamos, migramos y operamos tu nube: servidores, despliegues, monitoreo y respaldos." },
   },
   {
     href: "/services/discovery/", icon: Users,
@@ -64,32 +64,33 @@ const CONTROL: { t: Bi; d: Bi }[] = [
 
 const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] = [
   {
-    id: "healthcare", client: "Helixona", where: { en: "Functional-medicine clinic, United States", es: "Clínica de medicina funcional, Estados Unidos" },
-    title: { en: "An agent that runs medical billing end to end.", es: "Un agente que lleva la facturación médica de punta a punta." },
-    text: { en: "It processes insurance claims, handles payer submissions and keeps the paperwork moving, with a human check where it counts.", es: "Procesa reclamos de seguros, gestiona los envíos a aseguradoras y mantiene la documentación en movimiento, con revisión humana donde importa." },
+    id: "healthcare", client: "Helixona", where: { en: "Health, California", es: "Salud, California" },
+    title: { en: "Medical billing run by an agent.", es: "Facturación médica con un agente." },
+    text: { en: "The agent logs into the clinical system and the insurer's portal, processes claims and attaches the documentation on its own. The team supervises, the AI executes.", es: "El agente entra al sistema clínico y al portal de la aseguradora, procesa los reclamos y adjunta la documentación por sí solo. El equipo supervisa, la IA ejecuta." },
   },
   {
     id: "usfq", client: "USFQ", where: { en: "Universidad San Francisco de Quito", es: "Universidad San Francisco de Quito" },
     title: { en: "EventFlow: campus events with an app in the App Store.", es: "EventFlow: eventos del campus con app en el App Store." },
   },
   {
-    id: "fence", client: "Western Fence Supply", where: { en: "Fence distributor, United States", es: "Distribuidor de cercas, Estados Unidos" },
-    title: { en: "From Excel to a CRM that routes its own leads.", es: "De Excel a un CRM que reparte sus propios leads." },
-    text: { en: "An Odoo integration: leads assigned by each rep's language, and multi-stop truck deliveries planned on 3D maps.", es: "Integración con Odoo: leads asignados según el idioma de cada vendedor y entregas de varias paradas planificadas sobre mapas 3D." },
-  },
-  {
-    id: "carcompra-crm", client: "CarCompra", where: { en: "Car dealership, Ecuador", es: "Concesionaria, Ecuador" },
-    title: { en: "A custom CRM that sells cars with AI and Meta ads.", es: "Un CRM a medida que vende autos con IA y pautas de Meta." },
-    text: { en: "Every campaign lead from WhatsApp and Instagram lands in one pipeline for the sales team.", es: "Cada lead de campaña desde WhatsApp e Instagram llega a un solo pipeline para el equipo de ventas." },
-  },
-  {
-    id: "parc", client: "PARC Home Care", where: { en: "Home-care agency, United States", es: "Agencia de cuidado en casa, Estados Unidos" },
-    title: { en: "PARC Connect, a client portal in both app stores.", es: "PARC Connect, un portal de clientes en ambas tiendas de apps." },
+    id: "fence", client: "Western Fence Supply", where: { en: "Distribution, Florida", es: "Distribución, Florida" },
+    title: { en: "Sales automated with AI.", es: "Ventas automatizadas con IA." },
+    text: { en: "Every lead is classified and assigned by language and rep, on an Odoo CRM with 8,500 prospects. Draw My Fence lays out the fence on a 3D satellite map and builds the quote.", es: "Cada lead se clasifica y se asigna solo, por idioma y vendedor, sobre un CRM en Odoo con 8.500 prospectos. Draw My Fence propone la cerca sobre el mapa satelital en 3D y genera la cotización." },
   },
   {
     id: "themedmotion", client: "ThemedMotion", where: { en: "Animatronics studio, Netherlands", es: "Estudio de animatrónicos, Países Bajos" },
     title: { en: "An immersive 3D portfolio for a studio that builds theme-park figures.", es: "Un portafolio 3D inmersivo para un estudio que construye figuras de parques temáticos." },
     text: { en: "Interactive 3D figure viewer and scroll storytelling across their seven-step process.", es: "Visor 3D interactivo y narrativa con scroll a lo largo de su proceso de siete pasos." },
+  },
+  {
+    id: "parc", client: "PARC Home Care", where: { en: "Home health, Chicago", es: "Salud a domicilio, Chicago" },
+    title: { en: "Documents that process themselves.", es: "Documentos que se procesan solos." },
+    text: { en: "AI reads every incoming fax, classifies it and extracts the medical referral. Agents load it into the clinical system with no typing, and the PARC Connect app links patients and staff.", es: "La IA lee cada fax entrante, lo clasifica y extrae los datos del referido médico. Los agentes cargan la información al sistema clínico sin digitación, y la app PARC Connect conecta a pacientes y personal." },
+  },
+  {
+    id: "carcompra-crm", client: "CarCompra", where: { en: "Car dealership, Ecuador", es: "Concesionaria, Ecuador" },
+    title: { en: "A custom CRM that sells cars with AI and Meta ads.", es: "Un CRM a medida que vende autos con IA y pautas de Meta." },
+    text: { en: "Every campaign lead from WhatsApp and Instagram lands in one pipeline for the sales team.", es: "Cada lead de campaña desde WhatsApp e Instagram llega a un solo pipeline para el equipo de ventas." },
   },
 ];
 
@@ -156,7 +157,7 @@ function WorldMap({ active, onPick }: { active: string | null; onPick: (id: stri
 
 const STRIP = [1, 2, 3, 4, 5].map((n) => `/mt/strip-${n}.webp`);
 /** 3D icon of each service card, in SERVICES order (rendered by scripts/icons3d-*.js). */
-const ART = ["ai", "software", "security", "workshops", "integration", "office"];
+const ART = ["ai", "software", "cloud", "workshops", "integration", "office"];
 /** Country flag of each case card. */
 const FLAG: Record<string, { code: string; name: Bi }> = {
   healthcare: { code: "us", name: { en: "United States", es: "Estados Unidos" } },
@@ -246,7 +247,7 @@ export function SparkHome() {
             </Link>
           </div>
           <div className={s.heroMedia}>
-            <video ref={loop} muted loop playsInline preload="metadata" poster={FILM.poster} aria-label={t(FILM.alt)}>
+            <video ref={loop} muted playsInline preload="metadata" poster={FILM.poster} aria-label={t(FILM.alt)}>
               <source src={FILM.src} type="video/mp4" />
             </video>
             <button type="button" className={s.play} onClick={openFilm} aria-label={es ? "Ver el video a pantalla completa" : "Watch the film full screen"}>

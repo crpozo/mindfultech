@@ -77,6 +77,20 @@ window.renderIcon = (kind) => {
     add(cg, pearl(), 0, 0.05, 0.55);
     g.rotation.set(-0.08, -0.5, 0.04);
     g.scale.setScalar(0.95);
+  } else if (kind === "cloud") {
+    // a cloud resting on a server slab: hosting and infrastructure
+    const c = sage();
+    add(new THREE.SphereGeometry(1.0, 64, 64), c, -1.15, 0.35, 0);
+    add(new THREE.SphereGeometry(1.35, 64, 64), c, 0, 0.85, 0);
+    add(new THREE.SphereGeometry(1.05, 64, 64), c, 1.2, 0.4, 0);
+    add(new THREE.CapsuleGeometry(0.72, 2.3, 16, 48), c, 0, -0.05, 0, 0, 0, Math.PI / 2);
+    add(new RoundedBoxGeometry(3.6, 0.42, 1.9, 8, 0.18), ink(), 0, -1.55, 0);
+    add(new RoundedBoxGeometry(3.6, 0.42, 1.9, 8, 0.18), pearl(), 0, -2.1, 0);
+    add(new THREE.SphereGeometry(0.11, 24, 24), sage(), -1.4, -1.55, 0.97);
+    add(new THREE.SphereGeometry(0.11, 24, 24), sage(), -1.05, -1.55, 0.97);
+    g.rotation.set(0.18, -0.42, 0);
+    g.position.y = 0.35;
+    g.scale.setScalar(0.9);
   } else if (kind === "workshops") {
     // three people around a table
     const person = (x, z, h, mat) => {

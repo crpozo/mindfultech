@@ -3101,3 +3101,20 @@
 .oneView .stats {
   padding-top: clamp(1.75rem, 4vh, 3rem);
 }
+
+/* service cards: the button sits at the bottom of every card, on one line */
+.svc p {
+  margin-bottom: 1.5rem;
+}
+.svc p + .pill {
+  margin-top: auto;
+}
+
+/* air between the contact block and the footer */
+.stepped {
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+.formNote a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
