@@ -2963,15 +2963,14 @@
   min-height: var(--header-h);
   padding-left: clamp(0.5rem, 1.1vw, 1.1rem);
   background: var(--paper);
-  /* paints the bar edge to edge without widening the page */
-  box-shadow: 0 0 0 100vmax var(--paper);
-  clip-path: inset(0 -100vmax);
   transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 .page[data-over="true"]:not([data-stuck="true"]) .header {
   background: transparent;
-  box-shadow: none;
   color: #fff;
+}
+.page[data-over="true"]:not([data-stuck="true"]) .header::before {
+  opacity: 0;
 }
 .pageBanner {
   width: 100%;
@@ -3206,4 +3205,34 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   background: linear-gradient(120deg, rgba(50, 52, 56, 0.97), rgba(58, 84, 80, 0.93) 62%, rgba(38, 39, 42, 0.97));
+}
+
+/* the fixed bar is painted edge to edge by a layer behind it. (A clip-path did
+   this before and cut off the phone menu that drops below the bar.) */
+.header::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 -100vmax;
+  background: var(--paper);
+  transition: opacity 0.2s ease;
+}
+
+/* phones: the case row opens with Helixona, Western Fence, ThemedMotion, USFQ */
+@media (max-width: 620px) {
+  .wall > li {
+    order: 5;
+  }
+  .wall > li[data-id="healthcare"] {
+    order: 1;
+  }
+  .wall > li[data-id="fence"] {
+    order: 2;
+  }
+  .wall > li[data-id="themedmotion"] {
+    order: 3;
+  }
+  .wall > li[data-id="usfq"] {
+    order: 4;
+  }
 }

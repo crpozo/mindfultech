@@ -516,6 +516,36 @@ export function sign(ctx, x, h, z, yaw, lines, bg, fg, w = 1.4, hh = 0.7) {
   m.rotation.y = yaw;
   ctx.S.add(m);
 }
+/** A white plaque carrying an image logo (the MindfulTech logo on the lobby wall). */
+export function logoSign(ctx, x, h, z, yaw, src, w = 1.9, hh = 0.62) {
+  const { B, y } = ctx;
+  const f = fwd(yaw);
+  B.add(rbox(w + 0.1, hh + 0.1, 0.06, 0.03), std("#ffffff", 0.7), mat4(x, y + h, z, 0, yaw, 0));
+  const W = 1024, H = Math.round((1024 * hh) / w);
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#ffffff";
+  g.fillRect(0, 0, W, H);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  const img = new Image();
+  img.onload = () => {
+    // fit the logo inside the plaque with a margin, keeping its proportions
+    const k = Math.min((W * 0.8) / img.width, (H * 0.68) / img.height);
+    const dw = img.width * k, dh = img.height * k;
+    g.imageSmoothingQuality = "high";
+    g.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    tex.needsUpdate = true;
+  };
+  img.src = src;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, map: tex, roughness: 0.7 }));
+  m.position.set(x + f.x * 0.035, y + h, z + f.z * 0.035);
+  m.rotation.y = yaw;
+  ctx.S.add(m);
+}
 export function picture(ctx, x, h, z, yaw, seed) {
   const { B, M, y } = ctx;
   const f = fwd(yaw);

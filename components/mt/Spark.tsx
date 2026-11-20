@@ -70,7 +70,8 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
   },
   {
     id: "usfq", client: "USFQ", where: { en: "Universidad San Francisco de Quito", es: "Universidad San Francisco de Quito" },
-    title: { en: "EventFlow: campus events with an app in the App Store.", es: "EventFlow: eventos del campus con app en el App Store." },
+    title: { en: "EventFlow, the event management system of Ecuador's top-ranked university.", es: "EventFlow, el sistema de gestión de eventos de la universidad número uno del Ecuador." },
+    text: { en: "Registration, check-in and schedules for every campus event, on the web and in an iOS app in the App Store.", es: "Registro, check-in y agenda de cada evento del campus, en la web y en una app de iOS en el App Store." },
   },
   {
     id: "fence", client: "Western Fence Supply", where: { en: "Distribution, Florida", es: "Distribución, Florida" },
@@ -362,7 +363,7 @@ export function SparkHome() {
           </div>
           <ul className={s.wall}>
             {CASES.map((c) => (
-              <li key={c.id}>
+              <li key={c.id} data-id={c.id}>
                 <div className={s.wallCard}>
                   <p>{t(c.title)}</p>
                   {c.text && <small>{t(c.text)}</small>}

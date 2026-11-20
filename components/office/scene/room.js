@@ -188,7 +188,9 @@ export function buildRoom(scene, bots, lang = "es", signs = null) {
   // ---- lobby strip: the black logo wall + glass line at x = LX, desk facing the turnstiles ----
   F.wall(gw, 4.4, 7.8, LX, floorH, M.slats, true, 0.15);
   F.glassWall(gw, D, 4.4, LX, floorH, [[-0.2, 0.9]], true);
-  F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, L.signs.logo, "#1b1b1f", "#ffffff", 1.9, 0.42);
+  // the lobby wall carries the MindfulTech logo; a brand with its own sign text keeps the text sign
+  if (signs && signs.logo) F.sign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, L.signs.logo, "#1b1b1f", "#ffffff", 1.9, 0.42);
+  else F.logoSign(gw, LX - 0.09, 2.62, 6.1, -PI / 2, "/brand/logo.webp", 1.9, 0.66);
   F.clock(gw, LX - 0.09, 1.75, 4.95, -PI / 2);
   // the entrance: glazed on the street side with a door gap in front of the
   // turnstiles; the oak block desk faces it, two disc pendants above
