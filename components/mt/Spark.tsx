@@ -89,7 +89,8 @@ const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] =
   },
 ];
 
-const SLIDES: { img: string; alt: Bi }[] = [
+const SLIDES: { img: string; video?: string; alt: Bi }[] = [
+  { img: "/mt/promo-poster.webp", video: "/mt/promo.mp4", alt: { en: "MindfulTech film: a person hands her messages, billing and reports to AI agents", es: "Video de MindfulTech: una persona delega sus mensajes, cobros y reportes a agentes de IA" } },
   { img: "/mt/hero-3d.webp", alt: { en: "Abstract 3D woven bands in sage green", es: "Cintas tejidas en 3D, en verde salvia" } },
   { img: "/mt/hero-a.webp", alt: { en: "The 3D AI Management Office, with one agent's live screen beside it", es: "La AI Management Office en 3D, con la pantalla en vivo de un agente al lado" } },
   { img: "/mt/hero-b.webp", alt: { en: "A dashboard that joins results from every location", es: "Un panel que une los resultados de todas las sedes" } },
@@ -106,6 +107,30 @@ export function SparkHome() {
   const es = lang === "es";
   const t = (v: Bi) => v[lang];
   const [slide, setSlide] = React.useState(0);
+  const loop = React.useRef<HTMLVideoElement>(null);
+  const film = React.useRef<HTMLVideoElement>(null);
+  const dialog = React.useRef<HTMLDialogElement>(null);
+  // The silent loop only runs while its slide is showing, and never for
+  // visitors who asked for less motion: they get the still and the play button.
+  React.useEffect(() => {
+    const v = loop.current;
+    if (!v) return;
+    if (slide === 0 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) v.play().catch(() => {});
+    else v.pause();
+  }, [slide]);
+  const openFilm = () => {
+    loop.current?.pause();
+    dialog.current?.showModal();
+    const v = film.current;
+    if (v) {
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    }
+  };
+  const closeFilm = () => {
+    film.current?.pause();
+    if (slide === 0 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) loop.current?.play().catch(() => {});
+  };
   const go = (d: number) => setSlide((v) => (v + d + SLIDES.length) % SLIDES.length);
   const rail = React.useRef<HTMLUListElement>(null);
   const slidePosts = (d: number) => {
@@ -131,13 +156,19 @@ export function SparkHome() {
               <Arrow />
             </Link>
           </div>
-          <div className={s.heroMedia}>
-            {SLIDES.map((sl, i) => (
-              <img key={sl.img} src={sl.img} alt={i === slide ? t(sl.alt) : ""} data-on={i === slide} loading={i === 0 ? "eager" : "lazy"} />
-            ))}
-            <Link href="/office-demo/" className={s.play} aria-label={es ? "Abrir la Oficina IA en vivo" : "Open the live AI Office"}>
+          <div className={s.heroMedia} data-film={slide === 0}>
+            {SLIDES.map((sl, i) =>
+              sl.video ? (
+                <video key={sl.video} ref={loop} muted loop playsInline preload="metadata" poster={sl.img} data-on={i === slide} aria-label={t(sl.alt)}>
+                  <source src={sl.video} type="video/mp4" />
+                </video>
+              ) : (
+                <img key={sl.img} src={sl.img} alt={i === slide ? t(sl.alt) : ""} data-on={i === slide} loading="lazy" />
+              )
+            )}
+            <button type="button" className={s.play} onClick={openFilm} aria-label={es ? "Ver el video con sonido" : "Play the film with sound"}>
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 7l8 5-8 5z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
-            </Link>
+            </button>
             <div className={s.arrows}>
               <button type="button" onClick={() => go(-1)} aria-label={es ? "Imagen anterior" : "Previous image"}>
                 <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -148,6 +179,15 @@ export function SparkHome() {
             </div>
           </div>
         </section>
+
+        <dialog ref={dialog} className={s.film} onClose={closeFilm} onClick={(e) => { if (e.target === dialog.current) dialog.current?.close(); }} aria-label={es ? "Video de MindfulTech" : "MindfulTech film"}>
+          <video ref={film} controls playsInline preload="none" poster="/mt/promo-poster.webp">
+            <source src="/mt/promo.mp4" type="video/mp4" />
+          </video>
+          <form method="dialog">
+            <button type="submit" className={`${s.pill} ${s.pillWhite} ${s.pillSmall}`}>{es ? "Cerrar video" : "Close film"}</button>
+          </form>
+        </dialog>
 
         <section className={s.logoRail} aria-label={es ? "Clientes" : "Clients"}>
           <ul className={s.logoTrack}>

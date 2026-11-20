@@ -219,7 +219,8 @@
   background: var(--night);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
 }
-.heroMedia > img {
+.heroMedia > img,
+.heroMedia > video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -229,11 +230,13 @@
   transition: opacity 0.5s ease;
 }
 .heroMedia > img[data-on="true"],
+.heroMedia > video[data-on="true"],
 .banner .heroMedia > img {
   opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
-  .heroMedia > img {
+  .heroMedia > img,
+  .heroMedia > video {
     transition: none;
   }
 }
@@ -247,8 +250,10 @@
   height: 5.5rem;
   margin: -2.75rem 0 0 -2.75rem;
   border-radius: 50%;
+  border: 0;
   background: rgba(27, 27, 27, 0.72);
   color: #fff;
+  cursor: pointer;
 }
 .play svg {
   width: 1.75rem;
@@ -257,12 +262,44 @@
 .play:hover {
   background: rgba(27, 27, 27, 0.85);
 }
+/* the film, with sound, in a dialog over the page */
+.film {
+  width: min(64rem, 100% - 2rem);
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--night);
+  color: #fff;
+  overflow: hidden;
+}
+.film::backdrop {
+  background: rgba(13, 13, 14, 0.82);
+}
+.film video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 848 / 480;
+  background: #000;
+}
+.film form {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem;
+}
 .arrows {
   position: absolute;
   left: 2rem;
   bottom: 2rem;
   display: flex;
   gap: 0.5rem;
+}
+/* on the film slide the arrows move up, clear of the burnt-in subtitles */
+.arrows {
+  transition: bottom 0.3s ease;
+}
+.heroMedia[data-film="true"] .arrows {
+  bottom: clamp(5.5rem, 19%, 8.5rem);
 }
 .arrows button {
   display: grid;
