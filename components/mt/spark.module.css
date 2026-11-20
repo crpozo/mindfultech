@@ -175,7 +175,7 @@
 .hero {
   --cut: clamp(2rem, 4.5vw, 4.25rem);
   display: grid;
-  grid-template-columns: minmax(0, 37fr) minmax(0, 61fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.75rem;
   min-height: clamp(26rem, 44vw, 39rem);
   /* breathing room under the menu, so the panels do not sit against it */
@@ -2360,39 +2360,30 @@
 .page[data-over="true"] {
   position: relative;
 }
-.page[data-over="true"] .header {
-  position: absolute;
-  z-index: 6;
-  top: clamp(0.5rem, 1.2vw, 1rem);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1.25rem clamp(1.25rem, 2.4vw, 2.25rem);
-  color: #fff;
-}
-.page[data-over="true"] .logo img {
+.page[data-over="true"]:not([data-stuck="true"]) .logo img {
   filter: brightness(0) invert(1);
 }
-.page[data-over="true"] .nav a:hover {
+.page[data-over="true"]:not([data-stuck="true"]) .nav a:hover {
   color: var(--sage);
 }
-.page[data-over="true"] .nav a[aria-current="page"] {
+.page[data-over="true"]:not([data-stuck="true"]) .nav a[aria-current="page"] {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
-.page[data-over="true"] .header > .pillInk {
+.page[data-over="true"]:not([data-stuck="true"]) .header > .pillInk {
   border-color: #fff;
   background: transparent;
   color: #fff;
 }
-.page[data-over="true"] .header > .pillInk:hover {
+.page[data-over="true"]:not([data-stuck="true"]) .header > .pillInk:hover {
   background: #fff;
   color: var(--ink);
 }
 @media (max-width: 960px) {
-  .page[data-over="true"] .nav[data-open="true"] {
+  .page[data-over="true"]:not([data-stuck="true"]) .nav[data-open="true"] {
     color: var(--ink);
   }
-  .page[data-over="true"] .nav[data-open="true"] a[aria-current="page"] {
+  .page[data-over="true"]:not([data-stuck="true"]) .nav[data-open="true"] a[aria-current="page"] {
     color: var(--sage-deep);
   }
   .pageBanner {
@@ -2956,4 +2947,64 @@
 .crumbs li:last-child {
   min-width: 0;
   white-space: nowrap;
+}
+
+/* ===== one menu everywhere =====
+   Same bar and same positions on every page, fixed to the top while scrolling.
+   On inner pages it starts see-through over the banner, which runs edge to edge. */
+.page {
+  --header-h: 5.1rem;
+}
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  min-height: var(--header-h);
+  padding-left: clamp(0.5rem, 1.1vw, 1.1rem);
+  background: var(--paper);
+  /* paints the bar edge to edge without widening the page */
+  box-shadow: 0 0 0 100vmax var(--paper);
+  clip-path: inset(0 -100vmax);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.page[data-over="true"]:not([data-stuck="true"]) .header {
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+}
+.pageBanner {
+  width: 100%;
+  margin-top: calc(var(--header-h) * -1);
+  padding-top: calc(var(--header-h) + clamp(3rem, 6vw, 5rem));
+  border-radius: 0;
+}
+@media (max-width: 620px) {
+  .page {
+    --header-h: 4.6rem;
+  }
+  .pageBanner {
+    min-height: 23rem;
+    padding-block: calc(var(--header-h) + 2.25rem) 4rem;
+  }
+}
+
+/* founder photo in the stepped frame */
+.portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4.6;
+  object-fit: cover;
+  object-position: 50% 22%;
+  border-radius: var(--r-card);
+}
+
+/* footer: edge to edge, no bitten corners */
+.footer {
+  margin: 0;
+  border-radius: 0;
+}
+.bite {
+  display: none;
 }

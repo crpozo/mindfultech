@@ -142,12 +142,12 @@ export function Hut8() {
         <h2 className={s.h2}>{es ? "Tu operación, con agentes" : "Your operation, with agents"}</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-start" }}>
           <p>{es ? "Escríbenos y te mostramos un agente corriendo sobre uno de tus flujos reales." : "Write to us and we'll show an agent running on one of your real workflows."}</p>
-          <a href="mailto:info@mindfultech.ec" className={s.btn}>{es ? "Contacto" : "Contact us"} →</a>
+          <a href="mailto:carlos@mindfultech.ec" className={s.btn}>{es ? "Contacto" : "Contact us"} →</a>
         </div>
       </section>
 
       <footer className={s.foot}>
-        <div><b>MindfulTech</b>Quito, Ecuador<br />info@mindfultech.ec</div>
+        <div><b>MindfulTech</b>Quito, Ecuador<br />carlos@mindfultech.ec</div>
         <div><b>{es ? "Plataforma" : "Platform"}</b><Link href="/services/discovery">{es ? "Investigación" : "Research"}</Link><Link href="/services">Software</Link><Link href="/office-demo">{es ? "Agentes" : "Agents"}</Link></div>
         <div><b>{es ? "Empresa" : "Company"}</b><Link href="/company">{es ? "Nosotros" : "About us"}</Link><Link href="/work">{es ? "Proyectos" : "Work"}</Link><Link href="/blog">Blog</Link></div>
         <div><b>{es ? "Conceptos" : "Concepts"}</b><Link href="/concept">{es ? "Todos los conceptos" : "All concepts"}</Link></div>

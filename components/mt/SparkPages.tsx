@@ -16,6 +16,8 @@ const sentence = (v: string) => (v === v.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{2}/
 const internal = (href: string) => href.replace(/^\/work#(.+)$/, "/work/$1/").replace("/work/helixona/", "/work/healthcare/");
 
 /* ------------------------------------------------------------- services */
+const SHOW_TEAM = false;
+
 export function SpServices() {
   const { lang } = useLang();
   const es = lang === "es";
@@ -275,7 +277,7 @@ export function SpCompany() {
 
       <section className={`${s.wrap} ${s.section} ${s.member}`}>
         <div className={s.portrait}>
-          <div className={s.todo}>{es ? "TODO: foto real de Carlos Pozo" : "TODO: real photo of Carlos Pozo"}</div>
+          <img src="/mt/carlos-pozo.webp" alt="Carlos Pozo" width={1200} height={1200} loading="lazy" />
         </div>
         <div>
           <h2 className={s.h2}>Carlos Pozo</h2>
@@ -288,7 +290,7 @@ export function SpCompany() {
           <dl className={s.memberFacts}>
             <div><dt>{es ? "Rol" : "Responsibility"}</dt><dd>{es ? "Fundador" : "Founder"}</dd></div>
             <div><dt>{es ? "En MindfulTech" : "At MindfulTech"}</dt><dd>{es ? "Desde 2016" : "Since 2016"}</dd></div>
-            <div><dt>Email</dt><dd><a href="mailto:info@mindfultech.ec">info@mindfultech.ec</a></dd></div>
+            <div><dt>Email</dt><dd><a href="mailto:carlos@mindfultech.ec">carlos@mindfultech.ec</a></dd></div>
           </dl>
         </div>
       </section>
@@ -322,6 +324,8 @@ export function SpCompany() {
         </ol>
       </section>
 
+      {/* team section hidden until there are real photos, names and roles (Carlos, 2026-11-20) */}
+      {SHOW_TEAM && (
       <section className={`${s.wrap} ${s.section}`}>
         <h2 className={s.h2}>{es ? "El equipo." : "The team."}</h2>
         <p className={s.sub} style={{ marginTop: "1rem" }}>{es ? "Equipo en Quito. Clientes en Estados Unidos, Europa y Latinoamérica." : "Team in Quito. Clients in the United States, Europe and Latin America."}</p>
@@ -331,6 +335,7 @@ export function SpCompany() {
           <Link href="/contact/" className={`${s.pill} ${s.pillLine}`}>{es ? "Escríbenos para unirte" : "Write to us about joining"}</Link>
         </div>
       </section>
+      )}
       <TalkBand />
     </SparkPage>
   );
@@ -422,7 +427,7 @@ export function SpContact() {
     <SparkPage>
       <Banner title={es ? "Contacto" : "Contact us"} lead={es ? "Cuéntanos qué quieres automatizar. Te responde una persona del equipo." : "Tell us what you want to automate. A person on the team replies."} crumbs={[[es ? "Contacto" : "Contact"]]}>
         <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.pill} ${s.pillSage}`}>{es ? "Escribir por WhatsApp" : "Chat on WhatsApp"}<Arrow /></a>
-        <a href="mailto:info@mindfultech.ec" className={`${s.pill} ${s.pillWhite}`}>{es ? "Enviar un correo" : "Send an email"}</a>
+        <a href="mailto:carlos@mindfultech.ec" className={`${s.pill} ${s.pillWhite}`}>{es ? "Enviar un correo" : "Send an email"}</a>
       </Banner>
       <div style={{ paddingTop: "var(--space)" }}><ContactBlock /></div>
       <div style={{ height: "var(--gutter)" }} />

@@ -192,8 +192,15 @@ export function SparkPage({ active, over = true, children }: { active?: string; 
   const { lang, setLang } = useLang();
   const es = lang === "es";
   const [open, setOpen] = React.useState(false);
+  const [stuck, setStuck] = React.useState(false);
+  React.useEffect(() => {
+    const on = () => setStuck(window.scrollY > 8);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
   return (
-    <div className={s.page} id="top" data-over={over}>
+    <div className={s.page} id="top" data-over={over} data-stuck={stuck || open}>
       <header className={`${s.heroWrap} ${s.header}`}>
         <Link href="/" className={s.logo} aria-label="MindfulTech">
           <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />

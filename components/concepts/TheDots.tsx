@@ -339,7 +339,7 @@ export function TheDots() {
   }, [lang]);
   const caps = CAPS[lang];
   const roleLabel: Record<Role, string> = es ? { Sales: "Ventas", Support: "Soporte", Finance: "Finanzas", Marketing: "Marketing", Operations: "Operaciones", Reception: "Recepción" } : { Sales: "Sales", Support: "Support", Finance: "Finance", Marketing: "Marketing", Operations: "Operations", Reception: "Reception" };
-  const mailto = `mailto:info@mindfultech.ec?subject=${encodeURIComponent(es ? "Quiero un escritorio en el AI Management Office" : "I want a desk in the AI Management Office")}&body=${encodeURIComponent((es ? "Escritorios que llenaría primero: " : "Desks I would fill first: ") + (roles.length ? roles.map((r) => roleLabel[r]).join(", ") : "—"))}`;
+  const mailto = `mailto:carlos@mindfultech.ec?subject=${encodeURIComponent(es ? "Quiero un escritorio en el AI Management Office" : "I want a desk in the AI Management Office")}&body=${encodeURIComponent((es ? "Escritorios que llenaría primero: " : "Desks I would fill first: ") + (roles.length ? roles.map((r) => roleLabel[r]).join(", ") : "—"))}`;
   return (
     <div className={s.root} ref={rootRef}>
       <div className={s.prog} data-id="prog" />
@@ -484,7 +484,7 @@ export function TheDots() {
                 <a href={mailto} className={`${s.btn} ${s.btnFill}`}>{es ? "Empieza un proyecto" : "Start a project"}</a>
                 <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={s.btn}>WhatsApp →</a>
               </div>
-              <p className={s.note}>info@mindfultech.ec / +593 958 73 1994 / Quito, Ecuador<br />{es ? "Ecuador, California, Chicago, Florida, Países Bajos, Alemania, España, Grecia" : "Ecuador, California, Chicago, Florida, Netherlands, Germany, Spain, Greece"}</p>
+              <p className={s.note}>carlos@mindfultech.ec / +593 958 73 1994 / Quito, Ecuador<br />{es ? "Ecuador, California, Chicago, Florida, Países Bajos, Alemania, España, Grecia" : "Ecuador, California, Chicago, Florida, Netherlands, Germany, Spain, Greece"}</p>
             </section>
           </div>
 

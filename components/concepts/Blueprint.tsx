@@ -128,7 +128,7 @@ export function Blueprint() {
           <div className={s.navRight}>
             <button type="button" className={lang === "en" ? s.on : ""} onClick={() => setLang("en")}>EN</button>
             <button type="button" className={lang === "es" ? s.on : ""} onClick={() => setLang("es")}>ES</button>
-            <a href="mailto:info@mindfultech.ec" className={s.navCta}>{es ? "Contacto" : "Contact us"}</a>
+            <a href="mailto:carlos@mindfultech.ec" className={s.navCta}>{es ? "Contacto" : "Contact us"}</a>
           </div>
         </div>
       </div>
@@ -274,7 +274,7 @@ export function Blueprint() {
           <h2 className={s.h2}>{es ? "Míralo trabajando sobre tu propio proceso" : "See it working on your own process"}</h2>
           <p>{es ? "Agenda una demo y te mostramos un agente corriendo sobre uno de tus flujos reales, no sobre un ejemplo." : "Book a demo and we'll show an agent running on one of your real workflows, not an example."}</p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-            <a href="mailto:info@mindfultech.ec" className={s.btn}>{es ? "Escríbenos" : "Contact us"}</a>
+            <a href="mailto:carlos@mindfultech.ec" className={s.btn}>{es ? "Escríbenos" : "Contact us"}</a>
             <a href="https://wa.me/593958731994" target="_blank" rel="noreferrer" className={`${s.btn} ${s.btnGhost}`}>WhatsApp</a>
           </div>
         </section>
@@ -286,7 +286,7 @@ export function Blueprint() {
             <div><span className={s.mono}>{es ? "Producto" : "Product"}</span><Link href="/office-demo">AI Management Office</Link><Link href="/office-usfq">USFQ NEXT</Link><Link href="/services">{es ? "Servicios" : "Services"}</Link></div>
             <div><span className={s.mono}>{es ? "Proyectos" : "Work"}</span><Link href="/work#healthcare">Helixona</Link><Link href="/work#usfq">USFQ EventFlow</Link><Link href="/work#fence">Western Fence Supply</Link></div>
             <div><span className={s.mono}>{es ? "Dirección" : "Address"}</span>Quito, Ecuador<br />{es ? "Clientes en EE. UU. y Europa" : "Clients in the US and Europe"}</div>
-            <div><span className={s.mono}>{es ? "Contacto" : "Contact"}</span><a href="mailto:info@mindfultech.ec">info@mindfultech.ec</a><a href="tel:+593958731994">+593 958 73 1994</a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer">WhatsApp</a></div>
+            <div><span className={s.mono}>{es ? "Contacto" : "Contact"}</span><a href="mailto:carlos@mindfultech.ec">carlos@mindfultech.ec</a><a href="tel:+593958731994">+593 958 73 1994</a><a href="https://wa.me/593958731994" target="_blank" rel="noreferrer">WhatsApp</a></div>
           </div>
           <div className={s.footBottom}><span>© 2026 MindfulTech. {es ? "Todos los derechos reservados." : "All rights reserved."}</span><span>{es ? "Concepto 02 / Blueprint" : "Concept 02 / Blueprint"}</span></div>
         </footer>

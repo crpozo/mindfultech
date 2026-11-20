@@ -20,7 +20,7 @@ const NAV: { key: NavKey; href: string; en: string; es: string }[] = [
 
 /** Web3Forms access key for carlos@mindfultech.ec (get it at web3forms.com with that email; no account needed). Empty = FormSubmit with a timeout, then mailto. */
 export const WEB3FORMS_KEY = "";
-export const CONTACT = { formTo: "carlos@mindfultech.ec", email: "info@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
+export const CONTACT = { formTo: "carlos@mindfultech.ec", email: "carlos@mindfultech.ec", phone: "+593 958 73 1994", tel: "tel:+593958731994", wa: "https://wa.me/593958731994" };
 
 export function SiteNav({ active }: { active?: NavKey }) {
   const { lang, setLang } = useLang();

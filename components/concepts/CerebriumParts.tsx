@@ -91,7 +91,7 @@ export function CbFooter() {
           <h2 className={s.h2}><Split text={es ? "Empieza a construir con IA hoy," : "Start building with AI today,"} /><br /><Split text={es ? "o cuéntanos tu flujo." : "or talk to us about your workflow."} delay={300} /></h2>
           <div className={s.ctas}><button type="button" onClick={() => openContact()} className={`${s.btn} ${s.btnAcc}`}><Scramble text={es ? "Habla con nosotros" : "Talk to us"} /></button><Link href="/office-demo" className={`${s.btn} ${s.btnSolid}`}><Scramble text="AI Management Office" /></Link></div>
         </div>
-        <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>info@mindfultech.ec / +593 958 73 1994</span></div>
+        <div className={s.footBar}><span>2026 © MindfulTech, Quito</span><span className={s.mono}>carlos@mindfultech.ec / +593 958 73 1994</span></div>
       </footer>
     </section>
   );
