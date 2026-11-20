@@ -35,6 +35,11 @@
   color: inherit;
   text-decoration: none;
 }
+/* the old site's global rule tints every hovered link sage; here each link
+   decides its own hover (this sits early so the rules below can override it) */
+.page a:hover {
+  color: inherit;
+}
 .page :where(img, video) {
   display: block;
   max-width: 100%;
@@ -498,6 +503,65 @@
 .mark img {
   width: 62%;
   height: auto;
+}
+
+/* the split and its three figures share one screen */
+.oneView {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  min-height: 100svh;
+  padding-block: clamp(1.5rem, 4vh, 3rem);
+}
+.oneView .split {
+  align-items: center;
+}
+.oneView .splitMedia {
+  padding-block: clamp(1.25rem, 3.5vh, 2.5rem);
+}
+.oneView .splitMedia img {
+  width: auto;
+  max-width: 100%;
+  max-height: min(27rem, 46vh);
+}
+.oneView .h2 {
+  font-size: clamp(1.75rem, 0.8rem + min(2.4vw, 3.6vh), 3rem);
+}
+.oneView .strong {
+  margin-top: clamp(0.75rem, 2vh, 1.5rem);
+}
+.oneView .sub {
+  margin-top: 0.6rem;
+}
+.oneView .btnRow {
+  margin-top: clamp(1rem, 2.4vh, 1.75rem);
+}
+.oneView .checks {
+  margin-top: clamp(1rem, 2.6vh, 2rem);
+}
+.oneView .checks li + li {
+  margin-top: clamp(0.4rem, 1.2vh, 0.85rem);
+}
+.oneView .stats {
+  padding-block: clamp(1.25rem, 3vh, 2.25rem) 0;
+}
+.oneView .stats dt {
+  font-size: clamp(2.25rem, 1rem + min(3vw, 4.6vh), 4rem);
+}
+.oneView .stats dd {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+@media (max-width: 960px) {
+  .oneView {
+    min-height: 0;
+    padding-block: var(--space) 0;
+  }
+  .oneView .splitMedia img {
+    max-height: none;
+    width: min(100%, 21rem);
+  }
 }
 
 /* split */
@@ -1042,10 +1106,12 @@
 .postRail {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: calc((100% - 3rem) / 3);
+  grid-auto-columns: calc((100% - 4.5rem) / 3.22);
   gap: 1.5rem;
   margin-top: clamp(2rem, 4vw, 3rem);
-  padding-bottom: 1.5rem;
+  /* room for the cards' shadow, and the rail runs to the edge of the screen */
+  margin-right: calc((100vw - 100%) / -2);
+  padding: 0 calc((100vw - 100%) / 2) 2.5rem 0;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -1054,12 +1120,14 @@
   display: none;
 }
 .postRail li {
+  display: flex;
   scroll-snap-align: start;
 }
 .post {
   position: relative;
-  display: block;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   color: var(--ink);
 }
 .postImg {
@@ -1067,11 +1135,17 @@
   display: block;
   border-radius: var(--r-card);
   overflow: hidden;
+  background: var(--night);
 }
 .postImg img {
   width: 100%;
-  aspect-ratio: 3 / 2;
+  height: auto;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.post:hover .postImg img {
+  transform: scale(1.04);
 }
 /* the tag sits in a notch cut out of the picture's top-left corner */
 .postTag {
@@ -1079,7 +1153,7 @@
   left: 0;
   top: 0;
   padding: 0 0.6rem 0.6rem 0;
-  border-radius: 0 0 1rem 0;
+  border-radius: 0 0 1.1rem 0;
   background: var(--paper);
 }
 .postTag i {
@@ -1093,18 +1167,29 @@
 }
 .postBody {
   position: relative;
-  display: block;
-  margin: -0.5rem 0 0;
-  padding: 2rem 1.75rem 1.75rem;
-  border-radius: 0 0 var(--r-card) var(--r-card);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-top: -0.6rem;
+  padding: 1.75rem 1.75rem 1.5rem;
+  border-radius: var(--r-card);
   background: #fff;
-  box-shadow: 0 0 0 1px var(--line);
+  box-shadow: 0 14px 34px rgba(27, 27, 27, 0.08), 0 0 0 1px rgba(27, 27, 27, 0.04);
+  transition: box-shadow 0.25s ease;
+}
+.post:hover .postBody,
+.post:focus-visible .postBody {
+  box-shadow: 0 18px 40px rgba(27, 27, 27, 0.13), 0 0 0 1px rgba(27, 27, 27, 0.06);
 }
 .postBody b {
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
   font-size: 1.25rem;
   font-weight: 400;
   line-height: 1.32;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 .postBody > span:not(.postGo) {
   display: -webkit-box;
@@ -1119,19 +1204,20 @@
 .postBody small {
   display: flex;
   align-items: center;
-  margin-top: 1.25rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
   font-size: 0.875rem;
 }
 .postBody small i {
   width: 1px;
   height: 0.8rem;
   margin-inline: 0.85rem;
-  background: var(--line);
+  background: #c9cecd;
 }
 .postGo {
   position: absolute;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: 1.1rem;
+  bottom: 1.1rem;
   display: grid;
   place-items: center;
   width: 2.4rem;
@@ -1140,7 +1226,8 @@
   background: var(--sage);
   color: var(--ink);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transform: translateX(-0.4rem);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .postGo svg {
   margin: 0;
@@ -1148,9 +1235,17 @@
 .post:hover .postGo,
 .post:focus-visible .postGo {
   opacity: 1;
+  transform: none;
 }
-.post:hover .postBody {
-  box-shadow: 0 0 0 1px var(--ink);
+@media (prefers-reduced-motion: reduce) {
+  .postImg img,
+  .postGo,
+  .postBody {
+    transition: none;
+  }
+  .post:hover .postImg img {
+    transform: none;
+  }
 }
 .allPosts {
   margin-top: 1rem;
@@ -1424,7 +1519,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   .postRail {
-    grid-auto-columns: calc((100% - 1.5rem) / 2);
+    grid-auto-columns: calc((100% - 1.5rem) / 2.15);
   }
   .footGrid {
     grid-template-columns: 1fr 1fr 1fr;

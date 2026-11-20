@@ -95,6 +95,9 @@ const SLIDES: { img: string; alt: Bi }[] = [
   { img: "/mt/hero-c.webp", alt: { en: "An agent's panel: watch its screen, chat with it, approve its work", es: "El panel de un agente: mira su pantalla, conversa y aprueba su trabajo" } },
 ];
 
+/** Blog tags are stored in capitals; show them as words, keeping "AI" and "IA" as acronyms. */
+const tagLabel = (v: string) => v.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase()).replace(/\b(Ai|Ia)\b/g, (m) => m.toUpperCase());
+
 const STRIP = ["/art/leads.webp", "/art/product.webp", "/art/ailab.webp", "/art/homecare.webp", "/art/healthcare.webp"];
 
 export function SparkHome() {
@@ -201,7 +204,8 @@ export function SparkHome() {
           </div>
         </section>
 
-        <section className={`${s.wrap} ${s.section} ${s.split}`}>
+        <div className={s.oneView}>
+        <section className={`${s.wrap} ${s.split}`}>
           <div className={s.splitMedia}>
             <img src="/mt/agent-panel.webp" alt={es ? "Pantalla en vivo de un agente programando una publicación, con su registro de actividad" : "An agent's live screen scheduling a post, with its activity log"} width={540} height={680} loading="lazy" />
             <span className={`${s.chip} ${s.chipA}`}>{es ? "Mira cada pantalla en vivo" : "Watch every screen live"}</span>
@@ -232,6 +236,7 @@ export function SparkHome() {
             <div><dt>24/7</dt><dd>{es ? "un agente de facturación en producción para Helixona" : "a billing agent in production for Helixona"}</dd></div>
           </dl>
         </section>
+        </div>
 
         <div className={s.bands} aria-hidden="true">
           <div className={`${s.band} ${s.bandA}`}><span>{band.repeat(4)}</span><span>{band.repeat(4)}</span></div>
@@ -305,8 +310,8 @@ export function SparkHome() {
               <li key={p.slug}>
                 <Link href={`/blog/${p.slug}/`} className={s.post}>
                   <span className={s.postImg}>
-                    <img src={p.coverCard || p.cover} alt="" />
-                    <span className={s.postTag}><i>{p.tag[lang].charAt(0) + p.tag[lang].slice(1).toLowerCase()}</i></span>
+                    <img src={p.coverCard || p.cover} alt="" width={800} height={450} />
+                    <span className={s.postTag}><i>{tagLabel(p.tag[lang])}</i></span>
                   </span>
                   <span className={s.postBody}>
                     <b>{t(p.title)}</b>
