@@ -2546,3 +2546,220 @@
     clip-path: inset(50%);
   }
 }
+
+/* ================= phones: a shorter page =================
+   Lists that would stack into a long column become one swipeable row (the next
+   card peeks in from the right, so the gesture is obvious), decoration goes,
+   and the spacing between sections tightens. */
+@media (max-width: 620px) {
+  .page {
+    --space: 3.25rem;
+  }
+  .svcGrid,
+  .control,
+  .wall,
+  .places,
+  .cards3,
+  .steps,
+  .timeline,
+  .gallery {
+    display: flex;
+    columns: auto;
+    gap: 0.85rem;
+    width: auto;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0 var(--gutter) 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .svcGrid::-webkit-scrollbar,
+  .control::-webkit-scrollbar,
+  .wall::-webkit-scrollbar,
+  .places::-webkit-scrollbar,
+  .cards3::-webkit-scrollbar,
+  .steps::-webkit-scrollbar,
+  .timeline::-webkit-scrollbar,
+  .gallery::-webkit-scrollbar {
+    display: none;
+  }
+  .svcGrid > *,
+  .control > .glass,
+  .wall > li,
+  .places > li,
+  .cards3 > *,
+  .steps > li,
+  .timeline > li,
+  .gallery > li {
+    flex: 0 0 82%;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+  .control {
+    margin-inline: 0;
+    padding-inline: var(--gutter);
+  }
+  .wall > li {
+    display: flex;
+  }
+  .wall a {
+    flex: 1;
+  }
+  .places > li {
+    flex-basis: 72%;
+    background: var(--wash);
+  }
+  .timeline > li {
+    flex-basis: 64%;
+  }
+
+  /* services: shorter cards */
+  .svc {
+    padding: 1.4rem 1.4rem 1.25rem;
+  }
+  .svcIcon {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 1.1rem 0;
+    border-radius: 1rem;
+  }
+  .svcFoot {
+    margin-top: 1.5rem;
+  }
+  .svcFoot p {
+    display: none;
+  }
+
+  /* control block */
+  .controlBlock {
+    padding-block: 2.75rem;
+  }
+  .control {
+    margin-top: 1.75rem;
+  }
+  .glass {
+    padding: 1.25rem;
+  }
+
+  /* split + figures: no chips, smaller picture, the three figures in one row */
+  .oneView {
+    gap: 1.5rem;
+    padding-block: 3.25rem 0;
+  }
+  .chip {
+    display: none;
+  }
+  .oneView .splitMedia img,
+  .splitMedia img {
+    width: min(100%, 14rem);
+  }
+  .splitPhoto img,
+  .oneView .splitPhoto img {
+    width: 100%;
+  }
+  .split .sub {
+    display: none;
+  }
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-block: 1.25rem 0;
+  }
+  .stats div {
+    padding: 0 0.5rem;
+  }
+  .stats div + div {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+  .stats dt,
+  .oneView .stats dt {
+    font-size: 1.9rem;
+  }
+  .stats dd,
+  .oneView .stats dd {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  /* decoration that only adds length */
+  .strip,
+  .ways,
+  .footGrid > div:nth-child(4) {
+    display: none;
+  }
+  .bands {
+    height: 6.5rem;
+  }
+
+  /* contact */
+  .contact {
+    gap: 1.75rem;
+  }
+  .form {
+    gap: 0.7rem;
+    padding: 1.25rem;
+  }
+  .form input,
+  .form select {
+    min-height: 3rem;
+  }
+  .form textarea {
+    min-height: 5.5rem;
+  }
+  .formLead {
+    display: none;
+  }
+
+  /* map */
+  .mapBlock {
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .mapPanel {
+    padding: 0.75rem;
+    border-radius: 1.25rem;
+  }
+  .mapKey span:nth-child(n + 2) {
+    display: none;
+  }
+
+  /* footer */
+  .footer {
+    padding-block: 3rem 3.5rem;
+  }
+  .footGrid {
+    gap: 1.75rem 1.25rem;
+  }
+  .footBrand p {
+    margin: 1rem 0 0.5rem;
+  }
+  .footBase {
+    margin-top: 1.75rem;
+  }
+
+  /* inner pages */
+  .pageBanner {
+    min-height: 23rem;
+    padding-block: 6rem 4rem;
+  }
+  .svcRow {
+    padding: 1.4rem;
+  }
+  .svcCols {
+    display: none;
+  }
+  .workList {
+    gap: 2.5rem;
+  }
+  .workRow .sub {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  .talkBand {
+    padding: 2.25rem 1.5rem;
+  }
+}
