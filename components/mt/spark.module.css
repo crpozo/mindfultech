@@ -3079,15 +3079,7 @@
   }
 }
 
-/* case cards are plain cards now: no link, no hover change, a flag by the place */
-.wall .wallCard:hover {
-  background: var(--wash);
-  color: var(--ink);
-}
-.wall .wallCard:hover small,
-.wall .wallCard:hover em {
-  color: var(--muted);
-}
+/* case cards are plain cards now: no link and no arrow, but the hover stays; a flag by the place */
 .wall em {
   display: flex;
   align-items: center;
