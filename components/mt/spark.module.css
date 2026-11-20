@@ -3118,3 +3118,92 @@
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
+
+/* form: an invalid email is marked on the field and explained under it */
+.form input[aria-invalid="true"] {
+  border-color: #b3261e;
+  background: #fdf3f2;
+}
+.fieldError {
+  grid-column: 1 / -1;
+  margin-top: -0.35rem;
+  color: #b3261e;
+  font-size: 0.9375rem;
+}
+
+/* form states: a spinner while it sends, a clear panel when it is sent, a red note when it fails */
+.spinner {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.form .pill[data-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+.form[aria-busy="true"] input,
+.form[aria-busy="true"] textarea {
+  opacity: 0.6;
+}
+.formFail {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid #e9b9b5;
+  border-radius: 0.6rem;
+  background: #fdf3f2;
+  color: #8c1d18;
+  font-size: 0.9375rem;
+}
+.formFail svg {
+  flex: none;
+  margin-top: 0.15rem;
+}
+.formFail a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.formDone {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  align-content: center;
+  gap: 0.9rem;
+  min-height: 22rem;
+}
+.formDone svg {
+  color: var(--sage-deep);
+}
+.formDone p {
+  font-size: 1.0625rem;
+  overflow-wrap: anywhere;
+}
+
+/* film lightbox: a large window over the page, not full screen */
+.film {
+  width: min(92vw, (100vh - 9rem) * 848 / 480, 84rem);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.5);
+}
+.film::backdrop {
+  background: rgba(13, 13, 14, 0.78);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* cards over the live 3D knot: no backdrop blur. Blurring a WebGL canvas that
+   redraws every frame made the whole block blink on scroll and pointer moves,
+   so with the knot live the cards carry their own near-solid gradient instead. */
+.mark[data-live="true"] ~ .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(120deg, rgba(50, 52, 56, 0.97), rgba(58, 84, 80, 0.93) 62%, rgba(38, 39, 42, 0.97));
+}

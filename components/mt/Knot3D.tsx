@@ -24,7 +24,9 @@ export function Knot3D({ className }: { className?: string }) {
       if (dead) return;
       let renderer: import("three").WebGLRenderer;
       try {
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+        // preserveDrawingBuffer keeps the last frame in the canvas, so the frosted
+        // cards above it never sample an empty buffer when the page repaints
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
       } catch {
         return;
       }
@@ -59,10 +61,15 @@ export function Knot3D({ className }: { className?: string }) {
       light(0xdffbf4, 60, -2, 4, -4);
       light(0x9be3d4, 70, 5, -2, -3);
 
+      let lastW = 0;
       const size = () => {
         const w = el.clientWidth || 300;
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        if (w === lastW) return;
+        lastW = w;
         renderer.setSize(w, w, false);
+        // resizing clears the canvas: draw straight away so it never shows blank
+        renderer.render(scene, camera);
       };
       size();
       const ro = new ResizeObserver(size);

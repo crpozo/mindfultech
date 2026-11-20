@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUp, MapPin, MessagesSquare } from "lucide-react";
+import { ArrowRight, ArrowUp, CircleAlert, CircleCheck, MapPin, MessagesSquare } from "lucide-react";
 import { useLang } from "@/components/i18n";
 import { CONTACT, WEB3FORMS_KEY } from "@/components/site/Shell";
 import s from "./spark.module.css";
@@ -35,35 +35,73 @@ export function Linkedin() {
   );
 }
 
+/** Domains people mistype most; the form suggests the right one instead of sending to a dead address. */
+const DOMAIN_FIX: Record<string, string> = {
+  "gmial.com": "gmail.com", "gmai.com": "gmail.com", "gmail.co": "gmail.com", "gmail.con": "gmail.com", "gnail.com": "gmail.com", "gmal.com": "gmail.com",
+  "hotmial.com": "hotmail.com", "hotmai.com": "hotmail.com", "hotmal.com": "hotmail.com", "ghotmail.com": "hotmail.com", "hotmail.con": "hotmail.com", "hotmail.co": "hotmail.com",
+  "outlok.com": "outlook.com", "outloo.com": "outlook.com", "outlook.con": "outlook.com",
+  "yaho.com": "yahoo.com", "yahooo.com": "yahoo.com", "yahoo.con": "yahoo.com", "icloud.con": "icloud.com", "iclod.com": "icloud.com",
+};
+/** "" when the address is usable, otherwise what is wrong with it. */
+export function emailProblem(value: string, es: boolean): string {
+  const v = value.trim();
+  if (!v) return es ? "Escribe tu correo." : "Enter your email.";
+  if (!/^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(v) || /\.\./.test(v)) return es ? "Ese correo no es válido. Revisa que tenga la forma nombre@empresa.com." : "That email is not valid. Check it looks like name@company.com.";
+  const domain = v.split("@")[1].toLowerCase();
+  if (DOMAIN_FIX[domain]) return es ? `Ese dominio parece mal escrito. ¿Quisiste decir ${v.split("@")[0]}@${DOMAIN_FIX[domain]}?` : `That domain looks mistyped. Did you mean ${v.split("@")[0]}@${DOMAIN_FIX[domain]}?`;
+  return "";
+}
+
 export function ContactCard() {
   const { lang } = useLang();
   const es = lang === "es";
   const [f, setF] = React.useState({ name: "", email: "", msg: "" });
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
+  const [touched, setTouched] = React.useState(false);
+  const [sentTo, setSentTo] = React.useState("");
+  const mailRef = React.useRef<HTMLInputElement>(null);
+  const mailError = touched ? emailProblem(f.email, es) : "";
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "sending") return;
+    if (emailProblem(f.email, es)) {
+      setTouched(true);
+      mailRef.current?.focus();
+      return;
+    }
     setState("sending");
     const subject = `mindfultech.ec: ${f.name}`;
     const payload = { type: "project", name: f.name, email: f.email, message: f.msg };
     try {
       const ctrl = new AbortController();
-      const timer = window.setTimeout(() => ctrl.abort(), 15000);
+      const timer = window.setTimeout(() => ctrl.abort(), 8000);
       const r = WEB3FORMS_KEY
         ? await fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject, from_name: "mindfultech.ec", replyto: f.email, ...payload }) })
         : await fetch(`https://formsubmit.co/ajax/${CONTACT.formTo}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, signal: ctrl.signal, body: JSON.stringify({ ...payload, _subject: subject, _template: "table", _captcha: "false", _replyto: f.email }) });
       window.clearTimeout(timer);
       if (!r.ok) throw new Error(String(r.status));
+      setSentTo(f.email);
       setState("sent");
+      setTouched(false);
       setF({ name: "", email: "", msg: "" });
     } catch {
       // nothing opens on the visitor's side: the form says it failed and offers the direct channels
       setState("error");
     }
   };
+  if (state === "sent") {
+    return (
+      <div className={`${s.form} ${s.formDone}`} role="status">
+        <CircleCheck size={44} strokeWidth={1.5} aria-hidden="true" />
+        <h3>{es ? "Mensaje enviado" : "Message sent"}</h3>
+        <p>{es ? `Gracias. Una persona del equipo te responde a ${sentTo}.` : `Thank you. A person on the team will reply to ${sentTo}.`}</p>
+        <button type="button" className={`${s.pill} ${s.pillLine}`} onClick={() => setState("idle")}>{es ? "Enviar otro mensaje" : "Send another message"}</button>
+      </div>
+    );
+  }
   return (
-    <form className={s.form} onSubmit={submit}>
+    <form className={s.form} onSubmit={submit} aria-busy={state === "sending"}>
       <h3>{es ? "Escríbenos" : "Get in touch"}</h3>
       <p className={s.formLead}>{es ? "Llena el formulario y una persona del equipo te responde por correo." : "Fill out the form and a person on the team replies by email."}</p>
       <label>
@@ -72,25 +110,29 @@ export function ContactCard() {
       </label>
       <label>
         <span>Email</span>
-        <input required type="email" value={f.email} onChange={set("email")} autoComplete="email" placeholder={es ? "Correo electrónico" : "Email address"} />
+        <input ref={mailRef} required type="email" inputMode="email" value={f.email} onChange={set("email")} onBlur={() => f.email && setTouched(true)} autoComplete="email" placeholder={es ? "Correo electrónico" : "Email address"} aria-invalid={!!mailError} aria-describedby={mailError ? "sp-mail-error" : undefined} />
       </label>
+      {mailError && <p id="sp-mail-error" className={s.fieldError} role="alert">{mailError}</p>}
       <label className={s.full}>
         <span>{es ? "Qué quieres automatizar" : "What you want to automate"}</span>
         <textarea required value={f.msg} onChange={set("msg")} placeholder={es ? "Cuéntanos qué quieres automatizar" : "Tell us what you want to automate"} />
       </label>
-      <button type="submit" className={`${s.pill} ${s.pillInk}`} disabled={state === "sending"}>
-        {state === "sending" ? (es ? "Enviando mensaje" : "Sending message") : es ? "Enviar mensaje" : "Send message"}
-        <Arrow />
-      </button>
-      {state === "sent" && <p className={s.formNote} role="status">{es ? "Mensaje enviado. Te respondemos por correo." : "Message sent. We will reply by email."}</p>}
       {state === "error" && (
-        <p className={s.formNote} role="alert">
-          {es ? "No se pudo enviar el mensaje. Inténtalo de nuevo o escríbenos por " : "The message could not be sent. Try again or reach us on "}
-          <a href={CONTACT.wa} target="_blank" rel="noreferrer">WhatsApp</a>
-          {es ? " o a " : " or at "}
-          <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+        <p className={s.formFail} role="alert">
+          <CircleAlert size={20} strokeWidth={1.8} aria-hidden="true" />
+          <span>
+            {es ? "No se pudo enviar el mensaje. Inténtalo de nuevo o escríbenos por " : "The message could not be sent. Try again or reach us on "}
+            <a href={CONTACT.wa} target="_blank" rel="noreferrer">WhatsApp</a>
+            {es ? " o a " : " or at "}
+            <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+          </span>
         </p>
       )}
+      <button type="submit" className={`${s.pill} ${s.pillInk}`} disabled={state === "sending"} data-busy={state === "sending"}>
+        {state === "sending" ? <i className={s.spinner} aria-hidden="true" /> : null}
+        {state === "sending" ? (es ? "Enviando…" : "Sending…") : state === "error" ? (es ? "Intentar de nuevo" : "Try again") : es ? "Enviar mensaje" : "Send message"}
+        {state === "sending" ? null : <Arrow />}
+      </button>
     </form>
   );
 }

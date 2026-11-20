@@ -191,8 +191,8 @@ export function SparkHome() {
     if (on) v.play().catch(() => {});
     setSound(on);
   };
-  // Play means "big": the film opens full screen with sound, from the start.
-  // If the browser refuses full screen, it still opens in a dialog that fills the window.
+  // Play opens the film in a lightbox: a large window over the page, with sound,
+  // from the start. Not full screen; the page stays visible behind it.
   const openFilm = () => {
     const v = loop.current;
     if (v) {
@@ -204,9 +204,8 @@ export function SparkHome() {
     const big = film.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
     if (!big) return;
     big.currentTime = 0;
+    big.muted = false;
     big.play().catch(() => {});
-    if (big.requestFullscreen) big.requestFullscreen().catch(() => {});
-    else big.webkitEnterFullscreen?.();
   };
   const closeFilm = () => {
     film.current?.pause();
@@ -303,10 +302,6 @@ export function SparkHome() {
               </li>
             ))}
           </ul>
-          <div className={s.svcFoot}>
-            <p>{es ? "Cada proyecto empieza entendiendo tu operación, no eligiendo una herramienta." : "Every project starts by understanding how you operate, not by picking a tool."}</p>
-            <Link href="/services/" className={`${s.pill} ${s.pillInk}`}>{es ? "Ver todos los servicios" : "See all services"}</Link>
-          </div>
         </section>
 
         <section className={`${s.night} ${s.notched} ${s.controlBlock}`}>
