@@ -35,15 +35,15 @@ export function Arrow() {
 export function ContactCard() {
   const { lang } = useLang();
   const es = lang === "es";
-  const [f, setF] = React.useState({ name: "", email: "", company: "", msg: "" });
+  const [f, setF] = React.useState({ name: "", email: "", company: "", phone: "", service: "", msg: "" });
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "sending") return;
     setState("sending");
     const subject = `mindfultech.ec: ${f.name}`;
-    const payload = { type: "project", name: f.name, email: f.email, company: f.company, message: f.msg };
+    const payload = { type: "project", name: f.name, email: f.email, company: f.company, phone: f.phone, service: f.service, message: f.msg };
     try {
       const ctrl = new AbortController();
       const timer = window.setTimeout(() => ctrl.abort(), 8000);
@@ -53,35 +53,49 @@ export function ContactCard() {
       window.clearTimeout(timer);
       if (!r.ok) throw new Error(String(r.status));
       setState("sent");
-      setF({ name: "", email: "", company: "", msg: "" });
+      setF({ name: "", email: "", company: "", phone: "", service: "", msg: "" });
     } catch {
       // the form service did not answer: hand the same message to the visitor's mail app
       setState("error");
-      const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, "", f.msg].join("\n");
+      const body = [`${es ? "Nombre" : "Name"}: ${f.name}`, `Email: ${f.email}`, `${es ? "Empresa" : "Company"}: ${f.company}`, `${es ? "Teléfono" : "Phone"}: ${f.phone}`, `${es ? "Servicio" : "Service"}: ${f.service}`, "", f.msg].join("\n");
       window.location.href = `mailto:${CONTACT.formTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
   };
   return (
     <form className={s.form} onSubmit={submit}>
-      <h3>{es ? "Escríbenos" : "Send us a message"}</h3>
+      <h3>{es ? "Escríbenos" : "Get in touch"}</h3>
+      <p className={s.formLead}>{es ? "Llena el formulario y una persona del equipo te responde por correo." : "Fill out the form and a person on the team replies by email."}</p>
       <label>
-        {es ? "Nombre" : "Name"}
-        <input required value={f.name} onChange={set("name")} autoComplete="name" />
+        <span>{es ? "Tu nombre" : "Your name"}</span>
+        <input required value={f.name} onChange={set("name")} autoComplete="name" placeholder={es ? "Tu nombre" : "Your name"} />
       </label>
       <label>
-        Email
-        <input required type="email" value={f.email} onChange={set("email")} autoComplete="email" />
+        <span>Email</span>
+        <input required type="email" value={f.email} onChange={set("email")} autoComplete="email" placeholder={es ? "Correo electrónico" : "Email address"} />
+      </label>
+      <label>
+        <span>{es ? "Empresa" : "Company"}</span>
+        <input value={f.company} onChange={set("company")} autoComplete="organization" placeholder={es ? "Empresa" : "Company name"} />
+      </label>
+      <label>
+        <span>{es ? "Teléfono" : "Phone"}</span>
+        <input type="tel" value={f.phone} onChange={set("phone")} autoComplete="tel" placeholder={es ? "Teléfono" : "Phone number"} />
       </label>
       <label className={s.full}>
-        {es ? "Empresa" : "Company"}
-        <input value={f.company} onChange={set("company")} autoComplete="organization" />
+        <span>{es ? "Servicio" : "Service"}</span>
+        <select value={f.service} onChange={set("service")}>
+          <option value="">{es ? "Qué servicio te interesa" : "Which service you need"}</option>
+          {SERVICE_LINKS.map((v) => <option key={v.slug} value={v.label.en}>{v.label[lang]}</option>)}
+          <option value="AI Management Office">AI Management Office</option>
+        </select>
       </label>
       <label className={s.full}>
-        {es ? "Qué quieres automatizar" : "What you want to automate"}
-        <textarea required value={f.msg} onChange={set("msg")} />
+        <span>{es ? "Qué quieres automatizar" : "What you want to automate"}</span>
+        <textarea required value={f.msg} onChange={set("msg")} placeholder={es ? "Cuéntanos qué quieres automatizar" : "Tell us what you want to automate"} />
       </label>
       <button type="submit" className={`${s.pill} ${s.pillInk}`} disabled={state === "sending"}>
         {state === "sending" ? (es ? "Enviando mensaje" : "Sending message") : es ? "Enviar mensaje" : "Send message"}
+        <Arrow />
       </button>
       {state === "sent" && <p className={s.formNote} role="status">{es ? "Mensaje enviado. Te respondemos por correo." : "Message sent. We will reply by email."}</p>}
       {state === "error" && <p className={s.formNote} role="status">{es ? "No se pudo enviar desde aquí. Se abrió tu correo con el mensaje listo." : "It could not be sent from here. Your mail app opened with the message ready."}</p>}
@@ -95,15 +109,25 @@ export function ContactBlock({ id, h1 = false }: { id?: string; h1?: boolean }) 
   const es = lang === "es";
   const H = h1 ? "h1" : "h2";
   return (
-    <section id={id} className={`${s.night} ${s.section}`}>
+    <section id={id} className={`${s.night} ${s.section} ${s.stepped}`}>
       <div className={`${s.wrap} ${s.contact}`}>
         <div>
+          <p className={s.kicker}>{es ? "Estamos para responder tus preguntas" : "We are here to answer your questions"}</p>
           <H className={s.h2} style={{ maxWidth: "14ch" }}>{es ? "Cuéntanos qué quieres automatizar." : "Tell us what you want to automate."}</H>
-          <p className={s.sub}>{es ? "Escríbenos por el formulario, por WhatsApp o por correo. Te responde una persona del equipo." : "Write through the form, WhatsApp or email. A person on the team replies."}</p>
+          <p className={s.contactLead}>{es ? "Escríbenos por el formulario, por WhatsApp o por correo. Te responde una persona del equipo, no un bot." : "Write through the form, WhatsApp or email. A person on the team replies, not a bot."}</p>
+          <div className={s.btnRow}>
+            <a href={CONTACT.wa} target="_blank" rel="noreferrer" className={`${s.pill} ${s.pillWhite}`}>{es ? "Escribir por WhatsApp" : "Chat on WhatsApp"}<Arrow /></a>
+            <a href={`mailto:${CONTACT.email}`} className={`${s.pill} ${s.pillLine}`}>{es ? "Enviar un correo" : "Send an email"}</a>
+          </div>
           <ul className={s.ways}>
-            <li><b>WhatsApp</b><a href={CONTACT.wa} target="_blank" rel="noreferrer">{CONTACT.phone}</a></li>
-            <li><b>Email</b><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></li>
-            <li><b>{es ? "Oficina" : "Office"}</b><span>Quito, Ecuador</span></li>
+            <li>
+              <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 27l1.7-5.5A11 11 0 1111 25.6z" /><path d="M12 13c0 4 3 7 7 7l1.5-2-2.5-1.5-1 1c-1.2-.5-2.3-1.6-2.8-2.8l1-1L13.7 11z" /></svg>
+              <div><b>{es ? "Primero entendemos tu operación" : "We start by understanding how you operate"}</b><p>{es ? "La primera conversación es para conocer tu proceso, no para venderte una herramienta." : "The first conversation is about your process, not about selling you a tool."}</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 29s9-8.5 9-15a9 9 0 10-18 0c0 6.5 9 15 9 15z" /><circle cx="16" cy="14" r="3.5" /></svg>
+              <div><b>{es ? "Equipo en Quito, Ecuador" : "A team in Quito, Ecuador"}</b><p>{CONTACT.phone}. {CONTACT.email}</p></div>
+            </li>
           </ul>
         </div>
         <ContactCard />
@@ -147,7 +171,7 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
   const es = lang === "es";
   const [open, setOpen] = React.useState(false);
   return (
-    <div className={s.page}>
+    <div className={s.page} id="top">
       <header className={`${s.heroWrap} ${s.header}`}>
         <Link href="/" className={s.logo} aria-label="MindfulTech">
           <img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} />
@@ -167,11 +191,23 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
       <main>{children}</main>
 
       <footer className={s.footer}>
-        <div className={s.wrap}>
+        <i className={`${s.bite} ${s.biteTL}`} /><i className={`${s.bite} ${s.biteTR}`} /><i className={`${s.bite} ${s.biteBL}`} /><i className={`${s.bite} ${s.biteBR}`} />
+        <div className={s.footIn}>
           <div className={s.footGrid}>
             <div className={s.footBrand}>
               <span className={s.footLogo}><img src="/brand/logo.webp" alt="MindfulTech" width={220} height={71} loading="lazy" /></span>
-              <p>AI Software Lab. Quito, Ecuador.</p>
+              <p>AI Software Lab. {es ? "Conectamos tus sistemas y los agentes hacen el trabajo." : "We connect your systems and agents do the work."}</p>
+              <a href={`mailto:${CONTACT.email}`} className={s.footMail}>{CONTACT.email}</a>
+              <a href={CONTACT.tel}>{CONTACT.phone}</a>
+            </div>
+            <div>
+              <h2>{es ? "Empresa" : "Company"}</h2>
+              <ul>
+                <li><Link href="/company/">{es ? "Sobre nosotros" : "About us"}</Link></li>
+                <li><Link href="/work/">{es ? "Casos" : "Case studies"}</Link></li>
+                <li><Link href="/office-demo/">{es ? "Oficina IA" : "AI Office"}</Link></li>
+                <li><Link href="/contact/">{es ? "Contacto" : "Contact us"}</Link></li>
+              </ul>
             </div>
             <div>
               <h2>{es ? "Servicios" : "Services"}</h2>
@@ -182,30 +218,37 @@ export function SparkPage({ active, children }: { active?: string; children: Rea
               </ul>
             </div>
             <div>
-              <h2>{es ? "Empresa" : "Company"}</h2>
+              <h2>{es ? "Recursos" : "Resources"}</h2>
               <ul>
-                {NAV.slice(1).map((n) => (
-                  <li key={n.key}><Link href={n.href}>{n.label[lang]}</Link></li>
-                ))}
-                <li><Link href="/contact/">{es ? "Contacto" : "Contact"}</Link></li>
+                <li><Link href="/blog/">Blog</Link></li>
+                <li><Link href="/services/">{es ? "Cómo trabajamos" : "How it works"}</Link></li>
               </ul>
             </div>
-            <div>
-              <h2>{es ? "Contacto" : "Contact"}</h2>
-              <ul>
-                <li><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></li>
-                <li><a href={CONTACT.wa} target="_blank" rel="noreferrer">WhatsApp {CONTACT.phone}</a></li>
-              </ul>
+            <div className={s.footTalk}>
+              <h2>{es ? "Empecemos" : "Start a project"}</h2>
+              <p>{es ? "Cuéntanos qué quieres automatizar y te respondemos por correo." : "Tell us what you want to automate and we reply by email."}</p>
+              <Link href="/contact/" className={s.footField}><span>{TALK[lang]}</span><i><Arrow /></i></Link>
+              <div className={s.social}>
+                <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zM8.7 17H6.4V9.7h2.3zM7.5 8.7a1.3 1.3 0 110-2.7 1.3 1.3 0 010 2.7zM17.7 17h-2.3v-3.6c0-.9 0-2-1.2-2s-1.4 1-1.4 1.9V17h-2.3V9.7h2.2v1c.3-.6 1-1.2 2.2-1.2 2.3 0 2.8 1.5 2.8 3.5z" /></svg>
+                </a>
+                <a href="https://github.com/crpozo" target="_blank" rel="noreferrer" aria-label="GitHub">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 00-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.2-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0012 2z" /></svg>
+                </a>
+              </div>
             </div>
           </div>
           <div className={s.footBase}>
-            <span>© 2026 MindfulTech</span>
+            <span>© 2026 MindfulTech. {es ? "Todos los derechos reservados." : "All rights reserved."}</span>
             <div className={s.lang} role="group" aria-label={es ? "Idioma" : "Language"}>
               <button type="button" aria-pressed={!es} onClick={() => setLang("en")}>English</button>
               <button type="button" aria-pressed={es} onClick={() => setLang("es")}>Español</button>
             </div>
           </div>
         </div>
+        <a href="#top" className={s.toTop} aria-label={es ? "Volver arriba" : "Back to top"}>
+          <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </a>
       </footer>
     </div>
   );
