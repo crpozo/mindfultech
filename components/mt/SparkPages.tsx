@@ -369,7 +369,8 @@ export function SpCompany() {
         </ul>
       </section>
 
-      <section className={`${s.wrap} ${s.sectionFlush}`}>
+      {/* with the team section hidden this is the last section, so it carries the space before the closing band */}
+      <section className={`${s.wrap} ${s.sectionFlush}`} style={SHOW_TEAM ? undefined : { paddingBottom: "var(--space)" }}>
         <h2 className={s.h2}>{es ? "Diez años, en cuatro fechas." : "Ten years, in four dates."}</h2>
         <ol className={s.timeline}>
           {TIMELINE.map(([y, en, sp]) => (
