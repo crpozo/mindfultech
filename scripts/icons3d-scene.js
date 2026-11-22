@@ -92,21 +92,32 @@ window.renderIcon = (kind) => {
     g.position.y = 0.35;
     g.scale.setScalar(0.9);
   } else if (kind === "vision") {
-    // a camera lens inside a scan frame: computer vision
-    add(new THREE.TorusGeometry(1.45, 0.42, 48, 160), sage());
-    add(new THREE.SphereGeometry(1.12, 64, 64), pearl(), 0, 0, -0.1);
-    add(new THREE.SphereGeometry(0.62, 48, 48), ink(), 0, 0, 0.72);
-    add(new THREE.SphereGeometry(0.16, 24, 24), pearl(), 0.24, 0.26, 1.24);
-    const corner = (sx, sy) => {
-      add(new RoundedBoxGeometry(1.05, 0.26, 0.26, 6, 0.1), ink(), sx * 2.05, sy * 2.45, 0);
-      add(new RoundedBoxGeometry(0.26, 1.05, 0.26, 6, 0.1), ink(), sx * 2.45, sy * 2.05, 0);
+    // a security camera on its wall mount: computer vision
+    const cam = new THREE.Group();
+    const put = (geo, mat, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) => {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      m.rotation.set(rx, ry, rz);
+      cam.add(m);
     };
-    corner(-1, 1);
-    corner(1, 1);
-    corner(-1, -1);
-    corner(1, -1);
-    g.rotation.set(0.08, -0.5, 0.04);
+    // body lies along x, lens to the left
+    put(new THREE.CapsuleGeometry(0.78, 2.3, 24, 48), pearl(), 0, 0, 0, 0, 0, Math.PI / 2);
+    put(new RoundedBoxGeometry(3.3, 0.24, 1.9, 8, 0.1), sage(), -0.2, 0.86, 0);
+    put(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 64), sage(), -1.75, 0, 0, 0, 0, Math.PI / 2);
+    put(new THREE.CylinderGeometry(0.56, 0.56, 0.2, 64), ink(), -2.02, 0, 0, 0, 0, Math.PI / 2);
+    put(new THREE.SphereGeometry(0.34, 48, 48), ink(), -2.02, 0, 0);
+    put(new THREE.SphereGeometry(0.09, 24, 24), pearl(), -2.3, 0.14, 0.12);
+    put(new THREE.SphereGeometry(0.1, 24, 24), sage(), 1.0, 0.3, 0.72);
+    cam.rotation.set(0, 0, 0.3);
+    cam.position.set(-0.35, 0.55, 0);
+    g.add(cam);
+    // arm and wall plate
+    add(new THREE.CylinderGeometry(0.2, 0.2, 1.9, 32), ink(), 1.45, -0.52, 0, 0, 0, 0.885);
+    add(new THREE.SphereGeometry(0.34, 32, 32), ink(), 0.75, 0.05, 0);
+    add(new RoundedBoxGeometry(0.4, 2.3, 1.7, 8, 0.14), ink(), 2.15, -1.1, 0);
+    g.rotation.set(0.12, 0.62, 0);
     g.scale.setScalar(0.86);
+    g.position.y = 0.2;
   } else if (kind === "workshops") {
     // three people around a table
     const person = (x, z, h, mat) => {
