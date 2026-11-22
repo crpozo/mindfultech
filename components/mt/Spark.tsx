@@ -4,7 +4,7 @@ import { Knot3D } from "./Knot3D";
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
-import { AppWindow, Bot, Building2, FileClock, KeyRound, MapPin, Play, ShieldCheck, UserCheck, Users, Volume2, VolumeX, Workflow, type LucideIcon } from "lucide-react";
+import { AppWindow, Bot, Building2, CreditCard, FileSearch, Headset, Inbox, MousePointerClick, Package, Play, Receipt, ShieldCheck, UserCheck, Users, Volume2, VolumeX, Workflow, type LucideIcon } from "lucide-react";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { SparkPage, ContactBlock, Arrow, TALK, type Bi } from "./SparkChrome";
 import s from "./spark.module.css";
@@ -53,13 +53,24 @@ const SERVICES: { href: string; icon: LucideIcon; title: Bi; text: Bi }[] = [
   },
 ];
 
-const CONTROL_ICONS: LucideIcon[] = [UserCheck, MapPin, KeyRound, FileClock];
+const CONTROL_ICONS: LucideIcon[] = [Inbox, FileSearch, MousePointerClick, UserCheck];
 
 const CONTROL: { t: Bi; d: Bi }[] = [
-  { t: { en: "A person approves", es: "Una persona aprueba" }, d: { en: "Agents prepare. A person signs off on payments, customer messages and anything that cannot be undone.", es: "Los agentes preparan. Una persona aprueba pagos, mensajes a clientes y lo que no se puede deshacer." } },
-  { t: { en: "Data stays in your region", es: "Los datos se quedan en tu región" }, d: { en: "Your data lives in the cloud region you choose, inside your own accounts.", es: "Tus datos viven en la región de nube que elijas, dentro de tus cuentas." } },
-  { t: { en: "Least privilege", es: "Mínimo privilegio" }, d: { en: "Each agent gets only the access its job needs, with its own credentials.", es: "Cada agente recibe solo el acceso que su tarea necesita, con credenciales propias." } },
-  { t: { en: "An audit trail you can export", es: "Auditoría que puedes exportar" }, d: { en: "Every action is logged with who, what and when.", es: "Cada acción queda registrada con quién, qué y cuándo." } },
+  { t: { en: "It receives a task", es: "Recibe una tarea" }, d: { en: "An email, a form, an order or a schedule starts the work. Nobody has to open a chat and ask.", es: "Un correo, un formulario, un pedido o un horario inicia el trabajo. Nadie tiene que abrir un chat y pedirlo." } },
+  { t: { en: "It reads what it needs", es: "Lee lo que necesita" }, d: { en: "It looks up your documents, your customer records and the rules of your business before deciding anything.", es: "Consulta tus documentos, los datos de tus clientes y las reglas de tu negocio antes de decidir." } },
+  { t: { en: "It works in your tools", es: "Trabaja en tus herramientas" }, d: { en: "It logs into your CRM, your email and your spreadsheets, and does the steps a person would do by hand.", es: "Entra a tu CRM, tu correo y tus hojas de cálculo, y hace los pasos que una persona haría a mano." } },
+  { t: { en: "It hands the result to a person", es: "Entrega el resultado a una persona" }, d: { en: "It reports what it did and stops to ask when something is unclear or needs approval.", es: "Informa lo que hizo y se detiene a preguntar cuando algo no está claro o necesita aprobación." } },
+];
+
+const HUB_ICONS: LucideIcon[] = [Users, Receipt, Package, Headset, CreditCard];
+
+/** Sample figures for the illustration of the integration block. */
+const HUB: { n: Bi; src: string; v: Bi }[] = [
+  { n: { en: "Sales", es: "Ventas" }, src: "CRM", v: { en: "128 deals", es: "128 negocios" } },
+  { n: { en: "Accounting", es: "Contabilidad" }, src: "ERP", v: { en: "42 invoices", es: "42 facturas" } },
+  { n: { en: "Inventory", es: "Inventario" }, src: "WMS", v: { en: "3 low", es: "3 por agotarse" } },
+  { n: { en: "Support", es: "Soporte" }, src: "WhatsApp", v: { en: "9 open", es: "9 abiertos" } },
+  { n: { en: "Payments", es: "Pagos" }, src: "Bank", v: { en: "$18,400", es: "$18,400" } },
 ];
 
 const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] = [
@@ -307,8 +318,8 @@ export function SparkHome() {
 
         <section className={`${s.night} ${s.notched} ${s.controlBlock}`}>
           <div className={`${s.wrap} ${s.center}`}>
-            <p className={s.kicker}>{es ? "Cuatro reglas que van en cada proyecto que entregamos" : "Four rules that are part of every project we deliver"}</p>
-            <h2 className={s.h2}>{es ? "Automatización que te mantiene en control." : "Automation that keeps you in control."}</h2>
+            <p className={s.kicker}>{es ? "Un agente es software que hace un trabajo completo, de principio a fin" : "An agent is software that does a whole job, from start to finish"}</p>
+            <h2 className={s.h2}>{es ? "Cómo trabaja un agente de IA." : "How an AI agent works."}</h2>
           </div>
           <div className={`${s.wrap} ${s.control}`}>
             <Knot3D className={s.mark} />
@@ -327,17 +338,30 @@ export function SparkHome() {
         <div className={s.oneView}>
         <section className={`${s.wrap} ${s.split}`}>
           <div className={s.splitMedia}>
-            <img src="/mt/agent-panel.webp" alt={es ? "Pantalla en vivo de un agente programando una publicación, con su registro de actividad" : "An agent's live screen scheduling a post, with its activity log"} width={540} height={680} loading="lazy" />
-            <span className={`${s.chip} ${s.chipA}`}>{es ? "Mira cada pantalla en vivo" : "Watch every screen live"}</span>
-            <span className={`${s.chip} ${s.chipB}`}>{es ? "Conversa con el agente" : "Chat with the agent"}</span>
-            <span className={`${s.chip} ${s.chipC}`}>{es ? "Aprueba lo importante" : "Approve what matters"}</span>
+            <div className={s.hub} role="img" aria-label={es ? "Un panel que reúne ventas, contabilidad, inventario, soporte y pagos" : "One panel that brings together sales, accounting, inventory, support and payments"}>
+              <p className={s.hubHead}><b>{es ? "Tu negocio hoy" : "Your business today"}</b><em>{es ? "En vivo" : "Live"}</em></p>
+              <ul>
+                {HUB.map((h, i) => {
+                  const Icon = HUB_ICONS[i];
+                  return (
+                    <li key={h.n.en}>
+                      <span><Icon size={18} strokeWidth={1.6} aria-hidden="true" /></span>
+                      <div><b>{t(h.n)}</b><small>{h.src}</small></div>
+                      <strong>{t(h.v)}</strong>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <span className={`${s.chip} ${s.chipA}`}>{es ? "Todos tus sistemas conectados" : "All your systems connected"}</span>
+            <span className={`${s.chip} ${s.chipB}`}>{es ? "Datos al día" : "Data always up to date"}</span>
           </div>
           <div>
-            <p className={s.eyebrow}>{es ? "Conoce la AI Management Office de MindfulTech" : "Meet the AI Management Office by MindfulTech"}</p>
-            <h2 className={s.h2}>{es ? "Mira, conversa y aprueba el trabajo de tu equipo de IA." : "Watch, chat with and approve the work of your AI team."}</h2>
-            <p className={s.strong}>{es ? "Cada agente tiene un rol y un escritorio. Abres su pantalla, le escribes y decides lo que necesita tu firma." : "Every agent has a role and a desk. You open its screen, write to it, and decide what needs your sign-off."}</p>
+            <p className={s.eyebrow}>{es ? "Integración de sistemas" : "Systems integration"}</p>
+            <h2 className={s.h2}>{es ? "Una sola plataforma que lo ve todo." : "One platform that sees everything."}</h2>
+            <p className={s.strong}>{es ? "Conectamos tu CRM, tu contabilidad, tu inventario y las herramientas que tu equipo ya usa. Cada número queda en un solo lugar y nadie vuelve a copiar datos a mano." : "We connect your CRM, your accounting, your inventory and the tools your team already uses. Every number sits in one place and nobody copies data by hand again."}</p>
             <div className={s.btnRow}>
-              <Link href="/office-demo/" className={`${s.pill} ${s.pillSage}`}>{es ? "Abrir la Oficina IA" : "Open the AI Office"}<Arrow /></Link>
+              <Link href="/services/" className={`${s.pill} ${s.pillSage}`}>{es ? "Ver integración de sistemas" : "See systems integration"}<Arrow /></Link>
               <a href="#contact" className={`${s.pill} ${s.pillLine}`}>{t(TALK)}</a>
             </div>
           </div>
