@@ -14,7 +14,7 @@ const fs = require("fs");
   await p.setContent('<!doctype html><style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style><body></body>');
   await p.addScriptTag({ content: code });
   const shots = [];
-  for (const k of ["ai", "software", "security", "cloud", "workshops", "integration", "office"]) {
+  for (const k of ["ai", "software", "security", "cloud", "vision", "workshops", "integration", "office"]) {
     await p.evaluate((k) => window.renderIcon(k), k);
     await new Promise((r) => setTimeout(r, 300));
     await p.screenshot({ path: `${out}/icon-${k}.png`, omitBackground: true });

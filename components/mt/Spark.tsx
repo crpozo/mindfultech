@@ -37,9 +37,9 @@ const SERVICES: { href: string; icon: LucideIcon; title: Bi; text: Bi }[] = [
     text: { en: "We set up, migrate and run your cloud: servers, deployments, monitoring and backups.", es: "Montamos, migramos y operamos tu nube: servidores, despliegues, monitoreo y respaldos." },
   },
   {
-    href: "/services/discovery/", icon: Users,
-    title: { en: "Workshops and requirements", es: "Workshops y requerimientos" },
-    text: { en: "Facilitated sessions that turn how you operate into a clear build plan.", es: "Sesiones facilitadas que convierten tu operación en un plan claro de construcción." },
+    href: "/services/", icon: Users,
+    title: { en: "Computer vision", es: "Visión por computadora" },
+    text: { en: "Cameras that count, measure and flag problems on their own: shelves and footfall in retail, quality on the line.", es: "Cámaras que cuentan, miden y avisan solas: góndolas y afluencia en retail, calidad en la línea de producción." },
   },
   {
     href: "/work/", icon: Workflow,
@@ -158,7 +158,7 @@ function WorldMap({ active, onPick }: { active: string | null; onPick: (id: stri
 
 const STRIP = [1, 2, 3, 4, 5].map((n) => `/mt/strip-${n}.webp`);
 /** 3D icon of each service card, in SERVICES order (rendered by scripts/icons3d-*.js). */
-const ART = ["ai", "software", "cloud", "workshops", "integration", "office"];
+const ART = ["ai", "software", "cloud", "vision", "integration", "office"];
 /** Country flag of each case card. */
 const FLAG: Record<string, { code: string; name: Bi }> = {
   healthcare: { code: "us", name: { en: "United States", es: "Estados Unidos" } },

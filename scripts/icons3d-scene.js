@@ -91,6 +91,22 @@ window.renderIcon = (kind) => {
     g.rotation.set(0.18, -0.42, 0);
     g.position.y = 0.35;
     g.scale.setScalar(0.9);
+  } else if (kind === "vision") {
+    // a camera lens inside a scan frame: computer vision
+    add(new THREE.TorusGeometry(1.45, 0.42, 48, 160), sage());
+    add(new THREE.SphereGeometry(1.12, 64, 64), pearl(), 0, 0, -0.1);
+    add(new THREE.SphereGeometry(0.62, 48, 48), ink(), 0, 0, 0.72);
+    add(new THREE.SphereGeometry(0.16, 24, 24), pearl(), 0.24, 0.26, 1.24);
+    const corner = (sx, sy) => {
+      add(new RoundedBoxGeometry(1.05, 0.26, 0.26, 6, 0.1), ink(), sx * 2.05, sy * 2.45, 0);
+      add(new RoundedBoxGeometry(0.26, 1.05, 0.26, 6, 0.1), ink(), sx * 2.45, sy * 2.05, 0);
+    };
+    corner(-1, 1);
+    corner(1, 1);
+    corner(-1, -1);
+    corner(1, -1);
+    g.rotation.set(0.08, -0.5, 0.04);
+    g.scale.setScalar(0.86);
   } else if (kind === "workshops") {
     // three people around a table
     const person = (x, z, h, mat) => {
