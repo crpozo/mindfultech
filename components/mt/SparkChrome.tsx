@@ -242,6 +242,10 @@ export function SparkPage({ active, over = true, children }: { active?: string; 
             <Link key={n.key} href={n.href} aria-current={active === n.key ? "page" : undefined}>{n.label[lang]}</Link>
           ))}
         </nav>
+        <div className={s.langTop} role="group" aria-label={es ? "Idioma" : "Language"}>
+          <button type="button" lang="en" aria-label="English" aria-pressed={!es} onClick={() => setLang("en")}>EN</button>
+          <button type="button" lang="es" aria-label="Español" aria-pressed={es} onClick={() => setLang("es")}>ES</button>
+        </div>
         <button type="button" className={`${s.pill} ${s.pillLine} ${s.pillSmall} ${s.menuBtn}`} aria-expanded={open} aria-controls="sp-nav" onClick={() => setOpen((v) => !v)}>
           {open ? (es ? "Cerrar" : "Close") : es ? "Menú" : "Menu"}
         </button>
@@ -300,10 +304,6 @@ export function SparkPage({ active, over = true, children }: { active?: string; 
           </div>
           <div className={s.footBase}>
             <span>© 2026 MindfulTech. {es ? "Todos los derechos reservados." : "All rights reserved."}</span>
-            <div className={s.lang} role="group" aria-label={es ? "Idioma" : "Language"}>
-              <button type="button" aria-pressed={!es} onClick={() => setLang("en")}>English</button>
-              <button type="button" aria-pressed={es} onClick={() => setLang("es")}>Español</button>
-            </div>
           </div>
         </div>
         <a href="#top" className={s.toTop} aria-label={es ? "Volver arriba" : "Back to top"}>

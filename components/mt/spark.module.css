@@ -3764,3 +3764,49 @@
 .oneView .splitMedia:has(.hub) {
   padding-block: clamp(3.5rem, 8vh, 4.75rem);
 }
+
+/* language switch in the header */
+.langTop {
+  flex: none;
+  display: flex;
+  padding: 0.2rem;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 999px;
+}
+.langTop button {
+  min-width: 2.35rem;
+  min-height: 2rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.langTop button:hover {
+  opacity: 1;
+}
+.langTop button[aria-pressed="true"] {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  opacity: 1;
+}
+@media (max-width: 960px) {
+  .langTop {
+    margin-left: auto;
+  }
+  .header > .langTop + .menuBtn {
+    margin-left: 0;
+  }
+  .langTop {
+    padding: 0;
+  }
+  .langTop button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
