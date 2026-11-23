@@ -3810,3 +3810,24 @@
     min-height: 2.75rem;
   }
 }
+
+/* phones: the first service card looks like the rest, not dark */
+@media (max-width: 620px) {
+  .page a.svcDark,
+  .page a.svcDark:hover,
+  .page a.svcDark:focus-visible {
+    background: var(--wash);
+    color: var(--ink);
+  }
+  .svcDark p {
+    color: var(--muted);
+  }
+  .svcDark .svcBtn {
+    background: var(--ink);
+    color: #fff;
+  }
+  .svcDark::before,
+  .svcDark::after {
+    display: none;
+  }
+}
