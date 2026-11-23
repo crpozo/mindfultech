@@ -3675,16 +3675,16 @@
 
 /* integration block: a dark panel with the live 3D platform */
 .splitMedia:has(.hubArt) {
-  background: var(--night);
-  padding: clamp(2.5rem, 5.5vh, 3.25rem) clamp(0.5rem, 1.5vw, 1rem);
+  background: #d9ebe6;
+  padding: clamp(2rem, 4.5vh, 2.75rem) 0.25rem;
 }
 .hubArt {
   position: relative;
-  width: min(100%, 38rem);
+  width: min(100%, 42rem);
   aspect-ratio: 5 / 4;
 }
 .oneView .hubArt {
-  width: min(100%, 38rem, 52vh * 1.25);
+  width: min(100%, 42rem, 58vh * 1.25);
 }
 .splitMedia .hubArt img,
 .oneView .splitMedia .hubArt img {
@@ -3701,8 +3701,8 @@
   visibility: hidden;
 }
 .splitMedia:has(.hubArt) .chip {
-  background: #fff;
-  color: var(--ink);
+  background: var(--ink);
+  color: #fff;
 }
 .splitMedia:has(.hubArt) .chipA {
   left: 4%;
