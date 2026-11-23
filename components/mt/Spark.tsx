@@ -1,6 +1,7 @@
 "use client";
 
 import { Knot3D } from "./Knot3D";
+import { Hub3D } from "./Hub3D";
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
@@ -327,13 +328,13 @@ export function SparkHome() {
         <div className={s.oneView}>
         <section className={`${s.wrap} ${s.split}`}>
           <div className={s.splitMedia}>
-            <img className={s.hubArt} src="/mt/hub.webp" alt={es ? "Una plataforma central conectada a los paneles de ventas, contabilidad, inventario y soporte" : "A central platform wired to the sales, accounting, inventory and support dashboards"} width={1100} height={880} loading="lazy" />
+            <Hub3D className={s.hubArt} alt={es ? "Una plataforma central conectada a los paneles de ventas, contabilidad, inventario y soporte" : "A central platform wired to the sales, accounting, inventory and support dashboards"} />
             <span className={`${s.chip} ${s.chipA}`}>{es ? "Todos tus sistemas conectados" : "All your systems connected"}</span>
             <span className={`${s.chip} ${s.chipB}`}>{es ? "Datos al día" : "Data always up to date"}</span>
           </div>
           <div>
             <p className={s.eyebrow}>{es ? "Integración de sistemas" : "Systems integration"}</p>
-            <h2 className={s.h2}>{es ? "Una sola plataforma que lo ve todo." : "One platform that sees everything."}</h2>
+            <h2 className={s.h2}>{es ? "Todos tus sistemas, trabajando como uno solo." : "All your systems, working as one."}</h2>
             <p className={s.strong}>{es ? "Conectamos tu CRM, tu contabilidad, tu inventario y las herramientas que tu equipo ya usa. Cada número queda en un solo lugar y nadie vuelve a copiar datos a mano." : "We connect your CRM, your accounting, your inventory and the tools your team already uses. Every number sits in one place and nobody copies data by hand again."}</p>
             <div className={s.btnRow}>
               <Link href="/services/" className={`${s.pill} ${s.pillSage}`}>{es ? "Ver integración de sistemas" : "See systems integration"}<Arrow /></Link>

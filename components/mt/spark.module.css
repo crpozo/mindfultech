@@ -3673,17 +3673,32 @@
   }
 }
 
-/* integration block: a dark panel with the 3D platform render */
+/* integration block: a dark panel with the live 3D platform */
 .splitMedia:has(.hubArt) {
   background: var(--night);
-  padding: clamp(2.75rem, 6vh, 3.75rem) clamp(0.75rem, 2vw, 1.5rem);
+  padding: clamp(2.5rem, 5.5vh, 3.25rem) clamp(0.5rem, 1.5vw, 1rem);
 }
-.splitMedia .hubArt,
-.oneView .splitMedia .hubArt {
-  width: min(100%, 34rem);
-  max-height: min(27rem, 50vh);
+.hubArt {
+  position: relative;
+  width: min(100%, 38rem);
+  aspect-ratio: 5 / 4;
+}
+.oneView .hubArt {
+  width: min(100%, 38rem, 52vh * 1.25);
+}
+.splitMedia .hubArt img,
+.oneView .splitMedia .hubArt img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   object-fit: contain;
   border-radius: 0;
+}
+.hubArt[data-live="true"] img {
+  visibility: hidden;
 }
 .splitMedia:has(.hubArt) .chip {
   background: #fff;
@@ -3701,8 +3716,8 @@
   bottom: 5%;
 }
 @media (max-width: 960px) {
-  .oneView .splitMedia .hubArt {
-    max-height: none;
+  .oneView .hubArt {
+    width: min(100%, 30rem);
   }
 }
 
