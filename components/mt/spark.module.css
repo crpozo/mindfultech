@@ -3673,96 +3673,37 @@
   }
 }
 
-/* integration block: one panel listing every connected system */
-.hub {
-  width: min(100%, 21rem);
-  padding: 1.1rem 1.15rem 0.5rem;
-  border-radius: 1rem;
+/* integration block: a dark panel with the 3D platform render */
+.splitMedia:has(.hubArt) {
+  background: var(--night);
+  padding: clamp(2.75rem, 6vh, 3.75rem) clamp(0.75rem, 2vw, 1.5rem);
+}
+.splitMedia .hubArt,
+.oneView .splitMedia .hubArt {
+  width: min(100%, 34rem);
+  max-height: min(27rem, 50vh);
+  object-fit: contain;
+  border-radius: 0;
+}
+.splitMedia:has(.hubArt) .chip {
   background: #fff;
   color: var(--ink);
-  box-shadow: 0 1.25rem 2.5rem -1.5rem rgba(20, 60, 52, 0.55);
 }
-.hubHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 0.85rem;
-  font-size: 1rem;
-}
-.hubHead b {
-  font-weight: 500;
-}
-.hubHead em {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 99px;
-  background: #e8f4f1;
-  color: var(--sage-deep);
-  font-size: 0.75rem;
-  font-style: normal;
-}
-.hubHead em::before {
-  content: "";
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: currentColor;
-}
-.hub li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-block: 0.7rem;
-  border-top: 1px solid #eceeee;
-}
-.hub li > span {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 0.6rem;
-  background: #f1f4f3;
-  color: var(--sage-deep);
-}
-.hub li > div {
-  flex: 1;
-  min-width: 0;
-  line-height: 1.25;
-}
-.hub li b {
-  display: block;
-  font-size: 0.9375rem;
-  font-weight: 500;
-}
-.hub li small {
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-.hub li strong {
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.splitMedia:has(.hub) .chipA {
-  left: 3%;
-  top: 5%;
+.splitMedia:has(.hubArt) .chipA {
+  left: 4%;
+  top: 6%;
   max-width: none;
   padding-block: 0.7rem;
 }
-.splitMedia:has(.hub) .chipB {
+.splitMedia:has(.hubArt) .chipB {
   right: 4%;
   top: auto;
-  bottom: 4%;
+  bottom: 5%;
 }
-.splitMedia:has(.hub) .chipC {
-  left: 6%;
-  bottom: 12%;
-}
-.oneView .splitMedia:has(.hub) {
-  padding-block: clamp(3.5rem, 8vh, 4.75rem);
+@media (max-width: 960px) {
+  .oneView .splitMedia .hubArt {
+    max-height: none;
+  }
 }
 
 /* language switch in the header */

@@ -4,7 +4,7 @@ import { Knot3D } from "./Knot3D";
 import * as React from "react";
 import Link from "next/link";
 import { useLang } from "@/components/i18n";
-import { AppWindow, Bot, Building2, CreditCard, FileSearch, Headset, Inbox, MousePointerClick, Package, Play, Receipt, ShieldCheck, UserCheck, Users, Volume2, VolumeX, Workflow, type LucideIcon } from "lucide-react";
+import { AppWindow, Bot, Building2, FileSearch, Inbox, MousePointerClick, Play, ShieldCheck, UserCheck, Users, Volume2, VolumeX, Workflow, type LucideIcon } from "lucide-react";
 import { LAND_PATH, MAP_VIEW } from "@/lib/map/land";
 import { SparkPage, ContactBlock, Arrow, TALK, type Bi } from "./SparkChrome";
 import s from "./spark.module.css";
@@ -60,17 +60,6 @@ const CONTROL: { t: Bi; d: Bi }[] = [
   { t: { en: "It reads what it needs", es: "Lee lo que necesita" }, d: { en: "It looks up your documents, your customer records and the rules of your business before deciding anything.", es: "Consulta tus documentos, los datos de tus clientes y las reglas de tu negocio antes de decidir." } },
   { t: { en: "It works in your tools", es: "Trabaja en tus herramientas" }, d: { en: "It logs into your CRM, your email and your spreadsheets, and does the steps a person would do by hand.", es: "Entra a tu CRM, tu correo y tus hojas de cálculo, y hace los pasos que una persona haría a mano." } },
   { t: { en: "It hands the result to a person", es: "Entrega el resultado a una persona" }, d: { en: "It reports what it did and stops to ask when something is unclear or needs approval.", es: "Informa lo que hizo y se detiene a preguntar cuando algo no está claro o necesita aprobación." } },
-];
-
-const HUB_ICONS: LucideIcon[] = [Users, Receipt, Package, Headset, CreditCard];
-
-/** Sample figures for the illustration of the integration block. */
-const HUB: { n: Bi; src: string; v: Bi }[] = [
-  { n: { en: "Sales", es: "Ventas" }, src: "CRM", v: { en: "128 deals", es: "128 negocios" } },
-  { n: { en: "Accounting", es: "Contabilidad" }, src: "ERP", v: { en: "42 invoices", es: "42 facturas" } },
-  { n: { en: "Inventory", es: "Inventario" }, src: "WMS", v: { en: "3 low", es: "3 por agotarse" } },
-  { n: { en: "Support", es: "Soporte" }, src: "WhatsApp", v: { en: "9 open", es: "9 abiertos" } },
-  { n: { en: "Payments", es: "Pagos" }, src: "Bank", v: { en: "$18,400", es: "$18,400" } },
 ];
 
 const CASES: { id: string; client: string; where: Bi; title: Bi; text?: Bi }[] = [
@@ -338,21 +327,7 @@ export function SparkHome() {
         <div className={s.oneView}>
         <section className={`${s.wrap} ${s.split}`}>
           <div className={s.splitMedia}>
-            <div className={s.hub} role="img" aria-label={es ? "Un panel que reúne ventas, contabilidad, inventario, soporte y pagos" : "One panel that brings together sales, accounting, inventory, support and payments"}>
-              <p className={s.hubHead}><b>{es ? "Tu negocio hoy" : "Your business today"}</b><em>{es ? "En vivo" : "Live"}</em></p>
-              <ul>
-                {HUB.map((h, i) => {
-                  const Icon = HUB_ICONS[i];
-                  return (
-                    <li key={h.n.en}>
-                      <span><Icon size={18} strokeWidth={1.6} aria-hidden="true" /></span>
-                      <div><b>{t(h.n)}</b><small>{h.src}</small></div>
-                      <strong>{t(h.v)}</strong>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <img className={s.hubArt} src="/mt/hub.webp" alt={es ? "Una plataforma central conectada a los paneles de ventas, contabilidad, inventario y soporte" : "A central platform wired to the sales, accounting, inventory and support dashboards"} width={1100} height={880} loading="lazy" />
             <span className={`${s.chip} ${s.chipA}`}>{es ? "Todos tus sistemas conectados" : "All your systems connected"}</span>
             <span className={`${s.chip} ${s.chipB}`}>{es ? "Datos al día" : "Data always up to date"}</span>
           </div>
