@@ -157,7 +157,6 @@ function WorldMap({ active, onPick }: { active: string | null; onPick: (id: stri
   );
 }
 
-const STRIP = [1, 2, 3, 4, 5].map((n) => `/mt/strip-${n}.webp`);
 /** 3D icon of each service card, in SERVICES order (rendered by scripts/icons3d-*.js). */
 const ART = ["ai", "software", "cloud", "vision", "integration", "office"];
 /** Country flag of each case card. */
@@ -378,15 +377,7 @@ export function SparkHome() {
           </ul>
         </section>
 
-        <ul className={s.strip} aria-hidden="true">
-          {STRIP.map((src) => (
-            <li key={src}><img src={src} alt="" loading="lazy" /></li>
-          ))}
-        </ul>
-
-        <div style={{ marginTop: "var(--space)" }}>
-          <ContactBlock id="contact" />
-        </div>
+        <ContactBlock id="contact" />
 
         {/* world map removed from the home at Carlos's request (2026-11-20); kept for reuse */}
         {SHOW_MAP && (
