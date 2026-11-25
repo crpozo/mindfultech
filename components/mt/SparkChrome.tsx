@@ -12,11 +12,10 @@ export type Bi = { en: string; es: string };
 export const TALK: Bi = { en: "Talk to us", es: "Hablemos" };
 
 export const NAV: { key: string; href: string; label: Bi }[] = [
-  { key: "services", href: "/services/", label: { en: "Services", es: "Servicios" } },
-  { key: "work", href: "/work/", label: { en: "Work", es: "Casos" } },
+  { key: "services", href: "/#services", label: { en: "Services", es: "Servicios" } },
+  { key: "work", href: "/#work", label: { en: "Work", es: "Casos" } },
   { key: "office", href: "/office-demo/", label: { en: "AI Office", es: "Oficina IA" } },
   { key: "company", href: "/company/", label: { en: "Company", es: "Empresa" } },
-  { key: "blog", href: "/blog/", label: { en: "Blog", es: "Blog" } },
 ];
 export const SERVICE_LINKS: { slug: string; label: Bi }[] = [
   { slug: "ai", label: { en: "AI and automation", es: "IA y automatización" } },
@@ -239,7 +238,7 @@ export function SparkPage({ active, over = true, children }: { active?: string; 
         <nav id="sp-nav" className={s.nav} data-open={open} aria-label={es ? "Principal" : "Main"}>
           <Link href="/" aria-current={active === "home" ? "page" : undefined}>{es ? "Inicio" : "Home"}</Link>
           {NAV.map((n) => (
-            <Link key={n.key} href={n.href} aria-current={active === n.key ? "page" : undefined}>{n.label[lang]}</Link>
+            <Link key={n.key} href={n.href} onClick={() => setOpen(false)} aria-current={active === n.key ? "page" : undefined}>{n.label[lang]}</Link>
           ))}
         </nav>
         <div className={s.langTop} role="group" aria-label={es ? "Idioma" : "Language"}>

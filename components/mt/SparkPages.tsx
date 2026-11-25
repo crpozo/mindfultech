@@ -336,7 +336,7 @@ export function SpCompany() {
         <div>
           <h2 className={s.h2}>Carlos Pozo</h2>
           <p className={s.role}>{es ? "Fundador" : "Founder"}</p>
-          <p className={s.strong}>{es ? "Le puse MindfulTech porque la tecnología debería hacerse con intención: pensada y aplicada con criterio, no por moda." : "I named it MindfulTech because technology should be built with intention: considered and applied with judgment, not because it is fashionable."}</p>
+          <p className={s.strong}>{es ? "Le puse MindfulTech porque la tecnología debe hacerse con propósito: que mejore la vida de las personas y potencie el crecimiento de las organizaciones a través de experiencias digitales únicas, sostenibles, escalables y centradas en el usuario." : "I named it MindfulTech because technology should be made with purpose: to improve people's lives and help organizations grow through digital experiences that are unique, sustainable, scalable and centered on the user."}</p>
           <p className={s.sub}>{es ? "Primero entendemos tu negocio y los sistemas que ya usas, después integramos, y solo entonces aplicamos IA de forma deliberada, donde de verdad mejora la eficiencia." : "First we understand your business and the systems you already run, then we integrate, and only then do we apply AI deliberately, where it genuinely improves efficiency."}</p>
           <div className={s.memberSocial}>
             <a href="https://www.linkedin.com/company/mindfultech" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin /></a>

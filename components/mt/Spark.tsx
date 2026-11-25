@@ -287,7 +287,7 @@ export function SparkHome() {
           ))}
         </section>
 
-        <section className={`${s.wrap} ${s.section}`}>
+        <section id="services" className={`${s.wrap} ${s.section}`}>
           <h2 className={`${s.h2} ${s.svcHead}`}>{es ? "IA y software para que tu negocio crezca, ahorre tiempo y haga mucho más." : "AI and software to grow your business, save time and get far more done."}</h2>
           <ul className={s.svcGrid}>
             {SERVICES.map((v, i) => (
@@ -357,7 +357,7 @@ export function SparkHome() {
           <div className={`${s.band} ${s.bandB}`}><span>{band.repeat(4)}</span><span>{band.repeat(4)}</span></div>
         </div>
 
-        <section className={`${s.wrap} ${s.section}`}>
+        <section id="work" className={`${s.wrap} ${s.section}`}>
           <div className={s.center}>
             <h2 className={s.h2} style={{ maxWidth: "16ch" }}>{es ? "Lo que construimos para nuestros clientes." : "What we built for our clients."}</h2>
           </div>

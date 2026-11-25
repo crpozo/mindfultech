@@ -3787,3 +3787,8 @@
     display: none;
   }
 }
+
+/* Menu links that jump to a block of the home: stop below the sticky header. */
+.page section[id] {
+  scroll-margin-top: 4.5rem;
+}
